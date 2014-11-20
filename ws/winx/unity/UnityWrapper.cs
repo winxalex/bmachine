@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using System.Collections;
 using System;
 using System.Reflection;
+using ws.winx.unity;
 
 namespace ws.winx.unity
 {
@@ -12,17 +13,18 @@ public class AvatarPreviewW {
 	
 	private static Type realType;
 	
-	private static ConstructorInfo method_ctor;
-	private static PropertyInfo property_OnAvatarChangeFunc;
-	private static PropertyInfo property_IKOnFeet;
-	private static PropertyInfo property_Animator;
-	private static MethodInfo method_DoPreviewSettings;
-	private static MethodInfo method_OnDestroy;
-	private static MethodInfo method_DoAvatarPreview;
+	
+	private static MethodInfo MethodInfo_DoPreviewSettings;
+	private static MethodInfo MethodInfo_OnDestroy;
+	private static MethodInfo MethodInfo_DoAvatarPreview;
 	private static MethodInfo MethodInfo_DoRenderPreview;
 	private static MethodInfo MethodInfo_Init;
 	private static MethodInfo MethodInfo_AvatarTimeControlGUI;
-	private static FieldInfo field_timeControl;
+	private static FieldInfo FieldInfo_timeControl;
+		private static ConstructorInfo method_ctor;
+		private static PropertyInfo PropertyInfo_OnAvatarChangeFunc;
+		private static PropertyInfo PropertyInfo_IKOnFeet;
+		private static PropertyInfo PropertyInfo_Animator;
 
 		Texture image = null;
 
@@ -35,16 +37,16 @@ public class AvatarPreviewW {
 			realType = assembly.GetType("UnityEditor.AvatarPreview");
 			
 			method_ctor 					= realType.GetConstructor(new Type[] { typeof(Animator), typeof(Motion)});
-			property_OnAvatarChangeFunc 	= realType.GetProperty("OnAvatarChangeFunc");
-			property_IKOnFeet				= realType.GetProperty("IKOnFeet");
-			property_Animator				= realType.GetProperty("Animator");
-			method_DoPreviewSettings		= realType.GetMethod("DoPreviewSettings");
-			method_OnDestroy				= realType.GetMethod("OnDestroy");
-			method_DoAvatarPreview			= realType.GetMethod("DoAvatarPreview", new Type[] {typeof(Rect), typeof(GUIStyle)});
-			field_timeControl				= realType.GetField("timeControl");
+			PropertyInfo_OnAvatarChangeFunc 	= realType.GetProperty("OnAvatarChangeFunc");
+			PropertyInfo_IKOnFeet				= realType.GetProperty("IKOnFeet");
+			PropertyInfo_Animator				= realType.GetProperty("Animator");
+			MethodInfo_DoPreviewSettings		= realType.GetMethod("DoPreviewSettings");
+			MethodInfo_OnDestroy				= realType.GetMethod("OnDestroy");
+			MethodInfo_DoAvatarPreview			= realType.GetMethod("DoAvatarPreview", new Type[] {typeof(Rect), typeof(GUIStyle)});
+			FieldInfo_timeControl				= realType.GetField("timeControl");
 			MethodInfo_DoRenderPreview 		= realType.GetMethod("DoRenderPreview",new Type[] {typeof(Rect), typeof(GUIStyle)});
 			MethodInfo_Init 				= realType.GetMethod("Init",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-				MethodInfo_AvatarTimeControlGUI	= realType.GetMethod("AvatarTimeControlGUI",new Type[]{typeof(Rect)});
+			MethodInfo_AvatarTimeControlGUI	= realType.GetMethod("AvatarTimeControlGUI",new Type[]{typeof(Rect)});
 			
 		}
 	}
@@ -63,7 +65,7 @@ public class AvatarPreviewW {
 		InitType();
 		
 		instance = method_ctor.Invoke( new object[] { previewObjectInScene, objectOnSameAsset } );
-			//my = (AvatarPreview)instance;
+		
 	}
 
 		public void DoAvatarPreview2(Rect rect, GUIStyle background)
@@ -147,36 +149,36 @@ public class AvatarPreviewW {
 	{
 		get
 		{
-			return property_Animator.GetValue(instance, null) as Animator;
+			return PropertyInfo_Animator.GetValue(instance, null) as Animator;
 		}
 	}
 	public bool IKOnFeet {
 		get {
-			return (bool)property_IKOnFeet.GetValue(instance, null);
+			return (bool)PropertyInfo_IKOnFeet.GetValue(instance, null);
 		}
 	}
 	
 	public OnAvatarChange OnAvatarChangeFunc {
 		set {
-			property_OnAvatarChangeFunc.SetValue(instance, Delegate.CreateDelegate(property_OnAvatarChangeFunc.PropertyType, value.Target, value.Method), null);
+			PropertyInfo_OnAvatarChangeFunc.SetValue(instance, Delegate.CreateDelegate(PropertyInfo_OnAvatarChangeFunc.PropertyType, value.Target, value.Method), null);
 		}
 	}
 	
 	public void DoPreviewSettings() {
-		method_DoPreviewSettings.Invoke(instance, null);
+		MethodInfo_DoPreviewSettings.Invoke(instance, null);
 	}
 	
 	public void OnDestroy() {
-		method_OnDestroy.Invoke(instance, null);
+		MethodInfo_OnDestroy.Invoke(instance, null);
 	}
 	
 	public void DoAvatarPreview(Rect rect, GUIStyle background) {
-		method_DoAvatarPreview.Invoke(instance, new object[] { rect, background });
+		MethodInfo_DoAvatarPreview.Invoke(instance, new object[] { rect, background });
 	}
 	
 	public TimeControlW timeControl {
 		get {
-			return new TimeControlW(field_timeControl.GetValue(instance));
+			return new TimeControlW(FieldInfo_timeControl.GetValue(instance));
 		}
 	}
 	#endregion
@@ -292,4 +294,203 @@ public class TimeControlW {
 		method_Update.Invoke(instance, null);
 	}
 }
+
+
+
+	public enum TangentMode
+	{
+		Editable = 0,
+		Smooth = 1,
+		Linear = 2,
+		Stepped = Linear | Smooth,
+	}
+	
+	public enum TangentDirection
+	{
+		Left,
+		Right
+	}
+	
+	
+	public class KeyframeUtil {
+		
+		public static Keyframe GetNew( float time, float value, TangentMode leftAndRight){
+			return GetNew(time,value, leftAndRight,leftAndRight);
+		}
+		
+		public static Keyframe GetNew(float time, float value, TangentMode left, TangentMode right){
+			object boxed = new Keyframe(time,value); // cant use struct in reflection			
+			
+			SetKeyBroken(boxed, true);
+			SetKeyTangentMode(boxed, 0, left);
+			SetKeyTangentMode(boxed, 1, right);
+			
+			Keyframe keyframe = (Keyframe)boxed;
+			if (left == TangentMode.Stepped )
+				keyframe.inTangent = float.PositiveInfinity;
+			if (right == TangentMode.Stepped )
+				keyframe.outTangent = float.PositiveInfinity;
+			
+			return keyframe;
+		}
+		
+		
+		// UnityEditor.CurveUtility.cs (c) Unity Technologies
+		public static void SetKeyTangentMode(object keyframe, int leftRight, TangentMode mode)
+		{
+			
+			Type t = typeof( UnityEngine.Keyframe );
+			FieldInfo field = t.GetField( "m_TangentMode", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance );
+			int tangentMode =  (int)field.GetValue(keyframe);
+			
+			if (leftRight == 0)
+			{
+				tangentMode &= -7;
+				tangentMode |= (int) mode << 1;
+			}
+			else
+			{
+				tangentMode &= -25;
+				tangentMode |= (int) mode << 3;
+			}
+			
+			field.SetValue(keyframe, tangentMode);
+			if (GetKeyTangentMode(tangentMode, leftRight) == mode)
+				return;
+			Debug.Log("bug"); 
+		}
+		
+		// UnityEditor.CurveUtility.cs (c) Unity Technologies
+		public static TangentMode GetKeyTangentMode(int tangentMode, int leftRight)
+		{
+			if (leftRight == 0)
+				return (TangentMode) ((tangentMode & 6) >> 1);
+			else
+				return (TangentMode) ((tangentMode & 24) >> 3);
+		}
+		
+		// UnityEditor.CurveUtility.cs (c) Unity Technologies
+		public static TangentMode GetKeyTangentMode(Keyframe keyframe, int leftRight)
+		{
+			Type t = typeof( UnityEngine.Keyframe );
+			FieldInfo field = t.GetField( "m_TangentMode", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance );
+			int tangentMode =  (int)field.GetValue(keyframe);
+			if (leftRight == 0)
+				return (TangentMode) ((tangentMode & 6) >> 1);
+			else
+				return (TangentMode) ((tangentMode & 24) >> 3);
+		}
+		
+		
+		// UnityEditor.CurveUtility.cs (c) Unity Technologies
+		public static void SetKeyBroken(object keyframe, bool broken)
+		{
+			Type t = typeof( UnityEngine.Keyframe );
+			FieldInfo field = t.GetField( "m_TangentMode", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance );
+			int tangentMode =  (int)field.GetValue(keyframe);
+			
+			if (broken)
+				tangentMode |= 1;
+			else
+				tangentMode &= -2;
+			field.SetValue(keyframe, tangentMode);
+		}
+		
+	}
 }
+
+
+
+public static class BlendTreeEx {
+	
+	public static int GetRecursiveBlendParamCount(this BlendTree bt) {
+		object val = bt.GetType().GetProperty("recursiveBlendParameterCount", BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Public).GetValue(bt, new object[]{});
+		return (int)val;
+	}
+	public static string GetRecursiveBlendParam(this BlendTree bt, int index) {
+		object val = bt.GetType().GetMethod("GetRecursiveBlendParameter", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Invoke(bt, new object[]{index});
+		return (string)val;
+	}
+	public static float GetRecursiveBlendParamMax(this BlendTree bt, int index) {
+		object val = bt.GetType().GetMethod("GetRecursiveBlendParameterMax", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Invoke(bt, new object[]{index});
+		return (float)val;
+	}
+	public static float GetRecursiveBlendParamMin(this BlendTree bt, int index) {
+		object val = bt.GetType().GetMethod("GetRecursiveBlendParameterMin", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Invoke(bt, new object[]{index});
+		return (float)val;
+	}
+	
+}
+
+public static class StateEx {
+	
+	public static void SetMotion(this State state, Motion motion) {
+		state.GetType().GetMethod("SetMotionInternal", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new System.Type[] {typeof(Motion)}, null).Invoke(state, new object[] {motion});
+	}
+	
+}
+
+
+
+/*****************
+ * Linear curve
+	AnimationCurve linearCurve = new AnimationCurve();
+// Add 2 keyframe on 0.5 and 1.0 seconds with 1 and 2 values
+linearCurve.AddKey(KeyframeUtil.GetNew(0.5f, 1.0f, TangentMode.Linear));
+linearCurve.AddKey(KeyframeUtil.GetNew(1.0f, 2.0f, TangentMode.Linear));
+// If you have at leas one keyframe with TangentMode.Linear you should recalculate tangents after you assign all values
+linearCurve.UpdateAllLinearTangents();
+// assign this curve to clip
+animationClip.SetCurve(gameObject, typeof(Transform),"localPosition.x", linearCurve);
+
+
+* Constant curve
+	This type of curve is very useful for m_IsActive properties (to enable and disable gameobjects)
+		AnimationCurve constantCurve = new AnimationCurve();
+
+constantCurve.AddKey(KeyframeUtil.GetNew(0.5f, 0.0f, TangentMode.Linear)); //false on 0.5 second
+constantCurve.AddKey(KeyframeUtil.GetNew(1.0f, 1.0f, TangentMode.Linear)); // true on 1.0 second
+
+animationClip.SetCurve(gameObject, typeof(GameObject),"m_IsActive", constantCurve);
+*/
+
+public static class CurveExtension {
+	
+	public static void UpdateAllLinearTangents(this AnimationCurve curve){
+		for (int i = 0; i < curve.keys.Length; i++) {
+			UpdateTangentsFromMode(curve, i);
+		}
+	}
+	
+	// UnityEditor.CurveUtility.cs (c) Unity Technologies
+	public static void UpdateTangentsFromMode(AnimationCurve curve, int index)
+	{
+		if (index < 0 || index >= curve.length)
+			return;
+		Keyframe key = curve[index];
+		if (KeyframeUtil.GetKeyTangentMode(key, 0) == TangentMode.Linear && index >= 1)
+		{
+			key.inTangent = CalculateLinearTangent(curve, index, index - 1);
+			curve.MoveKey(index, key);
+		}
+		if (KeyframeUtil.GetKeyTangentMode(key, 1) == TangentMode.Linear && index + 1 < curve.length)
+		{
+			key.outTangent = CalculateLinearTangent(curve, index, index + 1);
+			curve.MoveKey(index, key);
+		}
+		if (KeyframeUtil.GetKeyTangentMode(key, 0) != TangentMode.Smooth && KeyframeUtil.GetKeyTangentMode(key, 1) != TangentMode.Smooth)
+			return;
+		curve.SmoothTangents(index, 0.0f);
+	}
+	
+	// UnityEditor.CurveUtility.cs (c) Unity Technologies
+	private static float CalculateLinearTangent(AnimationCurve curve, int index, int toIndex)
+	{
+		return (float) (((double) curve[index].value - (double) curve[toIndex].value) / ((double) curve[index].time - (double) curve[toIndex].time));
+	}
+	
+}
+
+
+
+

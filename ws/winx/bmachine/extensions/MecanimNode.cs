@@ -9,38 +9,57 @@ using System.Text;
 using BehaviourMachine;
 using Motion=UnityEngine.Motion;
 
-
 namespace ws.winx.bmachine.extensions
 {
-		[NodeInfo ( category = "Sample/Mecanim/",
+		[NodeInfo ( category = "Extensions/Mecanim/",
                 icon = "Animator")]
-		public class MecanimNode: ActionNode
+		public class MecanimNode:ActionNode
 		{
 				
-				public AnimationCurve curve;
-				public Variable var;
-				public float transitionDuration = 0.3f;
-				public bool loop = false;
-				[RangeAttribute(0f,1f)]
-				public float
-						normalizedTime = 0f;
 				[AnimaStateInfoAttribute]
 				public AnimaStateInfo
-						selectedAnimaStateInfo;
-				float normalizedTimeLast = 0f;
-				float normalizedTimeCurrent = -1f;
-				float normalizedTimeStart = 0f;
+					selectedAnimaStateInfo;
+
+				public bool loop = false;
+
+		
+				[MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.X)]
+				public int blendParamXBlackboardBindID;
+
+		        [MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.Y)]
+				public int blendParamYBlackboardBindID;
+	
+				
+				[RangeAttribute(0f,1f)]
+				public float transitionDuration = 0.3f;
+				
+				[RangeAttribute(0f,1f)]
+				public float
+						timeStart = 0f;
+				
+				[HideInInspector]
+				public float
+						normalizedTimeCurrent = -1f;
+				public float normalizedTimeStart = 0f;
+
+				public AnimationCurve curve;
+
+
+				
+
 				int loopIdleCurrent = 0;
 				Animator _animator;
 				RuntimeAnimatorController _runtimeAnimaController;
+				float normalizedTimeLast = 0f;
+				int numBlendParamters;
 
-				
 
+		                         
 				public Animator animator {
 						get {
-								if (_animator == null){
+								if (_animator == null) {
 										_animator = self.GetComponent<Animator> ();
-										_runtimeAnimaController=_animator.runtimeAnimatorController;
+										_runtimeAnimaController = _animator.runtimeAnimatorController;
 								}
 								return _animator;
 						}
@@ -51,7 +70,7 @@ namespace ws.winx.bmachine.extensions
 
 						if (selectedAnimaStateInfo != null) {
 							
-								Debug.Log ("CrossFade to state hash:"+hash+" layer"+layer);
+								Debug.Log ("CrossFade to state hash:" + hash + " layer" + layer);
 							
 								AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo (layer);
 							
@@ -62,33 +81,28 @@ namespace ws.winx.bmachine.extensions
 								
 								
 								} else {
-										normalizedTimeLast =normalizedTimeStart = 0f;
-										normalizedTimeCurrent=-1f;
+										normalizedTimeLast = normalizedTimeStart = 0f;
+										normalizedTimeCurrent = -1f;
 								}
 							
-								//animator.CrossFade (hash, transitionDuration, layer, normalizedTime);
+								animator.CrossFade (hash, transitionDuration, layer, normalizedTime);
 			
 								//animator.Play(selectedAnimaStateInfo.hash,selectedAnimaStateInfo.layer,normalizedTime);
 						}
 				}
 
-
-	
-
-
-
-
-
-
-
-
 				public override void Reset ()
 				{
 						_animator = null;
-						normalizedTime = 0f;
+						timeStart = 0f;
 						transitionDuration = 0f;
 						selectedAnimaStateInfo = null;
-						curve = new AnimationCurve ();
+	
+						//mecanimBlendParamter = ScriptableObject.CreateInstance< MecanimBlendTreeParameters >();
+//						curve = new AnimationCurve (new Keyframe[] {
+//								new Keyframe (0f, 0f),
+//								new Keyframe (1f, 1f)
+//						});
 
 				}
 
@@ -106,15 +120,36 @@ namespace ws.winx.bmachine.extensions
 
 						Debug.Log ("Start");
 
-						animator.Play("Jump");
+						
 						//animator.runtimeAnimatorController = _runtimeAnimaController;
-					//	PlayAnimaState (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTime, transitionDuration);
+						PlayAnimaState (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, timeStart, transitionDuration);
 
 						
 						//animator.Play(selectedStateHash,layer,normalizedTime);
 
 				}
 
+				public override void OnTick ()
+				{
+						base.OnTick ();
+
+				}
+
+
+//		public override void OnTick ()
+//		{
+//			Status status = Status.Error;
+//			for (int i = 0; i < this.m_Children.Length; i++)
+//			{
+//				this.m_Children [i].OnTick ();
+//				status = this.m_Children [i].status;
+//				if (status == Status.Error || status == Status.Running)
+//				{
+//					break;
+//				}
+//			}
+//			base.status = status;
+//		}
 
 //		public override void OnTick ()
 //		{
@@ -143,7 +178,7 @@ namespace ws.winx.bmachine.extensions
 //						}
 
 
-			Debug.Log ("stateInfo.Hash "+stateInfo.nameHash+" "+selectedAnimaStateInfo.hash);		
+						Debug.Log ("stateInfo.Hash " + stateInfo.nameHash + " " + selectedAnimaStateInfo.hash);		
 
 
 						//int lastLoop = (int)lastNormalizedTime;
@@ -152,8 +187,8 @@ namespace ws.winx.bmachine.extensions
 						//				float lastNormalizedTime = lastLayerState[layer].normalizedTime - lastLoop;
 						//				float currNormalizedTime = stateInfo.normalizedTime - currLoop;
 
-						if (stateInfo.nameHash == selectedAnimaStateInfo.hash){
-								//&& normalizedTimeStart != normalizedTimeCurrent) {// && !animator.IsInTransition(selectedAnimaStateInfo.layer)){
+						if (stateInfo.nameHash == selectedAnimaStateInfo.hash
+								&& normalizedTimeStart != normalizedTimeCurrent) {// && !animator.IsInTransition(selectedAnimaStateInfo.layer)){
 
 
 								Debug.Log ("NormalizedTime: " + (stateInfo.normalizedTime));
@@ -164,27 +199,39 @@ namespace ws.winx.bmachine.extensions
 
 							
 							
-										if (normalizedTimeCurrent > 1f) {
-												if (loop) {
-														PlayAnimaState (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTime, transitionDuration);
-												} else {
-														this.status = Status.Success;
-														return;
-							
-												}
-
+								if (normalizedTimeCurrent > 1f) {
+										if (loop) {
+												PlayAnimaState (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, timeStart, transitionDuration);
 										} else {
-
-												//send event if its between previous and current time
-												if (normalizedTimeLast < 0.67f && normalizedTimeCurrent >= 0.67f)
-														Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
+												this.status = Status.Success;
+												return;
+							
 										}
 
-							
+								} else {
 
+										//send event if its between previous and current time
+										if (normalizedTimeLast < 0.67f && normalizedTimeCurrent >= 0.67f)
+												Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
+								}
+
+							
+								if (selectedAnimaStateInfo.blendParamsIDs != null && (numBlendParamters = selectedAnimaStateInfo.blendParamsIDs.Length) > 0) {
+
+										if (numBlendParamters > 1) {
+												animator.SetFloat (selectedAnimaStateInfo.blendParamsIDs [0], this.blackboard.GetFloatVar (this.blendParamXBlackboardBindID).Value);
+												animator.SetFloat (selectedAnimaStateInfo.blendParamsIDs [1], this.blackboard.GetFloatVar (this.blendParamYBlackboardBindID).Value);
+
+										} else
+												animator.SetFloat (selectedAnimaStateInfo.blendParamsIDs [0], this.blackboard.GetFloatVar (blendParamXBlackboardBindID).Value);
+
+
+								}
 
 
 								Debug.Log ("Update at: " + normalizedTimeCurrent);	
+
+								//characterControllerRadius.Value= curve.Evaluate(normalizedTimeCurrent);
 
 								normalizedTimeLast = normalizedTimeCurrent;
 

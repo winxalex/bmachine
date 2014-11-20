@@ -54,6 +54,29 @@ namespace ws.winx.editor.extensions
 				info.layer = layer;
 				info.motion=state.GetMotion();
 
+			
+
+				if(info.motion is BlendTree){
+					BlendTree blendTree=info.motion as BlendTree;
+					int count=blendTree.GetRecursiveBlendParamCount();
+
+					if(count>0){
+						info.blendParamsNames=new string[count];
+						info.blendParamsIDs=new int[count];
+
+						for (int j = 0; j < count; j++)
+						{
+							info.blendParamsNames[j]=blendTree.GetRecursiveBlendParam(j);
+							info.blendParamsIDs[j]=Animator.StringToHash(info.blendParamsNames[j]);
+						}
+
+
+					}
+
+
+
+				}
+
 				resultsAnimaInfoList.Add (info);
 
 				

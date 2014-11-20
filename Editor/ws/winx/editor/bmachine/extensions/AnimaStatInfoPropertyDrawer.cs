@@ -17,7 +17,7 @@ namespace ws.winx.editor.bmachine.extensions
 	{
 
 		GUIContent[] displayOptions;
-		List<AnimaStateInfo> animaInfoValues;
+		List<AnimaStateInfo> animaStateInfoValues;
 		AnimatorController aniController;
 		AnimaStateInfo selectedAnimaStateInfo;
 		bool isListDirty=false;
@@ -44,14 +44,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 		void RegenerateAnimaStatesInfoList(){
 
-			animaInfoValues = AnimaStateInfoUtility.getAnimaStatesInfo (aniController);
-			displayOptions = animaInfoValues.Select (x => x.label).ToArray ();
+			animaStateInfoValues = AnimaStateInfoUtility.getAnimaStatesInfo (aniController);
+			displayOptions = animaStateInfoValues.Select (x => x.label).ToArray ();
 
 			isListDirty=false;
 			
 			if(selectedAnimaStateInfo!=null){
 				
-				selectedAnimaStateInfo=animaInfoValues.FirstOrDefault((item)=>{ return item.hash==selectedAnimaStateInfo.hash;});
+				selectedAnimaStateInfo=animaStateInfoValues.FirstOrDefault((item)=>{ return item.hash==selectedAnimaStateInfo.hash;});
 			}
 
 		}
@@ -79,8 +79,13 @@ namespace ws.winx.editor.bmachine.extensions
 				AssetPostProcessorEventDispatcher.Imported += new AssetPostProcessorEventDispatcher.ImporetedEventHandler(onAssetsReImported);
 			}
 		
-			property.value = EditorGUILayoutEx.CustomObjectPopup (guiContent, selectedAnimaStateInfo, displayOptions, animaInfoValues);
+			selectedAnimaStateInfo = EditorGUILayoutEx.CustomObjectPopup (guiContent, selectedAnimaStateInfo, displayOptions, animaStateInfoValues);
 
+
+
+
+
+			property.value = selectedAnimaStateInfo;
 
 		
 			property.ApplyModifiedValue ();

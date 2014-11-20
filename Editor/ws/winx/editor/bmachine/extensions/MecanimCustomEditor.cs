@@ -56,6 +56,157 @@ namespace ws.winx.editor.bmachine.extensions
 			//OnPreviewDisable();
 		}
 
+
+//
+//		public void EventLineGUI (Rect rect, AnimationSelection selection, AnimationWindowState state, CurveEditor curveEditor)
+//		{
+//			AnimationClip activeAnimationClip = state.m_ActiveAnimationClip;
+//			GameObject rootGameObject = state.m_RootGameObject;
+//			GUI.BeginGroup (rect);
+//			Color color = GUI.color;
+//			Rect rect2 = new Rect (0f, 0f, rect.width, rect.height);
+//			float time = (float)Mathf.RoundToInt (state.PixelToTime (Event.current.mousePosition.x, rect) * state.frameRate) / state.frameRate;
+//			if (activeAnimationClip != null)
+//			{
+//				AnimationEvent[] animationEvents = AnimationUtility.GetAnimationEvents (activeAnimationClip);
+//				Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
+//				Rect[] array = new Rect[animationEvents.Length];
+//				Rect[] array2 = new Rect[animationEvents.Length];
+//				int num = 1;
+//				int num2 = 0;
+//				for (int i = 0; i < animationEvents.Length; i++)
+//				{
+//					AnimationEvent animationEvent = animationEvents [i];
+//					if (num2 == 0)
+//					{
+//						num = 1;
+//						while (i + num < animationEvents.Length && animationEvents [i + num].time == animationEvent.time)
+//						{
+//							num++;
+//						}
+//						num2 = num;
+//					}
+//					num2--;
+//					float num3 = Mathf.Floor (state.FrameToPixel (animationEvent.time * activeAnimationClip.frameRate, rect));
+//					int num4 = 0;
+//					if (num > 1)
+//					{
+//						float num5 = (float)Mathf.Min ((num - 1) * (image.width - 1), (int)(state.FrameDeltaToPixel (rect) - (float)(image.width * 2)));
+//						num4 = Mathf.FloorToInt (Mathf.Max (0f, num5 - (float)((image.width - 1) * num2)));
+//					}
+//					Rect rect3 = new Rect (num3 + (float)num4 - (float)(image.width / 2), (rect.height - 10f) * (float)(num2 - num + 1) / (float)Mathf.Max (1, num - 1), (float)image.width, (float)image.height);
+//					array [i] = rect3;
+//					array2 [i] = rect3;
+//				}
+//				if (this.m_DirtyTooltip)
+//				{
+//					if (this.m_HoverEvent >= 0 && this.m_HoverEvent < array.Length)
+//					{
+//						this.m_InstantTooltipText = AnimationEventPopup.FormatEvent (rootGameObject, animationEvents [this.m_HoverEvent]);
+//						this.m_InstantTooltipPoint = new Vector2 (array [this.m_HoverEvent].xMin + (float)((int)(array [this.m_HoverEvent].width / 2f)) + rect.x - 30f, rect.yMax);
+//					}
+//					this.m_DirtyTooltip = false;
+//				}
+//				if (this.m_EventsSelected == null || this.m_EventsSelected.Length != animationEvents.Length)
+//				{
+//					this.m_EventsSelected = new bool[animationEvents.Length];
+//					AnimationEventPopup.ClosePopup ();
+//				}
+//				Vector2 zero = Vector2.zero;
+//				int num6;
+//				float num7;
+//				float num8;
+//				HighLevelEvent highLevelEvent = EditorGUIExt.MultiSelection (rect, array2, new GUIContent (image), array, ref this.m_EventsSelected, null, out num6, out zero, out num7, out num8, GUIStyleX.none);
+//				if (highLevelEvent != HighLevelEvent.None)
+//				{
+//					switch (highLevelEvent)
+//					{
+//					case HighLevelEvent.DoubleClick:
+//						if (num6 != -1)
+//						{
+//							AnimationEventPopup.Edit (rootGameObject, selection.clip, num6, this.m_Owner);
+//						}
+//						else
+//						{
+//							this.EventLineContextMenuAdd (new AnimationEventTimeLine.EventLineContextMenuObject (rootGameObject, activeAnimationClip, time, -1));
+//						}
+//						break;
+//					case HighLevelEvent.ContextClick:
+//					{
+//						GenericMenu genericMenu = new GenericMenu ();
+//						AnimationEventTimeLine.EventLineContextMenuObject userData = new AnimationEventTimeLine.EventLineContextMenuObject (rootGameObject, activeAnimationClip, animationEvents [num6].time, num6);
+//						genericMenu.AddItem (new GUIContent ("Edit Animation Event"), false, new GenericMenu.MenuFunction2 (this.EventLineContextMenuEdit), userData);
+//						genericMenu.AddItem (new GUIContent ("Add Animation Event"), false, new GenericMenu.MenuFunction2 (this.EventLineContextMenuAdd), userData);
+//						genericMenu.AddItem (new GUIContent ("Delete Animation Event"), false, new GenericMenu.MenuFunction2 (this.EventLineContextMenuDelete), userData);
+//						genericMenu.ShowAsContext ();
+//						this.m_InstantTooltipText = null;
+//						this.m_DirtyTooltip = true;
+//						state.Repaint ();
+//						break;
+//					}
+//					case HighLevelEvent.BeginDrag:
+//						this.m_EventsAtMouseDown = animationEvents;
+//						this.m_EventTimes = new float[animationEvents.Length];
+//						for (int j = 0; j < animationEvents.Length; j++)
+//						{
+//							this.m_EventTimes [j] = animationEvents [j].time;
+//						}
+//						break;
+//					case HighLevelEvent.Drag:
+//					{
+//						for (int k = animationEvents.Length - 1; k >= 0; k--)
+//						{
+//							if (this.m_EventsSelected [k])
+//							{
+//								AnimationEvent animationEvent2 = this.m_EventsAtMouseDown [k];
+//								animationEvent2.time = this.m_EventTimes [k] + zero.x * state.PixelDeltaToTime (rect);
+//								animationEvent2.time = Mathf.Max (0f, animationEvent2.time);
+//								animationEvent2.time = (float)Mathf.RoundToInt (animationEvent2.time * activeAnimationClip.frameRate) / activeAnimationClip.frameRate;
+//							}
+//						}
+//						int[] array3 = new int[this.m_EventsSelected.Length];
+//						for (int l = 0; l < array3.Length; l++)
+//						{
+//							array3 [l] = l;
+//						}
+//						Array.Sort (this.m_EventsAtMouseDown, array3, new AnimationEventTimeLine.EventComparer ());
+//						bool[] array4 = (bool[])this.m_EventsSelected.Clone ();
+//						float[] array5 = (float[])this.m_EventTimes.Clone ();
+//						for (int m = 0; m < array3.Length; m++)
+//						{
+//							this.m_EventsSelected [m] = array4 [array3 [m]];
+//							this.m_EventTimes [m] = array5 [array3 [m]];
+//						}
+//						Undo.RegisterCompleteObjectUndo (activeAnimationClip, "Move Event");
+//						AnimationUtility.SetAnimationEvents (activeAnimationClip, this.m_EventsAtMouseDown);
+//						this.m_DirtyTooltip = true;
+//						break;
+//					}
+//					case HighLevelEvent.Delete:
+//						this.DeleteEvents (activeAnimationClip, this.m_EventsSelected);
+//						break;
+//					case HighLevelEvent.SelectionChanged:
+//						curveEditor.SelectNone ();
+//						if (num6 != -1)
+//						{
+//							AnimationEventPopup.UpdateSelection (rootGameObject, selection.clip, num6, this.m_Owner);
+//						}
+//						break;
+//					}
+//				}
+//				this.CheckRectsOnMouseMove (rect, animationEvents, array);
+//			}
+//			if (Event.current.type == EventType.ContextClick && rect2.Contains (Event.current.mousePosition) && selection.EnsureClipPresence ())
+//			{
+//				Event.current.Use ();
+//				GenericMenu genericMenu2 = new GenericMenu ();
+//				genericMenu2.AddItem (new GUIContent ("Add Animation Event"), false, new GenericMenu.MenuFunction2 (this.EventLineContextMenuAdd), new AnimationEventTimeLine.EventLineContextMenuObject (rootGameObject, activeAnimationClip, time, -1));
+//				genericMenu2.ShowAsContext ();
+//			}
+//			GUI.color = color;
+//			GUI.EndGroup ();
+//		}
+
 		private void ClearStateMachine()
 		{
 			if (avatarPreview != null && avatarPreview.Animator != null)
@@ -167,6 +318,8 @@ namespace ws.winx.editor.bmachine.extensions
 					controller.AddParameter(blendTree.GetRecursiveBlendParam(j), AnimatorControllerParameterType.Float);
 				}
 			}
+
+
 		}
 
 
@@ -264,8 +417,7 @@ namespace ws.winx.editor.bmachine.extensions
 								int indentLevel = EditorGUI.indentLevel;
 				
 								//iterator.Find ("selectedStateHash")
-								//		SerializedNodeProperty current = iterator.current;
-
+										
 					
 										
 //										if (selectedAnimaStateInfo == null) {
@@ -285,7 +437,9 @@ namespace ws.winx.editor.bmachine.extensions
 //										}
 
 					
+				mecanimNode.normalizedTimeCurrent=EditorGUILayout.Slider(mecanimNode.normalizedTimeCurrent,0f,1f);
 
+				//mecanimNode.animator.Update(mecanimNode.normalizedTimeStart
 
 									//	GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, target);
 					

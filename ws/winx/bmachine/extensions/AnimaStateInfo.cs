@@ -35,7 +35,10 @@ namespace ws.winx.bmachine.extensions{
 		public Motion motion;
 		
 		public int layer;
-		
+
+		public string[] blendParamsNames;
+
+		public int[] blendParamsIDs; 
 	
 		
 		public GUIContent label;
