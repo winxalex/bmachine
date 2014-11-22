@@ -18,194 +18,199 @@ namespace ws.winx.bmachine.extensions
 				
 				[AnimaStateInfoAttribute]
 				public AnimaStateInfo
-					selectedAnimaStateInfo;
-
+						selectedAnimaStateInfo;
 				public bool loop = false;
-
-		
 				[MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.X)]
-				public int blendParamXBlackboardBindID;
-
-		        [MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.Y)]
-				public int blendParamYBlackboardBindID;
-	
-				
-				[RangeAttribute(0f,1f)]
-				public float transitionDuration = 0.3f;
-				
+				public int
+						blendParamXBlackboardBindID;
+				[MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.Y)]
+				public int
+						blendParamYBlackboardBindID;
 				[RangeAttribute(0f,1f)]
 				public float
-						timeStart = 0f;
-				
+						transitionDuration = 0.3f;
+				[RangeAttribute(0f,1f)]
+				public float
+						normalizedTimeStart = 0.5f;
 				[HideInInspector]
 				public float
 						normalizedTimeCurrent = -1f;
-				public float normalizedTimeStart = 0f;
+				
 
-				public AnimationCurve curve;
+				//!!!Curves serialization is buggy
+				//public AnimationCurve curve;
 
 
 				
 
-				int loopIdleCurrent = 0;
+			
 				Animator _animator;
-				RuntimeAnimatorController _runtimeAnimaController;
 				float normalizedTimeLast = 0f;
 				int numBlendParamters;
-
-
+				AnimatorStateInfo currentAnimatorStateInfo;
+				bool isCurrentEqualToSelectedAnimaInfo = false;
 		                         
 				public Animator animator {
 						get {
 								if (_animator == null) {
 										_animator = self.GetComponent<Animator> ();
-										_runtimeAnimaController = _animator.runtimeAnimatorController;
+									
 								}
 								return _animator;
 						}
 				}
 
-				void PlayAnimaState (int hash, int layer, float normalizedTime, float transitionDuration=0f)
+				void PlayAnimaState ()
 				{
-
-						if (selectedAnimaStateInfo != null) {
+					    
+						//if we are already in that AnimaState
+						//cos normalied time doesn't stop but continue to increase
+						if (isCurrentEqualToSelectedAnimaInfo) {
 							
-								Debug.Log ("CrossFade to state hash:" + hash + " layer" + layer);
+								normalizedTimeLast = currentAnimatorStateInfo.normalizedTime;
 							
-								AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo (layer);
 							
-								//if we are already in that AnimaState
-								if (stateInfo.nameHash == hash) {
+						} else {
 							
-										normalizedTimeLast = normalizedTimeStart = stateInfo.normalizedTime;
-								
-								
-								} else {
-										normalizedTimeLast = normalizedTimeStart = 0f;
-										normalizedTimeCurrent = -1f;
-								}
 							
-								animator.CrossFade (hash, transitionDuration, layer, normalizedTime);
-			
-								//animator.Play(selectedAnimaStateInfo.hash,selectedAnimaStateInfo.layer,normalizedTime);
+							
+								normalizedTimeLast = 0f;
+							
+							
 						}
-				}
+						
+						animator.CrossFade (selectedAnimaStateInfo.hash, transitionDuration, selectedAnimaStateInfo.layer, normalizedTimeStart);
 
+				}
+		
 				public override void Reset ()
 				{
+						//Debug.Log (selectedAnimaStateInfo.label.text+">Reset");
 						_animator = null;
-						timeStart = 0f;
+						
 						transitionDuration = 0f;
-						selectedAnimaStateInfo = null;
-	
-						//mecanimBlendParamter = ScriptableObject.CreateInstance< MecanimBlendTreeParameters >();
-//						curve = new AnimationCurve (new Keyframe[] {
-//								new Keyframe (0f, 0f),
-//								new Keyframe (1f, 1f)
-//						});
-
 				}
 
 				public override void Awake ()
 				{
           
-						Debug.Log ("Awake");
+						Debug.Log (selectedAnimaStateInfo.label.text + ">Awake");
 			
 
 
+				}
+
+				public override void OnEnable ()
+				{
+			
+						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
+			
+			
+
+
+
+				}
+
+//				public override void EditorOnTick ()
+//				{
+//						base.EditorOnTick ();
+//
+//						Debug.Log (selectedAnimaStateInfo.label.text + ">EditorTick");
+//
+//				}
+		
+				public override void OnDisable ()
+				{
+			
+						Debug.Log (selectedAnimaStateInfo.label.text + ">Disable");
+			
+			
+			
 				}
 		
 				public override void Start ()
 				{
 
-						Debug.Log ("Start");
+						Debug.Log (selectedAnimaStateInfo.label.text + ">Start MecanimNode");
 
-						
-						//animator.runtimeAnimatorController = _runtimeAnimaController;
-						PlayAnimaState (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, timeStart, transitionDuration);
-
-						
-						//animator.Play(selectedStateHash,layer,normalizedTime);
-
+						PlayAnimaState ();
+			
+//			if (!isCurrentEqualToSelectedAnimaInfo || !loop)
+//								PlayAnimaState ();
+//						else {
+//							Debug.Log("No play needed");
+//						}
 				}
 
 				public override void OnTick ()
 				{
-						base.OnTick ();
 
+						Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
+
+						currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
+						isCurrentEqualToSelectedAnimaInfo = currentAnimatorStateInfo.nameHash == selectedAnimaStateInfo.hash;
+
+						Debug.Log (selectedAnimaStateInfo.label.text + ">Before");
+
+
+					//The second check ins't nessery if I could reset Status when this node is switched
+					if (this.status != Status.Running || (!isCurrentEqualToSelectedAnimaInfo && loop && this.status == Status.Running)) {
+			
+								this.Start ();	
+				 
+								this.status = Status.Running;
+								return;
+						}
+
+						Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
+
+			
+						if (isCurrentEqualToSelectedAnimaInfo)
+								this.Update ();
+//						else if(loop)//I need to this check
+//								this.Start ();
+
+						if (this.status != Status.Running) {
+								this.End ();
+						}
 				}
-
-
-//		public override void OnTick ()
-//		{
-//			Status status = Status.Error;
-//			for (int i = 0; i < this.m_Children.Length; i++)
-//			{
-//				this.m_Children [i].OnTick ();
-//				status = this.m_Children [i].status;
-//				if (status == Status.Error || status == Status.Running)
-//				{
-//					break;
-//				}
-//			}
-//			base.status = status;
-//		}
-
-//		public override void OnTick ()
-//		{
-//			AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
-//			Debug.Log (stateInfo.loop);
-//			Debug.Log (stateInfo.normalizedTime);
-//
-//			this.status = Status.Running;
-//		}
 
 				public override void Update ()
 				{
 
 		
-						AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
-						normalizedTimeCurrent = stateInfo.normalizedTime;
+						//-(int)currentAnimatorStateInfo.normalizedTime;
 
-
-//						if (loop && animator.GetNextAnimatorStateInfo (selectedAnimaStateInfo.layer).nameHash != selectedAnimaStateInfo.hash) {
-//						
-//								Debug.Log ("Mecanim node : Animator have been assigned to other Anima State");		
-//								loop = false;
-//								this.status = Status.Success;
-//								return;
-//			
-//						}
-
-
-						Debug.Log ("stateInfo.Hash " + stateInfo.nameHash + " " + selectedAnimaStateInfo.hash);		
-
-
-						//int lastLoop = (int)lastNormalizedTime;
-						//int currLoop = (int)stateInfo.normalizedTime;
-
-						//				float lastNormalizedTime = lastLayerState[layer].normalizedTime - lastLoop;
-						//				float currNormalizedTime = stateInfo.normalizedTime - currLoop;
-
-						if (stateInfo.nameHash == selectedAnimaStateInfo.hash
-								&& normalizedTimeStart != normalizedTimeCurrent) {// && !animator.IsInTransition(selectedAnimaStateInfo.layer)){
-
-
-								Debug.Log ("NormalizedTime: " + (stateInfo.normalizedTime));
+						if (loop)
+								normalizedTimeCurrent = currentAnimatorStateInfo.normalizedTime - (int)currentAnimatorStateInfo.normalizedTime;
+						else
+								normalizedTimeCurrent = currentAnimatorStateInfo.normalizedTime;
 
 
 
+
+						Debug.Log (selectedAnimaStateInfo.label.text + ">Update() "); 
+						Debug.Log (selectedAnimaStateInfo.label.text + ">current state: " + currentAnimatorStateInfo.nameHash + " requested state " + selectedAnimaStateInfo.hash);
+						Debug.Log (selectedAnimaStateInfo.label.text + ">current state time= " + currentAnimatorStateInfo.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
+						Debug.Log (selectedAnimaStateInfo.label.text + "> state in transition" + animator.GetAnimatorTransitionInfo (selectedAnimaStateInfo.layer).userNameHash); 
+//		
+
+						
+
+		
+					
+						if (isCurrentEqualToSelectedAnimaInfo
+								&& normalizedTimeLast != normalizedTimeCurrent) {
+
+								//Debug.Log ("NormalizedTime: " + (currentAnimatorStateInfo.normalizedTime));
 
 
 							
 							
 								if (normalizedTimeCurrent > 1f) {
-										if (loop) {
-												PlayAnimaState (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, timeStart, transitionDuration);
-										} else {
+										if (!loop) {
 												this.status = Status.Success;
 												return;
-							
 										}
 
 								} else {
@@ -241,33 +246,35 @@ namespace ws.winx.bmachine.extensions
 						} else {
 
 								Debug.LogWarning ("MecanimNode Update on wrong  AnimaState");
+								//this.status = Status.Error;
+								//return;
+								
 						}
 
-						//					this.status = Status.Running;
-//			Debug.Log (stateInfo.nameHash);
-//
-//				if (stateInfo.nameHash == selectedAnimaStateInfo.hash) {
-//				    if(stateInfo.normalizedTime < 1f){
-//					normalizedTime=stateInfo.normalizedTime;
-//					this.status = Status.Running;
-//						} else {
-//					this.status = Status.Success;
-//						}
-//
-//
-//				}
-//
-//
+
+						
+						
 						this.status = Status.Running;
 
 				}
 
+
+		public override void ResetStatus ()
+		{
+			Debug.Log (selectedAnimaStateInfo.label.text + ">ResetStatus ");
+			base.ResetStatus ();
+		}
+
 				public override void End ()
 				{
+						Debug.Log (selectedAnimaStateInfo.label.text + ">" + this.status);
 
+						Debug.Log (selectedAnimaStateInfo.label.text + ">End ");
+						base.End ();
+			            
 				}
 
-
+		 
 //
 //		public static MecanimEvent[] GetEvents(Dictionary<int, Dictionary<int, Dictionary<int, List<MecanimEvent>>>> contextLoadedData,
 //		                                       Dictionary<int, Dictionary<int, AnimatorStateInfo>> contextLastStates,
