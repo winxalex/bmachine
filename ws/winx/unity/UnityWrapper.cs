@@ -57,21 +57,14 @@ namespace ws.winx.unity
 
 
 			object[] arguments=new object[]{rect,positions,content,hitPositions,selections,readOnly,clickedIndexTemp,offsetTemp,startSelectTemp,endSelectTemp,style};
-
-
-			//object[] arguments=new object[]{rect,positions,content,hitPositions,selections,readOnly,clickedIndex,offset,startSelect,endSelect,style};
-
 			object result=null;
 
-			try{
-				result=MethodInfo_MultiSelection.Invoke(null,arguments);
-			}catch(Exception ex){
-				Debug.LogWarning("Shit happens");
-			}
+			result=MethodInfo_MultiSelection.Invoke(null,arguments);
+			
 
 			int HighLevelEventEnumInt = (int)result;
 		
-				selections=arguments[4] as bool[];
+
 				clickedIndex=(int)arguments[6];
 				offset=(Vector2)arguments[7];
 				startSelect=(float)arguments[8];

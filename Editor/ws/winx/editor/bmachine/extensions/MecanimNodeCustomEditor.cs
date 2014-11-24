@@ -563,14 +563,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 				//Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
 
-				Rect rect= GUILayoutUtility.GetLastRect();
-				rect.y+=100;
+
+
 			//	DoTimeControl(rect);
 
 				if(eventTimeLine==null)
 					eventTimeLine=new MecanimNodeEventTimeLine(mecanimNode);
 
-				eventTimeLine.EventLineGUI(rect);
+				eventTimeLine.EventLineGUI();
 				//mecanimNode.animator.Update(mecanimNode.normalizedTimeStart
 
 									//	GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, target);

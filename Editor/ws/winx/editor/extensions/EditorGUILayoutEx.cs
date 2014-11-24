@@ -275,7 +275,7 @@ namespace ws.winx.editor.extensions
 			
 			
 			
-			if (GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup, GUILayout.MinWidth (200))) {
+			if (GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup)) {
 				
 				//shoot custom MouseDown event here!!!
 				
