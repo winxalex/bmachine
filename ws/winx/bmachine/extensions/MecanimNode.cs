@@ -9,15 +9,17 @@ using System.Text;
 using BehaviourMachine;
 using Motion=UnityEngine.Motion;
 
+
 namespace ws.winx.bmachine.extensions
 {
 		[NodeInfo ( category = "Extensions/Mecanim/",
                 icon = "Animator")]
-		public class MecanimNode:ActionNode
-		{
+	public class MecanimNode:ActionNode,IMecanimEvents
+	{
+
 				
-				[AnimaStateInfoAttribute]
-				public AnimaStateInfo
+				[MecanimStateInfoAttribute]
+				public MecanimStateInfo
 						selectedAnimaStateInfo;
 				public bool loop = false;
 				[MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.X)]
@@ -32,16 +34,34 @@ namespace ws.winx.bmachine.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						normalizedTimeStart = 0.5f;
-				[HideInInspector]
+				//[HideInInspector]
+				[RangeAttribute(0f,1f)]
 				public float
-						normalizedTimeCurrent = -1f;
+						normalizedTimeCurrent = 0f;
 				
 
 				//!!!Curves serialization is buggy
 				//public AnimationCurve curve;
 
+		   
+				AnimationEvent[] _animaEvents;
 
-				
+		#region IMecanimEvents implementation
+
+
+		AnimationEvent[] IMecanimEvents.GetAnimationEvents ()
+		{
+			return _animaEvents;
+		}
+
+		void IMecanimEvents.SetAnimationEvents (AnimationEvent[] events)
+		{
+			_animaEvents = events;
+		}
+
+		
+
+		#endregion
 
 			
 				Animator _animator;

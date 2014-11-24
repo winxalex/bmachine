@@ -27,7 +27,7 @@ namespace ws.winx.editor.bmachine.extensions
 		/// <seealso cref="BehaviourMachine.RandomChild" />
 		/// </summary>
 		[CustomNodeEditor(typeof(MecanimNode), true)]
-		public class MecanimCustomEditor : NodeEditor
+		public class MecanimNodeCustomEditor : NodeEditor
 		{
 
 				
@@ -35,13 +35,16 @@ namespace ws.winx.editor.bmachine.extensions
 			
 				MecanimNode mecanimNode;
 				GUIContent[] displayOptions;
-				List<AnimaStateInfo> animaInfoValues;
-				AnimaStateInfo selectedAnimaStateInfo;
+				List<MecanimStateInfo> animaInfoValues;
+				MecanimStateInfo selectedAnimaStateInfo;
 				AvatarPreviewW avatarPreview;
 				AnimatorController controller;
 				UnityEditorInternal.StateMachine stateMachine;
 
-		Motion previewedMotion;
+		MecanimNodeEventTimeLine eventTimeLine;
+
+			
+			Motion previewedMotion;
 		
 
 		State state;
@@ -84,7 +87,7 @@ namespace ws.winx.editor.bmachine.extensions
 //						{
 //							num++;
 //						}
-//						num2 = num;
+		//						num2 = num;.playin
 //					}
 //					num2--;
 //					float num3 = Mathf.Floor (state.FrameToPixel (animationEvent.time * activeAnimationClip.frameRate, rect));
@@ -386,6 +389,125 @@ namespace ws.winx.editor.bmachine.extensions
 			}
 		}
 
+
+
+
+
+
+
+		//
+		// Nested Types
+		//
+		private class Styles
+		{
+			public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
+			public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
+			public GUIStyle playButton = "TimeScrubberButton";
+			public GUIStyle timeScrubber = "TimeScrubber";
+		}
+
+		private static Styles s_Styles;
+		float m_MouseDrag;
+		float nextCurrentTime;
+		bool m_WrapForwardDrag;
+
+
+		//
+		// Methods
+		//
+		public void DoTimeControl (Rect rect)
+		{
+			if (MecanimNodeCustomEditor.s_Styles == null)
+			{
+				MecanimNodeCustomEditor.s_Styles = new MecanimNodeCustomEditor.Styles ();
+			}
+			Event current = Event.current;
+			//int controlID = GUIUtility.GetControlID (TimeControl.kScrubberIDHash, FocusType.Keyboard);
+			int controlID = GUIUtility.GetControlID (FocusType.Passive);
+			Rect rect2 = rect;
+			rect2.height = 21f;
+			Rect rect3 = rect2;
+			rect3.xMin += 33f;
+			switch (current.GetTypeForControl (controlID))
+			{
+			case EventType.MouseDown:
+				if (rect.Contains (current.mousePosition))
+				{
+					GUIUtility.keyboardControl = controlID;
+				}
+				if (rect3.Contains (current.mousePosition))
+				{
+					EditorGUIUtility.SetWantsMouseJumping (1);
+					GUIUtility.hotControl = controlID;
+					this.m_MouseDrag = current.mousePosition.x - rect3.xMin;
+					//this.nextCurrentTime = this.m_MouseDrag * (this.stopTime - this.startTime) / rect3.width + this.startTime;
+					this.m_WrapForwardDrag = false;
+					current.Use ();
+				}
+				break;
+			case EventType.MouseUp:
+				if (GUIUtility.hotControl == controlID)
+				{
+					EditorGUIUtility.SetWantsMouseJumping (0);
+					GUIUtility.hotControl = 0;
+					current.Use ();
+				}
+				break;
+			case EventType.MouseDrag:
+				if (GUIUtility.hotControl == controlID)
+				{
+					this.m_MouseDrag += current.delta.x * 1f;//this.playbackSpeed;
+					if (false && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width))
+					//if (this.loop && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width))
+					{
+						this.m_WrapForwardDrag = true;
+						this.m_MouseDrag = Mathf.Repeat (this.m_MouseDrag, rect3.width);
+					}
+					//this.nextCurrentTime = Mathf.Clamp (this.m_MouseDrag, 0f, rect3.width) * (this.stopTime - this.startTime) / rect3.width + this.startTime;
+					current.Use ();
+				}
+				break;
+			case EventType.KeyDown:
+//				if (GUIUtility.keyboardControl == controlID)
+//				{
+//					if (current.keyCode == KeyCode.LeftArrow)
+//					{
+//						if (this.currentTime - this.startTime > 0.01f)
+//						{
+//							this.deltaTime = -0.01f;
+//						}
+//						current.Use ();
+//					}
+//					if (current.keyCode == KeyCode.RightArrow)
+//					{
+//						if (this.stopTime - this.currentTime > 0.01f)
+//						{
+//							this.deltaTime = 0.01f;
+//						}
+//						current.Use ();
+//					}
+//				}
+				break;
+			}
+
+			//GUI.Box (rect2, GUIContent.none, TimeControl.s_Styles.timeScrubber);
+			GUI.Box (rect2, GUIContent.none, MecanimNodeCustomEditor.s_Styles.timeScrubber);
+			//thisg = GUI.Toggle (rect2, this.playing, (!this.playing) ? TimeControl.s_Styles.playIcon : TimeControl.s_Styles.pauseIcon, TimeControl.s_Styles.playButton);
+
+			//float num = Mathf.Lerp (rect3.x, rect3.xMax, this.normalizedTime);
+			float num = Mathf.Lerp (rect3.x, rect3.xMax, mecanimNode.normalizedTimeCurrent);
+
+			if (GUIUtility.keyboardControl == controlID)
+			{
+				Handles.color = new Color (1f, 0f, 0f, 1f);
+			}
+			else
+			{
+				Handles.color = new Color (1f, 0f, 0f, 0.5f);
+			}
+			Handles.DrawLine (new Vector2 (num, rect3.yMin), new Vector2 (num, rect3.yMax));
+			Handles.DrawLine (new Vector2 (num + 1f, rect3.yMin), new Vector2 (num + 1f, rect3.yMax));
+		}
           
 
 				/// <summary>
@@ -398,7 +520,7 @@ namespace ws.winx.editor.bmachine.extensions
 						mecanimNode = target as MecanimNode;
 
 						Motion motion =  mecanimNode.selectedAnimaStateInfo.motion;
-
+	
 		
 			
 						if (mecanimNode != null) {
@@ -437,8 +559,18 @@ namespace ws.winx.editor.bmachine.extensions
 //										}
 
 					
-				mecanimNode.normalizedTimeCurrent=EditorGUILayout.Slider(mecanimNode.normalizedTimeCurrent,0f,1f);
+				//mecanimNode.normalizedTimeCurrent=EditorGUILayout.Slider(mecanimNode.normalizedTimeCurrent,0f,1f);
 
+				//Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
+
+				Rect rect= GUILayoutUtility.GetLastRect();
+				rect.y+=100;
+			//	DoTimeControl(rect);
+
+				if(eventTimeLine==null)
+					eventTimeLine=new MecanimNodeEventTimeLine(mecanimNode);
+
+				eventTimeLine.EventLineGUI(rect);
 				//mecanimNode.animator.Update(mecanimNode.normalizedTimeStart
 
 									//	GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, target);

@@ -26,7 +26,7 @@ namespace ws.winx.editor.extensions
 		/// <param name="parentName">Parent name.</param>
 		/// <param name="layer">Layer.</param>
 		/// <param name="resultsAnimaInfoList">Results anima info list.</param>
-		 static void processStateMachinePath (UnityEditorInternal.StateMachine stateMachine, string parentName, int layer, List<AnimaStateInfo> resultsAnimaInfoList)
+		 static void processStateMachinePath (UnityEditorInternal.StateMachine stateMachine, string parentName, int layer, List<MecanimStateInfo> resultsAnimaInfoList)
 		{
 			int numStates = 0;
 			int numStateMachines = 0;
@@ -48,7 +48,7 @@ namespace ws.winx.editor.extensions
 				state = stateMachine.GetState (currentStateInx);
 		//	resultsAnimaInfoList.Add (new AnimaStateInfo (state.uniqueNameHash, new GUIContent (parentName + '/' + state.name), layer));
 //				
-				AnimaStateInfo info=AnimaStateInfo.CreateInstance<AnimaStateInfo>();
+				MecanimStateInfo info=MecanimStateInfo.CreateInstance<MecanimStateInfo>();
 				info.hash=state.uniqueNameHash;
 				info.label= new GUIContent (parentName + '/' + state.name);
 				info.layer = layer;
@@ -106,7 +106,7 @@ namespace ws.winx.editor.extensions
 		/// </summary>
 		/// <returns>The anima states info.</returns>
 		/// <param name="aniController">Ani controller.</param>
-		public static List<AnimaStateInfo> getAnimaStatesInfo (AnimatorController aniController)
+		public static List<MecanimStateInfo> getAnimaStatesInfo (AnimatorController aniController)
 		{
 			
 			AnimatorControllerLayer layer;
@@ -118,7 +118,7 @@ namespace ws.winx.editor.extensions
 			int currentLayerInx = 0;
 			
 			
-			List<AnimaStateInfo> animaStatesInfoList = new List<AnimaStateInfo> ();
+			List<MecanimStateInfo> animaStatesInfoList = new List<MecanimStateInfo> ();
 			
 			
 			for (; currentLayerInx<numLayers; currentLayerInx++) {

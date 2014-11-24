@@ -15,7 +15,7 @@ namespace ws.winx.editor.bmachine.extensions
 		public class MecanimBlendTreeParameterPropertyDrawer : NodePropertyDrawer
 		{
 
-				AnimaStateInfo previousSelectAnimaInfo;
+				MecanimStateInfo previousSelectAnimaInfo;
 				GUIContent label = new GUIContent ();
 				Variable blackBoardVariableX;
 				Variable blackBoardVariableY;

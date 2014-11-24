@@ -30,7 +30,7 @@ namespace BehaviourMachine
 
 		//public MecanimBlendParameterCustom cust;
 
-		public MecanimBlendParameterCustom floatCustom;
+	//	public MecanimBlendParameterCustom floatCustom;
 
 
 		public override void Awake ()
@@ -74,7 +74,7 @@ namespace BehaviourMachine
 		
 		public override void Reset ()
 		{
-			this.floatCustom = new MecanimBlendParameterCustom ();
+		//	this.floatCustom = new MecanimBlendParameterCustom ();
 			this.axisName = new ConcreteStringVar ();
 			this.storeAxis = new ConcreteFloatVar ();
 			//this.cust=new MecanimBlendParameterCustom(this.name,this.blackboard,12);

@@ -8,6 +8,85 @@ using ws.winx.unity;
 
 namespace ws.winx.unity
 {
+
+     public enum HighLevelEvent
+	{
+		None,
+		Click,
+		DoubleClick,
+		ContextClick,
+		BeginDrag,
+		Drag,
+		EndDrag,
+		Delete,
+		SelectionChanged
+	}
+
+
+	public class EditorGUIExtW {
+		#region Reflection
+		
+		private static Type realType;
+		
+		
+		private static MethodInfo MethodInfo_MultiSelection;
+
+		public static void InitType() {
+			
+			if (realType == null) {
+				Assembly assembly = Assembly.GetAssembly(typeof(Editor));
+				realType = assembly.GetType("UnityEditor.EditorGUIExt");
+				
+				MethodInfo_MultiSelection	= realType.GetMethod("MultiSelection",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static |  BindingFlags.Public);
+				
+			}
+		}
+		
+		#endregion
+		
+		#region Wrapper
+		public static HighLevelEvent MultiSelection (Rect rect, Rect[] positions, GUIContent content, Rect[] hitPositions, ref bool[] selections, bool[] readOnly, out int clickedIndex, out Vector2 offset, out float startSelect, out float endSelect, GUIStyle style)
+		{
+			InitType ();
+			float startSelectTemp=0f;
+			float endSelectTemp=0f;
+			int clickedIndexTemp=0;
+
+		
+			Vector2 offsetTemp = new Vector2 ();
+
+
+			object[] arguments=new object[]{rect,positions,content,hitPositions,selections,readOnly,clickedIndexTemp,offsetTemp,startSelectTemp,endSelectTemp,style};
+
+
+			//object[] arguments=new object[]{rect,positions,content,hitPositions,selections,readOnly,clickedIndex,offset,startSelect,endSelect,style};
+
+			object result=null;
+
+			try{
+				result=MethodInfo_MultiSelection.Invoke(null,arguments);
+			}catch(Exception ex){
+				Debug.LogWarning("Shit happens");
+			}
+
+			int HighLevelEventEnumInt = (int)result;
+		
+				selections=arguments[4] as bool[];
+				clickedIndex=(int)arguments[6];
+				offset=(Vector2)arguments[7];
+				startSelect=(float)arguments[8];
+				endSelect=(float)arguments[9];
+
+			return (ws.winx.unity.HighLevelEvent)HighLevelEventEnumInt;
+		
+		}
+
+		#endregion
+		
+	}
+
+
+
 public class AvatarPreviewW {
 	#region Reflection
 	

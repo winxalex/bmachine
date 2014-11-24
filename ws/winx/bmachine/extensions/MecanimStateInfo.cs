@@ -15,7 +15,7 @@ using UnityEngine;
 namespace ws.winx.bmachine.extensions{
 
 	[System.Serializable]
-	public class AnimaStateInfo:ScriptableObject
+	public class MecanimStateInfo:ScriptableObject
 	{
 		int _hash;
 

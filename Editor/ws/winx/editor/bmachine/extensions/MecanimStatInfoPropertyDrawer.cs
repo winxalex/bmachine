@@ -12,14 +12,14 @@ using System.Linq;
 
 namespace ws.winx.editor.bmachine.extensions
 {
-	[CustomNodePropertyDrawer (typeof(AnimaStateInfoAttribute))]
-	public class AnimaStatInfoPropertyDrawer : NodePropertyDrawer
+	[CustomNodePropertyDrawer (typeof(MecanimStateInfoAttribute))]
+	public class MecanimStatInfoPropertyDrawer : NodePropertyDrawer
 	{
 
 		GUIContent[] displayOptions;
-		List<AnimaStateInfo> animaStateInfoValues;
+		List<MecanimStateInfo> animaStateInfoValues;
 		AnimatorController aniController;
-		AnimaStateInfo selectedAnimaStateInfo;
+		MecanimStateInfo selectedAnimaStateInfo;
 		bool isListDirty=false;
 		
 		/// <summary>
@@ -64,7 +64,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 			MecanimNode mc = node as MecanimNode;
 
-				selectedAnimaStateInfo= property.value as AnimaStateInfo;
+				selectedAnimaStateInfo= property.value as MecanimStateInfo;
 
 
 			if (displayOptions == null || isListDirty) {
