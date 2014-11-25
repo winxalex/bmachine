@@ -41,7 +41,7 @@ namespace ws.winx.editor.bmachine.extensions
 				AnimatorController controller;
 				UnityEditorInternal.StateMachine stateMachine;
 
-		MecanimNodeEventTimeLine eventTimeLine;
+		CustomObjectTimeLine eventTimeLine;
 
 			
 			Motion previewedMotion;
@@ -568,9 +568,9 @@ namespace ws.winx.editor.bmachine.extensions
 			//	DoTimeControl(rect);
 
 				if(eventTimeLine==null)
-					eventTimeLine=new MecanimNodeEventTimeLine(mecanimNode);
+					eventTimeLine=new CustomObjectTimeLine();
 
-				eventTimeLine.EventLineGUI();
+				eventTimeLine.EventLineGUI(new float[]{0.2f,0.5f,0.5f,0.5f,0.3f,0.87f});
 				//mecanimNode.animator.Update(mecanimNode.normalizedTimeStart
 
 									//	GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, target);

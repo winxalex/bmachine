@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using BehaviourMachineEditor;
 using UnityEditorInternal;
 using System.Linq;
+using ws.winx.unity;
 
 namespace ws.winx.editor.bmachine.extensions
 {

@@ -8,13 +8,13 @@ using System.Collections.Generic;
 using System.Text;
 using BehaviourMachine;
 using Motion=UnityEngine.Motion;
+using ws.winx.unity;
 
 
 namespace ws.winx.bmachine.extensions
 {
-		[NodeInfo ( category = "Extensions/Mecanim/",
-                icon = "Animator")]
-	public class MecanimNode:ActionNode,IMecanimEvents
+		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator")]
+	public class MecanimNode:ActionNode
 	{
 
 				
@@ -44,24 +44,7 @@ namespace ws.winx.bmachine.extensions
 				//public AnimationCurve curve;
 
 		   
-				AnimationEvent[] _animaEvents;
 
-		#region IMecanimEvents implementation
-
-
-		AnimationEvent[] IMecanimEvents.GetAnimationEvents ()
-		{
-			return _animaEvents;
-		}
-
-		void IMecanimEvents.SetAnimationEvents (AnimationEvent[] events)
-		{
-			_animaEvents = events;
-		}
-
-		
-
-		#endregion
 
 			
 				Animator _animator;

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using BehaviourMachineEditor;
 using UnityEditorInternal;
 using System.Linq;
+using ws.winx.unity;
 
 
 namespace ws.winx.editor.bmachine.extensions
@@ -44,7 +45,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 		void RegenerateAnimaStatesInfoList(){
 
-			animaStateInfoValues = AnimaStateInfoUtility.getAnimaStatesInfo (aniController);
+			animaStateInfoValues = MecanimStateInfoUtility.getAnimaStatesInfo (aniController);
 			displayOptions = animaStateInfoValues.Select (x => x.label).ToArray ();
 
 			isListDirty=false;
