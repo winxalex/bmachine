@@ -40,8 +40,10 @@ namespace ws.winx.editor.bmachine.extensions
 				AvatarPreviewW avatarPreview;
 				AnimatorController controller;
 				UnityEditorInternal.StateMachine stateMachine;
+		float[] testtime=new float[]{0.2f,0.5f,0.5f,0.5f,0.3f,0.87f};
+		CustomObjectTimeLine eventTimeLine=new CustomObjectTimeLine();
 
-		CustomObjectTimeLine eventTimeLine;
+
 
 			
 			Motion previewedMotion;
@@ -567,10 +569,10 @@ namespace ws.winx.editor.bmachine.extensions
 
 			//	DoTimeControl(rect);
 
-				if(eventTimeLine==null)
-					eventTimeLine=new CustomObjectTimeLine();
 
-				eventTimeLine.EventLineGUI(new float[]{0.2f,0.5f,0.5f,0.5f,0.3f,0.87f});
+
+
+				eventTimeLine.EventLineGUI(ref testtime);
 				//mecanimNode.animator.Update(mecanimNode.normalizedTimeStart
 
 									//	GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, target);
