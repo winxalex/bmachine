@@ -12,11 +12,12 @@ using ws.winx.bmachine.extensions;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditorInternal;
+using ws.winx.unity;
 
 
 namespace ws.winx.editor.extensions
 {
-		public class AnimaStateInfoUtility
+		public class MecanimStateInfoUtility
 		{
 		
 		/// <summary>

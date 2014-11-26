@@ -40,8 +40,8 @@ namespace ws.winx.editor.bmachine.extensions
 				AvatarPreviewW avatarPreview;
 				AnimatorController controller;
 				UnityEditorInternal.StateMachine stateMachine;
-		float[] testtime=new float[]{0.2f,0.5f,0.5f,0.5f,0.3f,0.87f};
-		CustomObjectTimeLine eventTimeLine=new CustomObjectTimeLine();
+				float[] testtime=new float[]{0.2f,0.5f,0.5f,0.5f,0.3f,0.87f};
+				CustomObjectTimeLine eventTimeLine;
 
 
 
@@ -510,6 +510,26 @@ namespace ws.winx.editor.bmachine.extensions
 			Handles.DrawLine (new Vector2 (num, rect3.yMin), new Vector2 (num, rect3.yMax));
 			Handles.DrawLine (new Vector2 (num + 1f, rect3.yMin), new Vector2 (num + 1f, rect3.yMax));
 		}
+
+
+		StateEventEditor eventEditor;
+
+             void onMecanimEventEdit(object sender,CustomObjectTimeLine.TimeLineEventArgs args){
+			StateEventEditor.Init ();
+//			      if (eventEditor == null)
+//								//eventEditor = new StateEventEditor ();
+//						eventEditor=EditorWindow.GetWindow<StateEventEditor>("mile");
+//
+//			eventEditor.Show ();
+//						//eventEditor.ShowPopup();
+
+				}
+
+			void onMecanimEventClose(object sender,CustomObjectTimeLine.TimeLineEventArgs args){
+			     if (eventEditor != null)
+								eventEditor.Close ();
+			}
+
           
 
 				/// <summary>
@@ -568,11 +588,18 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 			//	DoTimeControl(rect);
+				if(!Application.isPlaying){
+						if(eventTimeLine==null){
+							     eventTimeLine=new CustomObjectTimeLine();
+							eventTimeLine.EditOpen+=onMecanimEventEdit;
+							eventTimeLine.EditClose+=onMecanimEventClose;
+						}
 
+				
+						testtime=eventTimeLine.onTimeLineGUI(testtime);
+					}
 
-
-
-				eventTimeLine.EventLineGUI(ref testtime);
+				
 				//mecanimNode.animator.Update(mecanimNode.normalizedTimeStart
 
 									//	GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, target);

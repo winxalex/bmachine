@@ -11,15 +11,27 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace ws.winx.editor.extensions
 {
 		public class EditorGUILayoutEx
 		{
 
-		//		private static object _CustomPopup_SelectedObject;
-				private static int _CustomPopup_ControlID = -1;
-				private static int _CustomPopup_SelectedIndex = -1;
+				private static object SELECTED_OBJECT=null;
+				private static int CONTROL_ID = -1;
+				private static int SELECTED_INDEX = -1;
+				private static IList CHANGED_VALUES=null;
+
+				private static Texture __eventMarkerTexture; 
+
+				public static Texture eventMarkerTexture {
+					get {
+						if(__eventMarkerTexture==null) __eventMarkerTexture= EditorGUIUtility.IconContent ("Animation.EventMarker").image;
+
+						return __eventMarkerTexture;
+					}
+				}
 
 				public delegate void MenuCallaback<T> (int selectedIndex,T SelectedObject,int controlID);
 
@@ -204,13 +216,13 @@ namespace ws.winx.editor.extensions
 			int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
 			
 			//if current == previous selected control => asign "selectedObject" and reset global
-			if (controlID == EditorGUILayoutEx._CustomPopup_ControlID) {
-				selectedIndex = EditorGUILayoutEx._CustomPopup_SelectedIndex;
+			if (controlID == EditorGUILayoutEx.CONTROL_ID) {
+				selectedIndex = EditorGUILayoutEx.SELECTED_INDEX;
 				
 				//reset
 			//	EditorGUILayoutEx._CustomPopup_SelectedObject = null;
-				EditorGUILayoutEx._CustomPopup_SelectedIndex = -1;
-				EditorGUILayoutEx._CustomPopup_ControlID = -1;
+				EditorGUILayoutEx.SELECTED_INDEX = -1;
+				EditorGUILayoutEx.CONTROL_ID = -1;
 			}
 			
 			//if selectionObject is null on Init
@@ -299,8 +311,8 @@ namespace ws.winx.editor.extensions
 						menu.AddItem (content, false, (obj) => {
 							int inx = (int)obj;
 							//EditorGUILayoutEx._CustomPopup_SelectedObject = values [inx];
-							EditorGUILayoutEx._CustomPopup_ControlID = controlID;
-							EditorGUILayoutEx._CustomPopup_SelectedIndex = inx;
+							EditorGUILayoutEx.CONTROL_ID = controlID;
+							EditorGUILayoutEx.SELECTED_INDEX = inx;
 							
 							//Debug.Log ("Selected:" + inx);	
 							
