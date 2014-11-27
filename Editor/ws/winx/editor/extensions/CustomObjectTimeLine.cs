@@ -15,7 +15,7 @@ namespace ws.winx.editor.extensions
 
 				private static int CONTROL_ID = -1;
 				private static int SELECTED_INDEX = -1;
-				private static IList CHANGED_VALUES=null;
+				private static IList CHANGED_VALUES = null;
 
 
 				public class TimeLineEventArgs:EventArgs
@@ -62,10 +62,7 @@ namespace ws.winx.editor.extensions
 				private bool m_DirtyTooltip;
 				private static Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
 				private string m_InstantTooltipText;
-				private bool[] m_EventsSelected;
-				[NonSerialized]
-				private float[]
-						timeValuesAtMouseDown;
+				private bool[] __valuesSelected;
 				[NonSerialized]
 				private float[]
 						timeValuesTime;
@@ -86,7 +83,7 @@ namespace ws.winx.editor.extensions
 				//
 				
 		
-				private void CheckRectsOnMouseMove (Rect postionRect, ref float[] values, Rect[] hitRects,int controlID)
+				private void CheckRectsOnMouseMove (Rect postionRect, ref float[] values, Rect[] hitRects, int controlID)
 				{
 						Vector2 mousePosition = Event.current.mousePosition;
 						bool flag = false;
@@ -98,7 +95,7 @@ namespace ws.winx.editor.extensions
 														Event.current.Use ();
 														this.m_HoverEvent = -1;
 														this.m_InstantTooltipText = string.Empty;
-														onContextClickOnTimeValue (new TimeLineEventArgs (i,values[i],values,controlID));
+														onContextClickOnTimeValue (new TimeLineEventArgs (i, values [i], values, controlID));
 														return;
 												}
 
@@ -145,25 +142,25 @@ namespace ws.winx.editor.extensions
 								if (this.EditClose != null)
 										this.EditClose (this, null);
 
-							    //TODO CREATE UNDOS
+								//TODO CREATE UNDOS
 								//Undo.RegisterCompleteObjectUndo (this, "Delete Event");
 
 								CHANGED_VALUES = list.ToArray ();
-								CONTROL_ID=args.controlID;
+								CONTROL_ID = args.controlID;
 								
 								
 
-								this.m_EventsSelected = new bool[list.Count];
+								this.__valuesSelected = new bool[list.Count];
 								this.m_DirtyTooltip = true;
 
-								if(this.Delete!=null)
-								this.Delete(this,new TimeLineEventArgs(-1,0f,(float[])CHANGED_VALUES,args.controlID));
+								if (this.Delete != null)
+										this.Delete (this, new TimeLineEventArgs (-1, 0f, (float[])CHANGED_VALUES, args.controlID));
 						}
 				}
 		
 				public void DeselectAll ()
 				{
-						this.m_EventsSelected = null;
+						this.__valuesSelected = null;
 				}
 		
 				public void DrawInstantTooltip (Rect position)
@@ -201,12 +198,12 @@ namespace ws.winx.editor.extensions
 
 
 
-						this.Select (newTimeValueInx,timeValues.Length);
+						this.Select (newTimeValueInx, timeValues.Length);
 
 						
 						//open editor for newely added 
 						if (Add != null)
-								Add (this, new TimeLineEventArgs(newTimeValueInx,args.selectedValue,timeValues,args.controlID));
+								Add (this, new TimeLineEventArgs (newTimeValueInx, args.selectedValue, timeValues, args.controlID));
 				}
 		
 				public virtual void onDelete (System.Object obj)
@@ -214,10 +211,10 @@ namespace ws.winx.editor.extensions
 						TimeLineEventArgs args = (TimeLineEventArgs)obj;
 
 						int index = args.selectedIndex;
-						if (this.m_EventsSelected [index]) {
-								this.DeleteEvents (args, this.m_EventsSelected);
+						if (this.__valuesSelected [index]) {
+								this.DeleteEvents (args, this.__valuesSelected);
 						} else {
-								bool[] timeValuesSelected = new bool[this.m_EventsSelected.Length];
+								bool[] timeValuesSelected = new bool[this.__valuesSelected.Length];
 								timeValuesSelected [index] = true;
 								this.DeleteEvents (args, timeValuesSelected);
 						}
@@ -257,12 +254,12 @@ namespace ws.winx.editor.extensions
 				
 		
 				//public void EventLineGUI (Rect rect, AnimationSelection selection, AnimationWindowState state, CurveEditor )
-				public float[] onTimeLineGUI (float[] timeValues)
+				public float[] onTimeLineGUI (float[] timeValues, bool sorted=false)
 				{
 						//main contorol position
 						Rect rectGlobal = GUILayoutUtility.GetLastRect ();
 						rectGlobal.y += 100;
-						rectGlobal.xMax -= 1f;
+						rectGlobal.xMax -= 3f;
 						rectGlobal.xMin = 33f;
 						rectGlobal.height = 100f;
 
@@ -283,13 +280,14 @@ namespace ws.winx.editor.extensions
 
 						//background
 						GUI.Box (rectLocal, GUIContent.none);
+						rectLocal.width -= image.width;
 
 		
 					
 							
 						float time = 0f;
 						if (rectLocal.Contains (Event.current.mousePosition))
-								time =(float)Math.Round( Event.current.mousePosition.x / rectLocal.width,2);
+								time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 2);
 						
 
 
@@ -319,7 +317,7 @@ namespace ws.winx.editor.extensions
 
 
 								timeValuesTheSameCounterDown--;
-								Rect rect3 = new Rect (timeValuePosition + (float)(image.width * 0.5), image.height * timeValuesTheSameCounterDown * 0.66f, (float)image.width, (float)image.height);
+								Rect rect3 = new Rect (timeValuePosition , image.height * timeValuesTheSameCounterDown * 0.66f, (float)image.width, (float)image.height);
 
 
 								positionsHitRectArray [i] = rect3;
@@ -345,8 +343,8 @@ namespace ws.winx.editor.extensions
 
 							
 
-						if (this.m_EventsSelected == null || this.m_EventsSelected.Length != timeValuesNumber) {
-								this.m_EventsSelected = new bool[timeValuesNumber];
+						if (this.__valuesSelected == null || this.__valuesSelected.Length != timeValuesNumber) {
+								this.__valuesSelected = new bool[timeValuesNumber];
 
 								if (EditClose != null)
 										EditClose (this, null);
@@ -363,16 +361,16 @@ namespace ws.winx.editor.extensions
 						float startSelect;
 						float endSelect;
 						
-						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (image), positionsHitRectArray, ref this.m_EventsSelected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
+						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (image), positionsHitRectArray, ref this.__valuesSelected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
 
 						if (highLevelEvent != HighLevelEvent.None) {
 								switch (highLevelEvent) {
 								case HighLevelEvent.DoubleClick:
 										if (clickedIndex != -1) {
-													if (EditOpen != null) {
-															EditOpen (this, new TimeLineEventArgs (clickedIndex,timeValues[clickedIndex],timeValues,controlID));
+												if (EditOpen != null) {
+														EditOpen (this, new TimeLineEventArgs (clickedIndex, timeValues [clickedIndex], timeValues, controlID));
 
-													}
+												}
 											
 										} else {
 												//never enters here
@@ -380,15 +378,15 @@ namespace ws.winx.editor.extensions
 												
 										}
 										break;
-					case HighLevelEvent.Click:
-					SELECTED_INDEX=clickedIndex;
-					Debug.Log("Clikc on "+clickedIndex);
-					break;
+								case HighLevelEvent.Click:
+										SELECTED_INDEX = clickedIndex;
+										Debug.Log ("Clikc on " + clickedIndex);
+										break;
 								case HighLevelEvent.ContextClick:
 										{
-					SELECTED_INDEX=clickedIndex;
+												SELECTED_INDEX = clickedIndex;
 												//Debug.Log ("ContextClick on handle");
-												onContextClickOnTimeValue (new TimeLineEventArgs (clickedIndex, timeValues[clickedIndex], timeValues, controlID));
+												onContextClickOnTimeValue (new TimeLineEventArgs (clickedIndex, timeValues [clickedIndex], timeValues, controlID));
 												this.m_InstantTooltipText = null;
 												this.m_DirtyTooltip = true;
 														
@@ -412,46 +410,52 @@ namespace ws.winx.editor.extensions
 										{
 				
 												for (int k = timeValues.Length - 1; k >= 0; k--) {
-														if (this.m_EventsSelected [k]) {
+														if (this.__valuesSelected [k]) {
 																	
-																timeValues [k] =(float)Math.Round( this.timeValuesTime [k] + offset.x / rectLocal.width,2);
+																timeValues [k] = (float)Math.Round (this.timeValuesTime [k] + offset.x / rectLocal.width, 2);
 																	
+																if (timeValues [k] > 1f)
+																		timeValues [k] = 1f;
+																else if (timeValues [k] < 0f)
+																		timeValues [k] = 0f;
 																//Debug.Log ("Dragged time" + timeValues [k]);
 														}
 												}
 
-												int[] indexArray = new int[this.m_EventsSelected.Length];
-												for (int l = 0; l < indexArray.Length; l++) {
-														indexArray [l] = l;
-												}
+												if (sorted) {
+														int[] indexArray = new int[this.__valuesSelected.Length];
+														for (int l = 0; l < indexArray.Length; l++) {
+																indexArray [l] = l;
+														}
 								
-												Array.Sort (timeValues, indexArray);
-											
-												bool[] cloneOfSelected = (bool[])this.m_EventsSelected.Clone ();
-														
-												float[] cloneOfTimes = (float[])this.timeValuesTime.Clone ();
-												for (int m = 0; m < indexArray.Length; m++) {
-														this.m_EventsSelected [m] = cloneOfSelected [indexArray [m]];
-														this.timeValuesTime [m] = cloneOfTimes [indexArray [m]];
-												}
+														Array.Sort (timeValues, indexArray);
 
+														bool[] cloneOfSelected = (bool[])this.__valuesSelected.Clone ();
+														
+														float[] cloneOfTimes = (float[])this.timeValuesTime.Clone ();
+														for (int m = 0; m < indexArray.Length; m++) {
+																this.__valuesSelected [m] = cloneOfSelected [indexArray [m]];
+																this.timeValuesTime [m] = cloneOfTimes [indexArray [m]];
+														}
+
+											
+												
+												}
 												//TODO CREATE UNDO
 												//Undo.RegisterCompleteObjectUndo (this, "Move Event");
-															
-												//timeValues = this.timeValuesAtMouseDown;
+					
+					
 												this.m_DirtyTooltip = true;
 												break;
 										}
-
-			
 								case HighLevelEvent.Delete:
-										this.DeleteEvents (new TimeLineEventArgs (clickedIndex,time,timeValues,controlID), this.m_EventsSelected);
+										this.DeleteEvents (new TimeLineEventArgs (clickedIndex, time, timeValues, controlID), this.__valuesSelected);
 										break;
 								case HighLevelEvent.SelectionChanged:
 						
 										if (clickedIndex != -1) {
 												if (EditOpen != null) {
-													EditOpen (this, new TimeLineEventArgs (clickedIndex,timeValues[clickedIndex],timeValues,controlID));
+														EditOpen (this, new TimeLineEventArgs (clickedIndex, timeValues [clickedIndex], timeValues, controlID));
 													
 												}
 
@@ -462,7 +466,7 @@ namespace ws.winx.editor.extensions
 						}
 
 
-						this.CheckRectsOnMouseMove (rectGlobal, ref timeValues, positionsHitRectArray,controlID);
+						this.CheckRectsOnMouseMove (rectGlobal, ref timeValues, positionsHitRectArray, controlID);
 
 		
 
@@ -539,8 +543,8 @@ namespace ws.winx.editor.extensions
 				/// <param name="maxItemsSelectable">Max items selectable.</param>
 				private void Select (int index, int timeValuesSelectableMax)
 				{
-						this.m_EventsSelected = new bool[timeValuesSelectableMax];
-						this.m_EventsSelected [index] = true;
+						this.__valuesSelected = new bool[timeValuesSelectableMax];
+						this.__valuesSelected [index] = true;
 				}
 		
 				
