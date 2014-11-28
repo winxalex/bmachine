@@ -263,6 +263,7 @@ namespace ws.winx.editor.bmachine.extensions
 				float nextCurrentTime;
 				bool m_WrapForwardDrag;
 
+		string[] displayNames;
 
 				//
 				// Methods
@@ -408,6 +409,8 @@ namespace ws.winx.editor.bmachine.extensions
 
 						eventTimeValues = args.values;
 						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+
+						Undo.RecordObject (target.self, "Add Node");
 				}
 
 				/// <summary>
@@ -443,9 +446,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-			mecanimNode.tree.SaveNodes ();
+						mecanimNode.tree.SaveNodes ();
 						eventTimeValues = timeValues;
+
+						
+						Undo.RecordObject (target.self, "Delete Node");
 						SendEventNormalizedEditor.Hide ();
+
+
 				}
           
 
@@ -519,21 +527,27 @@ namespace ws.winx.editor.bmachine.extensions
 												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
 												//select the time values from nodes
 												eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
+												displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+					
 										}
 
 //						if(eventTimeValues.Length!=mecanimNode.children.Length){
 //						eventTimeValues=mecanimNode.children.Select((val)=>((SendEventNormalized)val).timeNormalized.Value).ToArray();
 //
 //						}
-										eventTimeValues = eventTimeLine.onTimeLineGUI (eventTimeValues);
+
+										//Array.Sort (mecanimNode.children, eventTimeValues,new EventComparer());
+
+										eventTimeValues = eventTimeLine.onTimeLineGUI (eventTimeValues,ref displayNames,true);
 
 										//update time values 
 										int eventTimeValuesNumber = mecanimNode.children.Length;
 										for (int i=0; i<eventTimeValuesNumber; i++) {
 												((SendEventNormalized)mecanimNode.children [i]).timeNormalized = eventTimeValues [i];
+												((SendEventNormalized)mecanimNode.children [i]).name = displayNames [i];
 										}
 
-										//Array.Sort (mecanimNode.children, eventTimeValues,new EventComparer());
+										//
 								}
 
 				

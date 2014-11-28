@@ -16,11 +16,14 @@ using ws.winx.bmachine.extensions;
 
 namespace ws.winx.editor.bmachine.extensions
 {
-		[NodeInfo ( category = "Extensions/Mecanim/", icon = "StateMachine")]
+		
 		public class SendEventNormalizedEditor:EditorWindow
 		{
 				private static SendEventNormalizedEditor window;
 				private static SendEventNormalized node;
+				NodeEditor editor;
+
+				
 
 				public static void Show (SendEventNormalized node, Rect position)
 				{
@@ -40,17 +43,19 @@ namespace ws.winx.editor.bmachine.extensions
 								window.Close ();
 				}
 
-				NodeEditor editor;
+				
 
 				void OnGUI ()
 				{
 						// The actual window code goes here
-						if (editor == null)
-								editor = NodeEditor.CreateEditor (typeof(SendEventNormalized));
-						if (editor.target != SendEventNormalizedEditor.node)//How to add target to editor??? or subclass the Node Editor
-								editor.DrawNode (SendEventNormalizedEditor.node);
-						else
-								editor.OnInspectorGUI ();
+						if (SendEventNormalizedEditor.node != null) {
+								if (editor == null)
+										editor = NodeEditor.CreateEditor (typeof(SendEventNormalized));
+								if (editor.target != SendEventNormalizedEditor.node)//How to add target to editor??? or subclass the Node Editor
+										editor.DrawNode (SendEventNormalizedEditor.node);
+								else
+										editor.OnInspectorGUI ();
+						}
 				
 				}
 

@@ -14,6 +14,7 @@ using UnityEngine;
 
 namespace ws.winx.bmachine.extensions
 {
+		[NodeInfo ( category = "Extensions/Mecanim/", icon = "StateMachine")]
 		public class SendEventNormalized:ActionNode
 		{
 			//
@@ -38,7 +39,7 @@ namespace ws.winx.bmachine.extensions
 
 			public override void Update ()
 			{
-				//float timeNormalized=_animator.GetNextAnimatorStateInfo(((MecanimNode)this.owner).selectedAnimaStateInfo.layer).normalizedTime
+				float timeNormalized = _animator.GetNextAnimatorStateInfo (((MecanimNode)this.owner).selectedAnimaStateInfo.layer).normalizedTime;
 				timeNormalized = timeNormalized - (int)timeNormalized;
 
 				//base.owner.SendEvent (this.eventToSend.id);
@@ -46,6 +47,8 @@ namespace ws.winx.bmachine.extensions
 				//dispatch event to parent I'm done
 
 					_timeNormalizedLast = timeNormalized;
+
+
 			}
 			
 			public override void Reset ()

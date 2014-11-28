@@ -254,7 +254,7 @@ namespace ws.winx.editor.extensions
 				
 		
 				//public void EventLineGUI (Rect rect, AnimationSelection selection, AnimationWindowState state, CurveEditor )
-				public float[] onTimeLineGUI (float[] timeValues, bool sorted=false)
+				public float[] onTimeLineGUI (float[] timeValues,ref string[] displayNames, bool sorted=false)
 				{
 						//main contorol position
 						Rect rectGlobal = GUILayoutUtility.GetLastRect ();
@@ -433,9 +433,14 @@ namespace ws.winx.editor.extensions
 														bool[] cloneOfSelected = (bool[])this.__valuesSelected.Clone ();
 														
 														float[] cloneOfTimes = (float[])this.timeValuesTime.Clone ();
+														string[] cloneOfDisplayOptions=(string[])displayNames.Clone ();
+
+															int inx=-1;
 														for (int m = 0; m < indexArray.Length; m++) {
-																this.__valuesSelected [m] = cloneOfSelected [indexArray [m]];
-																this.timeValuesTime [m] = cloneOfTimes [indexArray [m]];
+																inx=indexArray [m];
+																this.__valuesSelected [m] = cloneOfSelected [inx];
+																this.timeValuesTime [m] = cloneOfTimes [inx];
+																displayNames[m]=cloneOfDisplayOptions[inx];
 														}
 
 											
@@ -478,38 +483,10 @@ namespace ws.winx.editor.extensions
 //				}
 //						}
 //			
-//						//this.m_InstantTooltipText = "mu text";
-//						if (this.m_InstantTooltipText != null && this.m_InstantTooltipText != String.Empty) {
-//								if (this.m_HoverEvent >= 0 && this.m_HoverEvent < positionsHitRectArray.Length) {
-//
-//
-//
-//										GUIStyle gUIStyle;
-//										Rect hitRect = positionsHitRectArray [this.m_HoverEvent];
-//
-//										gUIStyle = "AnimationEventTooltipArrow";
-//										Vector2 arrowSize = gUIStyle.CalcSize (new GUIContent ());
-//
-//
-//
-//										//GUI.skin.label.alignment=
-//										GUI.Label (new Rect (hitRect.x - arrowSize.x * 0.5f - 5f, hitRect.y + hitRect.height, arrowSize.x, arrowSize.y), string.Empty, gUIStyle);
-//										//	GUI.skin.label.alignment=TextAnchor.MiddleCenter;
-//
-//
-//
-//										gUIStyle = "AnimationEventTooltip";
-//										Vector2 textSize = gUIStyle.CalcSize (new GUIContent (this.m_InstantTooltipText));
-//										gUIStyle.alignment = TextAnchor.MiddleCenter;
-//
-//
-//
-//										//GUI.skin.label.alignment=TextAnchor.MiddleCenter;
-//										GUI.Label (new Rect (hitRect.x, hitRect.y + hitRect.height + arrowSize.y, Mathf.Max (arrowSize.x, textSize.x), textSize.y), this.m_InstantTooltipText, gUIStyle);
-//
-//										
-//								}
-//						}
+//					
+						
+						
+						
 
 
 
@@ -529,6 +506,21 @@ namespace ws.winx.editor.extensions
 		
 
 						GUI.EndGroup ();
+
+			if (this.m_HoverEvent >= 0 && this.m_HoverEvent < positionsHitRectArray.Length) {
+
+
+				Rect positionRect=positionsRectArray[this.m_HoverEvent];
+
+				//from local to global
+				positionRect.y+=rectGlobal.y;
+				positionRect.x+=rectGlobal.x;
+
+
+				
+				EditorGUILayoutEx.CustomTooltip(positionRect,displayNames[this.m_HoverEvent]+"["+timeValues[this.m_HoverEvent]+"]");
+				
+			}
 
 
 						return timeValues; 
