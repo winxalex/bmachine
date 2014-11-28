@@ -58,14 +58,12 @@ namespace ws.winx.editor.extensions
 				//
 				// Fields
 				//
-				private int m_HoverEvent = -1;
-				private bool m_DirtyTooltip;
+				
 				private static Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
-				private string m_InstantTooltipText;
+				
 				private bool[] __valuesSelected;
 				[NonSerialized]
-				private float[]
-						timeValuesTime;
+				private float[] timeValuesTime;
 				
 		
 
@@ -83,7 +81,7 @@ namespace ws.winx.editor.extensions
 				//
 				
 		
-				private void CheckRectsOnMouseMove (Rect postionRect, ref float[] values, Rect[] hitRects, int controlID)
+				private int CheckRectsOnMouseMove (Rect postionRect, ref float[] values, Rect[] hitRects, int controlID)
 				{
 						Vector2 mousePosition = Event.current.mousePosition;
 						bool flag = false;
@@ -93,34 +91,18 @@ namespace ws.winx.editor.extensions
 												if (Event.current.button == 1 && Event.current.isMouse) {
 														Debug.Log ("Right click inside hitRect" + hitRects [i] + " " + mousePosition);
 														Event.current.Use ();
-														this.m_HoverEvent = -1;
-														this.m_InstantTooltipText = string.Empty;
+														
 														onContextClickOnTimeValue (new TimeLineEventArgs (i, values [i], values, controlID));
-														return;
+														return -1;
 												}
 
 
-												flag = true;
-												if (this.m_HoverEvent != i) {
-
-
-														//Debug.Log("Hover over "+i);
-														this.m_HoverEvent = i;
-													
-														this.m_InstantTooltipText = i.ToString ();// events [this.m_HoverEvent].functionName;
-														//	this.m_InstantTooltipPoint = new Vector2 (hitRects [this.m_HoverEvent].xMin + (float)((int)(hitRects [this.m_HoverEvent].width / 2f)) + eventLineRect.x, eventLineRect.yMax);
-														this.m_DirtyTooltip = true;
-
-
-
-												}
+											return i;
 										}
 								}
 						}
-						if (!flag) {
-								this.m_HoverEvent = -1;
-								this.m_InstantTooltipText = string.Empty;
-						}
+						
+						return -1;
 				}
 		
 				private void DeleteEvents (TimeLineEventArgs args, bool[] deleteIndices)
@@ -151,7 +133,7 @@ namespace ws.winx.editor.extensions
 								
 
 								this.__valuesSelected = new bool[list.Count];
-								this.m_DirtyTooltip = true;
+								
 
 								if (this.Delete != null)
 										this.Delete (this, new TimeLineEventArgs (-1, 0f, (float[])CHANGED_VALUES, args.controlID));
@@ -325,20 +307,7 @@ namespace ws.winx.editor.extensions
 						}
 
 
-						if (this.m_DirtyTooltip) {
-
-								if (this.m_HoverEvent >= 0 && this.m_HoverEvent < positionsHitRectArray.Length) {
-										//Debug.Log ("AnimationEventPopup.FormatEvent... tooltip text");
-										this.m_InstantTooltipText = "Mile kitic";
-
-										//DrawInstantTooltip(rectLocal);
-
-
-
 					
-								}
-								this.m_DirtyTooltip = false;
-						}
 
 
 							
@@ -387,8 +356,7 @@ namespace ws.winx.editor.extensions
 												SELECTED_INDEX = clickedIndex;
 												//Debug.Log ("ContextClick on handle");
 												onContextClickOnTimeValue (new TimeLineEventArgs (clickedIndex, timeValues [clickedIndex], timeValues, controlID));
-												this.m_InstantTooltipText = null;
-												this.m_DirtyTooltip = true;
+											
 														
 												break;
 										}
@@ -450,7 +418,7 @@ namespace ws.winx.editor.extensions
 												//Undo.RegisterCompleteObjectUndo (this, "Move Event");
 					
 					
-												this.m_DirtyTooltip = true;
+												
 												break;
 										}
 								case HighLevelEvent.Delete:
@@ -471,7 +439,7 @@ namespace ws.winx.editor.extensions
 						}
 
 
-						this.CheckRectsOnMouseMove (rectGlobal, ref timeValues, positionsHitRectArray, controlID);
+						int hoverInx=this.CheckRectsOnMouseMove (rectGlobal, ref timeValues, positionsHitRectArray, controlID);
 
 		
 
@@ -507,10 +475,10 @@ namespace ws.winx.editor.extensions
 
 						GUI.EndGroup ();
 
-			if (this.m_HoverEvent >= 0 && this.m_HoverEvent < positionsHitRectArray.Length) {
+			if (hoverInx >= 0 && hoverInx < positionsHitRectArray.Length) {
 
 
-				Rect positionRect=positionsRectArray[this.m_HoverEvent];
+				Rect positionRect=positionsRectArray[hoverInx];
 
 				//from local to global
 				positionRect.y+=rectGlobal.y;
@@ -518,7 +486,7 @@ namespace ws.winx.editor.extensions
 
 
 				
-				EditorGUILayoutEx.CustomTooltip(positionRect,displayNames[this.m_HoverEvent]+"["+timeValues[this.m_HoverEvent]+"]");
+				EditorGUILayoutEx.CustomTooltip(positionRect,displayNames[hoverInx]+"["+timeValues[hoverInx]+"]");
 				
 			}
 
