@@ -124,7 +124,7 @@ namespace ws.winx.bmachine.extensions
 								
 						}
 
-						return result
+			return result;
 				}
 		
 				public override void Reset ()

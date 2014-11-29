@@ -322,36 +322,39 @@ namespace ws.winx.editor.extensions
 						int timeValuesNumber = timeValues.Length;
 						Rect[] positionsHitRectArray = new Rect[timeValuesNumber];
 						Rect[] positionsRectArray = new Rect[timeValuesNumber];
-						int timeValuesNumberOfTheSame = 1;//items that have same time
+						int timeValuesNumberOfTheSame = 0;//items that have same time
 						int timeValuesTheSameCounterDown = 0;//same time items count down
 
-						//float[] timeValues 
+						//mulitiplier simple changes the y position of the timeValue handle so
+						//same timeValues's hanldes are on of top of another
+
+						float[] timeValuesTheSameHightMultiply = new float[timeValuesNumber]; 
+						float timeValue;
+						int i = 0;
+						int fromToEndInx = 0;
+
 						
+						for (i = 0; i < timeValuesNumber; i++) {
+								timeValue = timeValues [i];
+								timeValuesNumberOfTheSame = 0;
 
-						for (int i = 0; i < timeValuesNumber; i++) {
-								float timeValue = timeValues [i];
-
-
-								//find other with same value
-
-								if (timeValuesTheSameCounterDown == 0) {
-										timeValuesNumberOfTheSame = 1;
-
-										while (i + timeValuesNumberOfTheSame < timeValuesNumber && timeValues [i + timeValuesNumberOfTheSame] == timeValue) {
-												timeValuesNumberOfTheSame++;
+								if (timeValuesTheSameHightMultiply [i] == 0) {
+										//find other with same value and record multiply (1x,2x,...)
+										for (fromToEndInx=i+1; fromToEndInx < timeValuesNumber; fromToEndInx++) {
+												if (timeValues [fromToEndInx] == timeValue) {
+														timeValuesNumberOfTheSame++;
+														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+												}
+										
 										}
-						
-										//init counter to number of items with same time value
-										timeValuesTheSameCounterDown = timeValuesNumberOfTheSame;
 								}
 
 
 							
 								float timeValuePosition = timeValue * rectLocal.width;
 
-
-								timeValuesTheSameCounterDown--;
-								Rect rect3 = new Rect (timeValuePosition, image.height * timeValuesTheSameCounterDown * 0.66f, (float)image.width, (float)image.height);
+								
+								Rect rect3 = new Rect (timeValuePosition, image.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)image.width, (float)image.height);
 
 
 								positionsHitRectArray [i] = rect3;
@@ -466,14 +469,13 @@ namespace ws.winx.editor.extensions
 
 
 						int hoverInx = -1; 
-						hoverInx=this.GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray, controlID);					
+						hoverInx = this.GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray, controlID);					
 
 
 
 					
 						if (Event.current.type == EventType.ContextClick && rectLocal.Contains (Event.current.mousePosition) 
-								|| (Event.current.button == 1 && Event.current.isMouse)) 
-						{
+								|| (Event.current.button == 1 && Event.current.isMouse)) {
 
 								onContextClick (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, controlID));
 
