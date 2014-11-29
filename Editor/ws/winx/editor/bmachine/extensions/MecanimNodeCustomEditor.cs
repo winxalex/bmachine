@@ -41,7 +41,7 @@ namespace ws.winx.editor.bmachine.extensions
 				AnimatorController controller;
 				UnityEditorInternal.StateMachine stateMachine;
 				float[] eventTimeValues;
-				CustomObjectTimeLine eventTimeLine;
+				CustomTimeLine eventTimeLine;
 				Rect eventTimeLineValuePopUpRect;
 				Motion previewedMotion;
 				State state;
@@ -355,12 +355,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 				///  TIMELINE EVENTHANDLERS
+		 
+		 
 				/// <summary>
 				/// Ons the mecanim event edit.
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventEdit (object sender, CustomObjectTimeLine.TimeLineEventArgs args)
+				void onMecanimEventEdit (object sender, TimeLineEventArgs<float> args)
 				{
 				
 						SendEventNormalized child = mecanimNode.children [args.selectedIndex] as SendEventNormalized;
@@ -383,7 +385,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventClose (object sender, CustomObjectTimeLine.TimeLineEventArgs args)
+				void onMecanimEventClose (object sender, TimeLineEventArgs<float> args)
 				{
 						SendEventNormalizedEditor.Hide ();
 				}
@@ -394,20 +396,26 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventAdd (object sender, CustomObjectTimeLine.TimeLineEventArgs args)
+				void onMecanimEventAdd (object sender, TimeLineEventArgs<float> args)
 				{
 				
 
-			   
+			   			//create and add node to internal bhv tree
 						SendEventNormalized child = mecanimNode.tree.AddNode (typeof(SendEventNormalized)) as SendEventNormalized;
 				
-			
+						//add node to its parent list
 						mecanimNode.Insert (args.selectedIndex, child);
 						child.timeNormalized.Value = args.selectedValue;
 
 						mecanimNode.tree.SaveNodes ();
 
-						eventTimeValues = args.values;
+						eventTimeValues = (float[])args.values;
+
+			//recreate (not to optimal but doesn't have
+			displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+
+
+						
 						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 						Undo.RecordObject (target.self, "Add Node");
@@ -418,9 +426,9 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventDelete (object sender, CustomObjectTimeLine.TimeLineEventArgs args)
+				void onMecanimEventDelete (object sender, TimeLineEventArgs<float> args)
 				{
-						float[] timeValues = args.values;
+						float[] timeValues = (float[])args.values;
 						int timeValuesNumber = timeValues.Length;
 
 
@@ -447,9 +455,15 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 						mecanimNode.tree.SaveNodes ();
+
+						//assign to display new 
 						eventTimeValues = timeValues;
 
-						
+			//recreate (not to optimal but doesn't have
+			displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+
+
+							
 						Undo.RecordObject (target.self, "Delete Node");
 						SendEventNormalizedEditor.Hide ();
 
@@ -515,16 +529,17 @@ namespace ws.winx.editor.bmachine.extensions
 								//	DoTimeControl(rect);
 								if (!Application.isPlaying) {
 										if (eventTimeLine == null) {
-												eventTimeLine = new CustomObjectTimeLine ();
+												eventTimeLine = new CustomTimeLine ();
 												eventTimeLine.EditOpen += onMecanimEventEdit;
 												eventTimeLine.EditClose += onMecanimEventClose;
 												eventTimeLine.Delete += onMecanimEventDelete;
 												eventTimeLine.Add += onMecanimEventAdd;
 							
-												Debug.Log ("eventTimeLine reconstructed");
+				
 					
 												//TODO calculate PopupRect
-												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
+
+						eventTimeLineValuePopUpRect =new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
 												//select the time values from nodes
 												eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
 												displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
@@ -536,15 +551,25 @@ namespace ws.winx.editor.bmachine.extensions
 //
 //						}
 
-										//Array.Sort (mecanimNode.children, eventTimeValues,new EventComparer());
 
-										eventTimeValues = eventTimeLine.onTimeLineGUI (eventTimeValues,ref displayNames,true);
+
+
+										//Array.Sort (mecanimNode.children, eventTimeValues,new EventComparer());
+										//Array.Sort (eventTimeValues,mecanimNode.children);
+
+										eventTimeLine.onTimeLineGUI (ref eventTimeValues,ref displayNames);
 
 										//update time values 
 										int eventTimeValuesNumber = mecanimNode.children.Length;
 										for (int i=0; i<eventTimeValuesNumber; i++) {
 												((SendEventNormalized)mecanimNode.children [i]).timeNormalized = eventTimeValues [i];
-												((SendEventNormalized)mecanimNode.children [i]).name = displayNames [i];
+
+													//if changes have been made in editor
+													if(((SendEventNormalized)mecanimNode.children [i]).name!= displayNames [i])
+													displayNames [i]=((SendEventNormalized)mecanimNode.children [i]).name;
+											
+													//mecanimNode.treeInx.
+												
 										}
 
 										//

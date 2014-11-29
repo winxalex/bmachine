@@ -48,6 +48,8 @@ namespace ws.winx.bmachine.extensions
 
 					_timeNormalizedLast = timeNormalized;
 
+			//this.tree
+
 
 			}
 			

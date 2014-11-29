@@ -37,6 +37,8 @@ namespace ws.winx.bmachine.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						normalizedTimeCurrent = 0f;
+
+				
 				
 
 				//!!!Curves serialization is buggy
@@ -51,6 +53,11 @@ namespace ws.winx.bmachine.extensions
 				int numBlendParamters;
 				AnimatorStateInfo currentAnimatorStateInfo;
 				bool isCurrentEqualToSelectedAnimaInfo = false;
+				List<int> _treeInx;
+				
+				public List<int> treeInx{ 
+			get{ if(_treeInx==null) _treeInx=new List<int>(); return _treeInx; }
+		}
 		                         
 				public Animator animator {
 						get {
@@ -94,14 +101,30 @@ namespace ws.winx.bmachine.extensions
 
 				}
 
+			public override void Remove (ActionNode child)
+			{
+				base.Remove (child);
+			}
+
 				public override bool Add (ActionNode child)
 				{
+						bool result=false;
+
 						if (!(child is SendEventNormalized)) {
 								Debug.LogWarning ("You can add only SendEventNormailized type of ActionCode");
 								return false;
 						}
 
-						return base.Add (child);
+							result = base.Add (child);
+
+						if (result) {
+
+								this.treeInx.Add(tree.GetIndex(child));
+				          	
+								
+						}
+
+						return result
 				}
 		
 				public override void Reset ()
