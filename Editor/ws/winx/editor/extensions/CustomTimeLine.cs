@@ -333,28 +333,55 @@ namespace ws.winx.editor.extensions
 						int i = 0;
 						int fromToEndInx = 0;
 
+						float timeValuePositionX = 0f;
+
+					
+
 						
 						for (i = 0; i < timeValuesNumber; i++) {
-								timeValue = timeValues [i];
-								timeValuesNumberOfTheSame = 0;
-
-								if (timeValuesTheSameHightMultiply [i] == 0) {
-										//find other with same value and record multiply (1x,2x,...)
-										for (fromToEndInx=i+1; fromToEndInx < timeValuesNumber; fromToEndInx++) {
-												if (timeValues [fromToEndInx] == timeValue) {
-														timeValuesNumberOfTheSame++;
-														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
-												}
-										
-										}
-								}
-
-
-							
-								float timeValuePosition = timeValue * rectLocal.width;
 
 								
-								Rect rect3 = new Rect (timeValuePosition, image.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)image.width, (float)image.height);
+								timeValue = timeValues [i];
+								timeValuePositionX = timeValue * rectLocal.width;
+								timeValuesNumberOfTheSame = 0;
+
+								//version 1 display one tube no visible separtion od handles
+//								if (timeValuesTheSameHightMultiply [i] == 0) {
+//										//find other with same value and record multiply (1x,2x,...)
+//										for (fromToEndInx=i+1; fromToEndInx < timeValuesNumber; fromToEndInx++) {
+//												if (timeValues [fromToEndInx] == timeValue) {
+//														timeValuesNumberOfTheSame++;
+//														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+//												}
+//										
+//										}
+//								}
+
+									
+
+				//version 2 display has visible separtion od handles
+												if (timeValuesTheSameHightMultiply [i] == 0) {
+														//find other with same value and record multiply (1x,2x,...)
+														for (fromToEndInx=timeValuesNumber-1; fromToEndInx > i; fromToEndInx--) {
+																if (timeValues [fromToEndInx] == timeValue) {
+																		
+																		timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+																		timeValuesNumberOfTheSame++;
+																}
+														
+														}
+
+													timeValuesTheSameHightMultiply [i]=timeValuesNumberOfTheSame;
+												}
+							
+
+								
+
+							
+								
+
+								
+								Rect rect3 = new Rect (timeValuePositionX, image.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)image.width, (float)image.height);
 
 
 								positionsHitRectArray [i] = rect3;
