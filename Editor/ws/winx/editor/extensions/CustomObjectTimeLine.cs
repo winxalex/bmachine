@@ -18,6 +18,14 @@ namespace ws.winx.editor.extensions
 				IList<T> _values;
 				T _selectedValue;
 				int _controlID;
+				bool[] _selected;
+
+				public bool[] selected {
+						get {
+								return _selected;
+						}
+						
+				}
 				
 				public int controlID{ get { return _controlID; } }
 				
@@ -29,12 +37,13 @@ namespace ws.winx.editor.extensions
 						get{ return _selectedIndex;}
 				}
 		
-				public TimeLineEventArgs (int selectedIndex, T selectedValue, IList<T> values, int controlID)
+				public TimeLineEventArgs (int selectedIndex, T selectedValue, IList<T> values, bool[] selected, int controlID)
 				{
 						this._selectedValue = selectedValue;
 						this._values = values;
 						this._controlID = controlID;
 						this._selectedIndex = selectedIndex;
+						this._selected = selected;
 				}
 		}
 

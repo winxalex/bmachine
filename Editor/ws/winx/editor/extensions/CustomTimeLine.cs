@@ -16,36 +16,11 @@ namespace ws.winx.editor.extensions
 				private static int CONTROL_ID = -1;
 				private static int SELECTED_INDEX = -1;
 				private static IList CHANGED_VALUES = null;
+				private static bool[] SELECTED_VALUES = null;
 				private static Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
 
 
-				public class TimeLineEventArgs:EventArgs
-				{
-						
-
-						int _selectedIndex;
-						float[] _values;
-						float _selectedValue;
-						int _controlID;
-
-						public int controlID{ get { return _controlID; } }
-
-						public float selectedValue{ get { return _selectedValue; } }
-
-						public float[] values{ get { return _values; } }
-
-						public int selectedIndex {
-								get{ return _selectedIndex;}
-						}
-
-						public TimeLineEventArgs (int selectedIndex, float selectedValue, float[] values, int controlID)
-						{
-								this._selectedValue = selectedValue;
-								this._values = values;
-								this._controlID = controlID;
-								this._selectedIndex = selectedIndex;
-						}
-				}
+				
 
 
 				//
@@ -55,6 +30,7 @@ namespace ws.winx.editor.extensions
 				public event EventHandler<TimeLineEventArgs<float>> EditClose;
 				public event EventHandler<TimeLineEventArgs<float>> Delete;
 				public event EventHandler<TimeLineEventArgs<float>> Add;
+				public event EventHandler<TimeLineEventArgs<float>> DragEnd;
 		        
 
 
@@ -65,10 +41,7 @@ namespace ws.winx.editor.extensions
 				//
 				
 				
-				private bool[] __valuesSelected;
-				[NonSerialized]
-				private float[]
-						timeValuesTime;
+			
 				
 		
 
@@ -93,7 +66,7 @@ namespace ws.winx.editor.extensions
 				/// <param name="values">Values.</param>
 				/// <param name="hitRects">Hit rects.</param>
 				/// <param name="controlID">Control I.</param>
-				private int GetMouseHoverRectIndex (Rect postionRect, float[] values, Rect[] hitRects, int controlID)
+				private int GetMouseHoverRectIndex (Rect postionRect, float[] values, Rect[] hitRects, ref bool[] selected, int controlID)
 				{
 						Vector2 mousePosition = Event.current.mousePosition;
 						bool flag = false;
@@ -103,8 +76,9 @@ namespace ws.winx.editor.extensions
 												if (Event.current.button == 1 && Event.current.isMouse) {
 														Debug.Log ("Right click inside hitRect" + hitRects [i] + " " + mousePosition);
 														Event.current.Use ();
-														
-														onContextClickOnTimeValue (new TimeLineEventArgs<float> (i, values [i], values, controlID));
+														selected = new bool[values.Length];
+														selected [i] = true;
+														onContextClickOnTimeValue (new TimeLineEventArgs<float> (i, values [i], values, selected, controlID));
 														return -1;
 												}
 
@@ -125,7 +99,7 @@ namespace ws.winx.editor.extensions
 				/// <param name="deleteIndices">Delete indices.</param>
 				private void DeleteEvents (TimeLineEventArgs<float> args, bool[] deleteIndices)
 				{
-						bool deletionHappend = false;
+						
 						List<float> list = new List<float> (args.values);
 
 						
@@ -133,38 +107,29 @@ namespace ws.winx.editor.extensions
 		
 								if (deleteIndices [i]) {
 										list.RemoveAt (i);
-										deletionHappend = true;
+										
 								}
 						}
 
-						if (deletionHappend) {
+						if (list.Count<args.values.Count) {
 								
 								if (this.EditClose != null)
 										this.EditClose (this, null);
 
-								//TODO CREATE UNDOS
-								//Undo.RegisterCompleteObjectUndo (this, "Delete Event");
-
+								
 								CHANGED_VALUES = list.ToArray ();
 								CONTROL_ID = args.controlID;
 								
 								
 
-								this.__valuesSelected = new bool[list.Count];
 								
 
 								if (this.Delete != null)
-										this.Delete (this, new TimeLineEventArgs<float> (-1, 0f, (float[])CHANGED_VALUES, args.controlID));
+										this.Delete (this, new TimeLineEventArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
 						}
 				}
 
-				/// <summary>
-				/// Deselects all.
-				/// </summary>
-				public void DeselectAll ()
-				{
-						this.__valuesSelected = null;
-				}
+			
 		
 			
 				/// <summary>
@@ -176,9 +141,7 @@ namespace ws.winx.editor.extensions
 						//Debug.Log ("onAdd");
 						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
 					
-						//TODO Create UNDO
-						//Undo.RegisterCompleteObjectUndo (this, "Add Event");
-
+					
 						int newTimeValueInx = args.values.Count;
 
 						//find first time > then current and insert before it
@@ -202,13 +165,10 @@ namespace ws.winx.editor.extensions
 						CHANGED_VALUES = timeValues;
 
 
-
-						this.Select (newTimeValueInx, timeValues.Length);
-
 						
 						//open editor for newely added 
 						if (Add != null)
-								Add (this, new TimeLineEventArgs<float> (newTimeValueInx, args.selectedValue, timeValues, args.controlID));
+								Add (this, new TimeLineEventArgs<float> (newTimeValueInx, args.selectedValue, timeValues, null, args.controlID));
 				}
 
 				/// <summary>
@@ -220,10 +180,10 @@ namespace ws.winx.editor.extensions
 						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
 
 						int index = args.selectedIndex;
-						if (this.__valuesSelected [index]) {
-								this.DeleteEvents (args, this.__valuesSelected);
+						if (args.selected [index]) {
+								this.DeleteEvents (args, args.selected);
 						} else {
-								bool[] timeValuesSelected = new bool[this.__valuesSelected.Length];
+								bool[] timeValuesSelected = new bool[args.selected.Length];
 								timeValuesSelected [index] = true;
 								this.DeleteEvents (args, timeValuesSelected);
 						}
@@ -243,7 +203,7 @@ namespace ws.winx.editor.extensions
 								EditOpen (this, args);
 						}
 
-						this.Select (args.selectedIndex, args.values.Count);
+						
 				}
 
 
@@ -282,7 +242,9 @@ namespace ws.winx.editor.extensions
 				/// </summary>
 				/// <param name="timeValues">Time values.</param>
 				/// <param name="displayNames">Display names.</param>
-				public void onTimeLineGUI (ref float[] timeValues, ref string[] displayNames)
+			public void onTimeLineGUI (ref float[] timeValues,ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected
+
+		                           )
 				{
 						//main contorol position
 						Rect rectGlobal = GUILayoutUtility.GetLastRect ();
@@ -298,6 +260,7 @@ namespace ws.winx.editor.extensions
 						if (controlID == CONTROL_ID) {
 								CONTROL_ID = -1;
 								timeValues = (float[])CHANGED_VALUES;
+								
 								CHANGED_VALUES = null;
 						}
 						
@@ -315,7 +278,7 @@ namespace ws.winx.editor.extensions
 							
 						float time = 0f;
 						if (rectLocal.Contains (Event.current.mousePosition))
-								time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 2);
+								time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 4);
 						
 
 
@@ -359,20 +322,20 @@ namespace ws.winx.editor.extensions
 
 									
 
-				//version 2 display has visible separtion od handles
-												if (timeValuesTheSameHightMultiply [i] == 0) {
-														//find other with same value and record multiply (1x,2x,...)
-														for (fromToEndInx=timeValuesNumber-1; fromToEndInx > i; fromToEndInx--) {
-																if (timeValues [fromToEndInx] == timeValue) {
+								//version 2 display has visible separation of handles when they have same time
+								if (timeValuesTheSameHightMultiply [i] == 0) {
+										//find other with same value and record multiply (1x,2x,...)
+										for (fromToEndInx=timeValuesNumber-1; fromToEndInx > i; fromToEndInx--) {
+												if (timeValues [fromToEndInx] == timeValue) {
 																		
-																		timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
-																		timeValuesNumberOfTheSame++;
-																}
-														
-														}
-
-													timeValuesTheSameHightMultiply [i]=timeValuesNumberOfTheSame;
+														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+														timeValuesNumberOfTheSame++;
 												}
+														
+										}
+
+										timeValuesTheSameHightMultiply [i] = timeValuesNumberOfTheSame;
+								}
 							
 
 								
@@ -394,8 +357,8 @@ namespace ws.winx.editor.extensions
 
 							
 
-						if (this.__valuesSelected == null || this.__valuesSelected.Length != timeValuesNumber) {
-								this.__valuesSelected = new bool[timeValuesNumber];
+						if (selected == null || selected.Length != timeValuesNumber) {
+								selected = new bool[timeValuesNumber];
 
 								if (EditClose != null)
 										EditClose (this, null);
@@ -412,29 +375,31 @@ namespace ws.winx.editor.extensions
 						float startSelect;
 						float endSelect;
 						
-						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (image), positionsHitRectArray, ref this.__valuesSelected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
+						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (image), positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
 
 						if (highLevelEvent != HighLevelEvent.None) {
 								switch (highLevelEvent) {
 								case HighLevelEvent.DoubleClick:
 										if (clickedIndex != -1) {
 												if (EditOpen != null) {
-														EditOpen (this, new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, controlID));
+														EditOpen (this, new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 												
 												}
 											
 										} else {
 												//never enters here
-												this.onAdd (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, controlID));
+												this.onAdd (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID));
 												
 										}
 										break;
 								
 								case HighLevelEvent.ContextClick:
 										{
-												SELECTED_INDEX = clickedIndex;
+												
 												//Debug.Log ("ContextClick on handle");
-												onContextClickOnTimeValue (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, controlID));
+												selected = new bool[timeValuesNumber];
+												selected [clickedIndex] = true;
+												onContextClickOnTimeValue (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 											
 														
 												break;
@@ -442,12 +407,12 @@ namespace ws.winx.editor.extensions
 					      
 								case HighLevelEvent.BeginDrag:
 										
-										this.timeValuesTime = new float[timeValues.Length];
+										timeValuesTime =(float[]) timeValues.Clone();
 
-												
-										for (int j = 0; j < timeValues.Length; j++) {
-												this.timeValuesTime [j] = timeValues [j];
-										}
+//										//copy values when begin to drag	
+//										for (int j = 0; j < timeValues.Length; j++) {
+//												timeValuesTime [j] = timeValues [j];
+//										}
 
 										
 
@@ -457,9 +422,9 @@ namespace ws.winx.editor.extensions
 										{
 				
 												for (int k = timeValues.Length - 1; k >= 0; k--) {
-														if (this.__valuesSelected [k]) {
+														if (selected [k]) {
 																	
-																timeValues [k] = (float)Math.Round (this.timeValuesTime [k] + offset.x / rectLocal.width, 2);
+																timeValues [k] = (float)Math.Round (timeValuesTime [k] + offset.x / rectLocal.width, 4);
 																	
 																if (timeValues [k] > 1f)
 																		timeValues [k] = 1f;
@@ -470,21 +435,30 @@ namespace ws.winx.editor.extensions
 												}
 
 												
-												//TODO CREATE UNDO
-												//Undo.RegisterCompleteObjectUndo (this, "Move Event");
-					
+												
 					
 												
 												break;
 										}
+
+								case HighLevelEvent.EndDrag:
+					//Debug.Log("EndDrag");
+										if (DragEnd != null) {
+												DragEnd (this, new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID));
+										}
+
+										break;
 								case HighLevelEvent.Delete:
-										this.DeleteEvents (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, controlID), this.__valuesSelected);
+										this.DeleteEvents (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID), selected);
 										break;
 								case HighLevelEvent.SelectionChanged:
 						
 										if (clickedIndex != -1) {
+
+												//	Debug.Log("SelectionChanged");
+
 												if (EditOpen != null) {
-														EditOpen (this, new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, controlID));
+														EditOpen (this, new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 														
 												}
 
@@ -496,15 +470,16 @@ namespace ws.winx.editor.extensions
 
 
 						int hoverInx = -1; 
-						hoverInx = this.GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray, controlID);					
+						hoverInx = this.GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray, ref selected, controlID);					
 
 
 
-					
+						//HighLevelEvent.ContextClick doens't raize when mouse right click so =>
 						if (Event.current.type == EventType.ContextClick && rectLocal.Contains (Event.current.mousePosition) 
 								|| (Event.current.button == 1 && Event.current.isMouse)) {
 
-								onContextClick (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, controlID));
+								
+								onContextClick (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID));
 
 
 			
@@ -536,17 +511,7 @@ namespace ws.winx.editor.extensions
 				}
 		
 
-				/// <summary>
-				/// Set selection flag to true to timeValue with index
-				/// into maximum selectable values
-				/// </summary>
-				/// <param name="index">Index.</param>
-				/// <param name="maxItemsSelectable">Max items selectable.</param>
-				private void Select (int index, int timeValuesSelectableMax)
-				{
-						this.__valuesSelected = new bool[timeValuesSelectableMax];
-						this.__valuesSelected [index] = true;
-				}
+			
 		
 				
 

@@ -59,6 +59,12 @@ namespace ws.winx.bmachine.extensions
 				this.timeNormalized = new ConcreteFloatVar ();
 				
 			}
+
+
+			public override string ToString ()
+			{
+				return string.Format ("[SendEventNormalized]{0} {1}",name,timeNormalized.Value);
+			}
 		}
 }
 

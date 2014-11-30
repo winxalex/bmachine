@@ -18,6 +18,7 @@ using ws.winx.editor.extensions;
 using ws.winx.bmachine.extensions;
 using Motion=UnityEngine.Motion;
 using ws.winx.unity;
+using ws.winx.csharp.extensions;
 
 namespace ws.winx.editor.bmachine.extensions
 {
@@ -41,12 +42,13 @@ namespace ws.winx.editor.bmachine.extensions
 				AnimatorController controller;
 				UnityEditorInternal.StateMachine stateMachine;
 				float[] eventTimeValues;
+				float[] eventTimeValuesPrev;
 				CustomTimeLine eventTimeLine;
 				Rect eventTimeLineValuePopUpRect;
 				Motion previewedMotion;
 				State state;
 				bool PrevIKOnFeet;
-
+				bool[] eventTimeValuesSelected;
 
 
 				//
@@ -262,8 +264,7 @@ namespace ws.winx.editor.bmachine.extensions
 				float m_MouseDrag;
 				float nextCurrentTime;
 				bool m_WrapForwardDrag;
-
-		string[] displayNames;
+				string[] displayNames;
 
 				//
 				// Methods
@@ -305,7 +306,7 @@ namespace ws.winx.editor.bmachine.extensions
 								if (GUIUtility.hotControl == controlID) {
 										this.m_MouseDrag += current.delta.x * 1f;//this.playbackSpeed;
 										if (false && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width)) {
-					//if (this.loop && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width))
+												//if (this.loop && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width))
 												this.m_WrapForwardDrag = true;
 												this.m_MouseDrag = Mathf.Repeat (this.m_MouseDrag, rect3.width);
 										}
@@ -400,7 +401,7 @@ namespace ws.winx.editor.bmachine.extensions
 				{
 				
 
-			   			//create and add node to internal bhv tree
+						//create and add node to internal bhv tree
 						SendEventNormalized child = mecanimNode.tree.AddNode (typeof(SendEventNormalized)) as SendEventNormalized;
 				
 						//add node to its parent list
@@ -411,14 +412,47 @@ namespace ws.winx.editor.bmachine.extensions
 
 						eventTimeValues = (float[])args.values;
 
-			//recreate (not to optimal but doesn't have
-			displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+						//recreate (not to optimal but doesn't have
+						displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 
+					
 
 						
+						
+						//show popup
 						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 						Undo.RecordObject (target.self, "Add Node");
+				}
+
+				void onMecanimEventDragEnd (object sender, TimeLineEventArgs<float> args)
+				{
+						int[] indexArray = new int[mecanimNode.children.Length];
+						for (int l = 0; l < indexArray.Length; l++) {
+								indexArray [l] = l;
+						}
+			
+						Array.Sort (mecanimNode.children, indexArray, new EventComparer ());
+			
+						bool[] cloneOfSelected = (bool[])eventTimeValuesSelected.Clone ();
+						int inx = -1;
+						SendEventNormalized ev;
+						for (int m = 0; m < indexArray.Length; m++) {
+				
+								inx = indexArray [m];
+								ev = ((SendEventNormalized)mecanimNode.children [m]);	
+								this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
+								this.eventTimeValues [m] = ev.timeNormalized; 
+								this.displayNames [m] = ev.name;
+				
+						}
+			
+			
+			
+			
+			
+						mecanimNode.tree.HierarchyChanged ();
+						StateUtility.SetDirty (mecanimNode.tree);
 				}
 
 				/// <summary>
@@ -459,16 +493,23 @@ namespace ws.winx.editor.bmachine.extensions
 						//assign to display new 
 						eventTimeValues = timeValues;
 
-			//recreate (not to optimal but doesn't have
-			displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+						
 
+						//recreate 
+						displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 
-							
+	
+						
+
+						StateUtility.SetDirty (mecanimNode.tree);
+
 						Undo.RecordObject (target.self, "Delete Node");
 						SendEventNormalizedEditor.Hide ();
 
 
 				}
+
+	
           
 
 				/// <summary>
@@ -534,52 +575,47 @@ namespace ws.winx.editor.bmachine.extensions
 												eventTimeLine.EditClose += onMecanimEventClose;
 												eventTimeLine.Delete += onMecanimEventDelete;
 												eventTimeLine.Add += onMecanimEventAdd;
+												eventTimeLine.DragEnd += onMecanimEventDragEnd;
 							
 				
 					
 												//TODO calculate PopupRect
 
-						eventTimeLineValuePopUpRect =new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
+												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
 												//select the time values from nodes
 												eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
 												displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
-					
+												eventTimeValuesSelected = new bool[eventTimeValues.Length];
 										}
 
-//						if(eventTimeValues.Length!=mecanimNode.children.Length){
-//						eventTimeValues=mecanimNode.children.Select((val)=>((SendEventNormalized)val).timeNormalized.Value).ToArray();
-//
-//						}
 
 
+										eventTimeLine.onTimeLineGUI (ref eventTimeValues,ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected);
 
-
-										//Array.Sort (mecanimNode.children, eventTimeValues,new EventComparer());
-										//Array.Sort (eventTimeValues,mecanimNode.children);
-
-										eventTimeLine.onTimeLineGUI (ref eventTimeValues,ref displayNames);
+										SendEventNormalized ev;
 
 										//update time values 
 										int eventTimeValuesNumber = mecanimNode.children.Length;
 										for (int i=0; i<eventTimeValuesNumber; i++) {
-												((SendEventNormalized)mecanimNode.children [i]).timeNormalized = eventTimeValues [i];
+												ev = ((SendEventNormalized)mecanimNode.children [i]);	
+												ev.timeNormalized = eventTimeValues [i];
 
-													//if changes have been made in editor
-													if(((SendEventNormalized)mecanimNode.children [i]).name!= displayNames [i])
-													displayNames [i]=((SendEventNormalized)mecanimNode.children [i]).name;
+												//if changes have been made in pop editor or SendEventNormailized inspector
+												if (ev.name != displayNames [i])
+														displayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
 											
-													//mecanimNode.treeInx.
+												int eventTimeValueSwitchInx = -1;
+
 												
 										}
-
-										//
 								}
 
-				
-								//mecanimNode.animator.Update(mecanimNode.normalizedTimeStart
+								//NOTES!!! I"ve gone with edit popup but I might draw Nodes here but think would move whole avatar and timeline preview down/up
+								//if I draw them all or maybe just selected one(but what if many are selected ???) maybe I would draw it here as popup sucks
 
-								//	GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, target);
-					
+			
+
+								
 
 //								if (!Application.isPlaying) {
 //									
