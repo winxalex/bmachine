@@ -14,26 +14,16 @@ namespace ws.winx.editor.extensions
 		{
 
 				private static int CONTROL_ID = -1;
-				private static int SELECTED_INDEX = -1;
+			
 				private static IList CHANGED_VALUES = null;
-				private static bool[] SELECTED_VALUES = null;
-				private static Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
+
+		private static Texture __eventMarkerTexture = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
 
 
 				
 
 
-				//
-				// Events
-				//
-				public event EventHandler<TimeLineEventArgs<float>> EditOpen;
-				public event EventHandler<TimeLineEventArgs<float>> EditClose;
-				public event EventHandler<TimeLineEventArgs<float>> Delete;
-				public event EventHandler<TimeLineEventArgs<float>> Add;
-				public event EventHandler<TimeLineEventArgs<float>> DragEnd;
-		        
-
-
+			
 
 
 				//
@@ -49,10 +39,8 @@ namespace ws.winx.editor.extensions
 				//
 				// Constructors
 				//
-				public CustomTimeLine ()
-				{
 
-				}
+				
 		
 				//
 				// Methods
@@ -66,21 +54,14 @@ namespace ws.winx.editor.extensions
 				/// <param name="values">Values.</param>
 				/// <param name="hitRects">Hit rects.</param>
 				/// <param name="controlID">Control I.</param>
-				private int GetMouseHoverRectIndex (Rect postionRect, float[] values, Rect[] hitRects, ref bool[] selected, int controlID)
+				private static int GetMouseHoverRectIndex (Rect postionRect, float[] values, Rect[] hitRects)
 				{
 						Vector2 mousePosition = Event.current.mousePosition;
 						bool flag = false;
 						if (values.Length == hitRects.Length) {
 								for (int i = hitRects.Length - 1; i >= 0; i--) {
 										if (hitRects [i].Contains (mousePosition)) {
-												if (Event.current.button == 1 && Event.current.isMouse) {
-														Debug.Log ("Right click inside hitRect" + hitRects [i] + " " + mousePosition);
-														Event.current.Use ();
-														selected = new bool[values.Length];
-														selected [i] = true;
-														onContextClickOnTimeValue (new TimeLineEventArgs<float> (i, values [i], values, selected, controlID));
-														return -1;
-												}
+											
 
 
 												return i;
@@ -97,7 +78,7 @@ namespace ws.winx.editor.extensions
 				/// </summary>
 				/// <param name="args">Arguments.</param>
 				/// <param name="deleteIndices">Delete indices.</param>
-				private void DeleteEvents (TimeLineEventArgs<float> args, bool[] deleteIndices)
+				private static void DeleteEvents (TimeLineEventArgs<float> args, bool[] deleteIndices)
 				{
 						
 						List<float> list = new List<float> (args.values);
@@ -113,8 +94,8 @@ namespace ws.winx.editor.extensions
 
 						if (list.Count<args.values.Count) {
 								
-								if (this.EditClose != null)
-										this.EditClose (this, null);
+								if (args.EditClose != null)
+										args.EditClose (args);
 
 								
 								CHANGED_VALUES = list.ToArray ();
@@ -124,8 +105,8 @@ namespace ws.winx.editor.extensions
 
 								
 
-								if (this.Delete != null)
-										this.Delete (this, new TimeLineEventArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
+								if (args.Delete != null)
+										args.Delete ( new TimeLineEventArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
 						}
 				}
 
@@ -136,7 +117,7 @@ namespace ws.winx.editor.extensions
 				/// Ons the add.
 				/// </summary>
 				/// <param name="obj">Object.</param>
-				public virtual void onAdd (System.Object obj)
+				public static void onAdd (System.Object obj)
 				{
 						//Debug.Log ("onAdd");
 						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
@@ -167,25 +148,25 @@ namespace ws.winx.editor.extensions
 
 						
 						//open editor for newely added 
-						if (Add != null)
-								Add (this, new TimeLineEventArgs<float> (newTimeValueInx, args.selectedValue, timeValues, null, args.controlID));
+						if (args.Add != null)
+								args.Add (new TimeLineEventArgs<float> (newTimeValueInx, args.selectedValue, timeValues, null, args.controlID));
 				}
 
 				/// <summary>
 				/// Ons the delete.
 				/// </summary>
 				/// <param name="obj">Object.</param>
-				public virtual void onDelete (System.Object obj)
+				public static void onDelete (System.Object obj)
 				{
 						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
 
 						int index = args.selectedIndex;
 						if (args.selected [index]) {
-								this.DeleteEvents (args, args.selected);
+								DeleteEvents (args, args.selected);
 						} else {
 								bool[] timeValuesSelected = new bool[args.selected.Length];
 								timeValuesSelected [index] = true;
-								this.DeleteEvents (args, timeValuesSelected);
+								DeleteEvents (args, timeValuesSelected);
 						}
 
 
@@ -195,12 +176,12 @@ namespace ws.winx.editor.extensions
 				/// Ons the edit.
 				/// </summary>
 				/// <param name="obj">Object.</param>
-				public virtual void onEdit (System.Object obj)
+				public static void onEdit (System.Object obj)
 				{
 						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
 
-						if (EditOpen != null) {
-								EditOpen (this, args);
+						if (args.EditOpen != null) {
+								args.EditOpen (args);
 						}
 
 						
@@ -211,13 +192,13 @@ namespace ws.winx.editor.extensions
 				/// Ons the context click on time value.
 				/// </summary>
 				/// <param name="args">Arguments.</param>
-				public virtual void onContextClickOnTimeValue (TimeLineEventArgs<float> args)
+				public static void onContextClickOnTimeValue (TimeLineEventArgs<float> args)
 				{
 
 						GenericMenu genericMenu = new GenericMenu ();
-						genericMenu.AddItem (new GUIContent ("Edit"), false, new GenericMenu.MenuFunction2 (this.onEdit), args);
-						genericMenu.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (this.onAdd), args);
-						genericMenu.AddItem (new GUIContent ("Delete"), false, new GenericMenu.MenuFunction2 (this.onDelete), args);
+						genericMenu.AddItem (new GUIContent ("Edit"), false, new GenericMenu.MenuFunction2 (onEdit), args);
+						genericMenu.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
+						genericMenu.AddItem (new GUIContent ("Delete"), false, new GenericMenu.MenuFunction2 (onDelete), args);
 						genericMenu.ShowAsContext ();
 
 				}
@@ -227,12 +208,12 @@ namespace ws.winx.editor.extensions
 				/// Ons the context click.
 				/// </summary>
 				/// <param name="args">Arguments.</param>
-				public virtual void onContextClick (TimeLineEventArgs<float> args)
+				public static void onContextClick (TimeLineEventArgs<float> args)
 				{
 						//Debug.Log ("ContextClick on empty");
 						Event.current.Use ();
 						GenericMenu genericMenu2 = new GenericMenu ();
-						genericMenu2.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (this.onAdd), args);
+						genericMenu2.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
 						genericMenu2.ShowAsContext ();
 				}
 				
@@ -242,8 +223,8 @@ namespace ws.winx.editor.extensions
 				/// </summary>
 				/// <param name="timeValues">Time values.</param>
 				/// <param name="displayNames">Display names.</param>
-			public void onTimeLineGUI (ref float[] timeValues,ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected
-
+			public static void onTimeLineGUI (ref float[] timeValues,ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected,
+		                                  Action<TimeLineEventArgs<float>> Add=null,Action<TimeLineEventArgs<float>> Delete=null,  Action<TimeLineEventArgs<float>> EditClose=null,Action<TimeLineEventArgs<float>> EditOpen=null,Action<TimeLineEventArgs<float>> DragEnd=null
 		                           )
 				{
 						//main contorol position
@@ -271,7 +252,7 @@ namespace ws.winx.editor.extensions
 
 						//background
 						GUI.Box (rectLocal, GUIContent.none);
-						rectLocal.width -= image.width;
+						rectLocal.width -= __eventMarkerTexture.width;
 
 		
 					
@@ -344,7 +325,7 @@ namespace ws.winx.editor.extensions
 								
 
 								
-								Rect rect3 = new Rect (timeValuePositionX, image.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)image.width, (float)image.height);
+								Rect rect3 = new Rect (timeValuePositionX, __eventMarkerTexture.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)__eventMarkerTexture.width, (float)__eventMarkerTexture.height);
 
 
 								positionsHitRectArray [i] = rect3;
@@ -361,7 +342,7 @@ namespace ws.winx.editor.extensions
 								selected = new bool[timeValuesNumber];
 
 								if (EditClose != null)
-										EditClose (this, null);
+										EditClose (null);
 
 								
 								
@@ -375,20 +356,20 @@ namespace ws.winx.editor.extensions
 						float startSelect;
 						float endSelect;
 						
-						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (image), positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
+						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (__eventMarkerTexture), positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
 
 						if (highLevelEvent != HighLevelEvent.None) {
 								switch (highLevelEvent) {
 								case HighLevelEvent.DoubleClick:
 										if (clickedIndex != -1) {
 												if (EditOpen != null) {
-														EditOpen (this, new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
+														EditOpen (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 												
 												}
 											
 										} else {
 												//never enters here
-												this.onAdd (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID));
+												onAdd (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID,Add));
 												
 										}
 										break;
@@ -399,7 +380,7 @@ namespace ws.winx.editor.extensions
 												//Debug.Log ("ContextClick on handle");
 												selected = new bool[timeValuesNumber];
 												selected [clickedIndex] = true;
-												onContextClickOnTimeValue (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
+												onContextClickOnTimeValue (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID,Add,Delete,EditClose,EditOpen));
 											
 														
 												break;
@@ -444,12 +425,12 @@ namespace ws.winx.editor.extensions
 								case HighLevelEvent.EndDrag:
 					//Debug.Log("EndDrag");
 										if (DragEnd != null) {
-												DragEnd (this, new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID));
+												DragEnd (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID));
 										}
 
 										break;
 								case HighLevelEvent.Delete:
-										this.DeleteEvents (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID), selected);
+										DeleteEvents (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID,null,Delete), selected);
 										break;
 								case HighLevelEvent.SelectionChanged:
 						
@@ -458,7 +439,7 @@ namespace ws.winx.editor.extensions
 												//	Debug.Log("SelectionChanged");
 
 												if (EditOpen != null) {
-														EditOpen (this, new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
+														EditOpen (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 														
 												}
 
@@ -470,7 +451,17 @@ namespace ws.winx.editor.extensions
 
 
 						int hoverInx = -1; 
-						hoverInx = this.GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray, ref selected, controlID);					
+						hoverInx = GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray);
+
+
+							if (hoverInx>0 && Event.current.button == 1 && Event.current.isMouse) {
+								
+								Event.current.Use ();
+								selected = new bool[timeValuesNumber];
+								selected [hoverInx] = true;
+								onContextClickOnTimeValue (new TimeLineEventArgs<float> (hoverInx, timeValues [hoverInx], timeValues, selected, controlID,Add,Delete,EditClose,EditOpen));
+								
+							}
 
 
 

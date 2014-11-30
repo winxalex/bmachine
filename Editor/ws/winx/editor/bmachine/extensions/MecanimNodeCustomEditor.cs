@@ -363,7 +363,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventEdit (object sender, TimeLineEventArgs<float> args)
+				void onMecanimEventEdit (TimeLineEventArgs<float> args)
 				{
 				
 						SendEventNormalized child = mecanimNode.children [args.selectedIndex] as SendEventNormalized;
@@ -386,7 +386,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventClose (object sender, TimeLineEventArgs<float> args)
+				void onMecanimEventClose (TimeLineEventArgs<float> args)
 				{
 						SendEventNormalizedEditor.Hide ();
 				}
@@ -397,7 +397,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventAdd (object sender, TimeLineEventArgs<float> args)
+				void onMecanimEventAdd (TimeLineEventArgs<float> args)
 				{
 				
 
@@ -425,7 +425,7 @@ namespace ws.winx.editor.bmachine.extensions
 						Undo.RecordObject (target.self, "Add Node");
 				}
 
-				void onMecanimEventDragEnd (object sender, TimeLineEventArgs<float> args)
+				void onMecanimEventDragEnd (TimeLineEventArgs<float> args)
 				{
 						int[] indexArray = new int[mecanimNode.children.Length];
 						for (int l = 0; l < indexArray.Length; l++) {
@@ -460,7 +460,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventDelete (object sender, TimeLineEventArgs<float> args)
+				void onMecanimEventDelete (TimeLineEventArgs<float> args)
 				{
 						float[] timeValues = (float[])args.values;
 						int timeValuesNumber = timeValues.Length;
@@ -570,12 +570,7 @@ namespace ws.winx.editor.bmachine.extensions
 								//	DoTimeControl(rect);
 								if (!Application.isPlaying) {
 										if (eventTimeLine == null) {
-												eventTimeLine = new CustomTimeLine ();
-												eventTimeLine.EditOpen += onMecanimEventEdit;
-												eventTimeLine.EditClose += onMecanimEventClose;
-												eventTimeLine.Delete += onMecanimEventDelete;
-												eventTimeLine.Add += onMecanimEventAdd;
-												eventTimeLine.DragEnd += onMecanimEventDragEnd;
+											
 							
 				
 					
@@ -590,7 +585,9 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-										eventTimeLine.onTimeLineGUI (ref eventTimeValues,ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected);
+										CustomTimeLine.onTimeLineGUI (ref eventTimeValues,ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected,
+					                              onMecanimEventAdd,onMecanimEventDelete,onMecanimEventClose,onMecanimEventEdit,onMecanimEventDragEnd
+					                              );
 
 										SendEventNormalized ev;
 
