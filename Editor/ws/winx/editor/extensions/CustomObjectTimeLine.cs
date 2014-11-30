@@ -10,63 +10,7 @@ using ws.winx.csharp.extensions;
 
 namespace ws.winx.editor.extensions
 {
-		public class TimeLineEventArgs<T>:EventArgs
-		{
-				
-				
-				int _selectedIndex;
-				IList<T> _values;
-				T _selectedValue;
-				int _controlID;
-				bool[] _selected;
 
-				public bool[] selected {
-						get {
-								return _selected;
-						}
-						
-				}
-				
-				public int controlID{ get { return _controlID; } }
-				
-				public T selectedValue{ get { return _selectedValue; } }
-				
-				public IList<T> values{ get { return _values; } }
-				
-				public int selectedIndex {
-						get{ return _selectedIndex;}
-				}
-
-						public Action<TimeLineEventArgs<float>> EditOpen;
-						public Action<TimeLineEventArgs<float>> EditClose;
-						public Action<TimeLineEventArgs<float>> Delete;
-						public Action<TimeLineEventArgs<float>> Add;
-						public Action<TimeLineEventArgs<float>> DragEnd;
-
-				//
-				// Events
-				//
-//				public event EventHandler<TimeLineEventArgs<float>> EditOpen;
-//				public event EventHandler<TimeLineEventArgs<float>> EditClose;
-//				public event EventHandler<TimeLineEventArgs<float>> Delete;
-//				public event EventHandler<TimeLineEventArgs<float>> Add;
-//				public event EventHandler<TimeLineEventArgs<float>> DragEnd;
-		
-				public TimeLineEventArgs (int selectedIndex, T selectedValue, IList<T> values, bool[] selected, int controlID,
-		                          Action<TimeLineEventArgs<float>> Add=null,Action<TimeLineEventArgs<float>> Delete=null,  Action<TimeLineEventArgs<float>> EditClose=null,Action<TimeLineEventArgs<float>> EditOpen=null,Action<TimeLineEventArgs<float>> DragEnd=null
-		        )
-				{
-						this._selectedValue = selectedValue;
-						this._values = values;
-						this._controlID = controlID;
-						this._selectedIndex = selectedIndex;
-						this._selected = selected;
-						this.Add = Add;
-						this.EditClose = EditClose;
-						this.EditOpen = EditOpen;
-						this.Delete = Delete;
-				}
-		}
 
 //		[Serializable]
 //		public class CustomObjectTimeLine<T> where T:IComparable,ICloneable

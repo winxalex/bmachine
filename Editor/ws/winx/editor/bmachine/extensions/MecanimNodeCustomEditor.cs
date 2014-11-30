@@ -43,7 +43,7 @@ namespace ws.winx.editor.bmachine.extensions
 				UnityEditorInternal.StateMachine stateMachine;
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
-				CustomTimeLine eventTimeLine;
+				bool eventTimeLineInitalized;
 				Rect eventTimeLineValuePopUpRect;
 				Motion previewedMotion;
 				State state;
@@ -395,7 +395,6 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <summary>
 				/// Ons the mecanim event add.
 				/// </summary>
-				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
 				void onMecanimEventAdd (TimeLineEventArgs<float> args)
 				{
@@ -425,6 +424,11 @@ namespace ws.winx.editor.bmachine.extensions
 						Undo.RecordObject (target.self, "Add Node");
 				}
 
+
+				/// <summary>
+				/// Ons the mecanim event drag end.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
 				void onMecanimEventDragEnd (TimeLineEventArgs<float> args)
 				{
 						int[] indexArray = new int[mecanimNode.children.Length];
@@ -458,7 +462,6 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <summary>
 				/// Ons the mecanim event delete.
 				/// </summary>
-				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
 				void onMecanimEventDelete (TimeLineEventArgs<float> args)
 				{
@@ -569,7 +572,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 								//	DoTimeControl(rect);
 								if (!Application.isPlaying) {
-										if (eventTimeLine == null) {
+										if (!eventTimeLineInitalized) {
 											
 							
 				
@@ -581,11 +584,12 @@ namespace ws.winx.editor.bmachine.extensions
 												eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
 												displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 												eventTimeValuesSelected = new bool[eventTimeValues.Length];
+												eventTimeLineInitalized=true;
 										}
 
 
 
-										CustomTimeLine.onTimeLineGUI (ref eventTimeValues,ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected,
+					EditorGUILayoutEx.CustomTimeLine (ref eventTimeValues,ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected,mecanimNode.normalizedTimeCurrent,
 					                              onMecanimEventAdd,onMecanimEventDelete,onMecanimEventClose,onMecanimEventEdit,onMecanimEventDragEnd
 					                              );
 

@@ -12,25 +12,26 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Collections;
+using ws.winx.unity;
 
 namespace ws.winx.editor.extensions
 {
 		public class EditorGUILayoutEx
 		{
 
-				private static object SELECTED_OBJECT=null;
+				private static object SELECTED_OBJECT = null;
 				private static int CONTROL_ID = -1;
 				private static int SELECTED_INDEX = -1;
-				private static IList CHANGED_VALUES=null;
-
-				private static Texture __eventMarkerTexture; 
+				private static IList CHANGED_VALUES = null;
+				private static Texture __eventMarkerTexture;
 
 				public static Texture eventMarkerTexture {
-					get {
-						if(__eventMarkerTexture==null) __eventMarkerTexture= EditorGUIUtility.IconContent ("Animation.EventMarker").image;
+						get {
+								if (__eventMarkerTexture == null)
+										__eventMarkerTexture = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
 
-						return __eventMarkerTexture;
-					}
+								return __eventMarkerTexture;
+						}
 				}
 
 				public delegate void MenuCallaback<T> (int selectedIndex,T SelectedObject,int controlID);
@@ -46,8 +47,8 @@ namespace ws.winx.editor.extensions
 				private class ToolTipStyles
 				{
 					
-					public GUIStyle tooltipBackground = "AnimationEventTooltip";
-					public GUIStyle tooltipArrow = "AnimationEventTooltipArrow";
+						public GUIStyle tooltipBackground = "AnimationEventTooltip";
+						public GUIStyle tooltipArrow = "AnimationEventTooltipArrow";
 
 				}
 				
@@ -59,252 +60,744 @@ namespace ws.winx.editor.extensions
 
 		#region CustomPopup
 
-		public static int CustomPopup<T>(GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
+				public static int CustomPopup<T> (GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
 		                                 MenuCallaback<T> onSelection=null,
 		                                 EventCallback onEvent=null,
 		                                 GUIStyle labelStyle=null
-		                                 )
-		{
-			GUIContent content;
-			string buttonLabel = null;
-			int i = 0;
-			int len;
-			int inxd;
+				)
+				{
+						GUIContent content;
+						string buttonLabel = null;
+						int i = 0;
+						int len;
+						int inxd;
 			
-			EditorGUILayout.BeginHorizontal ();
-			
-			
-			
-			//add Label field
-			// Screen.width in insprector returns its width not Screen => so 35% for the lable and rest for the popup button
-			if (labelStyle != null)
-				EditorGUILayout.LabelField (label, labelStyle, GUILayout.Width (Screen.width * 0.35f));
-			else
-				EditorGUILayout.LabelField (label, GUILayout.Width (Screen.width * 0.35f));
+						EditorGUILayout.BeginHorizontal ();
 			
 			
-			//						//get current control ID
-			int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
 			
-			//if current == previous selected control => asign "selectedObject" and reset global
-			if (controlID == EditorGUILayoutEx.CONTROL_ID) {
-				selectedIndex = EditorGUILayoutEx.SELECTED_INDEX;
+						//add Label field
+						// Screen.width in insprector returns its width not Screen => so 35% for the lable and rest for the popup button
+						if (labelStyle != null)
+								EditorGUILayout.LabelField (label, labelStyle, GUILayout.Width (Screen.width * 0.35f));
+						else
+								EditorGUILayout.LabelField (label, GUILayout.Width (Screen.width * 0.35f));
+			
+			
+						//						//get current control ID
+						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
+			
+						//if current == previous selected control => asign "selectedObject" and reset global
+						if (controlID == EditorGUILayoutEx.CONTROL_ID) {
+								selectedIndex = EditorGUILayoutEx.SELECTED_INDEX;
 				
-				//reset
-			//	EditorGUILayoutEx._CustomPopup_SelectedObject = null;
-				EditorGUILayoutEx.SELECTED_INDEX = -1;
-				EditorGUILayoutEx.CONTROL_ID = -1;
-			}
+								//reset
+								//	EditorGUILayoutEx._CustomPopup_SelectedObject = null;
+								EditorGUILayoutEx.SELECTED_INDEX = -1;
+								EditorGUILayoutEx.CONTROL_ID = -1;
+						}
 			
-			//if selectionObject is null on Init
-			if (selectedIndex < 0) {
+						//if selectionObject is null on Init
+						if (selectedIndex < 0) {
 				
 				
-				inxd = len = displayOptions.Length;
+								inxd = len = displayOptions.Length;
 				
-				//set "selectedObject" to first values[i] that is Enable
-				for (i=0; i<len; i++) {
-					buttonLabel = displayOptions [i].text;
+								//set "selectedObject" to first values[i] that is Enable
+								for (i=0; i<len; i++) {
+										buttonLabel = displayOptions [i].text;
 					
-					//check if contains "*" disable mark
-					if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
-						continue;
+										//check if contains "*" disable mark
+										if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
+												continue;
 					
-					inxd = i;
-					break;
+										inxd = i;
+										break;
 					
-				}
+								}
 				
-				//if we have found value[i] which is Enabled => set selectObject to it
-				if (inxd < len) {
-					//remove submenu's mark "/"
-					buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);		
-					selectedIndex = inxd;
-				}
+								//if we have found value[i] which is Enabled => set selectObject to it
+								if (inxd < len) {
+										//remove submenu's mark "/"
+										buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);		
+										selectedIndex = inxd;
+								}
 				
-			} else {
+						} else {
 				
-				//find label on displayOptions[i] which is value[i] == selectedObject
-				buttonLabel = displayOptions [selectedIndex].text;
+								//find label on displayOptions[i] which is value[i] == selectedObject
+								buttonLabel = displayOptions [selectedIndex].text;
 				
-				//remove submenus mark "/"
-				buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);
+								//remove submenus mark "/"
+								buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);
 				
 				
-			}
+						}
 			
 			
-			//Debug.Log ("SelectedIndex:"+selectedIndex);
+						//Debug.Log ("SelectedIndex:"+selectedIndex);
 			
 			
-			//dispatch events
-			if (onEvent != null && controlID == GUIUtility.hotControl) {
-				onEvent (controlID, Event.current);
-			}
-			//								switch (Event.current.GetTypeForControl (controlID)) {
-			//								case EventType.mouseDown://never triggered
-			//										Debug.Log ("Event " + Event.current.type);
-			//
-			//										break;
-			//								case EventType.mouseUp:
-			//										Debug.Log ("Event " + Event.current.type);
-			//										break;
-			//			default:
-			//				Debug.Log ("Event "+Event.current.type);
-			//				break;
-			//			}
+						//dispatch events
+						if (onEvent != null && controlID == GUIUtility.hotControl) {
+								onEvent (controlID, Event.current);
+						}
+						//								switch (Event.current.GetTypeForControl (controlID)) {
+						//								case EventType.mouseDown://never triggered
+						//										Debug.Log ("Event " + Event.current.type);
+						//
+						//										break;
+						//								case EventType.mouseUp:
+						//										Debug.Log ("Event " + Event.current.type);
+						//										break;
+						//			default:
+						//				Debug.Log ("Event "+Event.current.type);
+						//				break;
+						//			}
 			
 			
 			
 			
 			
-			if (GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup)) {
+						if (GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup)) {
 				
-				//shoot custom MouseDown event here!!!
+								//shoot custom MouseDown event here!!!
 				
-				// Now create the menu, add items and show it
-				GenericMenu menu = new GenericMenu ();
+								// Now create the menu, add items and show it
+								GenericMenu menu = new GenericMenu ();
 				
-				len = displayOptions.Length;
+								len = displayOptions.Length;
 				
-				for (i=0; i<len; i++) {
+								for (i=0; i<len; i++) {
 					
-					content = displayOptions [i];
+										content = displayOptions [i];
 					
-					// null mean AddSeparator
-					if (content==null)
-						menu.AddSeparator ("");
+										// null mean AddSeparator
+										if (content == null)
+												menu.AddSeparator ("");
 					// "*" at the end => mean AddDisabledItem
 					else if (content.text.LastIndexOf ('*', content.text.Length - 1) > -1) {
-						content.text = content.text.Remove (content.text.Length - 1);
-						menu.AddDisabledItem (content);
-					} else
-						menu.AddItem (content, false, (obj) => {
-							int inx = (int)obj;
-							//EditorGUILayoutEx._CustomPopup_SelectedObject = values [inx];
-							EditorGUILayoutEx.CONTROL_ID = controlID;
-							EditorGUILayoutEx.SELECTED_INDEX = inx;
+												content.text = content.text.Remove (content.text.Length - 1);
+												menu.AddDisabledItem (content);
+										} else
+												menu.AddItem (content, false, (obj) => {
+														int inx = (int)obj;
+														//EditorGUILayoutEx._CustomPopup_SelectedObject = values [inx];
+														EditorGUILayoutEx.CONTROL_ID = controlID;
+														EditorGUILayoutEx.SELECTED_INDEX = inx;
 							
-							//Debug.Log ("Selected:" + inx);	
+														//Debug.Log ("Selected:" + inx);	
 							
-							//dispatch selected
-							if (onSelection != null)
-								onSelection (inx, values [inx], controlID);
+														//dispatch selected
+														if (onSelection != null)
+																onSelection (inx, values [inx], controlID);
 							
-						}, i);
-				}
+												}, i);
+								}
 				
 				
 				
-				menu.ShowAsContext ();
-			}
+								menu.ShowAsContext ();
+						}
 			
-			EditorGUILayout.EndHorizontal ();
-			return selectedIndex;
-		}
+						EditorGUILayout.EndHorizontal ();
+						return selectedIndex;
+				}
 		#endregion
 
 		#region CustomObjectPopup
-		public static T CustomObjectPopup<T> (GUIContent label, T selectedObject,GUIContent[] displayOptions, IList<T> values,
+				public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,
 		                                      MenuCallaback<T> onSelection=null,
 		                                      EventCallback onEvent=null,
 		                                      GUIStyle labelStyle=null
 		                                      
-		                                      )
-		{
+				)
+				{
 
-			int inxOfSelectedObject;
-			int len;
-			int i;
-			string buttonLabel;
+						int inxOfSelectedObject;
+						int len;
+						int i;
+						string buttonLabel;
 			
 			
 			
 			
 			
-			//if selectionObject is null on Init
-			if (selectedObject == null) {
+						//if selectionObject is null on Init
+						if (selectedObject == null) {
 				
 				
-				inxOfSelectedObject = len = displayOptions.Length;
+								inxOfSelectedObject = len = displayOptions.Length;
 				
-				//find index of "selectedObject" that is Enable
-				for (i=0; i<len; i++) {
-					buttonLabel = displayOptions [i].text;
+								//find index of "selectedObject" that is Enable
+								for (i=0; i<len; i++) {
+										buttonLabel = displayOptions [i].text;
 					
-					//check if contains "*" disable mark
-					if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
-						continue;
+										//check if contains "*" disable mark
+										if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
+												continue;
 					
-					inxOfSelectedObject = i;
-					break;
+										inxOfSelectedObject = i;
+										break;
 					
+								}
+				
+								//if we have found value[i] which is Enabled => set selectObject to it
+								if (inxOfSelectedObject < len) {
+					
+										selectedObject = values [inxOfSelectedObject];
+										CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle);
+								}
+				
+						} else {
+				
+								//find label on displayOptions[i] which is value[i] == selectedObject
+								inxOfSelectedObject = values.IndexOf (selectedObject);
+								//Array.IndexOf (values, selectedObject);
+
+				
+								inxOfSelectedObject = CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle);
+				
+								selectedObject = values [inxOfSelectedObject];
+				
+				
+						}
+			
+			
+			
+			
+			
+			
+						return selectedObject;
+
 				}
-				
-				//if we have found value[i] which is Enabled => set selectObject to it
-				if (inxOfSelectedObject < len) {
-					
-					selectedObject = values [inxOfSelectedObject];
-					CustomPopup(label,inxOfSelectedObject,displayOptions,values,onSelection,onEvent,labelStyle);
-				}
-				
-			} else {
-				
-				//find label on displayOptions[i] which is value[i] == selectedObject
-				inxOfSelectedObject=values.IndexOf(selectedObject);
-					//Array.IndexOf (values, selectedObject);
-
-				
-				inxOfSelectedObject=CustomPopup(label,inxOfSelectedObject,displayOptions,values,onSelection,onEvent,labelStyle);
-				
-				selectedObject=values[inxOfSelectedObject];
-				
-				
-			}
-			
-			
-			
-			
-			
-			
-			return selectedObject;
-
-		}
 
 		#endregion
 
 
 		#region CustomTooltip
 
-		public static void  CustomTooltip(Rect positionRect,string text){
+				public static void  CustomTooltip (Rect positionRect, string text)
+				{
 		
-			if (EditorGUILayoutEx.TOOLTIP_STYLES == null) {
-				EditorGUILayoutEx.TOOLTIP_STYLES = new EditorGUILayoutEx.ToolTipStyles ();
-			}
-												GUIStyle gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipArrow;
-												Vector2 arrowSize = gUIStyle.CalcSize (new GUIContent ());
-		
-		
-		
-												
-												GUI.Label (new Rect (positionRect.x - arrowSize.x * 0.5f - 5f, positionRect.y + positionRect.height, arrowSize.x, arrowSize.y), string.Empty, gUIStyle);
-												
-		
-		
-												gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipBackground;
-												Vector2 textSize = gUIStyle.CalcSize (new GUIContent (text));
-												gUIStyle.alignment = TextAnchor.MiddleCenter;
+						if (EditorGUILayoutEx.TOOLTIP_STYLES == null) {
+								EditorGUILayoutEx.TOOLTIP_STYLES = new EditorGUILayoutEx.ToolTipStyles ();
+						}
+						GUIStyle gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipArrow;
+						Vector2 arrowSize = gUIStyle.CalcSize (new GUIContent ());
 		
 		
 		
 												
-			GUI.Label (new Rect (positionRect.x+arrowSize.x*0.5f- Mathf.Max (arrowSize.x, textSize.x)*0.5f, positionRect.y + positionRect.height + arrowSize.y, Mathf.Max (arrowSize.x, textSize.x), textSize.y), text, gUIStyle);
+						GUI.Label (new Rect (positionRect.x - arrowSize.x * 0.5f - 5f, positionRect.y + positionRect.height, arrowSize.x, arrowSize.y), string.Empty, gUIStyle);
+												
+		
+		
+						gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipBackground;
+						Vector2 textSize = gUIStyle.CalcSize (new GUIContent (text));
+						gUIStyle.alignment = TextAnchor.MiddleCenter;
+		
+		
+		
+												
+						GUI.Label (new Rect (positionRect.x + arrowSize.x * 0.5f - Mathf.Max (arrowSize.x, textSize.x) * 0.5f, positionRect.y + positionRect.height + arrowSize.y, Mathf.Max (arrowSize.x, textSize.x), textSize.y), text, gUIStyle);
 												
 
-		}
+				}
 		#endregion
 
+		#region CustomTimeLine
+				//
+				// Methods
+				//
+		
+				/// <summary>
+				/// Gets the index of the mouse hover rect.
+				/// </summary>
+				/// <returns>The mouse hover rect index.</returns>
+				/// <param name="postionRect">Postion rect.</param>
+				/// <param name="values">Values.</param>
+				/// <param name="hitRects">Hit rects.</param>
+				/// <param name="controlID">Control I.</param>
+				private static int GetMouseHoverRectIndex (Rect postionRect, float[] values, Rect[] hitRects)
+				{
+						Vector2 mousePosition = Event.current.mousePosition;
+						bool flag = false;
+						if (values.Length == hitRects.Length) {
+								for (int i = hitRects.Length - 1; i >= 0; i--) {
+										if (hitRects [i].Contains (mousePosition)) {
+						
+						
+						
+												return i;
+										}
+								}
+						}
+			
+						return -1;
+				}
+		
+		
+				/// <summary>
+				/// Deletes the events.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				/// <param name="deleteIndices">Delete indices.</param>
+				private static void DeleteEvents (TimeLineEventArgs<float> args, bool[] deleteIndices)
+				{
+			
+						List<float> list = new List<float> (args.values);
+			
+			
+						for (int i = list.Count  - 1; i >= 0; i--) {
+				
+								if (deleteIndices [i]) {
+										list.RemoveAt (i);
+					
+								}
+						}
+			
+						if (list.Count < args.values.Count) {
+				
+								if (args.EditClose != null)
+										args.EditClose (args);
+				
+				
+								CHANGED_VALUES = list.ToArray ();
+								CONTROL_ID = args.controlID;
+				
+				
+				
+				
+				
+								if (args.Delete != null)
+										args.Delete (new TimeLineEventArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
+						}
+				}
+		
+		
+		
+		
+				/// <summary>
+				/// Ons the add.
+				/// </summary>
+				/// <param name="obj">Object.</param>
+				private static void onAdd (System.Object obj)
+				{
+						//Debug.Log ("onAdd");
+						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
+			
+			
+						int newTimeValueInx = args.values.Count;
+			
+						//find first time > then current and insert before it
+						for (int i = 0; i < newTimeValueInx; i++) {
+								if (args.values [i] > args.selectedValue) {
+										newTimeValueInx = i;
+										break;
+								}
+						}
+			
+						float[] timeValues = new float[args.values.Count];
+						args.values.CopyTo (timeValues, 0);
+			
+			
+			
+						ArrayUtility.Insert<float> (ref timeValues, newTimeValueInx, args.selectedValue);
+			
+			
+			
+						CONTROL_ID = args.controlID;
+						CHANGED_VALUES = timeValues;
+			
+			
+			
+						//open editor for newely added 
+						if (args.Add != null)
+								args.Add (new TimeLineEventArgs<float> (newTimeValueInx, args.selectedValue, timeValues, null, args.controlID));
+				}
+		
+				/// <summary>
+				/// Ons the delete.
+				/// </summary>
+				/// <param name="obj">Object.</param>
+				private static void onDelete (System.Object obj)
+				{
+						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
+			
+						int index = args.selectedIndex;
+						if (args.selected [index]) {
+								DeleteEvents (args, args.selected);
+						} else {
+								bool[] timeValuesSelected = new bool[args.selected.Length];
+								timeValuesSelected [index] = true;
+								DeleteEvents (args, timeValuesSelected);
+						}
+			
+			
+				}
+		
+				/// <summary>
+				/// Ons the edit.
+				/// </summary>
+				/// <param name="obj">Object.</param>
+				private static void onEdit (System.Object obj)
+				{
+						TimeLineEventArgs<float> args = (TimeLineEventArgs<float>)obj;
+			
+						if (args.EditOpen != null) {
+								args.EditOpen (args);
+						}
+			
+			
+				}
+		
+		
+				/// <summary>
+				/// Ons the context click on time value.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				private static void onContextClickOnTimeValue (TimeLineEventArgs<float> args)
+				{
+			
+						GenericMenu genericMenu = new GenericMenu ();
+						genericMenu.AddItem (new GUIContent ("Edit"), false, new GenericMenu.MenuFunction2 (onEdit), args);
+						genericMenu.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
+						genericMenu.AddItem (new GUIContent ("Delete"), false, new GenericMenu.MenuFunction2 (onDelete), args);
+						genericMenu.ShowAsContext ();
+			
+				}
+		
+		
+				/// <summary>
+				/// Ons the context click.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				private static void onContextClick (TimeLineEventArgs<float> args)
+				{
+						//Debug.Log ("ContextClick on empty");
+						Event.current.Use ();
+						GenericMenu genericMenu2 = new GenericMenu ();
+						genericMenu2.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
+						genericMenu2.ShowAsContext ();
+				}
+		
+		
+	
+				/// <summary>
+				/// Customs the time line.
+				/// </summary>
+				/// <param name="timeValues">Time values.</param>
+				/// <param name="timeValuesTime">Time values time.</param>
+				/// <param name="displayNames">Display names.</param>
+				/// <param name="selected">Selected.</param>
+				/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
+				/// <param name="Add">Add.</param>
+				/// <param name="Delete">Delete.</param>
+				/// <param name="EditClose">Edit close.</param>
+				/// <param name="EditOpen">Edit open.</param>
+				/// <param name="DragEnd">Drag end.</param>
+				public static void CustomTimeLine (ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
+		                                   Action<TimeLineEventArgs<float>> Add=null, Action<TimeLineEventArgs<float>> Delete=null, Action<TimeLineEventArgs<float>> EditClose=null, Action<TimeLineEventArgs<float>> EditOpen=null, Action<TimeLineEventArgs<float>> DragEnd=null
+				)
+				{
+						//main contorol position
+						Rect rectGlobal = GUILayoutUtility.GetLastRect ();
+
+		
 
 
-	}
+						rectGlobal.y += 100;
+						rectGlobal.xMax -= 3f;
+						rectGlobal.xMin = 33f;
+						rectGlobal.height = 100f;
+			
+			
+						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
+						//Debug.Log ("Cid:" + controlID + " " + GUIUtility.hotControl);
+			
+						if (controlID == CONTROL_ID) {
+								CONTROL_ID = -1;
+								timeValues = (float[])CHANGED_VALUES;
+				
+								CHANGED_VALUES = null;
+						}
+			
+						GUI.BeginGroup (rectGlobal);
+						Color color = GUI.color;
+			
+						Rect rectLocal = new Rect (0f, 0f, rectGlobal.width, rectGlobal.height);
+			
+						//background
+						GUI.Box (rectLocal, GUIContent.none);
+						rectLocal.width -= eventMarkerTexture.width;
+			
+			
+			
+						//if time less then zero use mouse position for Add otherwise use outside value 
+
+						float time = 0f;
+						if (rectLocal.Contains (Event.current.mousePosition)) {
+								time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 4);
+				 					
+						}
+
+			
+			
+			
+						int timeValuesNumber = timeValues.Length;
+						Rect[] positionsHitRectArray = new Rect[timeValuesNumber];
+						Rect[] positionsRectArray = new Rect[timeValuesNumber];
+						int timeValuesNumberOfTheSame = 0;//items that have same time
+						int timeValuesTheSameCounterDown = 0;//same time items count down
+			
+						//mulitiplier simple changes the y position of the timeValue handle so
+						//same timeValues's hanldes are on of top of another
+			
+						float[] timeValuesTheSameHightMultiply = new float[timeValuesNumber]; 
+						float timeValue;
+						int i = 0;
+						int fromToEndInx = 0;
+			
+						float timeValuePositionX = 0f;
+			
+			
+			
+			
+						for (i = 0; i < timeValuesNumber; i++) {
+				
+				
+								timeValue = timeValues [i];
+								timeValuePositionX = timeValue * rectLocal.width;
+								timeValuesNumberOfTheSame = 0;
+				
+								//version 1 display one tube no visible separtion od handles
+								//								if (timeValuesTheSameHightMultiply [i] == 0) {
+								//										//find other with same value and record multiply (1x,2x,...)
+								//										for (fromToEndInx=i+1; fromToEndInx < timeValuesNumber; fromToEndInx++) {
+								//												if (timeValues [fromToEndInx] == timeValue) {
+								//														timeValuesNumberOfTheSame++;
+								//														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+								//												}
+								//										
+								//										}
+								//								}
+				
+				
+				
+								//version 2 display has visible separation of handles when they have same time
+								if (timeValuesTheSameHightMultiply [i] == 0) {
+										//find other with same value and record multiply (1x,2x,...)
+										for (fromToEndInx=timeValuesNumber-1; fromToEndInx > i; fromToEndInx--) {
+												if (timeValues [fromToEndInx] == timeValue) {
+							
+														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+														timeValuesNumberOfTheSame++;
+												}
+						
+										}
+					
+										timeValuesTheSameHightMultiply [i] = timeValuesNumberOfTheSame;
+								}
+				
+				
+				
+				
+				
+				
+				
+				
+								Rect rect3 = new Rect (timeValuePositionX, eventMarkerTexture.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)eventMarkerTexture.width, (float)eventMarkerTexture.height);
+				
+				
+								positionsHitRectArray [i] = rect3;
+								positionsRectArray [i] = rect3;
+						}
+			
+			
+			
+			
+			
+			
+			
+						if (selected == null || selected.Length != timeValuesNumber) {
+								selected = new bool[timeValuesNumber];
+				
+								if (EditClose != null)
+										EditClose (null);
+				
+				
+				
+						}
+			
+			
+			
+			
+						Vector2 offset = Vector2.zero; 
+						int clickedIndex;
+						float startSelect;
+						float endSelect;
+			
+						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (__eventMarkerTexture), positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
+			
+			
+			
+						if (highLevelEvent != HighLevelEvent.None) {
+								switch (highLevelEvent) {
+								case HighLevelEvent.DoubleClick:
+										if (clickedIndex != -1) {
+												if (EditOpen != null) {
+														EditOpen (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
+							
+												}
+						
+										} else {
+												//never enters here???
+												if (timeInput >= 0)
+														time = timeInput;
+												onAdd (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add));
+						
+										}
+										break;
+					
+								case HighLevelEvent.ContextClick:
+										{
+					
+												//Debug.Log ("ContextClick on handle");
+												selected = new bool[timeValuesNumber];
+												selected [clickedIndex] = true;
+
+												if (timeInput >= 0)
+														time = timeInput;
+												else
+														time = timeValues [clickedIndex];
+												onContextClickOnTimeValue (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add, Delete, EditClose, EditOpen));
+					
+					
+												break;
+										}
+					
+								case HighLevelEvent.BeginDrag:
+					
+										timeValuesTime = (float[])timeValues.Clone ();
+					
+					//										//copy values when begin to drag	
+					//										for (int j = 0; j < timeValues.Length; j++) {
+					//												timeValuesTime [j] = timeValues [j];
+					//										}
+					
+					
+					
+					
+										break;
+								case HighLevelEvent.Drag:
+										{
+					
+												for (int k = timeValues.Length - 1; k >= 0; k--) {
+														if (selected [k]) {
+							
+																timeValues [k] = (float)Math.Round (timeValuesTime [k] + offset.x / rectLocal.width, 4);
+							
+																if (timeValues [k] > 1f)
+																		timeValues [k] = 1f;
+																else if (timeValues [k] < 0f)
+																		timeValues [k] = 0f;
+																//Debug.Log ("Dragged time" + timeValues [k]);
+														}
+												}
+					
+					
+					
+					
+					
+												break;
+										}
+					
+								case HighLevelEvent.EndDrag:
+					//Debug.Log("EndDrag");
+										if (DragEnd != null) {
+												DragEnd (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID));
+										}
+					
+										break;
+								case HighLevelEvent.Delete:
+										DeleteEvents (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID, null, Delete), selected);
+										break;
+								case HighLevelEvent.SelectionChanged:
+					
+										if (clickedIndex != -1) {
+						
+												//	Debug.Log("SelectionChanged");
+						
+												if (EditOpen != null) {
+														EditOpen (new TimeLineEventArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
+							
+												}
+						
+						
+										}
+										break;
+								}
+						}
+			
+			
+						int hoverInx = -1; 
+						hoverInx = GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray);
+			
+			
+						if (hoverInx > 0 && Event.current.button == 1 && Event.current.isMouse) {
+				
+								Event.current.Use ();
+								selected = new bool[timeValuesNumber];
+								selected [hoverInx] = true;
+							
+								if (timeInput >= 0)
+										time = timeInput;
+								else
+										time = timeValues [hoverInx];
+								onContextClickOnTimeValue (new TimeLineEventArgs<float> (hoverInx, time, timeValues, selected, controlID, Add, Delete, EditClose, EditOpen));
+				
+						}
+			
+			
+			
+						//HighLevelEvent.ContextClick doens't raize when mouse right click so =>
+						if (Event.current.type == EventType.ContextClick && rectLocal.Contains (Event.current.mousePosition) 
+								|| (Event.current.button == 1 && Event.current.isMouse)) {
+				
+								if (timeInput >= 0)
+										time = timeInput;
+								onContextClick (new TimeLineEventArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add));
+				
+				
+				
+				
+						}
+			
+						GUI.color = color;
+			
+						GUI.EndGroup ();
+			
+						//show tooltip on hover
+						if (hoverInx >= 0 && hoverInx < positionsHitRectArray.Length) {
+				
+				
+								Rect positionRect = positionsRectArray [hoverInx];
+				
+								//from local to global
+								positionRect.y += rectGlobal.y;
+								positionRect.x += rectGlobal.x;
+				
+				
+				
+								EditorGUILayoutEx.CustomTooltip (positionRect, displayNames [hoverInx] + "[" + timeValues [hoverInx] + "]");
+				
+						}
+			
+			
+			
+				}
+		#endregion
+
+		}
 }
