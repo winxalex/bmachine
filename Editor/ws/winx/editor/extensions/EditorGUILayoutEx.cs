@@ -484,34 +484,26 @@ namespace ws.winx.editor.extensions
 				}
 		
 		
-	
-				/// <summary>
-				/// Customs the time line.
-				/// </summary>
-				/// <param name="timeValues">Time values.</param>
-				/// <param name="timeValuesTime">Time values time.</param>
-				/// <param name="displayNames">Display names.</param>
-				/// <param name="selected">Selected.</param>
-				/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
-				/// <param name="Add">Add.</param>
-				/// <param name="Delete">Delete.</param>
-				/// <param name="EditClose">Edit close.</param>
-				/// <param name="EditOpen">Edit open.</param>
-				/// <param name="DragEnd">Drag end.</param>
-				public static void CustomTimeLine (ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
+		/// <summary>
+		/// Customs the time line.
+		/// </summary>
+		/// <param name="rectGlobal">Rect global.</param>
+		/// <param name="timeValues">Time values.</param>
+		/// <param name="timeValuesTime">Internal purpose. Time values at drag start (just pass reference).</param>
+		/// <param name="displayNames">Display names.</param>
+		/// <param name="selected">Selected. Array true/false values of thoose selected</param>
+		/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
+		/// <param name="Add">Add.</param>
+		/// <param name="Delete">Delete.</param>
+		/// <param name="EditClose">Edit close.</param>
+		/// <param name="EditOpen">Edit open.</param>
+		/// <param name="DragEnd">Drag end.</param>
+				public static void CustomTimeLine (ref Rect rectGlobal,ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
 		                                   Action<TimeLineArgs<float>> Add=null, Action<TimeLineArgs<float>> Delete=null, Action<TimeLineArgs<float>> EditClose=null, Action<TimeLineArgs<float>> EditOpen=null, Action<TimeLineArgs<float>> DragEnd=null
 				)
 				{
-						//main contorol position
-						Rect rectGlobal = GUILayoutUtility.GetLastRect ();
-
-		
-
-
-						rectGlobal.y += 100;
-						rectGlobal.xMax -= 3f;
-						rectGlobal.xMin = 33f;
-						rectGlobal.height = 100f;
+						
+					
 			
 			
 						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
@@ -525,12 +517,13 @@ namespace ws.winx.editor.extensions
 						}
 			
 						GUI.BeginGroup (rectGlobal);
+						
 						Color color = GUI.color;
 			
 						Rect rectLocal = new Rect (0f, 0f, rectGlobal.width, rectGlobal.height);
 			
 						//background
-						GUI.Box (rectLocal, GUIContent.none);
+						//GUI.Box (rectLocal, GUIContent.none);
 						rectLocal.width -= eventMarkerTexture.width;
 			
 			

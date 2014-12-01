@@ -49,6 +49,7 @@ namespace ws.winx.editor.bmachine.extensions
 				State state;
 				bool PrevIKOnFeet;
 				bool[] eventTimeValuesSelected;
+				EventComparer eventTimeComparer = new EventComparer ();
 
 
 				//
@@ -194,7 +195,7 @@ namespace ws.winx.editor.bmachine.extensions
 								return;
 						}
 
-						Debug.Log ("UpdateAvatarState");
+						//Debug.Log ("UpdateAvatarState");
 			
 						Animator animator = avatarPreview.Animator;
 						if (animator) {
@@ -361,7 +362,6 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <summary>
 				/// Ons the mecanim event edit.
 				/// </summary>
-				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
 				void onMecanimEventEdit (TimeLineArgs<float> args)
 				{
@@ -384,7 +384,6 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <summary>
 				/// On the mecanim event close.
 				/// </summary>
-				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
 				void onMecanimEventClose (TimeLineArgs<float> args)
 				{
@@ -436,7 +435,7 @@ namespace ws.winx.editor.bmachine.extensions
 								indexArray [l] = l;
 						}
 			
-						Array.Sort (mecanimNode.children, indexArray, new EventComparer ());
+						Array.Sort (mecanimNode.children, indexArray, eventTimeComparer);
 			
 						bool[] cloneOfSelected = (bool[])eventTimeValuesSelected.Clone ();
 						int inx = -1;
@@ -542,106 +541,110 @@ namespace ws.winx.editor.bmachine.extensions
 				
 								// Cache the indent level
 								int indentLevel = EditorGUI.indentLevel;
+
+
+
+
+
+
+		
+
+
+
+
+
 				
-								//iterator.Find ("selectedStateHash")
-										
-					
-										
-//										if (selectedAnimaStateInfo == null) {
-//											mecanimNode.layer = selectedAnimaStateInfo.layer;
-//											mecanimNode.selectedStateHash = selectedAnimaStateInfo.hash;
-//										}
-
-
-								//selectedAnimaStateInfo=EditorGUILayoutEx.CustomObjectPopup(new GUIContent("State"),selectedAnimaStateInfo,displayOptions,animaInfoValues.ToArray());
-								//selectedAnimaStateInfo = EditorGUILayoutEx.CustomObjectPopup (new GUIContent ("State"), selectedAnimaStateInfo, displayOptions, animaInfoValues);
-
-								//selectedObject2=ws.winx.editor.extensions.EditorGUILayoutEx.CustomObjectPopup(new GUIContent("State1"),selectedObject2,new GUIContent[]{new GUIContent("mile"),new GUIContent("mile/kitic")},new string[]{"mile","kitic"});
-
-//										if (selectedAnimaStateInfo != null) {
-//												mecanimNode.layer = selectedAnimaStateInfo.layer;
-//												mecanimNode.selectedStateHash = selectedAnimaStateInfo.hash;
-//										}
-
-					
-								//mecanimNode.normalizedTimeCurrent=EditorGUILayout.Slider(mecanimNode.normalizedTimeCurrent,0f,1f);
-
-								//Texture image = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
-
-
-
-								//	DoTimeControl(rect);
+				
 								if (!Application.isPlaying) {
-										if (!eventTimeLineInitalized) {
-											
-							
-				
-					
-												//TODO calculate PopupRect
+									
+									
+										SetPreviewMotion (motion);
+									
+										//if(Event.current.type==EventType.Repaint){	
+										UpdateAvatarState (motion);
+								
+										
+										Rect avatarRect = EditorGUILayout.BeginHorizontal ();
+										avatarRect.y += 30f;
 
-												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
-												//select the time values from nodes
-												eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
-												displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
-												eventTimeValuesSelected = new bool[eventTimeValues.Length];
-												eventTimeLineInitalized=true;
-										}
-
-
-
-					EditorGUILayoutEx.CustomTimeLine (ref eventTimeValues,ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected,mecanimNode.normalizedTimeCurrent,
-					                              onMecanimEventAdd,onMecanimEventDelete,onMecanimEventClose,onMecanimEventEdit,onMecanimEventDragEnd
-					                              );
-
-										SendEventNormalized ev;
-
-										//update time values 
-										int eventTimeValuesNumber = mecanimNode.children.Length;
-										for (int i=0; i<eventTimeValuesNumber; i++) {
-												ev = ((SendEventNormalized)mecanimNode.children [i]);	
-												ev.timeNormalized = eventTimeValues [i];
-
-												//if changes have been made in pop editor or SendEventNormailized inspector
-												if (ev.name != displayNames [i])
-														displayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
-											
-												int eventTimeValueSwitchInx = -1;
-
-												
-										}
+										avatarRect.height=Screen.height-avatarRect.y-20f;
+										avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
+										EditorGUILayout.EndHorizontal ();		
+										
+									
+								} else {
+										AnimatorController cont = mecanimNode.animator.runtimeAnimatorController as AnimatorController;
 								}
+								
+								// Restore the indent level
+								EditorGUI.indentLevel = indentLevel;
+								
+								// Apply modified properties
+								this.serializedNode.ApplyModifiedProperties ();
+								
+						}
 
-								//NOTES!!! I"ve gone with edit popup but I might draw Nodes here but think would move whole avatar and timeline preview down/up
-								//if I draw them all or maybe just selected one(but what if many are selected ???) maybe I would draw it here as popup sucks
+
+
+			GUIStyle playButton = "TimeScrubberButton";
+			Vector2 playButtonSize=playButton.CalcSize (new GUIContent ());
+			
+						if (!Application.isPlaying) {
+								if (!eventTimeLineInitalized) {
+					
+					
+					
+					
+										//TODO calculate PopupRect
+					
+										eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
+										//select the time values from nodes
+										eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
+										displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+										eventTimeValuesSelected = new bool[eventTimeValues.Length];
+										eventTimeLineInitalized = true;
+								}
+				
+								Rect timeLineRect = GUILayoutUtility.GetLastRect ();
+								
+								timeLineRect.xMin+=playButtonSize.x-EditorGUILayoutEx.eventMarkerTexture.width*0.5f;
+
+								timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3*0.66f + playButtonSize.y;
+				
+								EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
+				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd
+								);
+
+				
+				
+								SendEventNormalized ev;
+				
+								//update time values 
+								int eventTimeValuesNumber = mecanimNode.children.Length;
+								for (int i=0; i<eventTimeValuesNumber; i++) {
+										ev = ((SendEventNormalized)mecanimNode.children [i]);	
+										ev.timeNormalized = eventTimeValues [i];
+					
+										//if changes have been made in pop editor or SendEventNormailized inspector
+										if (ev.name != displayNames [i])
+												displayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
+					
+										int eventTimeValueSwitchInx = -1;
+					
+					
+								}
+						}
+								
+
+
+
+						//NOTES!!! I"ve gone with edit popup but I might draw Nodes here but think would move whole avatar and timeline preview down/up
+						//if I draw them all or maybe just selected one(but what if many are selected ???) maybe I would draw it here as popup sucks
 
 			
 
 								
 
-//								if (!Application.isPlaying) {
-//									
-//									
-//										SetPreviewMotion (motion);
-//										
-//									//if(Event.current.type==EventType.Repaint){	
-//										UpdateAvatarState (motion);
-//
-//					//GUILayout.BeginHorizontal();
-//							avatarPreview.DoAvatarPreview2 (new Rect (0, 0, 100, 150), GUIStyle.none);
-//										//avatarPreview.DoAvatarPreview (new Rect (0, 0, Screen.width, 200), GUIStyle.none);
-//					//GUILayout.EndHorizontal();	
-//									
-//								} else {
-//									AnimatorController cont=mecanimNode.animator.runtimeAnimatorController as AnimatorController;
-//								}
-				
-								// Restore the indent level
-								EditorGUI.indentLevel = indentLevel;
-				
-								// Apply modified properties
-								this.serializedNode.ApplyModifiedProperties ();
-								
-						}
 				}
 		}
 }
