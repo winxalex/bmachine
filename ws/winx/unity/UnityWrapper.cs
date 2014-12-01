@@ -80,19 +80,21 @@ namespace ws.winx.unity
 
 
 
+	#region AvatarPreviewW
+
 public class AvatarPreviewW {
 	#region Reflection
 	
 	private static Type realType;
 	
 	
-	private static MethodInfo MethodInfo_DoPreviewSettings;
-	private static MethodInfo MethodInfo_OnDestroy;
-	private static MethodInfo MethodInfo_DoAvatarPreview;
-	private static MethodInfo MethodInfo_DoRenderPreview;
-	private static MethodInfo MethodInfo_Init;
-	private static MethodInfo MethodInfo_AvatarTimeControlGUI;
-	private static FieldInfo FieldInfo_timeControl;
+		private static MethodInfo MethodInfo_DoPreviewSettings;
+		private static MethodInfo MethodInfo_OnDestroy;
+		private static MethodInfo MethodInfo_DoAvatarPreview;
+		private static MethodInfo MethodInfo_DoRenderPreview;
+		private static MethodInfo MethodInfo_Init;
+		private static MethodInfo MethodInfo_AvatarTimeControlGUI;
+		private static FieldInfo FieldInfo_timeControl;
 		private static ConstructorInfo method_ctor;
 		private static PropertyInfo PropertyInfo_OnAvatarChangeFunc;
 		private static PropertyInfo PropertyInfo_IKOnFeet;
@@ -101,6 +103,12 @@ public class AvatarPreviewW {
 		Texture image = null;
 
 		Rect lastRect;	
+
+		AnimatorController _previewAnimatorController;
+		UnityEditorInternal.StateMachine _previewStateMachine;
+		State _previewState;
+		bool PrevIKOnFeet;
+		Motion _previewedMotion;
 	
 	public static void InitType() {
 
@@ -127,18 +135,193 @@ public class AvatarPreviewW {
 	
 	#region Wrapper
 	
-	//private object instance;
-		private object instance;
-//		private AvatarPreview my;
+	
+	private object instance;
+
 	
 	public delegate void OnAvatarChange();
 	
-	public AvatarPreviewW(Animator previewObjectInScene, Motion objectOnSameAsset) {
-		InitType();
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ws.winx.unity.AvatarPreviewW"/> class.
+		/// </summary>
+		/// <param name="previewObjectInScene">Preview object in scene.</param>
+		/// <param name="objectOnSameAsset">Object on same asset.</param>
+		public AvatarPreviewW(Animator previewObjectInScene, Motion objectOnSameAsset) {
+			InitType();
+			
+			instance = method_ctor.Invoke( new object[] { previewObjectInScene, objectOnSameAsset } );
+
+				_previewedMotion = objectOnSameAsset;
+
+				CreatePreviewStateMachine (_previewedMotion);
+			
+		}
+
+		/// <summary>
+		/// Sets the preview motion.
+		/// </summary>
+		/// <param name="motion">Motion.</param>
+		public void SetPreviewMotion (Motion motion)
+		{
+			//if the same motion then return;
+			if (_previewedMotion == motion && motion != null)
+				return;
+				
+
+			_previewedMotion = motion;
+
+			_previewState.SetMotion (motion);
+			CreateParameters (motion);
+			this.timeControl.currentTime = 0f;
+
+			this.Animator.Update (0f);
+
+		}
+
+
+		/// <summary>
+		/// Creates the preview state machine.
+		/// </summary>
+		/// <param name="motion">Motion.</param>
+		private void CreatePreviewStateMachine (Motion motion)
+		{
+			if (this.Animator == null)
+				return;
+			
+			//Debug.Log ("CreateStateMachine");
+			
+			if (_previewAnimatorController == null) {
+				_previewAnimatorController = new AnimatorController ();
+				_previewAnimatorController.AddLayer ("previewLayer");
+				_previewAnimatorController.hideFlags = HideFlags.DontSave;
+				
+				_previewStateMachine = _previewAnimatorController.GetLayer (0).stateMachine;
+				CreateParameters (motion);
+				
+				_previewState = _previewStateMachine.AddState ("previewState");
+				
+				_previewState.SetMotion (motion);
+				_previewState.iKOnFeet = this.IKOnFeet;
+				_previewState.hideFlags = HideFlags.DontSave;
+				
+				
+				AnimatorController.SetAnimatorController (this.Animator, _previewAnimatorController);
+				Debug.Log ("Setting avatarPreview.Animator " + this.Animator.name + " to temp controller");
+			} 
+			
+			
+			
+			if (AnimatorController.GetEffectiveAnimatorController (this.Animator) != this._previewAnimatorController) {
+				AnimatorController.SetAnimatorController (this.Animator, this._previewAnimatorController);
+				
+				Debug.Log ("Getting Effective Animator and set avatarPreview.Animator " + this.Animator.name + " to temp controller");
+			}
+		}
+
+
+		/// <summary>
+		/// Clears the state machine.
+		/// </summary>
+		private void ClearStateMachine ()
+		{
+			if ( this.Animator != null) {
+				AnimatorController.SetAnimatorController (this.Animator, null);
+			}
+			UnityEngine.Object.DestroyImmediate (this._previewAnimatorController);
+			UnityEngine.Object.DestroyImmediate (this._previewStateMachine);
+			UnityEngine.Object.DestroyImmediate (this._previewState);
+			_previewStateMachine = null;
+			_previewAnimatorController = null;
+			_previewState = null;
+		}
 		
-		instance = method_ctor.Invoke( new object[] { previewObjectInScene, objectOnSameAsset } );
+
 		
-	}
+		
+		/// <summary>
+		/// Creates the parameters.
+		/// </summary>
+		/// <param name="motion">Motion.</param>
+		private void CreateParameters (Motion motion)
+		{
+			int parameterCount = _previewAnimatorController.parameterCount;
+			for (int i = 0; i < parameterCount; i++) {
+				_previewAnimatorController.RemoveParameter (0);
+			}
+			
+			if (motion is BlendTree) {
+				BlendTree blendTree = motion as BlendTree;
+				
+				for (int j = 0; j < blendTree.GetRecursiveBlendParamCount(); j++) {
+					_previewAnimatorController.AddParameter (blendTree.GetRecursiveBlendParam (j), AnimatorControllerParameterType.Float);
+				}
+			}
+			
+			
+		}
+		
+		private void UpdateAvatarState (Motion motion)
+		{
+			if (Event.current.type != EventType.Repaint) {
+				return;
+			}
+			
+			//Debug.Log ("UpdateAvatarState");
+			
+
+			if (this.Animator) {
+				//				if (PrevIKOnFeet != avatarPreview.IKOnFeet)
+				//				{
+				//					PrevIKOnFeet = avatarPreview.IKOnFeet;
+				//					Vector3 rootPosition = avatarPreview.Animator.rootPosition;
+				//					Quaternion rootRotation = avatarPreview.Animator.rootRotation;
+				//
+				//					ClearStateMachine();
+				//					CreateStateMachine(motion);
+				//					//ResetStateMachine();
+				//					avatarPreview.Animator.UpdateWrapper(avatarPreview.timeControl.currentTime);
+				//					avatarPreview.Animator.UpdateWrapper(0f);
+				//					avatarPreview.Animator.rootPosition = rootPosition;
+				//					avatarPreview.Animator.rootRotation = rootRotation;
+				//				}
+				
+				this.timeControl.loop = true;
+				float timeAnimationLength = 1f;
+				float timeNormalized = 0f;
+				if (this.Animator.layerCount > 0) {
+					
+					AnimatorStateInfo currentAnimatorStateInfo = this.Animator.GetCurrentAnimatorStateInfo (0);
+					timeAnimationLength = currentAnimatorStateInfo.length;
+					timeNormalized = currentAnimatorStateInfo.normalizedTime;
+				}
+				
+				this.timeControl.startTime = 0f;
+				this.timeControl.stopTime = timeAnimationLength;
+				this.timeControl.Update ();
+				
+				float timeDelta = this.timeControl.deltaTime;
+				if (!motion.isLooping) {
+					if (timeNormalized >= 1f) {
+						timeDelta -= timeAnimationLength;
+					} else {
+						if (timeNormalized < 0f) {
+							timeDelta += timeAnimationLength;
+						}
+					}
+				}
+				
+				
+
+				this.Animator.Update (timeDelta);
+			}
+		}
+
+
+
+
+
+
 
 		public void DoAvatarPreview2(Rect rect, GUIStyle background)
 		{
@@ -209,6 +392,8 @@ public class AvatarPreviewW {
 		}
 
      	public Texture DoRenderPreview (Rect previewRect, GUIStyle background){
+		
+
 			return MethodInfo_DoRenderPreview.Invoke (instance, new object[]{previewRect,background}) as Texture;
 		}
 
@@ -245,6 +430,8 @@ public class AvatarPreviewW {
 	}
 	
 	public void DoAvatarPreview(Rect rect, GUIStyle background) {
+		UpdateAvatarState (_previewedMotion);
+
 		MethodInfo_DoAvatarPreview.Invoke(instance, new object[] { rect, background });
 	}
 	
@@ -254,37 +441,46 @@ public class AvatarPreviewW {
 		}
 	}
 	#endregion
+
+
+
+
 	
 }
+#endregion
 
+
+
+
+#region TimeControlWrapper
 public class TimeControlW {
 	private static Type realType;
 	private object instance;
 	
-	private static FieldInfo field_currentTime;
-	private static FieldInfo field_loop;
-	private static FieldInfo field_startTime;
-	private static FieldInfo field_stopTime;
-	private static MethodInfo method_Update;
-	private static PropertyInfo property_deltaTime;
-	private static PropertyInfo property_normalizedTime;
-	private static PropertyInfo property_playing;
-	private static PropertyInfo property_nextCurrentTime;
+	private static FieldInfo FieldInfo_currentTime;
+	private static FieldInfo FieldInfo_loop;
+	private static FieldInfo FieldInfo_startTime;
+	private static FieldInfo FieldInfo_stopTime;
+	private static MethodInfo MethodInfo_Update;
+	private static PropertyInfo PropertyInfo_deltaTime;
+	private static PropertyInfo PropertyInfo_normalizedTime;
+	private static PropertyInfo PropertyInfo_playing;
+	private static PropertyInfo PropertyInfo_nextCurrentTime;
 	
 	public static void InitType() {
 		if (realType == null) {
 			Assembly assembly = Assembly.GetAssembly(typeof(Editor));
 			realType = assembly.GetType("UnityEditor.TimeControl");
 			
-			field_currentTime = realType.GetField("currentTime");
-			field_loop = realType.GetField("loop");
-			field_startTime = realType.GetField("startTime");
-			field_stopTime = realType.GetField("stopTime");
-			method_Update = realType.GetMethod("Update");
-			property_deltaTime = realType.GetProperty("deltaTime");
-			property_normalizedTime = realType.GetProperty("normalizedTime");
-			property_playing = realType.GetProperty("playing");
-			property_nextCurrentTime = realType.GetProperty("nextCurrentTime");
+			FieldInfo_currentTime = realType.GetField("currentTime");
+			FieldInfo_loop = realType.GetField("loop");
+			FieldInfo_startTime = realType.GetField("startTime");
+			FieldInfo_stopTime = realType.GetField("stopTime");
+			MethodInfo_Update = realType.GetMethod("Update");
+			PropertyInfo_deltaTime = realType.GetProperty("deltaTime");
+			PropertyInfo_normalizedTime = realType.GetProperty("normalizedTime");
+			PropertyInfo_playing = realType.GetProperty("playing");
+			PropertyInfo_nextCurrentTime = realType.GetProperty("nextCurrentTime");
 		}
 	}
 	
@@ -292,81 +488,187 @@ public class TimeControlW {
 		InitType();
 		this.instance = realTimeControl;
 	}
+
+		//
+		// Nested Types
+		//
+		private class Styles
+		{
+			public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
+			public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
+			public GUIStyle playButton = "TimeScrubberButton";
+			public GUIStyle timeScrubber = "TimeScrubber";
+		}
+		
+		private static Styles s_Styles;
+		float m_MouseDrag;
+		bool m_WrapForwardDrag;
+		string[] displayNames;
+		
+		//
+		// Methods
+		//
+		public void DoTimeControl2 (Rect rect)
+		{
+			if (TimeControlW.s_Styles == null) {
+				TimeControlW.s_Styles = new TimeControlW.Styles ();
+			}
+			Event current = Event.current;
+			//int controlID = GUIUtility.GetControlID (TimeControl.kScrubberIDHash, FocusType.Keyboard);
+			int controlID = GUIUtility.GetControlID (FocusType.Passive);
+			Rect rect2 = rect;
+			rect2.height = 21f;
+			Rect rect3 = rect2;
+			rect3.xMin += 33f;
+			switch (current.GetTypeForControl (controlID)) {
+			case EventType.MouseDown:
+				if (rect.Contains (current.mousePosition)) {
+					GUIUtility.keyboardControl = controlID;
+				}
+				if (rect3.Contains (current.mousePosition)) {
+					EditorGUIUtility.SetWantsMouseJumping (1);
+					GUIUtility.hotControl = controlID;
+					this.m_MouseDrag = current.mousePosition.x - rect3.xMin;
+					//this.nextCurrentTime = this.m_MouseDrag * (this.stopTime - this.startTime) / rect3.width + this.startTime;
+					this.m_WrapForwardDrag = false;
+					current.Use ();
+				}
+				break;
+			case EventType.MouseUp:
+				if (GUIUtility.hotControl == controlID) {
+					EditorGUIUtility.SetWantsMouseJumping (0);
+					GUIUtility.hotControl = 0;
+					current.Use ();
+				}
+				break;
+			case EventType.MouseDrag:
+				if (GUIUtility.hotControl == controlID) {
+					this.m_MouseDrag += current.delta.x * 1f;//this.playbackSpeed;
+					if (false && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width)) {
+						//if (this.loop && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width))
+						this.m_WrapForwardDrag = true;
+						this.m_MouseDrag = Mathf.Repeat (this.m_MouseDrag, rect3.width);
+					}
+					//this.nextCurrentTime = Mathf.Clamp (this.m_MouseDrag, 0f, rect3.width) * (this.stopTime - this.startTime) / rect3.width + this.startTime;
+					current.Use ();
+				}
+				break;
+			case EventType.KeyDown:
+				//				if (GUIUtility.keyboardControl == controlID)
+				//				{
+				//					if (current.keyCode == KeyCode.LeftArrow)
+				//					{
+				//						if (this.currentTime - this.startTime > 0.01f)
+				//						{
+				//							this.deltaTime = -0.01f;
+				//						}
+				//						current.Use ();
+				//					}
+				//					if (current.keyCode == KeyCode.RightArrow)
+				//					{
+				//						if (this.stopTime - this.currentTime > 0.01f)
+				//						{
+				//							this.deltaTime = 0.01f;
+				//						}
+				//						current.Use ();
+				//					}
+				//				}
+				break;
+			}
+			
+			//GUI.Box (rect2, GUIContent.none, TimeControl.s_Styles.timeScrubber);
+			GUI.Box (rect2, GUIContent.none, TimeControlW.s_Styles.timeScrubber);
+
+			//this are the buttons
+			//thisg = GUI.Toggle (rect2, this.playing, (!this.playing) ? TimeControl.s_Styles.playIcon : TimeControl.s_Styles.pauseIcon, TimeControl.s_Styles.playButton);
+			
+			float num = Mathf.Lerp (rect3.x, rect3.xMax, this.normalizedTime);
+
+			
+			if (GUIUtility.keyboardControl == controlID) {
+				Handles.color = new Color (1f, 0f, 0f, 1f);
+			} else {
+				Handles.color = new Color (1f, 0f, 0f, 0.5f);
+			}
+			Handles.DrawLine (new Vector2 (num, rect3.yMin), new Vector2 (num, rect3.yMax));
+			Handles.DrawLine (new Vector2 (num + 1f, rect3.yMin), new Vector2 (num + 1f, rect3.yMax));
+		}
+
 	
 	public float currentTime {
 		get {
-			return (float)field_currentTime.GetValue(instance);
+			return (float)FieldInfo_currentTime.GetValue(instance);
 		}
 		set {
-			field_currentTime.SetValue(instance, value);
+			FieldInfo_currentTime.SetValue(instance, value);
 		}
 	}
 	
 	public bool loop {
 		get {
-			return (bool)field_loop.GetValue(instance);
+			return (bool)FieldInfo_loop.GetValue(instance);
 		}
 		set {
-			field_loop.SetValue(instance, value);
+			FieldInfo_loop.SetValue(instance, value);
 		}
 	}
 	
 	public float startTime {
 		get {
-			return (float)field_startTime.GetValue(instance);
+			return (float)FieldInfo_startTime.GetValue(instance);
 		}
 		set {
-			field_startTime.SetValue(instance, value);
+			FieldInfo_startTime.SetValue(instance, value);
 		}
 	}
 	
 	public float stopTime {
 		get {
-			return (float)field_stopTime.GetValue(instance);
+			return (float)FieldInfo_stopTime.GetValue(instance);
 		}
 		set {
-			field_stopTime.SetValue(instance, value);
+			FieldInfo_stopTime.SetValue(instance, value);
 		}
 	}
 	
 	public float deltaTime {
 		get {
-			return (float)property_deltaTime.GetValue(instance, null);
+			return (float)PropertyInfo_deltaTime.GetValue(instance, null);
 		}
 		set {
-			property_deltaTime.SetValue(instance, value, null);
+			PropertyInfo_deltaTime.SetValue(instance, value, null);
 		}
 	}
 	
 	public float normalizedTime {
 		get {
-			return (float)property_normalizedTime.GetValue(instance, null);
+			return (float)PropertyInfo_normalizedTime.GetValue(instance, null);
 		}
 		set {
-			property_normalizedTime.SetValue(instance, value, null);
+			PropertyInfo_normalizedTime.SetValue(instance, value, null);
 		}
 	}
 	
 	public bool playing {
 		get {
-			return (bool)property_playing.GetValue(instance, null);
+			return (bool)PropertyInfo_playing.GetValue(instance, null);
 		}
 		set {
-			property_playing.SetValue(instance, value, null);
+			PropertyInfo_playing.SetValue(instance, value, null);
 		}
 	}
 	
 	public float nextCurrentTime {
 		set {
-			property_nextCurrentTime.SetValue(instance, value, null);
+			PropertyInfo_nextCurrentTime.SetValue(instance, value, null);
 		}
 	}
 	
 	public void Update() {
-		method_Update.Invoke(instance, null);
+		MethodInfo_Update.Invoke(instance, null);
 	}
 }
-
+#endregion
 
 
 	public enum TangentMode
@@ -472,7 +774,7 @@ public class TimeControlW {
 }
 
 
-
+#region BlendTreeExtension
 public static class BlendTreeEx {
 	
 	public static int GetRecursiveBlendParamCount(this BlendTree bt) {
@@ -494,6 +796,9 @@ public static class BlendTreeEx {
 	
 }
 
+#endregion
+
+#region State Extension
 public static class StateEx {
 	
 	public static void SetMotion(this State state, Motion motion) {
@@ -501,7 +806,7 @@ public static class StateEx {
 	}
 	
 }
-
+#endregion
 
 
 /*****************
@@ -526,6 +831,7 @@ constantCurve.AddKey(KeyframeUtil.GetNew(1.0f, 1.0f, TangentMode.Linear)); // tr
 animationClip.SetCurve(gameObject, typeof(GameObject),"m_IsActive", constantCurve);
 */
 
+#region CurveExtension
 public static class CurveExtension {
 	
 	public static void UpdateAllLinearTangents(this AnimationCurve curve){
@@ -563,6 +869,6 @@ public static class CurveExtension {
 	
 }
 
-
+#endregion
 
 

@@ -44,7 +44,9 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 			
-						if (blendParams != null) {
+			if (blendParams != null && blendParams.Length>(int)((MecanimBlendParameterAttribute)attribute).axis) {
+
+
 
 								label.text = this.caption;
 								EditorGUILayout.LabelField (label);

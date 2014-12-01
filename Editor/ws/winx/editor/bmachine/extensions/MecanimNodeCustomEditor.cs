@@ -38,19 +38,23 @@ namespace ws.winx.editor.bmachine.extensions
 				GUIContent[] displayOptions;
 				List<MecanimStateInfo> animaInfoValues;
 				MecanimStateInfo selectedAnimaStateInfo;
-				AvatarPreviewW avatarPreview;
-				AnimatorController controller;
-				UnityEditorInternal.StateMachine stateMachine;
+				
+			
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
 				bool eventTimeLineInitalized;
 				Rect eventTimeLineValuePopUpRect;
-				Motion previewedMotion;
-				State state;
-				bool PrevIKOnFeet;
 				bool[] eventTimeValuesSelected;
 				EventComparer eventTimeComparer = new EventComparer ();
 
+				string[] eventDisplayNames;
+
+				//avatarPreviewTimeControl button
+		GUIStyle playButtonStyle;
+				Vector2 playButtonSize;
+
+				
+				AvatarPreviewW avatarPreview;
 
 				//
 				// Nested Types
@@ -81,279 +85,14 @@ namespace ws.winx.editor.bmachine.extensions
 						//OnPreviewDisable();
 				}
 
-				private void ClearStateMachine ()
-				{
-						if (avatarPreview != null && avatarPreview.Animator != null) {
-								AnimatorController.SetAnimatorController (avatarPreview.Animator, null);
-						}
-						UnityEngine.Object.DestroyImmediate (this.controller);
-						UnityEngine.Object.DestroyImmediate (this.stateMachine);
-						UnityEngine.Object.DestroyImmediate (this.state);
-						stateMachine = null;
-						controller = null;
-						state = null;
-				}
-		
-//		public void ResetStateMachine()
-//		{
-//			ClearStateMachine();
-//			CreateStateMachine();
-//		}
-
-				public void SetPreviewMotion (Motion motion)
-				{
-						if (previewedMotion == motion && motion != null)
-								return;
-						//			
-						previewedMotion = motion;
-						//			
-						//			ClearStateMachine();
 			
-						if (avatarPreview == null) {
-								avatarPreview = new AvatarPreviewW (null, motion);
-								//avatarPreview = new AvatarPreviewWrapper((((MecanimNode)target).animator), motion);
 
 
-								//avatarPreview.OnAvatarChangeFunc = this.OnPreviewAvatarChanged;
-								PrevIKOnFeet = avatarPreview.IKOnFeet;
 
-						}
+
+
+
 			
-						if (motion != null)
-								CreateStateMachine (motion);
-						//			
-						//			Repaint();
-				}
-
-				private void CreateStateMachine (Motion motion)
-				{
-						if (avatarPreview == null || avatarPreview.Animator == null)
-								return;
-
-						Debug.Log ("CreateStateMachine");
-			
-						if (controller == null) {
-								controller = new AnimatorController ();
-								controller.AddLayer ("preview");
-								controller.hideFlags = HideFlags.DontSave;
-				
-								stateMachine = controller.GetLayer (0).stateMachine;
-								CreateParameters (motion);
-				
-								state = stateMachine.AddState ("preview");
-
-								state.SetMotion (motion);
-								state.iKOnFeet = avatarPreview.IKOnFeet;
-								state.hideFlags = HideFlags.DontSave;
-
-								
-								AnimatorController.SetAnimatorController (avatarPreview.Animator, controller);
-								Debug.Log ("Setting avatarPreview.Animator " + avatarPreview.Animator.name + " to temp controller");
-						} else {
-								Debug.Log ("Reset of root position and rotation cos of new motion");
-								//Vector3 rootPosition = avatarPreview.Animator.rootPosition;
-								//Quaternion rootRotation = avatarPreview.Animator.rootRotation;
-								state.SetMotion (motion);
-								CreateParameters (motion);
-								avatarPreview.timeControl.currentTime = 0f;
-								avatarPreview.Animator.UpdateWrapper (0f);
-								//avatarPreview.Animator.rootPosition = rootPosition;
-								//avatarPreview.Animator.rootRotation = rootRotation;
-								Debug.Log ("Reseted");
-						}
-
-		
-			
-						if (AnimatorController.GetEffectiveAnimatorController (avatarPreview.Animator) != this.controller) {
-								AnimatorController.SetAnimatorController (avatarPreview.Animator, this.controller);
-
-								Debug.Log ("Getting Effective Animator and set avatarPreview.Animator " + avatarPreview.Animator.name + " to temp controller");
-						}
-				}
-
-				private void CreateParameters (Motion motion)
-				{
-						int parameterCount = controller.parameterCount;
-						for (int i = 0; i < parameterCount; i++) {
-								controller.RemoveParameter (0);
-						}
-			
-						if (motion is BlendTree) {
-								BlendTree blendTree = motion as BlendTree;
-				
-								for (int j = 0; j < blendTree.GetRecursiveBlendParamCount(); j++) {
-										controller.AddParameter (blendTree.GetRecursiveBlendParam (j), AnimatorControllerParameterType.Float);
-								}
-						}
-
-
-				}
-
-				private void UpdateAvatarState (Motion motion)
-				{
-						if (Event.current.type != EventType.Repaint) {
-								return;
-						}
-
-						//Debug.Log ("UpdateAvatarState");
-			
-						Animator animator = avatarPreview.Animator;
-						if (animator) {
-//				if (PrevIKOnFeet != avatarPreview.IKOnFeet)
-//				{
-//					PrevIKOnFeet = avatarPreview.IKOnFeet;
-//					Vector3 rootPosition = avatarPreview.Animator.rootPosition;
-//					Quaternion rootRotation = avatarPreview.Animator.rootRotation;
-//
-//					ClearStateMachine();
-//					CreateStateMachine(motion);
-//					//ResetStateMachine();
-//					avatarPreview.Animator.UpdateWrapper(avatarPreview.timeControl.currentTime);
-//					avatarPreview.Animator.UpdateWrapper(0f);
-//					avatarPreview.Animator.rootPosition = rootPosition;
-//					avatarPreview.Animator.rootRotation = rootRotation;
-//				}
-				
-								avatarPreview.timeControl.loop = true;
-								float num = 1f;
-								float num2 = 0f;
-								if (animator.layerCount > 0) {
-
-										AnimatorStateInfo currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo (0);
-										num = currentAnimatorStateInfo.length;
-										num2 = currentAnimatorStateInfo.normalizedTime;
-								}
-				
-								avatarPreview.timeControl.startTime = 0f;
-								avatarPreview.timeControl.stopTime = num;
-								avatarPreview.timeControl.Update ();
-				
-								float num3 = this.avatarPreview.timeControl.deltaTime;
-								if (!motion.isLooping) {
-										if (num2 >= 1f) {
-												num3 -= num;
-										} else {
-												if (num2 < 0f) {
-														num3 += num;
-												}
-										}
-								}
-				
-				
-								animator.UpdateWrapper (num3);
-						}
-				}
-
-
-
-
-
-
-
-				//
-				// Nested Types
-				//
-				private class Styles
-				{
-						public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
-						public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
-						public GUIStyle playButton = "TimeScrubberButton";
-						public GUIStyle timeScrubber = "TimeScrubber";
-				}
-
-				private static Styles s_Styles;
-				float m_MouseDrag;
-				float nextCurrentTime;
-				bool m_WrapForwardDrag;
-				string[] displayNames;
-
-				//
-				// Methods
-				//
-				public void DoTimeControl (Rect rect)
-				{
-						if (MecanimNodeCustomEditor.s_Styles == null) {
-								MecanimNodeCustomEditor.s_Styles = new MecanimNodeCustomEditor.Styles ();
-						}
-						Event current = Event.current;
-						//int controlID = GUIUtility.GetControlID (TimeControl.kScrubberIDHash, FocusType.Keyboard);
-						int controlID = GUIUtility.GetControlID (FocusType.Passive);
-						Rect rect2 = rect;
-						rect2.height = 21f;
-						Rect rect3 = rect2;
-						rect3.xMin += 33f;
-						switch (current.GetTypeForControl (controlID)) {
-						case EventType.MouseDown:
-								if (rect.Contains (current.mousePosition)) {
-										GUIUtility.keyboardControl = controlID;
-								}
-								if (rect3.Contains (current.mousePosition)) {
-										EditorGUIUtility.SetWantsMouseJumping (1);
-										GUIUtility.hotControl = controlID;
-										this.m_MouseDrag = current.mousePosition.x - rect3.xMin;
-										//this.nextCurrentTime = this.m_MouseDrag * (this.stopTime - this.startTime) / rect3.width + this.startTime;
-										this.m_WrapForwardDrag = false;
-										current.Use ();
-								}
-								break;
-						case EventType.MouseUp:
-								if (GUIUtility.hotControl == controlID) {
-										EditorGUIUtility.SetWantsMouseJumping (0);
-										GUIUtility.hotControl = 0;
-										current.Use ();
-								}
-								break;
-						case EventType.MouseDrag:
-								if (GUIUtility.hotControl == controlID) {
-										this.m_MouseDrag += current.delta.x * 1f;//this.playbackSpeed;
-										if (false && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width)) {
-												//if (this.loop && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width))
-												this.m_WrapForwardDrag = true;
-												this.m_MouseDrag = Mathf.Repeat (this.m_MouseDrag, rect3.width);
-										}
-										//this.nextCurrentTime = Mathf.Clamp (this.m_MouseDrag, 0f, rect3.width) * (this.stopTime - this.startTime) / rect3.width + this.startTime;
-										current.Use ();
-								}
-								break;
-						case EventType.KeyDown:
-//				if (GUIUtility.keyboardControl == controlID)
-//				{
-//					if (current.keyCode == KeyCode.LeftArrow)
-//					{
-//						if (this.currentTime - this.startTime > 0.01f)
-//						{
-//							this.deltaTime = -0.01f;
-//						}
-//						current.Use ();
-//					}
-//					if (current.keyCode == KeyCode.RightArrow)
-//					{
-//						if (this.stopTime - this.currentTime > 0.01f)
-//						{
-//							this.deltaTime = 0.01f;
-//						}
-//						current.Use ();
-//					}
-//				}
-								break;
-						}
-
-						//GUI.Box (rect2, GUIContent.none, TimeControl.s_Styles.timeScrubber);
-						GUI.Box (rect2, GUIContent.none, MecanimNodeCustomEditor.s_Styles.timeScrubber);
-						//thisg = GUI.Toggle (rect2, this.playing, (!this.playing) ? TimeControl.s_Styles.playIcon : TimeControl.s_Styles.pauseIcon, TimeControl.s_Styles.playButton);
-
-						//float num = Mathf.Lerp (rect3.x, rect3.xMax, this.normalizedTime);
-						float num = Mathf.Lerp (rect3.x, rect3.xMax, mecanimNode.normalizedTimeCurrent);
-
-						if (GUIUtility.keyboardControl == controlID) {
-								Handles.color = new Color (1f, 0f, 0f, 1f);
-						} else {
-								Handles.color = new Color (1f, 0f, 0f, 0.5f);
-						}
-						Handles.DrawLine (new Vector2 (num, rect3.yMin), new Vector2 (num, rect3.yMax));
-						Handles.DrawLine (new Vector2 (num + 1f, rect3.yMin), new Vector2 (num + 1f, rect3.yMax));
-				}
-
 
 
 				///  TIMELINE EVENTHANDLERS
@@ -411,7 +150,7 @@ namespace ws.winx.editor.bmachine.extensions
 						eventTimeValues = (float[])args.values;
 
 						//recreate (not to optimal but doesn't have
-						displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+						eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 
 					
 
@@ -446,7 +185,7 @@ namespace ws.winx.editor.bmachine.extensions
 								ev = ((SendEventNormalized)mecanimNode.children [m]);	
 								this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
 								this.eventTimeValues [m] = ev.timeNormalized; 
-								this.displayNames [m] = ev.name;
+								this.eventDisplayNames [m] = ev.name;
 				
 						}
 			
@@ -498,7 +237,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 
 						//recreate 
-						displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+						eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 
 	
 						
@@ -544,37 +283,31 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-
-
-
-		
-
-
-
-
-
 				
 				
 								if (!Application.isPlaying) {
 									
-									
-										SetPreviewMotion (motion);
+										if(avatarPreview==null)
+											avatarPreview=new AvatarPreviewW(null,motion);
+									    else
+											avatarPreview.SetPreviewMotion (motion);
 									
 										//if(Event.current.type==EventType.Repaint){	
-										UpdateAvatarState (motion);
+										//UpdateAvatarState (motion);
 								
 										
 										Rect avatarRect = EditorGUILayout.BeginHorizontal ();
-										avatarRect.y += 30f;
 
+										avatarRect.y += 30f;
 										avatarRect.height=Screen.height-avatarRect.y-20f;
+
+					                    
 										avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
+
 										EditorGUILayout.EndHorizontal ();		
 										
 									
-								} else {
-										AnimatorController cont = mecanimNode.animator.runtimeAnimatorController as AnimatorController;
-								}
+								} 
 								
 								// Restore the indent level
 								EditorGUI.indentLevel = indentLevel;
@@ -586,8 +319,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-			GUIStyle playButton = "TimeScrubberButton";
-			Vector2 playButtonSize=playButton.CalcSize (new GUIContent ());
+
 			
 						if (!Application.isPlaying) {
 								if (!eventTimeLineInitalized) {
@@ -600,18 +332,19 @@ namespace ws.winx.editor.bmachine.extensions
 										eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
 										//select the time values from nodes
 										eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
-										displayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+										eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 										eventTimeValuesSelected = new bool[eventTimeValues.Length];
+										playButtonStyle="TimeScrubberButton";
+										playButtonSize=playButtonStyle.CalcSize (new GUIContent ());
 										eventTimeLineInitalized = true;
 								}
 				
 								Rect timeLineRect = GUILayoutUtility.GetLastRect ();
-								
-								timeLineRect.xMin+=playButtonSize.x-EditorGUILayoutEx.eventMarkerTexture.width*0.5f;
 
+								timeLineRect.xMin+=playButtonSize.x-EditorGUILayoutEx.eventMarkerTexture.width*0.5f;
 								timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3*0.66f + playButtonSize.y;
 				
-								EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref displayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
+								EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
 				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd
 								);
 
@@ -626,8 +359,8 @@ namespace ws.winx.editor.bmachine.extensions
 										ev.timeNormalized = eventTimeValues [i];
 					
 										//if changes have been made in pop editor or SendEventNormailized inspector
-										if (ev.name != displayNames [i])
-												displayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
+										if (ev.name != eventDisplayNames [i])
+												eventDisplayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
 					
 										int eventTimeValueSwitchInx = -1;
 					
