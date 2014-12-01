@@ -2,23 +2,23 @@
 //            Behaviour Machine
 // Copyright © 2014 Anderson Campos Cardoso
 //----------------------------------------------
-using UnityEngine;
-using UnityEditor;
 using System;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using BehaviourMachine;
-using UnityEditorInternal;
-using System.Text;
-using StateMachine=UnityEditorInternal.StateMachine;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using BehaviourMachine;
 using BehaviourMachineEditor;
-using ws.winx.editor.extensions;
+using UnityEditor;
+using UnityEditorInternal;
+using UnityEngine;
 using ws.winx.bmachine.extensions;
-using Motion=UnityEngine.Motion;
-using ws.winx.unity;
 using ws.winx.csharp.extensions;
+using ws.winx.unity;
+using ws.winx.editor.extensions;
+using Motion = UnityEngine.Motion;
+using StateMachine = UnityEditorInternal.StateMachine;
 
 namespace ws.winx.editor.bmachine.extensions
 {
@@ -363,9 +363,9 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventEdit (TimeLineEventArgs<float> args)
+				void onMecanimEventEdit (TimeLineArgs<float> args)
 				{
-				
+
 						SendEventNormalized child = mecanimNode.children [args.selectedIndex] as SendEventNormalized;
 					
 		
@@ -386,7 +386,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				/// <param name="sender">Sender.</param>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventClose (TimeLineEventArgs<float> args)
+				void onMecanimEventClose (TimeLineArgs<float> args)
 				{
 						SendEventNormalizedEditor.Hide ();
 				}
@@ -396,7 +396,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// Ons the mecanim event add.
 				/// </summary>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventAdd (TimeLineEventArgs<float> args)
+				void onMecanimEventAdd (TimeLineArgs<float> args)
 				{
 				
 
@@ -429,7 +429,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// Ons the mecanim event drag end.
 				/// </summary>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventDragEnd (TimeLineEventArgs<float> args)
+				void onMecanimEventDragEnd (TimeLineArgs<float> args)
 				{
 						int[] indexArray = new int[mecanimNode.children.Length];
 						for (int l = 0; l < indexArray.Length; l++) {
@@ -463,7 +463,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// Ons the mecanim event delete.
 				/// </summary>
 				/// <param name="args">Arguments.</param>
-				void onMecanimEventDelete (TimeLineEventArgs<float> args)
+				void onMecanimEventDelete (TimeLineArgs<float> args)
 				{
 						float[] timeValues = (float[])args.values;
 						int timeValuesNumber = timeValues.Length;

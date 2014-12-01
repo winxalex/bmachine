@@ -15,7 +15,7 @@ using System.Collections;
 
 namespace ws.winx.editor.extensions
 {
-	public class TimeLineEventArgs<T>:EventArgs
+	public class TimeLineArgs<T>:EventArgs
 	{
 		
 		
@@ -42,11 +42,11 @@ namespace ws.winx.editor.extensions
 			get{ return _selectedIndex;}
 		}
 		
-		public Action<TimeLineEventArgs<float>> EditOpen;
-		public Action<TimeLineEventArgs<float>> EditClose;
-		public Action<TimeLineEventArgs<float>> Delete;
-		public Action<TimeLineEventArgs<float>> Add;
-		public Action<TimeLineEventArgs<float>> DragEnd;
+		public Action<TimeLineArgs<T>> EditOpen;
+		public Action<TimeLineArgs<T>> EditClose;
+		public Action<TimeLineArgs<T>> Delete;
+		public Action<TimeLineArgs<T>> Add;
+		public Action<TimeLineArgs<T>> DragEnd;
 		
 		//
 		// Events
@@ -57,8 +57,8 @@ namespace ws.winx.editor.extensions
 		//				public event EventHandler<TimeLineEventArgs<float>> Add;
 		//				public event EventHandler<TimeLineEventArgs<float>> DragEnd;
 		
-		public TimeLineEventArgs (int selectedIndex, T selectedValue, IList<T> values, bool[] selected, int controlID,
-		                          Action<TimeLineEventArgs<float>> Add=null,Action<TimeLineEventArgs<float>> Delete=null,  Action<TimeLineEventArgs<float>> EditClose=null,Action<TimeLineEventArgs<float>> EditOpen=null,Action<TimeLineEventArgs<float>> DragEnd=null
+		public TimeLineArgs(int selectedIndex, T selectedValue, IList<T> values, bool[] selected, int controlID,
+		                          Action<TimeLineArgs<T>> Add=null,Action<TimeLineArgs<T>> Delete=null,  Action<TimeLineArgs<T>> EditClose=null,Action<TimeLineArgs<T>> EditOpen=null,Action<TimeLineArgs<T>> DragEnd=null
 		                          )
 		{
 			this._selectedValue = selectedValue;
