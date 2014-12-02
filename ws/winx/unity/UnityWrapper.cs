@@ -271,20 +271,24 @@ public class AvatarPreviewW {
 			
 
 			if (this.Animator) {
-				//				if (PrevIKOnFeet != avatarPreview.IKOnFeet)
-				//				{
-				//					PrevIKOnFeet = avatarPreview.IKOnFeet;
-				//					Vector3 rootPosition = avatarPreview.Animator.rootPosition;
-				//					Quaternion rootRotation = avatarPreview.Animator.rootRotation;
-				//
-				//					ClearStateMachine();
-				//					CreateStateMachine(motion);
-				//					//ResetStateMachine();
-				//					avatarPreview.Animator.UpdateWrapper(avatarPreview.timeControl.currentTime);
-				//					avatarPreview.Animator.UpdateWrapper(0f);
-				//					avatarPreview.Animator.rootPosition = rootPosition;
-				//					avatarPreview.Animator.rootRotation = rootRotation;
-				//				}
+								if (PrevIKOnFeet != IKOnFeet)
+								{
+									PrevIKOnFeet =IKOnFeet;
+
+									//save root pos and rot
+									Vector3 rootPosition = this.Animator.rootPosition;
+									Quaternion rootRotation = this.Animator.rootRotation;
+				
+									ClearPreviewStateMachine();
+									CreatePreviewStateMachine(motion);
+									
+									this.Animator.Update(this.timeControl.currentTime);
+									this.Animator.Update(0f);
+
+									//restore root pos and rot
+									this.Animator.rootPosition = rootPosition;
+									this.Animator.rootRotation = rootRotation;
+								}
 				
 				this.timeControl.loop = true;
 				float timeAnimationLength = 1f;

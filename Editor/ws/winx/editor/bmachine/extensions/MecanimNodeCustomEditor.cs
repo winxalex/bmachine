@@ -278,7 +278,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-				
+								EditorGUILayout.LabelField("Events Timeline");
 				
 								if (!Application.isPlaying) {
 									

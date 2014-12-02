@@ -4,7 +4,7 @@ using BehaviourMachine;
 
 namespace ws.winx.bmachine.extensions
 {
-	[NodeInfo (category = "Extensions/Composite", icon = "Selector", description = "Has an \"or\" logic. If one child succeed, then the execution is stopped and the selector returns Success. If a child fails then sequantially runs the next child. If all child fails, returns Failure")]
+	[NodeInfo (category = "Extensions/Eventor/Composite", icon = "Selector", description = "Has an \"or\" logic. If one child succeed, then the execution is stopped and the selector returns Success. If a child fails then sequantially runs the next child. If all child fails, returns Failure")]
 	public class SelectorEventor : CompositeNode
 	{
 

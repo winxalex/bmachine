@@ -12,8 +12,8 @@ using ws.winx.unity;
 
 namespace ws.winx.bmachine.extensions
 {
-	[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
-		public class MecanimNode:CompositeNode
+	[NodeInfo ( category = "Extensions/Eventor/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
+		public class MecanimNodeEventor:CompositeNode
 		{
 
 				
@@ -54,7 +54,6 @@ namespace ws.winx.bmachine.extensions
 				AnimatorStateInfo currentAnimatorStateInfo;
 				bool isCurrentEqualToSelectedAnimaInfo = false;
 				List<int> _treeInx;
-				int _LastTickedChildren=-1;
 				
 				public List<int> treeInx{ 
 			get{ if(_treeInx==null) _treeInx=new List<int>(); return _treeInx; }
@@ -172,8 +171,12 @@ namespace ws.winx.bmachine.extensions
 				{
 
 						Debug.Log (selectedAnimaStateInfo.label.text + ">Start MecanimNode");
-
-						_LastTickedChildren = -1;
+						
+						//start the Event children (they are ticking themselfs)
+						int len=children.Length;
+						for (int i=0;i<len;  i++) {
+							children[i].Start();
+						}
 
 						PlayAnimaState ();
 
@@ -262,22 +265,6 @@ namespace ws.winx.bmachine.extensions
 										//Test only event sending is done try SentEventNormalized
 										//if (normalizedTimeLast < 0.67f && normalizedTimeCurrent >= 0.67f)
 												//Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
-
-
-										int len=children.Length;
-
-					                    if(len>0){
-											_LastTickedChildren++;
-
-											//reset
-											if(_LastTickedChildren>=len)
-											_LastTickedChildren=0;
-
-											for (int i=_LastTickedChildren;i<len;  i++) {
-												children[i].OnTick();
-											}
-										}
-
 								}
 
 							

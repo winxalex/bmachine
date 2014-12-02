@@ -14,8 +14,8 @@ using ws.winx.unity;
 
 namespace ws.winx.bmachine.extensions
 {
-	[NodeInfo ( category = "Extensions/Mecanim/", icon = "StateMachine",  description ="To be used in conjuction with MecanimNode for sending events in animation points in time")]
-		public class SendEventNormalized:ActionNode
+	[NodeInfo ( category = "Extensions/Eventor/Mecanim/", icon = "StateMachine",  description ="To be used in conjuction with MecanimNode for sending events in animation points in time")]
+		public class SendEventNormalizedEventor:ActionNode
 		{
 				//
 				// Fields
@@ -34,9 +34,27 @@ namespace ws.winx.bmachine.extensions
 				{
 				
 						_animator = this.self.GetComponent<Animator> ();
-						
+					
 				}
 
+
+
+				///!!!!Nasty hack :)
+
+				void onCustomNodeTick (ActionNode node)
+				{
+						if (node != this.branch)
+								return;
+						//Debug.Log ("onTick "+node.name);
+
+						OnTick ();
+				}
+
+
+					public override void Start ()
+					{
+						ActionNode.onNodeTick += onCustomNodeTick;
+					}
 
 
 				public override void Update ()
@@ -79,12 +97,24 @@ namespace ws.winx.bmachine.extensions
 				
 				}
 
+				public override void End ()
+				{
+						Debug.Log ("End " + this.name);
+						ActionNode.onNodeTick -= onCustomNodeTick;
+				}
 
-			
+				public override void OnDisable ()
+				{
+
+					//clean
+					ActionNode.onNodeTick -= onCustomNodeTick;
+
+					base.OnDisable ();
+				}
 
 				public override string ToString ()
 				{
-						return string.Format ("[SendEventNormalized]{0} {1}", name, timeNormalized.Value);
+						return string.Format ("[SendEventNormalizedEventor]{0} {1}", name, timeNormalized.Value);
 				}
 		}
 }
