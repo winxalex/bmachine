@@ -212,18 +212,18 @@ public class AvatarPreviewW {
 			
 			
 			
-			if (AnimatorController.GetEffectiveAnimatorController (this.Animator) != this._previewAnimatorController) {
-				AnimatorController.SetAnimatorController (this.Animator, this._previewAnimatorController);
-				
-				Debug.Log ("Getting Effective Animator and set avatarPreview.Animator " + this.Animator.name + " to temp controller");
-			}
+//			if (AnimatorController.GetEffectiveAnimatorController (this.Animator) != this._previewAnimatorController) {
+//				AnimatorController.SetAnimatorController (this.Animator, this._previewAnimatorController);
+//				
+//				Debug.Log ("Getting Effective Animator and set avatarPreview.Animator " + this.Animator.name + " to temp controller");
+//			}
 		}
 
 
 		/// <summary>
 		/// Clears the state machine.
 		/// </summary>
-		private void ClearStateMachine ()
+		private void ClearPreviewStateMachine ()
 		{
 			if ( this.Animator != null) {
 				AnimatorController.SetAnimatorController (this.Animator, null);
@@ -245,10 +245,10 @@ public class AvatarPreviewW {
 		/// <param name="motion">Motion.</param>
 		private void CreateParameters (Motion motion)
 		{
-			int parameterCount = _previewAnimatorController.parameterCount;
-			for (int i = 0; i < parameterCount; i++) {
-				_previewAnimatorController.RemoveParameter (0);
-			}
+//			int parameterCount = _previewAnimatorController.parameterCount;
+//			for (int i = 0; i < parameterCount; i++) {
+//				_previewAnimatorController.RemoveParameter (0);
+//			}
 			
 			if (motion is BlendTree) {
 				BlendTree blendTree = motion as BlendTree;

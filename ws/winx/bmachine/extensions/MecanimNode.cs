@@ -33,8 +33,8 @@ namespace ws.winx.bmachine.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						normalizedTimeStart = 0.5f;
-				//[HideInInspector]
-				[RangeAttribute(0f,1f)]
+				[HideInInspector]
+			//	[RangeAttribute(0f,1f)]
 				public float
 						normalizedTimeCurrent = 0f;
 
@@ -96,7 +96,8 @@ namespace ws.winx.bmachine.extensions
 							
 							
 						}
-						
+
+	//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
 						animator.CrossFade (selectedAnimaStateInfo.hash, transitionDuration, selectedAnimaStateInfo.layer, normalizedTimeStart);
 
 				}
@@ -126,6 +127,12 @@ namespace ws.winx.bmachine.extensions
 
 			return result;
 				}
+
+		public override void ResetStatus ()
+		{
+			Debug.Log (selectedAnimaStateInfo.label.text + ">ResetStatus");
+			base.ResetStatus ();
+		}
 		
 				public override void Reset ()
 				{
@@ -135,30 +142,30 @@ namespace ws.winx.bmachine.extensions
 						transitionDuration = 0f;
 				}
 
-				public override void Awake ()
-				{
-          
-						Debug.Log (selectedAnimaStateInfo.label.text + ">Awake");
-			
-
-
-				}
-
-				public override void OnEnable ()
-				{
-			
-						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
-
-				}
-		
-				public override void OnDisable ()
-				{
-			
-						Debug.Log (selectedAnimaStateInfo.label.text + ">Disable");
-			
-			
-			
-				}
+//				public override void Awake ()
+//				{
+//          
+//						Debug.Log (selectedAnimaStateInfo.label.text + ">Awake");
+//			
+//
+//
+//				}
+//
+//				public override void OnEnable ()
+//				{
+//			
+//						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
+//
+//				}
+//		
+//				public override void OnDisable ()
+//				{
+//			
+//						Debug.Log (selectedAnimaStateInfo.label.text + ">Disable");
+//			
+//			
+//			
+//				}
 		
 				public override void Start ()
 				{
@@ -172,16 +179,17 @@ namespace ws.winx.bmachine.extensions
 				public override void OnTick ()
 				{
 
-						Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
+						//Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
 
 						currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
 						isCurrentEqualToSelectedAnimaInfo = currentAnimatorStateInfo.nameHash == selectedAnimaStateInfo.hash;
 
-						Debug.Log (selectedAnimaStateInfo.label.text + ">Before");
+						//Debug.Log (selectedAnimaStateInfo.label.text + ">Before");
+
 
 
 						//The second check ins't nessery if I could reset Status when this node is switched
-						if (this.status != Status.Running || (!isCurrentEqualToSelectedAnimaInfo && loop && this.status == Status.Running)) {
+						if (this.status != Status.Running){
 			
 								this.Start ();	
 				 
@@ -189,7 +197,7 @@ namespace ws.winx.bmachine.extensions
 								return;
 						}
 
-						Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
+					//	Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
 
 			
 						if (isCurrentEqualToSelectedAnimaInfo)
@@ -200,6 +208,10 @@ namespace ws.winx.bmachine.extensions
 								this.End ();
 						}
 				}
+
+
+
+	
 
 
 

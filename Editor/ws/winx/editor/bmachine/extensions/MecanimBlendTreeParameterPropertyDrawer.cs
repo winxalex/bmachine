@@ -44,7 +44,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 			
-			if (blendParams != null && blendParams.Length>(int)((MecanimBlendParameterAttribute)attribute).axis) {
+						if (blendParams != null && blendParams.Length > (int)((MecanimBlendParameterAttribute)attribute).axis) {
 
 
 

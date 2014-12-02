@@ -38,22 +38,17 @@ namespace ws.winx.editor.bmachine.extensions
 				GUIContent[] displayOptions;
 				List<MecanimStateInfo> animaInfoValues;
 				MecanimStateInfo selectedAnimaStateInfo;
-				
-			
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
 				bool eventTimeLineInitalized;
 				Rect eventTimeLineValuePopUpRect;
 				bool[] eventTimeValuesSelected;
 				EventComparer eventTimeComparer = new EventComparer ();
-
 				string[] eventDisplayNames;
 
 				//avatarPreviewTimeControl button
-		GUIStyle playButtonStyle;
+				GUIStyle playButtonStyle;
 				Vector2 playButtonSize;
-
-				
 				AvatarPreviewW avatarPreview;
 
 				//
@@ -287,19 +282,17 @@ namespace ws.winx.editor.bmachine.extensions
 				
 								if (!Application.isPlaying) {
 									
-										if(avatarPreview==null)
-											avatarPreview=new AvatarPreviewW(null,motion);
-									    else
-											avatarPreview.SetPreviewMotion (motion);
+										if (avatarPreview == null)
+												avatarPreview = new AvatarPreviewW (null, motion);
+										else
+												avatarPreview.SetPreviewMotion (motion);
 									
-										//if(Event.current.type==EventType.Repaint){	
-										//UpdateAvatarState (motion);
-								
+										
 										
 										Rect avatarRect = EditorGUILayout.BeginHorizontal ();
 
 										avatarRect.y += 30f;
-										avatarRect.height=Screen.height-avatarRect.y-20f;
+										avatarRect.height = Screen.height - avatarRect.y - 20f;
 
 					                    
 										avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
@@ -334,15 +327,19 @@ namespace ws.winx.editor.bmachine.extensions
 										eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
 										eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 										eventTimeValuesSelected = new bool[eventTimeValues.Length];
-										playButtonStyle="TimeScrubberButton";
-										playButtonSize=playButtonStyle.CalcSize (new GUIContent ());
+
+										playButtonStyle = "TimeScrubberButton";
+
+										if (playButtonStyle != null)
+												playButtonSize = playButtonStyle.CalcSize (new GUIContent ());
+
 										eventTimeLineInitalized = true;
 								}
 				
 								Rect timeLineRect = GUILayoutUtility.GetLastRect ();
 
-								timeLineRect.xMin+=playButtonSize.x-EditorGUILayoutEx.eventMarkerTexture.width*0.5f;
-								timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3*0.66f + playButtonSize.y;
+								timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
+								timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
 				
 								EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
 				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd

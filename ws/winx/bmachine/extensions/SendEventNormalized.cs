@@ -39,17 +39,23 @@ namespace ws.winx.bmachine.extensions
 
 			public override void Update ()
 			{
-				float timeNormalized = _animator.GetNextAnimatorStateInfo (((MecanimNode)this.owner).selectedAnimaStateInfo.layer).normalizedTime;
-				timeNormalized = timeNormalized - (int)timeNormalized;
+				float timeNormalizedCurrent = _animator.GetCurrentAnimatorStateInfo (((MecanimNode)this.owner).selectedAnimaStateInfo.layer).normalizedTime;
+				timeNormalizedCurrent = timeNormalizedCurrent - (int)timeNormalizedCurrent;
 
-				//base.owner.SendEvent (this.eventToSend.id);
+				//
 				
 				//dispatch event to parent I'm done
 
-					_timeNormalizedLast = timeNormalized;
+			if (timeNormalizedCurrent > timeNormalized && _timeNormalizedLast < timeNormalized) {
 
-			//this.tree
+				base.owner.SendEvent (this.eventToSend.id);
+				Debug.Log("Event ["+name+"] sent at:"+timeNormalized);
+				this.status = Status.Success;
+						}
 
+				_timeNormalizedLast = timeNormalizedCurrent;
+
+				this.status = Status.Running;
 
 			}
 			
