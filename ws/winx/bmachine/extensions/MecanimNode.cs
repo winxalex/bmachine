@@ -13,7 +13,7 @@ using ws.winx.unity;
 namespace ws.winx.bmachine.extensions
 {
 	[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
-		public class MecanimNode:CompositeNode
+		public class MecanimNode:CompositeNode,IEventStatusNode
 		{
 
 				
@@ -21,12 +21,11 @@ namespace ws.winx.bmachine.extensions
 				public MecanimStateInfo
 						selectedAnimaStateInfo;
 				public bool loop = false;
-				[MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.X)]
-				public int
+		[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.X)]
+		       public int
 						blendParamXBlackboardBindID;
-				[MecanimBlendParameterAttribute(axis=MecanimBlendParameterAttribute.Axis.Y)]
-				public int
-						blendParamYBlackboardBindID;
+		[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.Y)]
+						public int blendParamYBlackboardBindID;
 				[RangeAttribute(0f,1f)]
 				public float
 						transitionDuration = 0.3f;
@@ -38,6 +37,36 @@ namespace ws.winx.bmachine.extensions
 				public float
 						normalizedTimeCurrent = 0f;
 
+
+
+				#region IEventStatusNode implementation
+					StatusUpdateHandler _statusHandler;
+					StatusEventArgs _statusArgs = new StatusEventArgs (Status.Error);
+					
+					public event StatusUpdateHandler OnChildCompleteStatus{
+						
+						add{
+							_statusHandler+=value;
+							
+							//v1
+							//this.tree.StartCoroutine
+							
+							//v2
+							this.tree.update += OnTick;
+						}
+						
+						remove{
+							_statusHandler-=value;
+							
+							//v1
+							//this.tree.StopCoroutine()
+							
+							//v2
+							this.tree.update -= OnTick;
+						}
+						
+					}
+				#endregion
 				
 				
 
@@ -252,7 +281,10 @@ namespace ws.winx.bmachine.extensions
 							
 								if (normalizedTimeCurrent > 1f) {
 										if (!loop) {
-												this.status = Status.Success;
+												_statusArgs.status=this.status = Status.Success;
+
+												if (_statusHandler != null)
+													_statusHandler.Invoke (this, _statusArgs);
 												return;
 										}
 
@@ -314,7 +346,10 @@ namespace ws.winx.bmachine.extensions
 
 						
 						
-						this.status = Status.Running;
+						_statusArgs.status=this.status = Status.Running;
+
+						if (_statusHandler != null)
+						_statusHandler.Invoke (this, _statusArgs);
 
 				}
 

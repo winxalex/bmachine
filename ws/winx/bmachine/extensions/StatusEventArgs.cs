@@ -8,7 +8,7 @@ namespace ws.winx.bmachine.extensions
 
 		public class StatusEventArgs : EventArgs
 		{
-				public BehaviourMachine.Status status { get; private set; }
+				public BehaviourMachine.Status status { get; set; }
 		
 				public StatusEventArgs (BehaviourMachine.Status status)
 				{

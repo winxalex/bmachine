@@ -104,7 +104,7 @@ namespace ws.winx.editor.bmachine.extensions
 					
 		
 						child.timeNormalized.Value = args.selectedValue;
-						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						NodePopupEditor<SendEventNormalized>.Show (child, eventTimeLineValuePopUpRect);
 
 				}
 
@@ -121,7 +121,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <param name="args">Arguments.</param>
 				void onMecanimEventClose (TimeLineArgs<float> args)
 				{
-						SendEventNormalizedEditor.Hide ();
+						NodePopupEditor<SendEventNormalized>.Hide ();
 				}
 
 
@@ -152,7 +152,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 						//show popup
-						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						NodePopupEditor<SendEventNormalized>.Show (child, eventTimeLineValuePopUpRect);
 
 						Undo.RecordObject (target.self, "Add Node");
 				}
@@ -240,7 +240,7 @@ namespace ws.winx.editor.bmachine.extensions
 						StateUtility.SetDirty (mecanimNode.tree);
 
 						Undo.RecordObject (target.self, "Delete Node");
-						SendEventNormalizedEditor.Hide ();
+						NodePopupEditor<SendEventNormalized>.Hide ();
 
 
 				}

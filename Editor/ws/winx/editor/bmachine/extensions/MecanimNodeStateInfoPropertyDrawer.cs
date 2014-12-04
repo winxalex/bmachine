@@ -14,7 +14,7 @@ using ws.winx.unity;
 namespace ws.winx.editor.bmachine.extensions
 {
 	[CustomNodePropertyDrawer (typeof(MecanimStateInfoAttribute))]
-	public class MecanimStatInfoPropertyDrawer : NodePropertyDrawer
+	public class MecanimNodeStateInfoPropertyDrawer : NodePropertyDrawer
 	{
 
 		GUIContent[] displayOptions;

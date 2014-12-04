@@ -12,8 +12,8 @@ using ws.winx.unity;
 
 namespace ws.winx.editor.bmachine.extensions
 {
-		[CustomNodePropertyDrawer (typeof(MecanimBlendParameterAttribute))]
-		public class MecanimBlendTreeParameterPropertyDrawer : NodePropertyDrawer
+		[CustomNodePropertyDrawer (typeof(MecanimNodeBlendParameterAttribute))]
+		public class MecanimNodeBlendTreeParameterPropertyDrawer : NodePropertyDrawer
 		{
 
 				MecanimStateInfo previousSelectAnimaInfo;
@@ -24,7 +24,7 @@ namespace ws.winx.editor.bmachine.extensions
 				GUIContent[] displayOptions;
 				string caption = "Blend Parameter";
 				List<Variable> blackboardFloatVariables;
-				MecanimBlendParameterAttribute blendParamAttribute;
+				MecanimNodeBlendParameterAttribute blendParamAttribute;
 				int blackBoardBindingID;
 				
 
@@ -44,7 +44,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 			
-						if (blendParams != null && blendParams.Length > (int)((MecanimBlendParameterAttribute)attribute).axis) {
+						if (blendParams != null && blendParams.Length > (int)((MecanimNodeBlendParameterAttribute)attribute).axis) {
 
 
 
@@ -71,7 +71,7 @@ namespace ws.winx.editor.bmachine.extensions
 								EditorGUILayout.BeginHorizontal ();
 
 								
-								label.text = blendParams [(int)((MecanimBlendParameterAttribute)attribute).axis];
+								label.text = blendParams [(int)((MecanimNodeBlendParameterAttribute)attribute).axis];
 
 								Variable variable = blackboardFloatVariables.Find ((Item) => {
 										return Item.id == blackBoardBindingID;});

@@ -14,7 +14,7 @@ namespace ws.winx.unity
 		
 
 
-		public class MecanimBlendParameterAttribute:PropertyAttribute
+		public class MecanimNodeBlendParameterAttribute:PropertyAttribute
 		{
 		   public enum Axis{
 			X=0,
@@ -22,11 +22,11 @@ namespace ws.winx.unity
 			}
 
 		public Axis axis;
-		public MecanimBlendParameterAttribute(){
+		public MecanimNodeBlendParameterAttribute(){
 
 		}
 
-			public MecanimBlendParameterAttribute(Axis a){
+			public MecanimNodeBlendParameterAttribute(Axis a){
 			this.axis = a;
 			}
 

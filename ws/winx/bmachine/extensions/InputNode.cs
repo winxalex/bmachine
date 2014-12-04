@@ -8,9 +8,11 @@ namespace BehaviourMachine
 	[NodeInfo (category = "Extensions/Mecanim/", icon = "Axis", description = "Stores the value of the virtual axis identified by \"Axis Name\" in \"Store Axis\"", url = "http://docs.unity3d.com/Documentation/ScriptReference/Input.GetAxis.html")]
 	public class InputNode : ActionNode,IEventStatusNode
 	{
+		//!!! NOT FINISHED
+
 		#region IEventStatusNode implementation
 
-		public event StatusUpdateHandler OnUpdateStatus;
+		public event StatusUpdateHandler OnChildCompleteStatus;
 
 		#endregion
 

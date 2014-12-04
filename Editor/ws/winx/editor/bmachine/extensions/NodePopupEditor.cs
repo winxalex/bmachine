@@ -17,24 +17,27 @@ using ws.winx.bmachine.extensions;
 namespace ws.winx.editor.bmachine.extensions
 {
 		
-		public class SendEventNormalizedEditor:EditorWindow
+		public class NodePopupEditor<T>:EditorWindow where T:ActionNode
 		{
-				private static SendEventNormalizedEditor window;
-				private static SendEventNormalized node;
+				private static NodePopupEditor<T> window;
+				private static T node;
 				NodeEditor editor;
 
 				
 
-				public static void Show (SendEventNormalized node, Rect position)
+				public static void Show(T node, Rect position)
 				{
-						SendEventNormalizedEditor.node = node;
+						NodePopupEditor<T>.node = node;
 
 						if (window != null)//restore last 
 								position = window.position;
 
-						SendEventNormalizedEditor.window = EditorWindow.GetWindow<SendEventNormalizedEditor> ();
-						SendEventNormalizedEditor.window.position = position;
-						SendEventNormalizedEditor.window.ShowPopup ();
+
+			//need fix
+			NodePopupEditor<T>.window =(NodePopupEditor<T>) EditorWindow.CreateInstance (typeof (NodePopupEditor<T>));
+					//(NodePopupEditor<T>) EditorWindow.GetWindow(typeof(NodePopupEditor<T>));
+						NodePopupEditor<T>.window.position = position;
+						NodePopupEditor<T>.window.ShowPopup ();
 				}
 
 				public static void Hide ()
@@ -48,11 +51,11 @@ namespace ws.winx.editor.bmachine.extensions
 				void OnGUI ()
 				{
 						// The actual window code goes here
-						if (SendEventNormalizedEditor.node != null) {
+						if (NodePopupEditor<T>.node != null) {
 								if (editor == null)
-										editor = NodeEditor.CreateEditor (typeof(SendEventNormalized));
-								if (editor.target != SendEventNormalizedEditor.node)//How to add target to editor??? or subclass the Node Editor
-										editor.DrawNode (SendEventNormalizedEditor.node);
+					editor = NodeEditor.CreateEditor(NodePopupEditor<T>.node.GetType());
+								if (editor.target != NodePopupEditor<T>.node)//How to add target to editor??? or subclass the Node Editor
+										editor.DrawNode (NodePopupEditor<T>.node);
 								else
 										editor.OnInspectorGUI ();
 						}
