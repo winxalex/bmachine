@@ -104,7 +104,7 @@ namespace ws.winx.editor.bmachine.extensions
 					
 		
 						child.timeNormalized.Value = args.selectedValue;
-						NodePopupEditor<SendEventNormalized>.Show (child, eventTimeLineValuePopUpRect);
+						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 				}
 
@@ -121,7 +121,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <param name="args">Arguments.</param>
 				void onMecanimEventClose (TimeLineArgs<float> args)
 				{
-						NodePopupEditor<SendEventNormalized>.Hide ();
+						SendEventNormalizedEditor.Hide ();
 				}
 
 
@@ -152,7 +152,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 						//show popup
-						NodePopupEditor<SendEventNormalized>.Show (child, eventTimeLineValuePopUpRect);
+						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 						Undo.RecordObject (target.self, "Add Node");
 				}
@@ -240,7 +240,7 @@ namespace ws.winx.editor.bmachine.extensions
 						StateUtility.SetDirty (mecanimNode.tree);
 
 						Undo.RecordObject (target.self, "Delete Node");
-						NodePopupEditor<SendEventNormalized>.Hide ();
+						SendEventNormalizedEditor.Hide ();
 
 
 				}
@@ -261,6 +261,7 @@ namespace ws.winx.editor.bmachine.extensions
 	
 		
 			
+						
 						if (mecanimNode != null) {
 								// Get children nodes
 								//ActionNode[] children = randomChild.children;
@@ -288,15 +289,27 @@ namespace ws.winx.editor.bmachine.extensions
 												avatarPreview.SetPreviewMotion (motion);
 									
 										
-										
 										Rect avatarRect = EditorGUILayout.BeginHorizontal ();
 
 										avatarRect.y += 30f;
 										avatarRect.height = Screen.height - avatarRect.y - 20f;
 
-					                    
-										avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
+					if(eventTimeValues!=null && Event.current.type == EventType.Repaint){
 
+						//find first selected if exist
+						int eventTimeValueSelectedIndex=Array.IndexOf(eventTimeValuesSelected,true);
+					
+						if(eventTimeValueSelectedIndex>-1)
+							avatarPreview.SetTimeValue(eventTimeValues[eventTimeValueSelectedIndex]);
+	
+
+					}				
+
+
+
+
+						avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
+					//Debug.Log(avatarPreview.timeControl.currentTime+" "+);
 										EditorGUILayout.EndHorizontal ();		
 										
 									
@@ -348,18 +361,21 @@ namespace ws.winx.editor.bmachine.extensions
 				
 				
 								SendEventNormalized ev;
-				
+
+
+
 								//update time values 
 								int eventTimeValuesNumber = mecanimNode.children.Length;
 								for (int i=0; i<eventTimeValuesNumber; i++) {
 										ev = ((SendEventNormalized)mecanimNode.children [i]);	
 										ev.timeNormalized = eventTimeValues [i];
+
 					
 										//if changes have been made in pop editor or SendEventNormailized inspector
 										if (ev.name != eventDisplayNames [i])
 												eventDisplayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
 					
-										int eventTimeValueSwitchInx = -1;
+									
 					
 					
 								}

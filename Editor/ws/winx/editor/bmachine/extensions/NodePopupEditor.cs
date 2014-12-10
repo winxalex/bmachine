@@ -25,16 +25,18 @@ namespace ws.winx.editor.bmachine.extensions
 
 				
 
-				public static void Show(T node, Rect position)
+				public static void Show<B>(B node, Rect position)
 				{
-						NodePopupEditor<T>.node = node;
-
-						if (window != null)//restore last 
-								position = window.position;
-
-
-			//need fix
-			NodePopupEditor<T>.window =(NodePopupEditor<T>) EditorWindow.CreateInstance (typeof (NodePopupEditor<T>));
+//						NodePopupEditor<T>.node = node;
+//
+//			if (NodePopupEditor<T>.window != null)//restore last 
+//								position = window.position;
+//
+//
+//
+//			//need fix aaa
+		
+					   NodePopupEditor<T>.window =(NodePopupEditor<T>) EditorWindow.CreateInstance (typeof (NodePopupEditor<T>));
 					//(NodePopupEditor<T>) EditorWindow.GetWindow(typeof(NodePopupEditor<T>));
 						NodePopupEditor<T>.window.position = position;
 						NodePopupEditor<T>.window.ShowPopup ();

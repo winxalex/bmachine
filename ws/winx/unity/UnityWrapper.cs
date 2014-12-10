@@ -136,7 +136,9 @@ public class AvatarPreviewW {
 	#region Wrapper
 	
 	
-	private object instance;
+	private object __instance;
+
+	protected TimeControlW _timeControl;
 
 	
 	public delegate void OnAvatarChange();
@@ -150,7 +152,7 @@ public class AvatarPreviewW {
 		public AvatarPreviewW(Animator previewObjectInScene, Motion objectOnSameAsset) {
 			InitType();
 			
-			instance = method_ctor.Invoke( new object[] { previewObjectInScene, objectOnSameAsset } );
+			__instance = method_ctor.Invoke( new object[] { previewObjectInScene, objectOnSameAsset } );
 
 				_previewedMotion = objectOnSameAsset;
 
@@ -260,8 +262,10 @@ public class AvatarPreviewW {
 			
 			
 		}
-		
-		private void UpdateAvatarState (Motion motion)
+
+
+	
+		private void UpdateMotion (Motion motion)
 		{
 			if (Event.current.type != EventType.Repaint) {
 				return;
@@ -271,59 +275,87 @@ public class AvatarPreviewW {
 			
 
 			if (this.Animator) {
-								if (PrevIKOnFeet != IKOnFeet)
-								{
-									PrevIKOnFeet =IKOnFeet;
-
-									//save root pos and rot
-									Vector3 rootPosition = this.Animator.rootPosition;
-									Quaternion rootRotation = this.Animator.rootRotation;
-				
-									ClearPreviewStateMachine();
-									CreatePreviewStateMachine(motion);
-									
-									this.Animator.Update(this.timeControl.currentTime);
-									this.Animator.Update(0f);
-
-									//restore root pos and rot
-									this.Animator.rootPosition = rootPosition;
-									this.Animator.rootRotation = rootRotation;
-								}
+//								if (PrevIKOnFeet != IKOnFeet)
+//								{
+//									PrevIKOnFeet =IKOnFeet;
+//
+//									//save root pos and rot
+//									Vector3 rootPosition = this.Animator.rootPosition;
+//									Quaternion rootRotation = this.Animator.rootRotation;
+//				
+//									ClearPreviewStateMachine();
+//									CreatePreviewStateMachine(motion);
+//									
+//									this.Animator.Update(this.timeControl.currentTime);
+//									this.Animator.Update(0f);
+//
+//									//restore root pos and rot
+//									this.Animator.rootPosition = rootPosition;
+//									this.Animator.rootRotation = rootRotation;
+//								}
 				
 				this.timeControl.loop = true;
 				float timeAnimationLength = 1f;
-				float timeNormalized = 0f;
+				float timeNormalized=0f;
+
+
 				if (this.Animator.layerCount > 0) {
 					
 					AnimatorStateInfo currentAnimatorStateInfo = this.Animator.GetCurrentAnimatorStateInfo (0);
 					timeAnimationLength = currentAnimatorStateInfo.length;
+
+
 					timeNormalized = currentAnimatorStateInfo.normalizedTime;
 				}
 				
 				this.timeControl.startTime = 0f;
 				this.timeControl.stopTime = timeAnimationLength;
 				this.timeControl.Update ();
-				
+
+
+			
+
+
+				//deltaTime is nextCurrentTime-currentTime
+				//is set my drag of red Timeline handle or manually thru SetTimeValue
 				float timeDelta = this.timeControl.deltaTime;
-				if (!motion.isLooping) {
-					if (timeNormalized >= 1f) {
-						timeDelta -= timeAnimationLength;
-					} else {
-						if (timeNormalized < 0f) {
-							timeDelta += timeAnimationLength;
+
+
+
+				if(this.timeControl.playing){
+					if (!motion.isLooping) {
+						if (timeNormalized >= 1f) {
+							timeDelta -= timeAnimationLength;
+						} else {
+							if (timeNormalized < 0f) {
+								timeDelta += timeAnimationLength;
+							}
 						}
 					}
 				}
 				
-				
+
 
 				this.Animator.Update (timeDelta);
 			}
 		}
 
 
+	
+		public void SetTimeValue(float timeNormalized){
+
+			if (this.timeControl.playing)
+								return;
+
+			//currentTime is negative infinity not intialized => set it to 0f
+			if(this.timeControl.currentTime<0f) this.timeControl.currentTime=0f;
+			
+			//calculate nextCurrentTime based on timeNormalized
+			//deltaTime is nextCurrentTime-currentTime
+			this.timeControl.nextCurrentTime=this.timeControl.startTime*(1f - timeNormalized) + this.timeControl.stopTime * timeNormalized;	
 
 
+		}
 
 
 
@@ -392,56 +424,58 @@ public class AvatarPreviewW {
 		}
 
 		public void AvatarTimeControlGUI (Rect rect){
-			MethodInfo_AvatarTimeControlGUI.Invoke (instance,new object[]{rect});
+			MethodInfo_AvatarTimeControlGUI.Invoke (__instance,new object[]{rect});
 		}
 
      	public Texture DoRenderPreview (Rect previewRect, GUIStyle background){
 		
 
-			return MethodInfo_DoRenderPreview.Invoke (instance, new object[]{previewRect,background}) as Texture;
+			return MethodInfo_DoRenderPreview.Invoke (__instance, new object[]{previewRect,background}) as Texture;
 		}
 
 		void Init ()
 		{
-			MethodInfo_Init.Invoke (instance, null);
+			MethodInfo_Init.Invoke (__instance, null);
 		}
 	
 	public Animator Animator
 	{
 		get
 		{
-			return PropertyInfo_Animator.GetValue(instance, null) as Animator;
+			return PropertyInfo_Animator.GetValue(__instance, null) as Animator;
 		}
 	}
 	public bool IKOnFeet {
 		get {
-			return (bool)PropertyInfo_IKOnFeet.GetValue(instance, null);
+			return (bool)PropertyInfo_IKOnFeet.GetValue(__instance, null);
 		}
 	}
 	
 	public OnAvatarChange OnAvatarChangeFunc {
 		set {
-			PropertyInfo_OnAvatarChangeFunc.SetValue(instance, Delegate.CreateDelegate(PropertyInfo_OnAvatarChangeFunc.PropertyType, value.Target, value.Method), null);
+			PropertyInfo_OnAvatarChangeFunc.SetValue(__instance, Delegate.CreateDelegate(PropertyInfo_OnAvatarChangeFunc.PropertyType, value.Target, value.Method), null);
 		}
 	}
 	
 	public void DoPreviewSettings() {
-		MethodInfo_DoPreviewSettings.Invoke(instance, null);
+		MethodInfo_DoPreviewSettings.Invoke(__instance, null);
 	}
 	
 	public void OnDestroy() {
-		MethodInfo_OnDestroy.Invoke(instance, null);
+		MethodInfo_OnDestroy.Invoke(__instance, null);
 	}
 	
-	public void DoAvatarPreview(Rect rect, GUIStyle background) {
-		UpdateAvatarState (_previewedMotion);
+	public void DoAvatarPreview(Rect rect, GUIStyle background, float normalizedTime=-1f) {
+		UpdateMotion (_previewedMotion);
 
-		MethodInfo_DoAvatarPreview.Invoke(instance, new object[] { rect, background });
+		MethodInfo_DoAvatarPreview.Invoke(__instance, new object[] { rect, background });
 	}
 	
 	public TimeControlW timeControl {
 		get {
-			return new TimeControlW(FieldInfo_timeControl.GetValue(instance));
+			if(_timeControl==null) _timeControl=new TimeControlW(FieldInfo_timeControl.GetValue(__instance));
+
+			return _timeControl;
 		}
 	}
 	#endregion

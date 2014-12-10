@@ -717,18 +717,23 @@ namespace ws.winx.editor.extensions
 										DeleteTimeValues (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, null, Delete), selected);
 										break;
 								case HighLevelEvent.SelectionChanged:
+
+				//	Debug.Log("SelectionChanged");
 					
-										if (clickedIndex != -1) {
+										if (clickedIndex > -1) {
 						
-												//	Debug.Log("SelectionChanged");
+												
 						
 												if (EditOpen != null) {
 														EditOpen (new TimeLineArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 							
 												}
+												
+												
 						
-						
-										}
+										}else
+
+											selected = new bool[timeValuesNumber];
 										break;
 								}
 						}
