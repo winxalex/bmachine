@@ -36,7 +36,7 @@ namespace ws.winx.editor.bmachine.extensions
 					   SendEventNormalizedEditor.window =(SendEventNormalizedEditor) EditorWindow.CreateInstance (typeof (SendEventNormalizedEditor));
 					//(SendEventNormalizedEditor) EditorWindow.GetWindow(typeof(SendEventNormalizedEditor));
 						SendEventNormalizedEditor.window.position = position;
-						SendEventNormalizedEditor.window.ShowPopup ();
+						SendEventNormalizedEditor.window.Show ();
 				}
 
 				public static void Hide ()
