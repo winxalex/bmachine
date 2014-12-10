@@ -33,8 +33,9 @@ namespace ws.winx.editor.bmachine.extensions
 							position = window.position;
 
 		
-					   SendEventNormalizedEditor.window =(SendEventNormalizedEditor) EditorWindow.CreateInstance (typeof (SendEventNormalizedEditor));
-					//(SendEventNormalizedEditor) EditorWindow.GetWindow(typeof(SendEventNormalizedEditor));
+			SendEventNormalizedEditor.window =(SendEventNormalizedEditor)EditorWindow.GetWindow(typeof(SendEventNormalizedEditor));
+			//EditorWindow.CreateInstance (typeof (SendEventNormalizedEditor));
+					//(SendEventNormalizedEditor) 
 						SendEventNormalizedEditor.window.position = position;
 						SendEventNormalizedEditor.window.Show ();
 				}
