@@ -337,7 +337,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 										
 
-
+					avatarPreview.timeControl.playbackSpeed=mecanimNode.speed;
 
 
 

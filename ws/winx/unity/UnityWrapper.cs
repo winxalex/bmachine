@@ -498,6 +498,7 @@ public class TimeControlW {
 	private static Type realType;
 	private object instance;
 	
+	private static FieldInfo FieldInfo_playbackSpeed;
 	private static FieldInfo FieldInfo_currentTime;
 	private static FieldInfo FieldInfo_loop;
 	private static FieldInfo FieldInfo_startTime;
@@ -517,11 +518,13 @@ public class TimeControlW {
 			FieldInfo_loop = realType.GetField("loop");
 			FieldInfo_startTime = realType.GetField("startTime");
 			FieldInfo_stopTime = realType.GetField("stopTime");
+			FieldInfo_playbackSpeed = realType.GetField("playbackSpeed");
 			MethodInfo_Update = realType.GetMethod("Update");
 			PropertyInfo_deltaTime = realType.GetProperty("deltaTime");
 			PropertyInfo_normalizedTime = realType.GetProperty("normalizedTime");
 			PropertyInfo_playing = realType.GetProperty("playing");
 			PropertyInfo_nextCurrentTime = realType.GetProperty("nextCurrentTime");
+
 		}
 	}
 	
@@ -689,6 +692,15 @@ public class TimeControlW {
 			PropertyInfo_normalizedTime.SetValue(instance, value, null);
 		}
 	}
+
+		public float playbackSpeed {
+			get {
+				return (float)FieldInfo_playbackSpeed.GetValue(instance);
+			}
+			set {
+				FieldInfo_playbackSpeed.SetValue(instance, value);
+			}
+		}
 	
 	public bool playing {
 		get {
