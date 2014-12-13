@@ -257,8 +257,11 @@ namespace ws.winx.editor.bmachine.extensions
 						DrawDefaultInspector ();
 			
 						mecanimNode = target as MecanimNode;
-
-						Motion motion = mecanimNode.animaStateInfoSelected.motion;
+						Motion motion;
+						if (mecanimNode.motionOverride == null)
+							motion = mecanimNode.animaStateInfoSelected.motion;
+						else
+							motion = mecanimNode.motionOverride;
 	
 		
 			
