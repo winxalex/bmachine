@@ -259,9 +259,9 @@ namespace ws.winx.editor.bmachine.extensions
 						mecanimNode = target as MecanimNode;
 						Motion motion;
 						if (mecanimNode.motionOverride == null)
-							motion = mecanimNode.animaStateInfoSelected.motion;
+								motion = mecanimNode.animaStateInfoSelected.motion;
 						else
-							motion = mecanimNode.motionOverride;
+								motion = mecanimNode.motionOverride;
 	
 		
 			
@@ -337,7 +337,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 										
 
-					avatarPreview.timeControl.playbackSpeed=mecanimNode.speed;
+										avatarPreview.timeControl.playbackSpeed = mecanimNode.speed;
 
 
 

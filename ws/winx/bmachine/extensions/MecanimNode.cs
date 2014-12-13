@@ -41,7 +41,7 @@ namespace ws.winx.bmachine.extensions
 						normalizedTimeCurrent = 0f;
 				//	[HideInInspector]
 
-				
+				public float speed = 1f;
 
 				
 
@@ -296,10 +296,10 @@ namespace ws.winx.bmachine.extensions
 
 								}
 
+								
 
 
-
-
+								animator.speed = this.speed;
 
 								
 			
@@ -366,9 +366,27 @@ namespace ws.winx.bmachine.extensions
 								} else {
 
 										//send event if its between previous and current time
-										//Test only event sending is done try SentEventNormalized
+										//Test only, event sending is done try SentEventNormalized
 										//if (normalizedTimeLast < 0.67f && normalizedTimeCurrent >= 0.67f)
 										//Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
+
+
+
+
+										if(this.speed<0f && normalizedTimeCurrent<0f){
+											if (!loop) {
+												_statusArgs.status = this.status = Status.Success;
+												
+												if (_statusHandler != null)
+													_statusHandler.Invoke (this, _statusArgs);
+												
+											}else{
+												animator.Play (animaStateInfoSelected.hash, animaStateInfoSelected.layer, normalizedTimeStart);
+											
+											}
+
+												return;
+										}
 
 
 										int len = children.Length;
@@ -401,7 +419,7 @@ namespace ws.winx.bmachine.extensions
 								}
 
 
-								//Debug.Log ("Update at: " + normalizedTimeCurrent);	
+							Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + normalizedTimeCurrent);	
 
 								//characterControllerRadius.Value= curve.Evaluate(normalizedTimeCurrent);
 
