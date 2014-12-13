@@ -212,7 +212,7 @@ public class AvatarPreviewW {
 				
 				
 				AnimatorController.SetAnimatorController (this.Animator, _previewAnimatorController);
-				Debug.Log ("Setting avatarPreview.Animator " + this.Animator.name + " to temp controller");
+				//Debug.Log ("Setting avatarPreview.Animator " + this.Animator.name + " to temp controller");
 			} 
 			
 			

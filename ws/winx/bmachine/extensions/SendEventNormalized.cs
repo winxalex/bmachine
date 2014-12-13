@@ -58,7 +58,7 @@ namespace ws.winx.bmachine.extensions
 								if (timeNormalizedCurrent > timeNormalized && _timeNormalizedLast < timeNormalized) {
 
 										base.owner.SendEvent (this.eventToSend.id);
-									//	Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
+		//								Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
 										this.status = Status.Success;
 										_timeNormalizedLast = timeNormalizedCurrent;
 										return;

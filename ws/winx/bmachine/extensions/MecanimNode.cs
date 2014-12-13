@@ -41,6 +41,7 @@ namespace ws.winx.bmachine.extensions
 						normalizedTimeCurrent = 0f;
 				//	[HideInInspector]
 
+				
 
 				
 
@@ -88,7 +89,9 @@ namespace ws.winx.bmachine.extensions
 				float normalizedTimeLast = 0f;
 				int numBlendParamters;
 				AnimatorStateInfo animatorStateInfoCurrent;
-				bool isCurrentEqualToSelectedAnimaInfo = false;
+				AnimatorStateInfo animatorStateInfoNext;
+				bool isCurrentEqualToSelectedAnimaInfo;
+				bool isSelectedAnimaInfoInTransition;
 				List<int> _treeInx;
 				int _LastTickedChildren = -1;
 		                         
@@ -102,45 +105,25 @@ namespace ws.winx.bmachine.extensions
 						}
 				}
 
+				AnimatorOverrideController _animatorOverrideController;
 
+				public AnimatorOverrideController animatorOverrideController {
+						get {
+								if (_animatorOverrideController == null) {
+										if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+												//animator.runtimeAnimatorController is already overrided just take reference
+												_animatorOverrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
+										} else {
+												_animatorOverrideController = new AnimatorOverrideController ();
 
+												//bind all clips from animator.runtimeAnimatorController to overrider
+												_animatorOverrideController.runtimeAnimatorController = animator.runtimeAnimatorController;
+										}
 
-				
+								}
 
-
-				/// <summary>
-				/// Plaies the state of the mecanima.
-				/// </summary>
-				void PlayAnimaState ()
-				{
-					    
-						//if we are already in that AnimaState
-						//cos normalied time doesn't stop but continue to increase
-						if (isCurrentEqualToSelectedAnimaInfo) {
-							
-								normalizedTimeLast = animatorStateInfoCurrent.normalizedTime;
-							
-							
-						} else {
-							
-							
-							
-								normalizedTimeLast = 0f;
-							
-							
+								return _animatorOverrideController;
 						}
-
-
-			Debug.Log (animaStateInfoSelected.label.text + ">Crosfade() "); 
-			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
-			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
-			Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetAnimatorTransitionInfo (animaStateInfoSelected.layer).nameHash); 
-			
-
-
-						//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
-						animator.CrossFade (animaStateInfoSelected.hash, transitionDuration, animaStateInfoSelected.layer, normalizedTimeStart);
-
 				}
 
 				public override void Remove (ActionNode child)
@@ -178,33 +161,30 @@ namespace ws.winx.bmachine.extensions
 						transitionDuration = 0f;
 				}
 
-				public override void Awake ()
-				{
-          
-						//Debug.Log (selectedAnimaStateInfo.label.text + ">Awake");
-
-
-		
-			
-			
-			
-		}
-		//
-		//				public override void OnEnable ()
-		//				{
-		//			
-		//						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
-		//
-		//				}
-		//		
-		//				public override void OnDisable ()
+//				public override void Awake ()
 //				{
-//			
-//						Debug.Log (selectedAnimaStateInfo.label.text + ">Disable");
-//			
-//			
+//          
+//					
 //			
 //				}
+
+
+				//
+				//				public override void OnEnable ()
+				//				{
+				//			
+				//						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
+				//
+				//				}
+				//		
+				//				public override void OnDisable ()
+				//				{
+				//			
+				//						Debug.Log (selectedAnimaStateInfo.label.text + ">Disable");
+				//			
+				//			
+				//			
+				//				}
 		
 				public override void Start ()
 				{
@@ -217,22 +197,74 @@ namespace ws.winx.bmachine.extensions
 
 				}
 
+
+
+				/// <summary>
+				/// Plaies the state of the mecanima.
+				/// </summary>
+				void PlayAnimaState ()
+				{
+			
+						//if we are already in that AnimaState
+						//cos normalied time doesn't stop but continue to increase
+						if (isCurrentEqualToSelectedAnimaInfo) {
+								//if(isSelectedAnimaInfoInTransition)
+								//normalizedTimeLast =animatorStateInfoNext.normalizedTime
+								//else
+								normalizedTimeLast = animatorStateInfoCurrent.normalizedTime;
+				
+				
+						} else {
+				
+				
+				
+								normalizedTimeLast = 0f;
+				
+				
+						}
+			
+			
+						//						Debug.Log (animaStateInfoSelected.label.text + ">Crosfade() "); 
+						//						Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
+						//						Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
+						//						Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetAnimatorTransitionInfo (animaStateInfoSelected.layer).nameHash); 
+						//			
+			
+			
+						//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
+						animator.CrossFade (animaStateInfoSelected.hash, transitionDuration, animaStateInfoSelected.layer, normalizedTimeStart);
+			
+				}
+
+
+				
+
+
+				/// <summary>
+				/// Raises the tick event.
+				/// </summary>
 				public override void OnTick ()
 				{
 
 						//Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
 
 						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+
+						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
+
+						isSelectedAnimaInfoInTransition = animator.IsInTransition (animaStateInfoSelected.layer) && (animatorStateInfoNext.nameHash == animaStateInfoSelected.hash);
+
 						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash;
 
-			Debug.Log (animaStateInfoSelected.label.text + ">Tick() "); 
-			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
-			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
-			if (animator.IsInTransition (animaStateInfoSelected.layer)) {
 
-				Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).nameHash+" Transition time:"+animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).normalizedTime); 
-
-						}
+//			Debug.Log (animaStateInfoSelected.label.text + ">Tick() "); 
+//			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
+//			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
+//			if ()) {
+//
+//				Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).nameHash+" Transition time:"+animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).normalizedTime); 
+//
+//						}
 			
 			
 
@@ -242,53 +274,28 @@ namespace ws.winx.bmachine.extensions
 						//The second check ins't nessery if I could reset Status when this node is switched
 						if (this.status != Status.Running) {
 
-				if (motionOverride != null) {
-					
-					
-					
-					//referrence
-					AnimatorOverrideController overrideController;
-					
-					
-					
-					if (animator.runtimeAnimatorController is AnimatorOverrideController) {
-						
-						overrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
-						
-						Debug.Log ("controller Already overrided just change overrrideController");
-					} else {
-						Debug.Log ("new overrrideController");
-						overrideController = new AnimatorOverrideController ();
-						overrideController.runtimeAnimatorController = animator.runtimeAnimatorController;
-					}
-					
-					if (overrideController [(AnimationClip)animaStateInfoSelected.motion] != motionOverride) {
-						
-						Debug.Log ("Selected state Motion " + animaStateInfoSelected.motion + "to be overrided to " + motionOverride);
-						overrideController [(AnimationClip)animaStateInfoSelected.motion] = (AnimationClip)motionOverride;
-						
-						
-						var a = overrideController [(AnimationClip)animaStateInfoSelected.motion];
-						//	animaStateInfoSelected.motion = motionOverRide;
-						
-						
-						
-						Debug.Log ("Override result:" + a);
-						
-						//rereference 
-						if (animator.runtimeAnimatorController is AnimatorOverrideController) {
-							animator.runtimeAnimatorController = overrideController.runtimeAnimatorController;
-						}
-						
-						animator.runtimeAnimatorController = overrideController;
-						
+								AnimationClip animationClipCurrent;
+								if (motionOverride != null 
+										&& ((animationClipCurrent = animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion]) != (AnimationClip)motionOverride)) {
 
-						
-					}
+
+										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
 					
+										animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] = (AnimationClip)motionOverride;
 					
-					
-				}
+										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
+
+
+										//to avoid nesting 
+										if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+												animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
+										}
+											
+										//rebind back												
+										animator.runtimeAnimatorController = animatorOverrideController;
+
+								}
+
 
 
 
@@ -316,6 +323,10 @@ namespace ws.winx.bmachine.extensions
 
 				public override void Update ()
 				{
+
+						//if(isSelectedAnimaInfoInTransition)
+						//normalizedTimeCurrent =animatorStateInfoNext.normalizedTime;
+						//else
 
 						if (loop)
 								normalizedTimeCurrent = animatorStateInfoCurrent.normalizedTime - (int)animatorStateInfoCurrent.normalizedTime;
