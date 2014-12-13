@@ -43,6 +43,8 @@ namespace ws.winx.bmachine.extensions
 
 				public float speed = 1f;
 
+				public float weight=1f;
+
 				
 
 
@@ -301,7 +303,7 @@ namespace ws.winx.bmachine.extensions
 
 								animator.speed = this.speed;
 
-								
+								animator.SetLayerWeight(animaStateInfoSelected.layer,this.weight);
 			
 								this.Start ();	
 				 
