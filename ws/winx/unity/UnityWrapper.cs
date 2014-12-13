@@ -154,6 +154,9 @@ public class AvatarPreviewW {
 			
 			__instance = method_ctor.Invoke( new object[] { previewObjectInScene, objectOnSameAsset } );
 
+
+
+
 				_previewedMotion = objectOnSameAsset;
 
 				CreatePreviewStateMachine (_previewedMotion);

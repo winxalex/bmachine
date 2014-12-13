@@ -40,7 +40,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 						blackBoardBindingID = (int)property.value;
 
-						blendParams = mecanimNode.selectedAnimaStateInfo.blendParamsNames;
+						blendParams = mecanimNode.animaStateInfoSelected.blendParamsNames;
 
 
 			
@@ -56,7 +56,7 @@ namespace ws.winx.editor.bmachine.extensions
 				
 
 
-								if (previousSelectAnimaInfo != mecanimNode.selectedAnimaStateInfo) {
+								if (previousSelectAnimaInfo != mecanimNode.animaStateInfoSelected) {
 										blackboardFloatVariables = mecanimNode.blackboard.GetVariables (typeof(FloatVar));
 										
 										//concat global and local blackboards
@@ -92,7 +92,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-						previousSelectAnimaInfo = mecanimNode.selectedAnimaStateInfo;
+						previousSelectAnimaInfo = mecanimNode.animaStateInfoSelected;
 
 						
 

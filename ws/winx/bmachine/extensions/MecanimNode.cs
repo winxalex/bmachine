@@ -12,60 +12,66 @@ using ws.winx.unity;
 
 namespace ws.winx.bmachine.extensions
 {
-	[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
+		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
 		public class MecanimNode:CompositeNode,IEventStatusNode
 		{
 
 				
 				[MecanimStateInfoAttribute]
 				public MecanimStateInfo
-						selectedAnimaStateInfo;
+						animaStateInfoSelected;
+				public Motion motionOverride;
 				public bool loop = false;
-		[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.X)]
-		       public int
+				[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.X)]
+				public int
 						blendParamXBlackboardBindID;
-		[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.Y)]
-						public int blendParamYBlackboardBindID;
+				[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.Y)]
+				public int
+						blendParamYBlackboardBindID;
 				[RangeAttribute(0f,1f)]
 				public float
 						transitionDuration = 0.3f;
 				[RangeAttribute(0f,1f)]
+				//[HideInInspector]
 				public float
 						normalizedTimeStart = 0.5f;
 				[HideInInspector]
-			//	[RangeAttribute(0f,1f)]
+				//	[RangeAttribute(0f,1f)]
 				public float
 						normalizedTimeCurrent = 0f;
+				//	[HideInInspector]
 
+
+				
 
 
 				#region IEventStatusNode implementation
-					StatusUpdateHandler _statusHandler;
-					StatusEventArgs _statusArgs = new StatusEventArgs (Status.Error);
+				StatusUpdateHandler _statusHandler;
+				StatusEventArgs _statusArgs = new StatusEventArgs (Status.Error);
 					
-					public event StatusUpdateHandler OnChildCompleteStatus{
+				public event StatusUpdateHandler OnChildCompleteStatus {
 						
-						add{
-							_statusHandler+=value;
+						add {
+								_statusHandler += value;
 							
-							//v1
-							//this.tree.StartCoroutine
+								//v1
+								//this.tree.StartCoroutine
 							
-							//v2
-							this.tree.update += OnTick;
+								//v2
+								this.tree.update += OnTick;
 						}
 						
-						remove{
-							_statusHandler-=value;
+						remove {
+								_statusHandler -= value;
 							
-							//v1
-							//this.tree.StopCoroutine()
+								//v1
+								//this.tree.StopCoroutine()
 							
-							//v2
-							this.tree.update -= OnTick;
+								//v2
+								this.tree.update -= OnTick;
 						}
 						
-					}
+				}
 				#endregion
 				
 				
@@ -76,18 +82,15 @@ namespace ws.winx.bmachine.extensions
 		         
 
 
-			
+				
+
 				Animator _animator;
 				float normalizedTimeLast = 0f;
 				int numBlendParamters;
-				AnimatorStateInfo currentAnimatorStateInfo;
+				AnimatorStateInfo animatorStateInfoCurrent;
 				bool isCurrentEqualToSelectedAnimaInfo = false;
 				List<int> _treeInx;
-				int _LastTickedChildren=-1;
-				
-				public List<int> treeInx{ 
-			get{ if(_treeInx==null) _treeInx=new List<int>(); return _treeInx; }
-		}
+				int _LastTickedChildren = -1;
 		                         
 				public Animator animator {
 						get {
@@ -115,7 +118,7 @@ namespace ws.winx.bmachine.extensions
 						//cos normalied time doesn't stop but continue to increase
 						if (isCurrentEqualToSelectedAnimaInfo) {
 							
-								normalizedTimeLast = currentAnimatorStateInfo.normalizedTime;
+								normalizedTimeLast = animatorStateInfoCurrent.normalizedTime;
 							
 							
 						} else {
@@ -127,35 +130,38 @@ namespace ws.winx.bmachine.extensions
 							
 						}
 
-	//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
-						animator.CrossFade (selectedAnimaStateInfo.hash, transitionDuration, selectedAnimaStateInfo.layer, normalizedTimeStart);
+
+			Debug.Log (animaStateInfoSelected.label.text + ">Crosfade() "); 
+			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
+			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
+			Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetAnimatorTransitionInfo (animaStateInfoSelected.layer).nameHash); 
+			
+
+
+						//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
+						animator.CrossFade (animaStateInfoSelected.hash, transitionDuration, animaStateInfoSelected.layer, normalizedTimeStart);
 
 				}
 
-			public override void Remove (ActionNode child)
-			{
-				base.Remove (child);
-			}
+				public override void Remove (ActionNode child)
+				{
+						base.Remove (child);
+				}
 
 				public override bool Add (ActionNode child)
 				{
-						bool result=false;
+						bool result = false;
 
 						if (!(child is SendEventNormalized)) {
 								Debug.LogWarning ("You can add only SendEventNormailized type of ActionCode");
 								return false;
 						}
 
-							result = base.Add (child);
+						result = base.Add (child);
 
-						if (result) {
+						
 
-								this.treeInx.Add(tree.GetIndex(child));
-				          	
-								
-						}
-
-			return result;
+						return result;
 				}
 
 //		public override void ResetStatus ()
@@ -172,23 +178,26 @@ namespace ws.winx.bmachine.extensions
 						transitionDuration = 0f;
 				}
 
-//				public override void Awake ()
-//				{
-//          
-//						Debug.Log (selectedAnimaStateInfo.label.text + ">Awake");
-//			
-//
-//
-//				}
-//
-//				public override void OnEnable ()
-//				{
-//			
-//						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
-//
-//				}
-//		
-//				public override void OnDisable ()
+				public override void Awake ()
+				{
+          
+						//Debug.Log (selectedAnimaStateInfo.label.text + ">Awake");
+
+
+		
+			
+			
+			
+		}
+		//
+		//				public override void OnEnable ()
+		//				{
+		//			
+		//						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
+		//
+		//				}
+		//		
+		//				public override void OnDisable ()
 //				{
 //			
 //						Debug.Log (selectedAnimaStateInfo.label.text + ">Disable");
@@ -200,7 +209,7 @@ namespace ws.winx.bmachine.extensions
 				public override void Start ()
 				{
 
-						Debug.Log (selectedAnimaStateInfo.label.text + ">Start MecanimNode");
+//						Debug.Log (selectedAnimaStateInfo.label.text + ">Start MecanimNode");
 
 						_LastTickedChildren = -1;
 
@@ -213,15 +222,79 @@ namespace ws.winx.bmachine.extensions
 
 						//Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
 
-						currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
-						isCurrentEqualToSelectedAnimaInfo = currentAnimatorStateInfo.nameHash == selectedAnimaStateInfo.hash;
+						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash;
 
-						//Debug.Log (selectedAnimaStateInfo.label.text + ">Before");
+			Debug.Log (animaStateInfoSelected.label.text + ">Tick() "); 
+			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
+			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
+			if (animator.IsInTransition (animaStateInfoSelected.layer)) {
+
+				Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).nameHash+" Transition time:"+animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).normalizedTime); 
+
+						}
+			
+			
+
 
 
 
 						//The second check ins't nessery if I could reset Status when this node is switched
-						if (this.status != Status.Running){
+						if (this.status != Status.Running) {
+
+				if (motionOverride != null) {
+					
+					
+					
+					//referrence
+					AnimatorOverrideController overrideController;
+					
+					
+					
+					if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+						
+						overrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
+						
+						Debug.Log ("controller Already overrided just change overrrideController");
+					} else {
+						Debug.Log ("new overrrideController");
+						overrideController = new AnimatorOverrideController ();
+						overrideController.runtimeAnimatorController = animator.runtimeAnimatorController;
+					}
+					
+					if (overrideController [(AnimationClip)animaStateInfoSelected.motion] != motionOverride) {
+						
+						Debug.Log ("Selected state Motion " + animaStateInfoSelected.motion + "to be overrided to " + motionOverride);
+						overrideController [(AnimationClip)animaStateInfoSelected.motion] = (AnimationClip)motionOverride;
+						
+						
+						var a = overrideController [(AnimationClip)animaStateInfoSelected.motion];
+						//	animaStateInfoSelected.motion = motionOverRide;
+						
+						
+						
+						Debug.Log ("Override result:" + a);
+						
+						//rereference 
+						if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+							animator.runtimeAnimatorController = overrideController.runtimeAnimatorController;
+						}
+						
+						animator.runtimeAnimatorController = overrideController;
+						
+
+						
+					}
+					
+					
+					
+				}
+
+
+
+
+
+								
 			
 								this.Start ();	
 				 
@@ -229,7 +302,7 @@ namespace ws.winx.bmachine.extensions
 								return;
 						}
 
-					//	Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
+						//	Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
 
 			
 						if (isCurrentEqualToSelectedAnimaInfo)
@@ -241,30 +314,21 @@ namespace ws.winx.bmachine.extensions
 						}
 				}
 
-
-
-	
-
-
-
-
-
-
 				public override void Update ()
 				{
 
 						if (loop)
-								normalizedTimeCurrent = currentAnimatorStateInfo.normalizedTime - (int)currentAnimatorStateInfo.normalizedTime;
+								normalizedTimeCurrent = animatorStateInfoCurrent.normalizedTime - (int)animatorStateInfoCurrent.normalizedTime;
 						else
-								normalizedTimeCurrent = currentAnimatorStateInfo.normalizedTime;
+								normalizedTimeCurrent = animatorStateInfoCurrent.normalizedTime;
 
 
 
 
-//						Debug.Log (selectedAnimaStateInfo.label.text + ">Update() "); 
-//						Debug.Log (selectedAnimaStateInfo.label.text + ">current state: " + currentAnimatorStateInfo.nameHash + " requested state " + selectedAnimaStateInfo.hash);
-//						Debug.Log (selectedAnimaStateInfo.label.text + ">current state time= " + currentAnimatorStateInfo.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
-//						Debug.Log (selectedAnimaStateInfo.label.text + "> state in transition" + animator.GetAnimatorTransitionInfo (selectedAnimaStateInfo.layer).userNameHash); 
+//						Debug.Log (animaStateInfoSelected.label.text + ">Update() "); 
+//						Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
+//						Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
+//						Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetAnimatorTransitionInfo (animaStateInfoSelected.layer).nameHash); 
 //		
 
 						
@@ -274,17 +338,17 @@ namespace ws.winx.bmachine.extensions
 						if (isCurrentEqualToSelectedAnimaInfo
 								&& normalizedTimeLast != normalizedTimeCurrent) {
 
-								//Debug.Log ("NormalizedTime: " + (currentAnimatorStateInfo.normalizedTime));
+								//Debug.Log ("NormalizedTime: " + (animatorStateInfoCurrent.normalizedTime));
 
 
 							
 							
 								if (normalizedTimeCurrent > 1f) {
 										if (!loop) {
-												_statusArgs.status=this.status = Status.Success;
+												_statusArgs.status = this.status = Status.Success;
 
 												if (_statusHandler != null)
-													_statusHandler.Invoke (this, _statusArgs);
+														_statusHandler.Invoke (this, _statusArgs);
 												return;
 										}
 
@@ -293,34 +357,34 @@ namespace ws.winx.bmachine.extensions
 										//send event if its between previous and current time
 										//Test only event sending is done try SentEventNormalized
 										//if (normalizedTimeLast < 0.67f && normalizedTimeCurrent >= 0.67f)
-												//Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
+										//Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
 
 
-										int len=children.Length;
+										int len = children.Length;
 
-					                    if(len>0){
-											_LastTickedChildren++;
+										if (len > 0) {
+												_LastTickedChildren++;
 
-											//reset
-											if(_LastTickedChildren>=len)
-											_LastTickedChildren=0;
+												//reset
+												if (_LastTickedChildren >= len)
+														_LastTickedChildren = 0;
 
-											for (int i=_LastTickedChildren;i<len;  i++) {
-												children[i].OnTick();
-											}
+												for (int i=_LastTickedChildren; i<len; i++) {
+														children [i].OnTick ();
+												}
 										}
 
 								}
 
 							
-								if (selectedAnimaStateInfo.blendParamsIDs != null && (numBlendParamters = selectedAnimaStateInfo.blendParamsIDs.Length) > 0) {
+								if (animaStateInfoSelected.blendParamsIDs != null && (numBlendParamters = animaStateInfoSelected.blendParamsIDs.Length) > 0) {
 
 										if (numBlendParamters > 1) {
-												animator.SetFloat (selectedAnimaStateInfo.blendParamsIDs [0], this.blackboard.GetFloatVar (this.blendParamXBlackboardBindID).Value);
-												animator.SetFloat (selectedAnimaStateInfo.blendParamsIDs [1], this.blackboard.GetFloatVar (this.blendParamYBlackboardBindID).Value);
+												animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (this.blendParamXBlackboardBindID).Value);
+												animator.SetFloat (animaStateInfoSelected.blendParamsIDs [1], this.blackboard.GetFloatVar (this.blendParamYBlackboardBindID).Value);
 
 										} else
-												animator.SetFloat (selectedAnimaStateInfo.blendParamsIDs [0], this.blackboard.GetFloatVar (blendParamXBlackboardBindID).Value);
+												animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (blendParamXBlackboardBindID).Value);
 
 
 								}
@@ -346,10 +410,10 @@ namespace ws.winx.bmachine.extensions
 
 						
 						
-						_statusArgs.status=this.status = Status.Running;
+						_statusArgs.status = this.status = Status.Running;
 
 						if (_statusHandler != null)
-						_statusHandler.Invoke (this, _statusArgs);
+								_statusHandler.Invoke (this, _statusArgs);
 
 				}
 

@@ -45,6 +45,7 @@ namespace ws.winx.editor.bmachine.extensions
 				bool[] eventTimeValuesSelected;
 				EventComparer eventTimeComparer = new EventComparer ();
 				string[] eventDisplayNames;
+				float timeNormalizedStartPrev = -1;
 
 				//avatarPreviewTimeControl button
 				GUIStyle playButtonStyle;
@@ -257,12 +258,18 @@ namespace ws.winx.editor.bmachine.extensions
 			
 						mecanimNode = target as MecanimNode;
 
-						Motion motion = mecanimNode.selectedAnimaStateInfo.motion;
+						Motion motion = mecanimNode.animaStateInfoSelected.motion;
 	
 		
 			
 						
 						if (mecanimNode != null) {
+
+
+								if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
+										Debug.LogError ("Can't override state that doesn't contain motion");
+								}
+								
 								// Get children nodes
 								//ActionNode[] children = randomChild.children;
 				
@@ -273,15 +280,23 @@ namespace ws.winx.editor.bmachine.extensions
 				
 								// Get an iterator
 								//var iterator = serializedNode.GetIterator ();
+
+									
 				
 								// Cache the indent level
 								int indentLevel = EditorGUI.indentLevel;
 
 
-
-								EditorGUILayout.LabelField("Events Timeline");
+								/////////// Avatar Preview GUI ////////////
+								
 				
-								if (!Application.isPlaying) {
+								if (!Application.isPlaying && motion != null) {
+						
+										EditorGUILayout.LabelField ("Events Timeline");
+										
+
+										
+
 									
 										if (avatarPreview == null)
 												avatarPreview = new AvatarPreviewW (null, motion);
@@ -294,92 +309,118 @@ namespace ws.winx.editor.bmachine.extensions
 										avatarRect.y += 30f;
 										avatarRect.height = Screen.height - avatarRect.y - 20f;
 
-					if(eventTimeValues!=null && Event.current.type == EventType.Repaint){
+										if (eventTimeValues != null && Event.current.type == EventType.Repaint) {
 
-						//find first selected if exist
-						int eventTimeValueSelectedIndex=Array.IndexOf(eventTimeValuesSelected,true);
+												//find first selected if exist
+												int eventTimeValueSelectedIndex = Array.IndexOf (eventTimeValuesSelected, true);
+
+
+												
 					
-						if(eventTimeValueSelectedIndex>-1)
-							avatarPreview.SetTimeValue(eventTimeValues[eventTimeValueSelectedIndex]);
+												if (eventTimeValueSelectedIndex > -1) {
+														avatarPreview.SetTimeValue (eventTimeValues [eventTimeValueSelectedIndex]);
+												} else {
+														if (mecanimNode.normalizedTimeStart != timeNormalizedStartPrev) {
+																timeNormalizedStartPrev = mecanimNode.normalizedTimeStart;
+																avatarPreview.SetTimeValue (timeNormalizedStartPrev);
+																
+														}
+
+												}
 	
 
-					}				
+										}				
+
+
+										
 
 
 
 
-						avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
-					//Debug.Log(avatarPreview.timeControl.currentTime+" "+);
+
+
+
+										avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
+										//Debug.Log(avatarPreview.timeControl.currentTime+" "+);
 										EditorGUILayout.EndHorizontal ();		
 										
+										
 									
-								} 
+										
+
+
 								
-								// Restore the indent level
-								EditorGUI.indentLevel = indentLevel;
-								
-								// Apply modified properties
-								this.serializedNode.ApplyModifiedProperties ();
-								
-						}
+										//////////////////////////////////////////////////////////////
 
 
+										////////// Events Timeline GUI //////////
 
-
-			
-						if (!Application.isPlaying) {
-								if (!eventTimeLineInitalized) {
+										if (!eventTimeLineInitalized) {
 					
 					
 					
 					
-										//TODO calculate PopupRect
+												//TODO calculate PopupRect
 					
-										eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
-										//select the time values from nodes
-										eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
-										eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
-										eventTimeValuesSelected = new bool[eventTimeValues.Length];
-
-										playButtonStyle = "TimeScrubberButton";
-
-										if (playButtonStyle != null)
-												playButtonSize = playButtonStyle.CalcSize (new GUIContent ());
-
-										eventTimeLineInitalized = true;
-								}
+												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
+												//select the time values from nodes
+												eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
+												eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+												eventTimeValuesSelected = new bool[eventTimeValues.Length];
+					
+												playButtonStyle = "TimeScrubberButton";
+					
+												if (playButtonStyle != null)
+														playButtonSize = playButtonStyle.CalcSize (new GUIContent ());
+					
+												eventTimeLineInitalized = true;
+										}
 				
-								Rect timeLineRect = GUILayoutUtility.GetLastRect ();
-
-								timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
-								timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
+										Rect timeLineRect = GUILayoutUtility.GetLastRect ();
 				
-								EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
+										timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
+										timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
+				
+										EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
 				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd
-								);
-
+										);
 				
 				
-								SendEventNormalized ev;
-
-
-
-								//update time values 
-								int eventTimeValuesNumber = mecanimNode.children.Length;
-								for (int i=0; i<eventTimeValuesNumber; i++) {
-										ev = ((SendEventNormalized)mecanimNode.children [i]);	
-										ev.timeNormalized = eventTimeValues [i];
-
-					
-										//if changes have been made in pop editor or SendEventNormailized inspector
-										if (ev.name != eventDisplayNames [i])
-												eventDisplayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
-					
-									
+				
+										SendEventNormalized ev;
+				
+				
+				
+										//update time values 
+										int eventTimeValuesNumber = mecanimNode.children.Length;
+										for (int i=0; i<eventTimeValuesNumber; i++) {
+												ev = ((SendEventNormalized)mecanimNode.children [i]);	
+												ev.timeNormalized = eventTimeValues [i];
 					
 					
+												//if changes have been made in pop editor or SendEventNormailized inspector
+												if (ev.name != eventDisplayNames [i])
+														eventDisplayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
+					
+					
+					
+					
+										}
+
+								
+										// Restore the indent level
+										EditorGUI.indentLevel = indentLevel;
+								
+										// Apply modified properties
+										this.serializedNode.ApplyModifiedProperties ();
+								
 								}
-						}
+
+
+
+						} 
+			
+					
 								
 
 

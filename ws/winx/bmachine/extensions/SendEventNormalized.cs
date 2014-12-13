@@ -41,7 +41,7 @@ namespace ws.winx.bmachine.extensions
 
 				public override void Update ()
 				{
-						MecanimStateInfo selectedAnimaStateInfo = ((MecanimNode)this.branch).selectedAnimaStateInfo;
+						MecanimStateInfo selectedAnimaStateInfo = ((MecanimNode)this.branch).animaStateInfoSelected;
 						AnimatorStateInfo currentAnimatorStateInfo = _animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
 
 						//Debug.Log ("onUpdate");
@@ -58,7 +58,7 @@ namespace ws.winx.bmachine.extensions
 								if (timeNormalizedCurrent > timeNormalized && _timeNormalizedLast < timeNormalized) {
 
 										base.owner.SendEvent (this.eventToSend.id);
-										Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
+									//	Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
 										this.status = Status.Success;
 										_timeNormalizedLast = timeNormalizedCurrent;
 										return;
