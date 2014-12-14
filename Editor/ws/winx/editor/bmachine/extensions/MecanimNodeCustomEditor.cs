@@ -74,12 +74,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-				void OnDisable ()
-				{
-
-						UnityEngine.Debug.Log ("Disable");
-						//OnPreviewDisable();
-				}
+			
 
 			
 
@@ -245,6 +240,9 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 				}
+
+
+
 
 	
           

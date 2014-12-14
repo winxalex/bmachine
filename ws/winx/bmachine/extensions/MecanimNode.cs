@@ -96,6 +96,7 @@ namespace ws.winx.bmachine.extensions
 				bool isSelectedAnimaInfoInTransition;
 				List<int> _treeInx;
 				int _LastTickedChildren = -1;
+			
 		                         
 				public Animator animator {
 						get {
@@ -161,6 +162,8 @@ namespace ws.winx.bmachine.extensions
 						_animator = null;
 						
 						transitionDuration = 0f;
+
+						//curve = new AnimationCurve ();
 				}
 
 //				public override void Awake ()
@@ -319,6 +322,10 @@ namespace ws.winx.bmachine.extensions
 
 
 						if (this.status != Status.Running) {
+								
+								//restore layer weight
+								animator.SetLayerWeight(animaStateInfoSelected.layer,0);
+
 								this.End ();
 						}
 				}

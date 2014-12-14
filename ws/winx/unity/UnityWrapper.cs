@@ -588,8 +588,8 @@ public class TimeControlW {
 			case EventType.MouseDrag:
 				if (GUIUtility.hotControl == controlID) {
 					this.m_MouseDrag += current.delta.x * 1f;//this.playbackSpeed;
-					if (false && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width)) {
-						//if (this.loop && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width))
+					//if (false && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width)) {
+					if (this.loop && ((this.m_MouseDrag < 0f && this.m_WrapForwardDrag) || this.m_MouseDrag > rect3.width)){
 						this.m_WrapForwardDrag = true;
 						this.m_MouseDrag = Mathf.Repeat (this.m_MouseDrag, rect3.width);
 					}

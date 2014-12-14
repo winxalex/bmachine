@@ -20,7 +20,7 @@ namespace ws.winx.editor.extensions
 		public class EditorGUILayoutEx
 		{
 
-				private static object SELECTED_OBJECT = null;
+//				private static object SELECTED_OBJECT = null;
 				private static int CONTROL_ID = -1;
 				private static int SELECTED_INDEX = -1;
 				private static IList CHANGED_VALUES = null;
