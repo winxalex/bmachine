@@ -17,10 +17,10 @@ namespace ws.winx.editor.extensions
 
 
 		// A delegate type for hooking up change notifications.
-		public delegate void ImporetedEventHandler(string[] importedAssetsPath);
+		public delegate void ImportedEventHandler(string[] importedAssetsPath);
 		// An event that clients can use to be notified whenever the
 		// elements of the list change.
-		public static event ImporetedEventHandler Imported;
+		public static event ImportedEventHandler Imported;
 
 
 		static void OnPostprocessAllAssets (

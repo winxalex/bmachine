@@ -9,11 +9,45 @@
 // ------------------------------------------------------------------------------
 using System;
 using UnityEngine;
+using UnityEditor;
+
+
 namespace ws.winx.unity
 {
 		public class MecanimStateInfoAttribute:PropertyAttribute
 		{
-		  
-		}
+
+
+
+
+
+
+//		//
+//		// Methods
+//		//
+//
+//		/// <summary>
+//		/// Ons the assets re imported.
+//		/// </summary>
+//		/// <param name="importedAssetsPath">Imported assets path.</param>
+//		void onAssetsReImported (string[] importedAssetsPath)
+//		{
+//			
+//			
+//			//check if the reimported asset is our aniController
+//			if (Array.FindIndex (importedAssetsPath, (path) => {
+//				return System.IO.Path.GetFileNameWithoutExtension (path) == aniController.name;}) > -1) {
+//				
+//				isListDirty = true;
+//				
+//			}
+//			
+//		}
+//
+//
+
+	}
+
+		
 }
 

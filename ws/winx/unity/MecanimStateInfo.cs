@@ -15,7 +15,7 @@ using UnityEngine;
 namespace ws.winx.unity{
 
 	[System.Serializable]
-	public class MecanimStateInfo:ScriptableObject
+	public class MecanimStateInfo:ScriptableObject,IEquatable<MecanimStateInfo>
 	{
 		int _hash;
 
@@ -49,6 +49,16 @@ namespace ws.winx.unity{
 		
 		
 		
+		#region IEquatable implementation
+		public bool Equals (MecanimStateInfo other)
+		{
+			if (other == null)
+								return false;
+
+
+			return this.hash == other.hash;
+		}
+		#endregion
 	}
 }
 

@@ -61,10 +61,17 @@ namespace ws.winx.editor.extensions
 
 		#region CustomPopup
 
+
+
+
+
+
 				public static int CustomPopup<T> (GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
 		                                 MenuCallaback<T> onSelection=null,
 		                                 EventCallback onEvent=null,
-		                                 GUIStyle labelStyle=null
+		                                 GUIStyle style=null,
+		                                  UnityEngine.Rect? position=null
+		                                
 				)
 				{
 						GUIContent content;
@@ -72,17 +79,27 @@ namespace ws.winx.editor.extensions
 						int i = 0;
 						int len;
 						int inxd;
+
+						if (!position.HasValue)
+								EditorGUILayout.BeginHorizontal ();
 			
-						EditorGUILayout.BeginHorizontal ();
-			
-			
+						Rect labelRect = position.Value;
+
+
 			
 						//add Label field
 						// Screen.width in insprector returns its width not Screen => so 35% for the lable and rest for the popup button
-						if (labelStyle != null)
-								EditorGUILayout.LabelField (label, labelStyle, GUILayout.Width (Screen.width * 0.35f));
-						else
-								EditorGUILayout.LabelField (label, GUILayout.Width (Screen.width * 0.35f));
+						if (style != null) {
+								if (!position.HasValue)
+										EditorGUILayout.LabelField (label, style, GUILayout.Width (Screen.width * 0.35f));
+								else
+										EditorGUI.LabelField (position.Value, label, style);
+						} else {
+								if (!position.HasValue)
+										EditorGUILayout.LabelField (label, GUILayout.Width (Screen.width * 0.35f));
+								else
+										labelRect = EditorGUI.PrefixLabel (position.Value, label);
+						}
 			
 			
 						//						//get current control ID
@@ -156,11 +173,14 @@ namespace ws.winx.editor.extensions
 						//				break;
 						//			}
 			
+						bool clicked;
+
+						if (position.HasValue)
+								clicked = GUI.Button (labelRect, buttonLabel, EditorStyles.popup);
+						else
+								clicked = GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup);
 			
-			
-			
-			
-						if (GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup)) {
+						if (clicked) {
 				
 								//shoot custom MouseDown event here!!!
 				
@@ -200,8 +220,9 @@ namespace ws.winx.editor.extensions
 				
 								menu.ShowAsContext ();
 						}
-			
-						EditorGUILayout.EndHorizontal ();
+
+						if (!position.HasValue)
+								EditorGUILayout.EndHorizontal ();
 						return selectedIndex;
 				}
 		#endregion
@@ -210,7 +231,8 @@ namespace ws.winx.editor.extensions
 				public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,
 		                                      MenuCallaback<T> onSelection=null,
 		                                      EventCallback onEvent=null,
-		                                      GUIStyle labelStyle=null
+		                                      GUIStyle labelStyle=null,
+		                                      UnityEngine.Rect? position=null
 		                                      
 				)
 				{
@@ -247,7 +269,7 @@ namespace ws.winx.editor.extensions
 								if (inxOfSelectedObject < len) {
 					
 										selectedObject = values [inxOfSelectedObject];
-										CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle);
+										CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
 								}
 				
 						} else {
@@ -257,7 +279,7 @@ namespace ws.winx.editor.extensions
 								//Array.IndexOf (values, selectedObject);
 
 				
-								inxOfSelectedObject = CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle);
+								inxOfSelectedObject = CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
 				
 								selectedObject = values [inxOfSelectedObject];
 				
@@ -484,21 +506,21 @@ namespace ws.winx.editor.extensions
 				}
 		
 		
-		/// <summary>
-		/// Customs the time line.
-		/// </summary>
-		/// <param name="rectGlobal">Rect global.</param>
-		/// <param name="timeValues">Time values.</param>
-		/// <param name="timeValuesTime">Internal purpose. Time values at drag start (just pass reference).</param>
-		/// <param name="displayNames">Display names.</param>
-		/// <param name="selected">Selected. Array true/false values of thoose selected</param>
-		/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
-		/// <param name="Add">Add.</param>
-		/// <param name="Delete">Delete.</param>
-		/// <param name="EditClose">Edit close.</param>
-		/// <param name="EditOpen">Edit open.</param>
-		/// <param name="DragEnd">Drag end.</param>
-				public static void CustomTimeLine (ref Rect rectGlobal,ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
+				/// <summary>
+				/// Customs the time line.
+				/// </summary>
+				/// <param name="rectGlobal">Rect global.</param>
+				/// <param name="timeValues">Time values.</param>
+				/// <param name="timeValuesTime">Internal purpose. Time values at drag start (just pass reference).</param>
+				/// <param name="displayNames">Display names.</param>
+				/// <param name="selected">Selected. Array true/false values of thoose selected</param>
+				/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
+				/// <param name="Add">Add.</param>
+				/// <param name="Delete">Delete.</param>
+				/// <param name="EditClose">Edit close.</param>
+				/// <param name="EditOpen">Edit open.</param>
+				/// <param name="DragEnd">Drag end.</param>
+				public static void CustomTimeLine (ref Rect rectGlobal, ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
 		                                   Action<TimeLineArgs<float>> Add=null, Action<TimeLineArgs<float>> Delete=null, Action<TimeLineArgs<float>> EditClose=null, Action<TimeLineArgs<float>> EditOpen=null, Action<TimeLineArgs<float>> DragEnd=null
 				)
 				{
@@ -731,9 +753,9 @@ namespace ws.winx.editor.extensions
 												
 												
 						
-										}else
+										} else
 
-											selected = new bool[timeValuesNumber];
+												selected = new bool[timeValuesNumber];
 										break;
 								}
 						}

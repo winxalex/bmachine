@@ -49,7 +49,7 @@ namespace ws.winx.editor.extensions
 				state = stateMachine.GetState (currentStateInx);
 		//	resultsAnimaInfoList.Add (new AnimaStateInfo (state.uniqueNameHash, new GUIContent (parentName + '/' + state.name), layer));
 //				
-				MecanimStateInfo info=MecanimStateInfo.CreateInstance<MecanimStateInfo>();
+				MecanimStateInfo info=ScriptableObject.CreateInstance<MecanimStateInfo>();
 				info.hash=state.uniqueNameHash;
 				info.label= new GUIContent (parentName + '/' + state.name);
 				info.layer = layer;

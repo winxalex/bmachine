@@ -47,7 +47,7 @@ namespace ws.winx.editor.bmachine.extensions
 				string[] eventDisplayNames;
 				float timeNormalizedStartPrev = -1;
 
-				//avatarPreviewTimeControl button
+				
 				GUIStyle playButtonStyle;
 				Vector2 playButtonSize;
 				AvatarPreviewW avatarPreview;
@@ -321,8 +321,8 @@ namespace ws.winx.editor.bmachine.extensions
 												if (eventTimeValueSelectedIndex > -1) {
 														avatarPreview.SetTimeValue (eventTimeValues [eventTimeValueSelectedIndex]);
 												} else {
-														if (mecanimNode.normalizedTimeStart != timeNormalizedStartPrev) {
-																timeNormalizedStartPrev = mecanimNode.normalizedTimeStart;
+														if (mecanimNode.timeNormalizedStart != timeNormalizedStartPrev) {
+																timeNormalizedStartPrev = mecanimNode.timeNormalizedStart;
 																avatarPreview.SetTimeValue (timeNormalizedStartPrev);
 																
 														}

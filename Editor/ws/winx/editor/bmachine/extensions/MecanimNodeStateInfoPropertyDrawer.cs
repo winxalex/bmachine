@@ -12,7 +12,7 @@ using ws.winx.unity;
 
 namespace ws.winx.editor.bmachine.extensions
 {
-		[CustomNodePropertyDrawer (typeof(MecanimStateInfoAttribute))]
+		[CustomNodePropertyDrawer (typeof(MecanimNodeStateInfoAttribute))]
 		public class MecanimNodeStateInfoPropertyDrawer : NodePropertyDrawer
 		{
 
@@ -97,7 +97,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 								//add handler to modification of AnimatorController
-								AssetPostProcessorEventDispatcher.Imported += new AssetPostProcessorEventDispatcher.ImporetedEventHandler (onAssetsReImported);
+								AssetPostProcessorEventDispatcher.Imported += new AssetPostProcessorEventDispatcher.ImportedEventHandler (onAssetsReImported);
 						}
 		
 						

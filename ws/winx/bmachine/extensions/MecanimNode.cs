@@ -17,10 +17,13 @@ namespace ws.winx.bmachine.extensions
 		{
 
 				
-				[MecanimStateInfoAttribute]
+				[MecanimNodeStateInfoAttribute]
 				public MecanimStateInfo
 						animaStateInfoSelected;
 				public Motion motionOverride;
+				[MecanimNodeMotionPropertyAttribute]
+				public MotionVar
+						varvar;
 				public bool loop = false;
 				[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.X)]
 				public int
@@ -30,22 +33,20 @@ namespace ws.winx.bmachine.extensions
 						blendParamYBlackboardBindID;
 				[RangeAttribute(0f,1f)]
 				public float
-						transitionDuration = 0.3f;
+						transitionDuration = 0.1f;
 				[RangeAttribute(0f,1f)]
 				//[HideInInspector]
 				public float
-						normalizedTimeStart = 0.5f;
+						timeNormalizedStart = 0f;
 				[HideInInspector]
-				//	[RangeAttribute(0f,1f)]
+				[RangeAttribute(0f,1f)]
 				public float
-						normalizedTimeCurrent = 0f;
+						timeNormalizedCurrent = 0f;
 				//	[HideInInspector]
 
 				public float speed = 1f;
-
-				public float weight=1f;
-
-				
+				public float weight = 1f;
+				public bool modeControl = false;
 
 
 				#region IEventStatusNode implementation
@@ -96,7 +97,6 @@ namespace ws.winx.bmachine.extensions
 				bool isSelectedAnimaInfoInTransition;
 				List<int> _treeInx;
 				int _LastTickedChildren = -1;
-			
 		                         
 				public Animator animator {
 						get {
@@ -237,7 +237,7 @@ namespace ws.winx.bmachine.extensions
 			
 			
 						//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
-						animator.CrossFade (animaStateInfoSelected.hash, transitionDuration, animaStateInfoSelected.layer, normalizedTimeStart);
+						animator.CrossFade (animaStateInfoSelected.hash, transitionDuration, animaStateInfoSelected.layer, timeNormalizedStart);
 			
 				}
 
@@ -306,7 +306,7 @@ namespace ws.winx.bmachine.extensions
 
 								animator.speed = this.speed;
 
-								animator.SetLayerWeight(animaStateInfoSelected.layer,this.weight);
+								animator.SetLayerWeight (animaStateInfoSelected.layer, this.weight);
 			
 								this.Start ();	
 				 
@@ -318,13 +318,14 @@ namespace ws.winx.bmachine.extensions
 
 			
 						if (isCurrentEqualToSelectedAnimaInfo)
+
 								this.Update ();
 
 
 						if (this.status != Status.Running) {
 								
 								//restore layer weight
-								animator.SetLayerWeight(animaStateInfoSelected.layer,0);
+								animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
 
 								this.End ();
 						}
@@ -338,9 +339,9 @@ namespace ws.winx.bmachine.extensions
 						//else
 
 						if (loop)
-								normalizedTimeCurrent = animatorStateInfoCurrent.normalizedTime - (int)animatorStateInfoCurrent.normalizedTime;
+								timeNormalizedCurrent = animatorStateInfoCurrent.normalizedTime - (int)animatorStateInfoCurrent.normalizedTime;
 						else
-								normalizedTimeCurrent = animatorStateInfoCurrent.normalizedTime;
+								timeNormalizedCurrent = animatorStateInfoCurrent.normalizedTime;
 
 
 
@@ -356,14 +357,14 @@ namespace ws.winx.bmachine.extensions
 		
 					
 						if (isCurrentEqualToSelectedAnimaInfo
-								&& normalizedTimeLast != normalizedTimeCurrent) {
+								&& normalizedTimeLast != timeNormalizedCurrent) {
 
 								//Debug.Log ("NormalizedTime: " + (animatorStateInfoCurrent.normalizedTime));
 
 
 							
 							
-								if (normalizedTimeCurrent > 1f) {
+								if (timeNormalizedCurrent > 1f) {
 										if (!loop) {
 												_statusArgs.status = this.status = Status.Success;
 
@@ -382,17 +383,17 @@ namespace ws.winx.bmachine.extensions
 
 
 
-										if(this.speed<0f && normalizedTimeCurrent<0f){
-											if (!loop) {
-												_statusArgs.status = this.status = Status.Success;
+										if (this.speed < 0f && timeNormalizedCurrent < 0f) {
+												if (!loop) {
+														_statusArgs.status = this.status = Status.Success;
 												
-												if (_statusHandler != null)
-													_statusHandler.Invoke (this, _statusArgs);
+														if (_statusHandler != null)
+																_statusHandler.Invoke (this, _statusArgs);
 												
-											}else{
-												animator.Play (animaStateInfoSelected.hash, animaStateInfoSelected.layer, normalizedTimeStart);
+												} else {
+														animator.Play (animaStateInfoSelected.hash, animaStateInfoSelected.layer, timeNormalizedStart);
 											
-											}
+												}
 
 												return;
 										}
@@ -428,11 +429,11 @@ namespace ws.winx.bmachine.extensions
 								}
 
 
-							Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + normalizedTimeCurrent);	
+								Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
 
 								//characterControllerRadius.Value= curve.Evaluate(normalizedTimeCurrent);
 
-								normalizedTimeLast = normalizedTimeCurrent;
+								normalizedTimeLast = timeNormalizedCurrent;
 
 
 

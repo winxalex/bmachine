@@ -9,11 +9,27 @@
 // ------------------------------------------------------------------------------
 using System;
 using UnityEngine;
-namespace ws.winx.unity
+namespace ws.winx.bmachine.extensions
 {
-		public class MecanimNodeEventorStateInfoAttribute:PropertyAttribute
+		
+
+
+		public class MecanimNodeBlendParameterAttribute:PropertyAttribute
 		{
-		  
+		   public enum Axis{
+			X=0,
+			Y=1
+			}
+
+		public Axis axis;
+		public MecanimNodeBlendParameterAttribute(){
+
+		}
+
+			public MecanimNodeBlendParameterAttribute(Axis a){
+			this.axis = a;
+			}
+
 		}
 }
 
