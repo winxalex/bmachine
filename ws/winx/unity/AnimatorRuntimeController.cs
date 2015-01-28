@@ -9,7 +9,7 @@ using ws.winx.bmachine.extensions;
 
 namespace ws.winx.editor.extensions
 {
-	[ExecuteInEditMode]
+		[ExecuteInEditMode]
 		[RequireComponent(typeof(Animator))]
 		public class AnimatorRuntimeController:MonoBehaviour
 		{
@@ -25,10 +25,6 @@ namespace ws.winx.editor.extensions
 				float currentTime = float.NegativeInfinity;
 				float nextCurrentTime = 0f;
 				Animator _animator;
-			
-
-	
-
 				[RangeAttribute(0f,1f)]
 				//[HideInInspector]
 			public float
@@ -63,7 +59,7 @@ namespace ws.winx.editor.extensions
 				{
 
 						AnimatorStateInfo animatorStateInfo;
-			if (_animator == null)
+						if (_animator == null)
 								return;
 
 						if (_animator.IsInTransition (animaStateInfoSelected.layer)) {

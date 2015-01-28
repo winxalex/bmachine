@@ -79,26 +79,28 @@ namespace ws.winx.editor.extensions
 						int i = 0;
 						int len;
 						int inxd;
+					
 
 						if (!position.HasValue)
 								EditorGUILayout.BeginHorizontal ();
-			
-						Rect labelRect = position.Value;
+						
 
 
 			
 						//add Label field
 						// Screen.width in insprector returns its width not Screen => so 35% for the lable and rest for the popup button
 						if (style != null) {
-								if (!position.HasValue)
-										EditorGUILayout.LabelField (label, style, GUILayout.Width (Screen.width * 0.35f));
-								else
+								if (position.HasValue)
 										EditorGUI.LabelField (position.Value, label, style);
-						} else {
-								if (!position.HasValue)
-										EditorGUILayout.LabelField (label, GUILayout.Width (Screen.width * 0.35f));
 								else
-										labelRect = EditorGUI.PrefixLabel (position.Value, label);
+										EditorGUILayout.LabelField (label, style, GUILayout.Width (Screen.width * 0.35f));
+										
+						} else {
+								if (position.HasValue)
+										position = EditorGUI.PrefixLabel (position.Value, label);
+								else
+										EditorGUILayout.LabelField (label, GUILayout.Width (Screen.width * 0.35f));
+										
 						}
 			
 			
@@ -176,7 +178,7 @@ namespace ws.winx.editor.extensions
 						bool clicked;
 
 						if (position.HasValue)
-								clicked = GUI.Button (labelRect, buttonLabel, EditorStyles.popup);
+								clicked = GUI.Button (position.Value, buttonLabel, EditorStyles.popup);
 						else
 								clicked = GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup);
 			
@@ -223,6 +225,7 @@ namespace ws.winx.editor.extensions
 
 						if (!position.HasValue)
 								EditorGUILayout.EndHorizontal ();
+
 						return selectedIndex;
 				}
 		#endregion

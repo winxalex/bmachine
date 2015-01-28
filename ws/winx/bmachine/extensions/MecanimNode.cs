@@ -429,7 +429,7 @@ namespace ws.winx.bmachine.extensions
 								}
 
 
-								Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
+								//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
 
 								//characterControllerRadius.Value= curve.Evaluate(normalizedTimeCurrent);
 
