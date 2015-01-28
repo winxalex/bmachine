@@ -19,6 +19,8 @@ namespace ws.winx.editor.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						timeNormalized;
+
+		float _timeNormalizedPrev=-1f;
 				public AnimatorUpdateMode updateMode;
 				float startTime;
 				float stopTime;
@@ -55,42 +57,75 @@ namespace ws.winx.editor.extensions
 
 				}
 
+
+		void controlAnimation(){
+			AnimatorStateInfo animatorStateInfo;
+			if (_animator == null)
+				return;
+			
+			if (_animator.IsInTransition (animaStateInfoSelected.layer)) {
+				animatorStateInfo = _animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
+			} else {
+				animatorStateInfo = _animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+			}
+			
+			
+			if (animatorStateInfo.nameHash == animaStateInfoSelected.hash) {
+				
+				
+				float timeDelta=0f;
+				
+				//currentTime is negative infinity not intialized => set it to 0f
+				if (currentTime < 0f)
+					this.currentTime = 0f;
+				
+				
+				stopTime = animatorStateInfo.length;
+				startTime = timeNormalizedStart * stopTime;
+				
+				
+				//calculate nextCurrentTime based on timeNormalized
+				//deltaTime is nextCurrentTime-currentTime
+				this.nextCurrentTime = this.startTime * (1f - timeNormalized) + this.stopTime * timeNormalized;	
+				
+				//timeDelta = nextCurrentTime - currentTime;
+				
+				Debug.Log("before time:"+animatorStateInfo.normalizedTime);
+				
+
+					timeDelta=timeNormalized-animatorStateInfo.normalizedTime;
+					_animator.Update(timeNormalized-animatorStateInfo.normalizedTime);
+	
+				
+				_timeNormalizedPrev=timeNormalized;
+				
+				//_animator.enabled=true;
+				//_animator.Update (timeDelta);
+				
+				
+				currentTime=nextCurrentTime;
+				
+				
+				Debug.Log("timeDelta:"+timeDelta);
+				//Debug.Log("timeDelta:"+timeDelta+"nextCurrentTime:"+nextCurrentTime+"currentTime:"+currentTime);
+				
+				Debug.Log("after time:"+animatorStateInfo.normalizedTime);
+				
+			} else {
+				
+				_animator.CrossFade(animaStateInfoSelected.hash,0f);
+			}
+				}
+
+		void FixedUpdate()
+		{
+			controlAnimation ();
+		}
+
 				void Update ()
 				{
 
-						AnimatorStateInfo animatorStateInfo;
-						if (_animator == null)
-								return;
-
-						if (_animator.IsInTransition (animaStateInfoSelected.layer)) {
-								animatorStateInfo = _animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
-						} else {
-								animatorStateInfo = _animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
-						}
 					
-
-						if (animatorStateInfo.nameHash == animaStateInfoSelected.hash) {
-				
-				
-								float timeDelta;
-				
-								//currentTime is negative infinity not intialized => set it to 0f
-								if (currentTime < 0f)
-										this.currentTime = 0f;
-
-
-								stopTime = animatorStateInfo.length;
-								startTime = timeNormalizedStart * stopTime;
-
-				
-								//calculate nextCurrentTime based on timeNormalized
-								//deltaTime is nextCurrentTime-currentTime
-								this.nextCurrentTime = this.startTime * (1f - timeNormalized) + this.stopTime * timeNormalized;	
-				
-								timeDelta = nextCurrentTime - currentTime;
-					
-								_animator.Update (timeDelta);
-						}
 
 				}
 				
