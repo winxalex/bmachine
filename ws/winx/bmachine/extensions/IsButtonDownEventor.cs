@@ -52,41 +52,45 @@ namespace BehaviourMachine
 		//
 		// Methods
 		//
-
-
-		public override void OnTick ()
+		public override Status Update ()
 		{
-
-		
-			if (this.buttonName.isNone)
-			{
-				_statusArgs.status=base.status = Status.Error;
-
-
-
-			}else
-			if (Input.GetButtonDown (this.buttonName.Value))
-			{
-				if (this.onSuccess.id != 0)
-				{
-					base.owner.root.SendEvent (this.onSuccess.id);
-				}
-				_statusArgs.status=base.status = Status.Success;
-
-
-
-			}
-			else
-			{
-				_statusArgs.status=base.status = Status.Failure;
-
-
-			}
-
-			Debug.Log("onTick "+_statusArgs.status);
-		
-			if(_statusHandler!=null) _statusHandler.Invoke(this,_statusArgs);
+			throw new NotImplementedException ();
 		}
+
+//		public  void OnTick ()
+//		{
+//
+//		
+//			if (this.buttonName.isNone)
+//			{
+//				//_statusArgs.status=base.status = Status.Error;
+//
+//
+//
+//			}else
+//			if (Input.GetButtonDown (this.buttonName.Value))
+//			{
+//				if (this.onSuccess.id != 0)
+//				{
+//					base.owner.root.SendEvent (this.onSuccess.id);
+//				}
+//
+//				_statusArgs.status=base.status = Status.Success;
+//
+//
+//
+//			}
+//			else
+//			{
+//				_statusArgs.status=base.status = Status.Failure;
+//
+//
+//			}
+//
+//			Debug.Log("onTick "+_statusArgs.status);
+//		
+//			if(_statusHandler!=null) _statusHandler.Invoke(this,_statusArgs);
+//		}
 		
 		public override void Reset ()
 		{

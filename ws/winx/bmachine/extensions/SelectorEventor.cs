@@ -51,22 +51,25 @@ namespace ws.winx.bmachine.extensions
 
 				}
 
-				public override void OnTick ()
+				public  void OnTick ()
 				{
 						//base.OnTick ();
 				}
 
-				public override void Update ()
+
+
+				public Status Update ()
 				{
-						this.status = _currentStatus;
+					//	this.status = _currentStatus;
 						base.Update ();
+					return _currentStatus;
 				}
 
 				void onUpdateNodeStatus (object sender, StatusEventArgs args)
 				{
 
 						if (args.status == Status.Success) {
-								this.status = args.status;
+								//this.status = args.status;
 								return;
 						}
 
@@ -83,7 +86,7 @@ namespace ws.winx.bmachine.extensions
 								child.OnChildCompleteStatus += new StatusUpdateHandler (onUpdateNodeStatus);
 
 						} else {
-								this.status = Status.Failure;
+								//this.status = Status.Failure;
 						}
 				}
 

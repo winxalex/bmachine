@@ -21,9 +21,9 @@ namespace ws.winx.editor.bmachine.extensions
 				GUIContent[] displayOptions;
 				string caption = "Motion";
 				List<Variable> blackboardMotionVariables;
-				Type MotionType = typeof(UnityEngine.Motion);
+				//Type MotionType = typeof(UnityEngine.Motion);
 				int blackBoardBindingID;
-				UnityEngine.Motion motion;
+				//UnityEngine.Motion motion;
 		
 				//
 				// Methods
@@ -36,7 +36,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 						
-						motion = (UnityEngine.Motion)property.value;
+						//motion = (UnityEngine.Motion)property.value;
 
 						label.text = this.caption;
 								

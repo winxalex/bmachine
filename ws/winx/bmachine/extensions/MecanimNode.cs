@@ -16,14 +16,11 @@ namespace ws.winx.bmachine.extensions
 		public class MecanimNode:CompositeNode,IEventStatusNode
 		{
 
-				
-				[MecanimNodeStateInfoAttribute]
-				public MecanimStateInfo
-						animaStateInfoSelected;
+	    
+				 [MecanimNodeStateInfoAttribute]
+				public MecanimStateInfo animaStateInfoSelected;
 				public Motion motionOverride;
-				[MecanimNodeMotionPropertyAttribute]
-				public MotionVar
-						varvar;
+			
 				public bool loop = false;
 				[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.X)]
 				public int
@@ -191,16 +188,16 @@ namespace ws.winx.bmachine.extensions
 				//			
 				//				}
 		
-				public override void Start ()
-				{
-
-//						Debug.Log (selectedAnimaStateInfo.label.text + ">Start MecanimNode");
-
-						_LastTickedChildren = -1;
-
-						PlayAnimaState ();
-
-				}
+//				public override void Start ()
+//				{
+//
+////						Debug.Log (selectedAnimaStateInfo.label.text + ">Start MecanimNode");
+//
+//						_LastTickedChildren = -1;
+//
+//						PlayAnimaState ();
+//
+//				}
 
 
 
@@ -241,107 +238,187 @@ namespace ws.winx.bmachine.extensions
 			
 				}
 
-
-				
+				//		public void OnTick ()
+				//		{
+				//			if (this.m_Status != Status.Running)
+				//			{
+				//				this.Start ();
+				//			}
+				//			this.m_Status = this.Update ();
+				//			if (this.m_Status != Status.Running)
+				//			{
+				//				this.End ();
+				//			}
+				//			this.OnNodeTick ();
+				//		}
+				//				
 
 
 				/// <summary>
 				/// Raises the tick event.
 				/// </summary>
-				public override void OnTick ()
+//				public void OnTick ()
+//				{
+//
+//						//Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
+//
+//						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+//
+//						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
+//
+//						isSelectedAnimaInfoInTransition = animator.IsInTransition (animaStateInfoSelected.layer) && (animatorStateInfoNext.nameHash == animaStateInfoSelected.hash);
+//
+//						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash;
+//
+//
+////			Debug.Log (animaStateInfoSelected.label.text + ">Tick() "); 
+////			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
+////			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
+////			if ()) {
+////
+////				Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).nameHash+" Transition time:"+animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).normalizedTime); 
+////
+////						}
+//			
+//			
+//
+//
+//
+//
+//						//The second check ins't nessery if I could reset Status when this node is switched
+//						if (this.status != Status.Running) {
+//
+//								AnimationClip animationClipCurrent;
+//								if (motionOverride != null 
+//										&& ((animationClipCurrent = animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion]) != (AnimationClip)motionOverride)) {
+//
+//
+//										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
+//					
+//										animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] = (AnimationClip)motionOverride;
+//					
+//										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
+//
+//
+//										//to avoid nesting 
+//										if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+//												animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
+//										}
+//											
+//										//rebind back												
+//										animator.runtimeAnimatorController = animatorOverrideController;
+//
+//								}
+//
+//								
+//
+//
+//								animator.speed = this.speed;
+//
+//								animator.SetLayerWeight (animaStateInfoSelected.layer, this.weight);
+//			
+//								this.Start ();	
+//				 
+//								this.status = Status.Running;
+//								return;
+//						}
+//
+//						//	Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
+//
+//			
+//						if (isCurrentEqualToSelectedAnimaInfo)
+//
+//								this.Update ();
+//
+//
+//						if (this.status != Status.Running) {
+//								
+//								//restore layer weight
+//								animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
+//
+//								this.End ();
+//						}
+//				}
+
+
+
+				public override Status Update ()
 				{
+					
+						
 
-						//Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
+			if (animaStateInfoSelected == null)
+								return Status.Failure;
 
-						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
-
+			  		 animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+			
 						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
-
+			
 						isSelectedAnimaInfoInTransition = animator.IsInTransition (animaStateInfoSelected.layer) && (animatorStateInfoNext.nameHash == animaStateInfoSelected.hash);
-
+			
 						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash;
 
 
-//			Debug.Log (animaStateInfoSelected.label.text + ">Tick() "); 
-//			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
-//			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
-//			if ()) {
-//
-//				Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).nameHash+" Transition time:"+animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).normalizedTime); 
-//
-//						}
-			
-			
 
-
-
+						///////////////////////  START  //////////////////////////
 
 						//The second check ins't nessery if I could reset Status when this node is switched
 						if (this.status != Status.Running) {
-
+				
 								AnimationClip animationClipCurrent;
 								if (motionOverride != null 
 										&& ((animationClipCurrent = animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion]) != (AnimationClip)motionOverride)) {
-
-
+					
+					
 										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
 					
 										animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] = (AnimationClip)motionOverride;
 					
 										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
-
-
+					
+					
 										//to avoid nesting 
 										if (animator.runtimeAnimatorController is AnimatorOverrideController) {
 												animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
 										}
-											
+					
 										//rebind back												
 										animator.runtimeAnimatorController = animatorOverrideController;
-
+					
 								}
-
-								
-
-
+				
+				
+				
+				
 								animator.speed = this.speed;
-
+				
 								animator.SetLayerWeight (animaStateInfoSelected.layer, this.weight);
-			
-								this.Start ();	
-				 
-								this.status = Status.Running;
-								return;
-						}
+				
+								//this.Start ();	
 
-						//	Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
-
-			
-						if (isCurrentEqualToSelectedAnimaInfo)
-
-								this.Update ();
-
-
-						if (this.status != Status.Running) {
+								_LastTickedChildren = -1;
 								
-								//restore layer weight
-								animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
-
-								this.End ();
+								PlayAnimaState ();
+								////////////////////
+								
+								return Status.Running;
 						}
-				}
 
-				public override void Update ()
-				{
+						//////////////////////////////////////////////////////////////////////
+					
+				
 
-						//if(isSelectedAnimaInfoInTransition)
-						//normalizedTimeCurrent =animatorStateInfoNext.normalizedTime;
-						//else
+						///////////////////  UPDATE  /////////////////////
 
-						if (loop)
-								timeNormalizedCurrent = animatorStateInfoCurrent.normalizedTime - (int)animatorStateInfoCurrent.normalizedTime;
-						else
-								timeNormalizedCurrent = animatorStateInfoCurrent.normalizedTime;
+						if (isCurrentEqualToSelectedAnimaInfo) {	
+
+
+
+
+								if (loop)
+										timeNormalizedCurrent = animatorStateInfoCurrent.normalizedTime - (int)animatorStateInfoCurrent.normalizedTime;
+								else
+										timeNormalizedCurrent = animatorStateInfoCurrent.normalizedTime;
 
 
 
@@ -356,104 +433,122 @@ namespace ws.winx.bmachine.extensions
 
 		
 					
-						if (isCurrentEqualToSelectedAnimaInfo
-								&& normalizedTimeLast != timeNormalizedCurrent) {
+								if (isCurrentEqualToSelectedAnimaInfo
+										&& normalizedTimeLast != timeNormalizedCurrent) {
 
-								//Debug.Log ("NormalizedTime: " + (animatorStateInfoCurrent.normalizedTime));
+										//Debug.Log ("NormalizedTime: " + (animatorStateInfoCurrent.normalizedTime));
 
 
 							
 							
-								if (timeNormalizedCurrent > 1f) {
-										if (!loop) {
-												_statusArgs.status = this.status = Status.Success;
-
-												if (_statusHandler != null)
-														_statusHandler.Invoke (this, _statusArgs);
-												return;
-										}
-
-								} else {
-
-										//send event if its between previous and current time
-										//Test only, event sending is done try SentEventNormalized
-										//if (normalizedTimeLast < 0.67f && normalizedTimeCurrent >= 0.67f)
-										//Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
-
-
-
-
-										if (this.speed < 0f && timeNormalizedCurrent < 0f) {
+										if (timeNormalizedCurrent > 1f) {
 												if (!loop) {
-														_statusArgs.status = this.status = Status.Success;
-												
+														_statusArgs.status =  Status.Success;
+
 														if (_statusHandler != null)
 																_statusHandler.Invoke (this, _statusArgs);
+
+														return Status.Success;
+												}
+
+										} else {
+
+												//send event if its between previous and current time
+												//Test only, event sending is done try SentEventNormalized
+												//if (normalizedTimeLast < 0.67f && normalizedTimeCurrent >= 0.67f)
+												//Debug.Log ("Event sent designated at 0.67 sent at:" + normalizedTimeCurrent);
+
+
+
+
+												if (this.speed < 0f && timeNormalizedCurrent < 0f) {
+														if (!loop) {
+																_statusArgs.status =  Status.Success;
 												
-												} else {
-														animator.Play (animaStateInfoSelected.hash, animaStateInfoSelected.layer, timeNormalizedStart);
-											
+																if (_statusHandler != null)
+																		_statusHandler.Invoke (this, _statusArgs);
+
+																return Status.Success;
+												
+														} else {
+																animator.Play (animaStateInfoSelected.hash, animaStateInfoSelected.layer, timeNormalizedStart);
+																return Status.Running;
+														}
+
+														//return;
 												}
 
-												return;
-										}
+												////////   TICK CHILDREN ///////
+												int len = children.Length;
 
+												if (len > 0) {
+														_LastTickedChildren++;
 
-										int len = children.Length;
+														//reset
+														if (_LastTickedChildren >= len)
+																_LastTickedChildren = 0;
 
-										if (len > 0) {
-												_LastTickedChildren++;
-
-												//reset
-												if (_LastTickedChildren >= len)
-														_LastTickedChildren = 0;
-
-												for (int i=_LastTickedChildren; i<len; i++) {
-														children [i].OnTick ();
+														for (int i=_LastTickedChildren; i<len; i++) {
+																children [i].OnTick ();
+														}
 												}
-										}
 
-								}
+										}
 
 							
-								if (animaStateInfoSelected.blendParamsIDs != null && (numBlendParamters = animaStateInfoSelected.blendParamsIDs.Length) > 0) {
+										if (animaStateInfoSelected.blendParamsIDs != null && (numBlendParamters = animaStateInfoSelected.blendParamsIDs.Length) > 0) {
 
-										if (numBlendParamters > 1) {
-												animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (this.blendParamXBlackboardBindID).Value);
-												animator.SetFloat (animaStateInfoSelected.blendParamsIDs [1], this.blackboard.GetFloatVar (this.blendParamYBlackboardBindID).Value);
+												if (numBlendParamters > 1) {
+														animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (this.blendParamXBlackboardBindID).Value);
+														animator.SetFloat (animaStateInfoSelected.blendParamsIDs [1], this.blackboard.GetFloatVar (this.blendParamYBlackboardBindID).Value);
 
-										} else
-												animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (blendParamXBlackboardBindID).Value);
-
-
-								}
+												} else
+														animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (blendParamXBlackboardBindID).Value);
 
 
-								//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
+										}
 
-								//characterControllerRadius.Value= curve.Evaluate(normalizedTimeCurrent);
 
-								normalizedTimeLast = timeNormalizedCurrent;
+										//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
+
+										//characterControllerRadius.Value= curve.Evaluate(normalizedTimeCurrent);
+
+										normalizedTimeLast = timeNormalizedCurrent;
 
 
 
 			
-						} else {
+								} else {
 
-								Debug.LogWarning ("MecanimNode Update on wrong  AnimaState");
-								//this.status = Status.Error;
-								//return;
+										Debug.LogWarning ("MecanimNode Update on wrong  AnimaState");
+										//this.status = Status.Error;
+										//return;
 								
+								}
+
+
+						
+						
+								//_statusArgs.status = this.status = Status.Running;
+
+								_statusArgs.status = Status.Running;
+
+								if (_statusHandler != null)
+										_statusHandler.Invoke (this, _statusArgs);
+
 						}
 
 
+								return Status.Running;
 						
-						
-						_statusArgs.status = this.status = Status.Running;
 
-						if (_statusHandler != null)
-								_statusHandler.Invoke (this, _statusArgs);
+				}
 
+				public override void End ()
+				{
+			if(animaStateInfoSelected!=null)
+			   //restore layer weight
+						animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
 				}
 
 

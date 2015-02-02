@@ -11,10 +11,11 @@ using System;
 using BehaviourMachine;
 using UnityEngine;
 using ws.winx.unity;
+using UnityEngine.Events;
 
 namespace ws.winx.bmachine.extensions
 {
-	[NodeInfo ( category = "Extensions/Mecanim/", icon = "StateMachine",  description ="To be used in conjuction with MecanimNode for sending events in animation points in time")]
+		[NodeInfo ( category = "Extensions/Mecanim/", icon = "StateMachine",  description ="To be used in conjuction with MecanimNode for sending events in animation points in time")]
 		public class SendEventNormalized:ActionNode
 		{
 				//
@@ -23,12 +24,10 @@ namespace ws.winx.bmachine.extensions
 
 				Animator _animator;
 				float _timeNormalizedLast;
-				[VariableInfo (requiredField = true,tooltip = "The event to send")]
-				public FsmEvent
-						eventToSend;
 				[VariableInfo (requiredField = true,fixedType=true, tooltip = "Normalized time value from 0 to 1."), Range (0f, 1f)]
 				public FloatVar
 						timeNormalized;
+				//public UnityEvent onAnimationEvent;
 			
 				public override void Awake ()
 				{
@@ -37,9 +36,7 @@ namespace ws.winx.bmachine.extensions
 						
 				}
 
-
-
-				public override void Update ()
+				public override Status Update ()
 				{
 						MecanimStateInfo selectedAnimaStateInfo = ((MecanimNode)this.branch).animaStateInfoSelected;
 						AnimatorStateInfo currentAnimatorStateInfo = _animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
@@ -57,30 +54,27 @@ namespace ws.winx.bmachine.extensions
 
 								if (timeNormalizedCurrent > timeNormalized && _timeNormalizedLast < timeNormalized) {
 
-										base.owner.SendEvent (this.eventToSend.id);
-		//								Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
-										this.status = Status.Success;
+										//Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
+										//onAnimationEvent.Invoke ();
 										_timeNormalizedLast = timeNormalizedCurrent;
-										return;
+										return Status.Success;
 								}
 
 								_timeNormalizedLast = timeNormalizedCurrent;
 						}
 
-						this.status = Status.Running;
-
+						//this.status = Status.Running;
+						
+						return Status.Running;
 				}
 			
 				public override void Reset ()
 				{
-						this.eventToSend = new FsmEvent ();
+						//this.onAnimationEvent = new UnityEvent ();
 						this.timeNormalized = new ConcreteFloatVar ();
 						_timeNormalizedLast = 0f;
 				
 				}
-
-
-			
 
 				public override string ToString ()
 				{

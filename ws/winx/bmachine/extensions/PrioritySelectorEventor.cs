@@ -22,12 +22,14 @@ namespace ws.winx.bmachine.extensions
 				{
 						
 						this.m_CurrentChildIndex = 0;
-						this.status = Status.Error;//composite without children
+						//this.status = Status.Error;//composite without children
 
 						if (this.children.Length > 0) {
 			
 								ActionNode child = this.children [0];
-								this.status=Status.Running;
+								
+
+				//this.status=Status.Running;
 								((IEventStatusNode)child).OnChildCompleteStatus += onChildStatus;
 
 								//Debug.Log ("Listen to child:" + child.name);
@@ -44,7 +46,7 @@ namespace ws.winx.bmachine.extensions
 				}
 
 			
-		public override void OnTick ()
+		public void OnTick ()
 		{
 			if (this.status != Status.Running)
 			{
@@ -69,7 +71,7 @@ namespace ws.winx.bmachine.extensions
 						((IEventStatusNode)child).OnChildCompleteStatus -= onChildStatus;
 
 						if (args.status == Status.Success) {
-								this.status = args.status;
+								//this.status = args.status;
 								this.End ();
 								return;
 						}
@@ -90,7 +92,7 @@ namespace ws.winx.bmachine.extensions
 
 						} else {
 								this.End ();
-								this.status = Status.Failure;
+								//this.status = Status.Failure;
 						}
 				}
 

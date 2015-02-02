@@ -20,7 +20,7 @@ namespace ws.winx.editor.bmachine.extensions
 				GUIContent[] displayOptions;
 				List<MecanimStateInfo> animaStateInfoValues;
 				MecanimStateInfo animaStateInfoSelected;
-				bool isListDirty = false;
+				
 				UnityEngine.Motion motionSelected;
 
 
@@ -49,7 +49,7 @@ namespace ws.winx.editor.bmachine.extensions
 						animaStateInfoValues = MecanimStateInfoUtility.getAnimaStatesInfo (animatorController);
 						displayOptions = animaStateInfoValues.Select (x => x.label).ToArray ();
 					
-						isListDirty = false;
+					
 					
 						if (animaStateInfoSelected != null) {
 						

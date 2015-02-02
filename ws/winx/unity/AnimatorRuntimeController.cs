@@ -90,7 +90,7 @@ namespace ws.winx.editor.extensions
 				
 				//timeDelta = nextCurrentTime - currentTime;
 				
-				Debug.Log("before time:"+animatorStateInfo.normalizedTime);
+			//	Debug.Log("before time:"+animatorStateInfo.normalizedTime);
 				
 
 					timeDelta=timeNormalized-animatorStateInfo.normalizedTime;
@@ -106,10 +106,10 @@ namespace ws.winx.editor.extensions
 				currentTime=nextCurrentTime;
 				
 				
-				Debug.Log("timeDelta:"+timeDelta);
+//				Debug.Log("timeDelta:"+timeDelta);
 				//Debug.Log("timeDelta:"+timeDelta+"nextCurrentTime:"+nextCurrentTime+"currentTime:"+currentTime);
 				
-				Debug.Log("after time:"+animatorStateInfo.normalizedTime);
+//				Debug.Log("after time:"+animatorStateInfo.normalizedTime);
 				
 			} else {
 				
