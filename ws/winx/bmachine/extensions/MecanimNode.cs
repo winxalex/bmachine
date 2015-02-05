@@ -77,10 +77,7 @@ namespace ws.winx.bmachine.extensions
 				
 				
 
-				//!!!Curves serialization is buggy
-				//public AnimationCurve curve;
-
-		         
+			
 
 
 				
@@ -160,7 +157,7 @@ namespace ws.winx.bmachine.extensions
 						
 						transitionDuration = 0f;
 
-						//curve = new AnimationCurve ();
+						
 				}
 
 //				public override void Awake ()
@@ -546,8 +543,8 @@ namespace ws.winx.bmachine.extensions
 
 				public override void End ()
 				{
-			if(animaStateInfoSelected!=null)
-			   //restore layer weight
+						if(animaStateInfoSelected!=null)
+			   			//restore layer weight
 						animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
 				}
 
