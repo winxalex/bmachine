@@ -12,7 +12,7 @@ using ws.winx.unity;
 
 namespace ws.winx.editor.bmachine.extensions
 {
-		[CustomNodePropertyDrawer (typeof(MecanimNodeStateInfoAttribute))]
+		[CustomNodePropertyDrawer (typeof(MecanimStateInfoAttribute))]
 		public class MecanimNodeStateInfoPropertyDrawer : NodePropertyDrawer
 		{
 
@@ -22,6 +22,18 @@ namespace ws.winx.editor.bmachine.extensions
 				MecanimStateInfo animaStateInfoSelected;
 				bool isListDirty = false;
 				UnityEngine.Motion motionSelected;
+
+
+
+				//
+				// Properties
+				//
+				public new MecanimStateInfoAttribute attribute {
+					get {
+						
+						return  (MecanimStateInfoAttribute)base.attribute;
+					}
+				}
 
 
 				//
@@ -66,7 +78,9 @@ namespace ws.winx.editor.bmachine.extensions
 
 				}
 	
+
 			
+				
 
 				/// <summary>
 				/// Raises the GU event.
@@ -77,15 +91,15 @@ namespace ws.winx.editor.bmachine.extensions
 				public override void OnGUI (SerializedNodeProperty property, ActionNode node, GUIContent guiContent)
 				{
 
-						MecanimNode mc = node as MecanimNode;
-
+						attribute.serializedObject = node;
+					
 						animaStateInfoSelected = property.value as MecanimStateInfo;
 
 
 						if (displayOptions == null || isListDirty) {
 								RuntimeAnimatorController runtimeContoller;
-
-								runtimeContoller = mc.animator.runtimeAnimatorController;
+				   
+								runtimeContoller = attribute.Ani.runtimeAnimatorController;
 
 								if (runtimeContoller is AnimatorOverrideController)
 										aniController = ((AnimatorOverrideController)runtimeContoller).runtimeAnimatorController as AnimatorController;

@@ -10,43 +10,48 @@
 using System;
 using UnityEngine;
 using UnityEditor;
-
+using System.Reflection;
 
 namespace ws.winx.unity
 {
 		public class MecanimStateInfoAttribute:PropertyAttribute
 		{
 
+				Animator _animator;
+				FieldInfo _animatorFieldInfo;
+				PropertyInfo _animatorPropertyInfo;
+				string _fieldNameAnimator;
+				public object serializedObject;
+
+				public Animator Ani {
+						get {
+
+								if (serializedObject != null && _animator == null) {
 
 
+										_animatorFieldInfo = serializedObject.GetType ().GetField (_fieldNameAnimator, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+										if (_animatorFieldInfo == null) { //try if property
+												_animatorPropertyInfo = serializedObject.GetType ().GetProperty (_fieldNameAnimator, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+												_animator = (Animator)_animatorPropertyInfo.GetValue (serializedObject, null);
+										} else {
+												_animator = (Animator)_animatorFieldInfo.GetValue (serializedObject);
+
+										}
+								}
+
+								return _animator;
+						}
+				}
+
+				public MecanimStateInfoAttribute (string fieldNameAnimator)
+				{
+
+						_fieldNameAnimator = fieldNameAnimator;
+				}
 
 
-
-//		//
-//		// Methods
-//		//
-//
-//		/// <summary>
-//		/// Ons the assets re imported.
-//		/// </summary>
-//		/// <param name="importedAssetsPath">Imported assets path.</param>
-//		void onAssetsReImported (string[] importedAssetsPath)
-//		{
-//			
-//			
-//			//check if the reimported asset is our aniController
-//			if (Array.FindIndex (importedAssetsPath, (path) => {
-//				return System.IO.Path.GetFileNameWithoutExtension (path) == aniController.name;}) > -1) {
-//				
-//				isListDirty = true;
-//				
-//			}
-//			
-//		}
-//
-//
-
-	}
+		}
 
 		
 }

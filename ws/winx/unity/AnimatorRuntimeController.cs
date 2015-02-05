@@ -13,7 +13,7 @@ namespace ws.winx.editor.extensions
 		[RequireComponent(typeof(Animator))]
 		public class AnimatorRuntimeController:MonoBehaviour
 		{
-				[MecanimStateInfoAttribute]
+				[MecanimStateInfoAttribute("_animator")]
 				public MecanimStateInfo
 						animaStateInfoSelected;
 				[RangeAttribute(0f,1f)]

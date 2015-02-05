@@ -23,7 +23,7 @@ namespace ws.winx.editor.bmachine.extensions
 				//
 				// Properties
 				//
-				public RangeAttributeEx attribute {
+				public new RangeAttributeEx attribute {
 						get {
 						
 								return  (RangeAttributeEx)base.attribute;

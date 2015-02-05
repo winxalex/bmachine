@@ -30,7 +30,7 @@ namespace ws.winx.editor.bmachine.extensions
 				//
 				// Properties
 				//
-				public MecanimStateInfoAttribute attribute {
+				public new MecanimStateInfoAttribute attribute {
 						get {
 						
 								return  (MecanimStateInfoAttribute)base.attribute;

@@ -3,11 +3,20 @@ using System.Collections;
 using BehaviourMachine;
 using ws.winx.unity;
 
+
 namespace ws.winx.bmachine.extensions
 {
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Animation Curve")]
 		public class AnimationCurveNode : ActionNode
 		{
+				
+				public bool syncWithAnimation = true;
+
+		[MecanimStateInfoAttribute("Ani")]
+				public MecanimStateInfo
+					animaStateInfoSelected;
+
+
 				[VariableInfo (requiredField = true,canBeConstant = false,tooltip = "Object.property or blackboard that will be controlled by Animation curve")]
 				public FloatVar
 						property;
@@ -24,23 +33,35 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public float
 						timeEnd;
+
+				
+
 				Animator _animator;
-				float _timeNormalizedPrev = -1f;
-				float _currentTime;
+
+				public Animator Ani {
+						get {
+							if(_animator==null) _animator = this.self.GetComponent<Animator> ();
+							return _animator;
+						}
+					}
+
+				float _timeCurrent;
 
 				public override void Awake ()
 				{
 
-						if (this.branch is MecanimNode) {
-
-								_animator = this.self.GetComponent<Animator> ();
+					if (curve != null || curve.keys != null || curve.keys.Length >1) {
+								timeStart = curve.keys [0].time;
+					
+								timeEnd = curve.keys [curve.length - 1].time;
 						}
+						
 				}
 
 				public override void Reset ()
 				{
 						curve = new AnimationCurve ();
-						_currentTime = 0f; 
+						_timeCurrent = 0f; 
 						//property = new ConcreteFloatVar ("mile", this.blackboard, 24);
 
 				}
@@ -48,7 +69,7 @@ namespace ws.winx.bmachine.extensions
 
 				public override void Start ()
 				{
-					_currentTime = timeStart;
+					_timeCurrent = timeStart;
 				}
 
 				public override Status Update ()
@@ -65,13 +86,12 @@ namespace ws.winx.bmachine.extensions
 
 						if (_animator != null) {
 
+								//time should be normalized in 0-1 when animator.normalizedTime is used as time ticker
 								if (timeStart > 1f || timeEnd > 1f || timeStart < 0f || timeEnd < 0f)
 										return Status.Error;
 
 
-								//take selected AnimaState in parent MecanimNode
-								MecanimStateInfo animaStateInfoSelected = ((MecanimNode)this.branch).animaStateInfoSelected;
-			
+								
 								//take Animator AnimaStateInfo 
 								AnimatorStateInfo animatorStateInfoCurrent = _animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
 				
@@ -86,28 +106,28 @@ namespace ws.winx.bmachine.extensions
 
 								//check if selected and current state are equal
 								if (animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash) {
-										_currentTime = animatorStateInfoCurrent.normalizedTime;
+										_timeCurrent = animatorStateInfoCurrent.normalizedTime;
 						
 										if (timeControl > 0)
 												_animator.Update (timeControl - animatorStateInfoCurrent.normalizedTime);
 								}
 						} else {
 								if (timeControl > 0)
-										_currentTime = timeControl;
+										_timeCurrent = timeControl;
 								else
-										_currentTime += base.owner.deltaTime;
+										_timeCurrent += base.owner.deltaTime;
 								
 						}
 			
 			
-						if (_currentTime >= timeStart && _currentTime <= timeEnd)
-								property.Value = curve.Evaluate (_currentTime);
+						if (_timeCurrent >= timeStart && _timeCurrent <= timeEnd)
+								property.Value = curve.Evaluate (_timeCurrent);
 
-						if (_currentTime > timeEnd)
+						if (_timeCurrent >= timeEnd)
 								return Status.Success;
 				
 			 
-
+			Debug.Log ("Time current:"+_timeCurrent);
 
 	
 

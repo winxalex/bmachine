@@ -13,14 +13,14 @@ using ws.winx.unity;
 namespace ws.winx.bmachine.extensions
 {
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
-		public class MecanimNode:CompositeNode,IEventStatusNode
+		public class MecanimNode:CompositeNode
 		{
 
 	    
-				 [MecanimNodeStateInfoAttribute]
-				public MecanimStateInfo animaStateInfoSelected;
+				[MecanimStateInfoAttribute("animator")]
+				public MecanimStateInfo
+						animaStateInfoSelected;
 				public Motion motionOverride;
-			
 				public bool loop = false;
 				[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.X)]
 				public int
@@ -43,45 +43,6 @@ namespace ws.winx.bmachine.extensions
 
 				public float speed = 1f;
 				public float weight = 1f;
-				public bool modeControl = false;
-
-
-				#region IEventStatusNode implementation
-				StatusUpdateHandler _statusHandler;
-				StatusEventArgs _statusArgs = new StatusEventArgs (Status.Error);
-					
-				public event StatusUpdateHandler OnChildCompleteStatus {
-						
-						add {
-								_statusHandler += value;
-							
-								//v1
-								//this.tree.StartCoroutine
-							
-								//v2
-								this.tree.update += OnTick;
-						}
-						
-						remove {
-								_statusHandler -= value;
-							
-								//v1
-								//this.tree.StopCoroutine()
-							
-								//v2
-								this.tree.update -= OnTick;
-						}
-						
-				}
-				#endregion
-				
-				
-
-			
-
-
-				
-
 				Animator _animator;
 				float normalizedTimeLast = 0f;
 				int numBlendParamters;
@@ -235,107 +196,10 @@ namespace ws.winx.bmachine.extensions
 			
 				}
 
-				//		public void OnTick ()
-				//		{
-				//			if (this.m_Status != Status.Running)
-				//			{
-				//				this.Start ();
-				//			}
-				//			this.m_Status = this.Update ();
-				//			if (this.m_Status != Status.Running)
-				//			{
-				//				this.End ();
-				//			}
-				//			this.OnNodeTick ();
-				//		}
-				//				
+				
 
 
-				/// <summary>
-				/// Raises the tick event.
-				/// </summary>
-//				public void OnTick ()
-//				{
-//
-//						//Debug.Log (selectedAnimaStateInfo.label.text + ">OnTick");
-//
-//						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
-//
-//						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
-//
-//						isSelectedAnimaInfoInTransition = animator.IsInTransition (animaStateInfoSelected.layer) && (animatorStateInfoNext.nameHash == animaStateInfoSelected.hash);
-//
-//						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash;
-//
-//
-////			Debug.Log (animaStateInfoSelected.label.text + ">Tick() "); 
-////			Debug.Log (animaStateInfoSelected.label.text + ">current state: " + animatorStateInfoCurrent.nameHash + " requested state " + animaStateInfoSelected.hash);
-////			Debug.Log (animaStateInfoSelected.label.text + ">current state time= " + animatorStateInfoCurrent.normalizedTime + " normalizedTimeStart= " + normalizedTimeStart);
-////			if ()) {
-////
-////				Debug.Log (animaStateInfoSelected.label.text + "> state in transition" + animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).nameHash+" Transition time:"+animator.GetNextAnimatorStateInfo(animaStateInfoSelected.layer).normalizedTime); 
-////
-////						}
-//			
-//			
-//
-//
-//
-//
-//						//The second check ins't nessery if I could reset Status when this node is switched
-//						if (this.status != Status.Running) {
-//
-//								AnimationClip animationClipCurrent;
-//								if (motionOverride != null 
-//										&& ((animationClipCurrent = animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion]) != (AnimationClip)motionOverride)) {
-//
-//
-//										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
-//					
-//										animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] = (AnimationClip)motionOverride;
-//					
-//										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
-//
-//
-//										//to avoid nesting 
-//										if (animator.runtimeAnimatorController is AnimatorOverrideController) {
-//												animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
-//										}
-//											
-//										//rebind back												
-//										animator.runtimeAnimatorController = animatorOverrideController;
-//
-//								}
-//
-//								
-//
-//
-//								animator.speed = this.speed;
-//
-//								animator.SetLayerWeight (animaStateInfoSelected.layer, this.weight);
-//			
-//								this.Start ();	
-//				 
-//								this.status = Status.Running;
-//								return;
-//						}
-//
-//						//	Debug.Log (selectedAnimaStateInfo.label.text + ">" + Status.Running);
-//
-//			
-//						if (isCurrentEqualToSelectedAnimaInfo)
-//
-//								this.Update ();
-//
-//
-//						if (this.status != Status.Running) {
-//								
-//								//restore layer weight
-//								animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
-//
-//								this.End ();
-//						}
-//				}
+
 
 
 
@@ -344,10 +208,14 @@ namespace ws.winx.bmachine.extensions
 					
 						
 
-			if (animaStateInfoSelected == null)
+						if (animaStateInfoSelected == null)
 								return Status.Failure;
 
-			  		 animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+			if(animaStateInfoSelected.label.text=="Move"){
+				Debug.Log ("stop");
+			}
+
+						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
 			
 						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
 			
@@ -440,10 +308,7 @@ namespace ws.winx.bmachine.extensions
 							
 										if (timeNormalizedCurrent > 1f) {
 												if (!loop) {
-														_statusArgs.status =  Status.Success;
-
-														if (_statusHandler != null)
-																_statusHandler.Invoke (this, _statusArgs);
+														
 
 														return Status.Success;
 												}
@@ -460,10 +325,7 @@ namespace ws.winx.bmachine.extensions
 
 												if (this.speed < 0f && timeNormalizedCurrent < 0f) {
 														if (!loop) {
-																_statusArgs.status =  Status.Success;
-												
-																if (_statusHandler != null)
-																		_statusHandler.Invoke (this, _statusArgs);
+																
 
 																return Status.Success;
 												
@@ -472,7 +334,7 @@ namespace ws.winx.bmachine.extensions
 																return Status.Running;
 														}
 
-														//return;
+														
 												}
 
 												////////   TICK CHILDREN ///////
@@ -526,26 +388,21 @@ namespace ws.winx.bmachine.extensions
 
 						
 						
-								//_statusArgs.status = this.status = Status.Running;
-
-								_statusArgs.status = Status.Running;
-
-								if (_statusHandler != null)
-										_statusHandler.Invoke (this, _statusArgs);
+								
 
 						}
 
 
-								return Status.Running;
+						return Status.Running;
 						
 
 				}
 
 				public override void End ()
 				{
-						if(animaStateInfoSelected!=null)
+						if (animaStateInfoSelected != null)
 			   			//restore layer weight
-						animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
+								animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
 				}
 
 
