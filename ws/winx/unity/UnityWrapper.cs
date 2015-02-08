@@ -5,6 +5,8 @@ using System.Collections;
 using System;
 using System.Reflection;
 using ws.winx.unity;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace ws.winx.unity
 {
@@ -757,6 +759,237 @@ namespace ws.winx.unity
 
 
 		/// ///////////////  CURVE EDITOR  //////////////// 
+	 
+	#region CurveMenuManagerW
+		public class CurveMenuManagerW
+		{
+		
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				static MethodInfo MethodInfo_AddTangentMenuItems;
+				private object __instance;
+		
+				public object wrapped {
+						get{ return __instance;}
+				}
+		
+				public static void InitType ()
+				{
+						if (method_ctor == null) {
+			
+				
+				
+				
+								method_ctor = GetWrappedType ().GetConstructor (new Type[] {
+					CurveEditorW.GetWrappedType ()
+						
+				});
+				
+				
+								MethodInfo_AddTangentMenuItems = __RealType.GetMethod ("AddTangentMenuItems", new Type[] {
+					typeof(GenericMenu),
+					typeof(List<>).MakeGenericType (__RealType)
+				});
+				
+						}
+			
+			
+				}
+
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.CurveMenuManager");
+						}
+			
+						return __RealType;
+				}
+		
+				public CurveMenuManagerW (CurveEditorW editor)
+				{
+			
+						InitType ();
+			
+						__instance = method_ctor.Invoke (new object[]{editor.wrapped});
+			
+				}
+		
+				public void AddTangentMenuItems (GenericMenu menu, List<KeyIdentifierW> keyList)
+				{
+
+
+						IList keyListOriginal = (IList)Activator.CreateInstance (typeof(List<>).MakeGenericType (__RealType));
+
+						foreach (KeyIdentifierW keyIDWrapper in keyList) {
+								keyListOriginal.Add (keyIDWrapper.wrapped);
+
+
+						}
+						MethodInfo_AddTangentMenuItems.Invoke (__instance, new object[] {
+								menu,
+								keyList
+						});
+				}
+		
+		}
+	#endregion
+
+	#region KeyIdentifierW
+		public class KeyIdentifierW
+		{
+		
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				static MethodInfo MethodInfo_SetWrap;
+				private object __instance;
+		
+				public object wrapped {
+						get{ return __instance;}
+				}
+		
+				public static void InitType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.KeyIdentifier");
+				
+				
+				
+								method_ctor = __RealType.GetConstructor (new Type[] {
+					assembly.GetType ("UnityEditor.CurveRenderer"),typeof(int),typeof(int)
+						
+				});
+				
+				
+
+						}
+			
+			
+				}
+		
+				public KeyIdentifierW (object renderer, int curveId, int keyIndex)
+				{
+			
+						InitType ();
+			
+						__instance = method_ctor.Invoke (new object[] {
+								renderer,
+								curveId,
+								keyIndex
+						});
+			
+				}
+		
+
+		
+		}
+
+	#endregion
+
+
+	#region CurveSelectionW
+		public class CurveSelectionW
+		{
+		
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				private object __instance;
+				static FieldInfo FieldInfo_m_Host;
+				static PropertyInfo PropertyInfo_key;
+				static PropertyInfo PropertyInfo_curveID ;
+				static PropertyInfo PropertyInfo_curveWrapper;
+				CurveWrapperW _curveWrapperW;
+
+				public object wrapped {
+						get{ return __instance;}
+						set{ __instance = value;}
+				}
+		
+				public static void InitType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.CurveSelection");
+				
+								FieldInfo_m_Host = __RealType.GetField ("m_Host", BindingFlags.Instance | BindingFlags.NonPublic);
+								PropertyInfo_key = __RealType.GetProperty ("key");
+								PropertyInfo_curveID = __RealType.GetProperty ("curveID");
+								PropertyInfo_curveWrapper = __RealType.GetProperty ("curveWrapper");
+
+
+				
+//								method_ctor = __RealType.GetConstructor (   new Type[] {
+//					typeof(int),assembly.GetType ("UnityEditor.CurveEditor"),typeof(int)
+//						
+//				});
+				
+
+				
+						}
+			
+			
+				}
+
+				public CurveWrapperW curveWrapper {
+						get {
+								if (_curveWrapperW == null)
+										_curveWrapperW = new CurveWrapperW ();
+
+								_curveWrapperW.wrapped = PropertyInfo_curveWrapper.GetValue (__instance, null);
+								return _curveWrapperW;
+						}
+				}
+
+				public CurveEditorW host {
+					
+						set{ FieldInfo_m_Host.SetValue (__instance, value.wrapped);}
+				}
+
+				public int key {
+						get {
+								return (int)PropertyInfo_key.GetValue (__instance, null);
+						}
+						set {
+								PropertyInfo_key.SetValue (__instance, value, null);
+						}
+				}
+
+				public int curveID {
+						get {
+								return (int)PropertyInfo_curveID.GetValue (__instance, null);
+						}
+						set {
+								PropertyInfo_curveID.SetValue (__instance, value, null);
+						}
+				}
+
+				public CurveSelectionW ()
+				{
+						InitType ();
+			
+						__instance = FormatterServices.GetUninitializedObject (__RealType);
+				}
+		
+				public CurveSelectionW (int curveID, CurveEditorW host, int keyIndex):this()
+				{
+			
+						
+
+
+						this.host = host;
+						this.key = keyIndex;
+						this.curveID = curveID;
+						
+						//__instance = method_ctor.Invoke (new object[]{curveID,host.wrapped,keyIndex});
+			
+				}
+		
+
+		
+		}
+	#endregion
+
 	#region NormalCurveRenderer
 		public class NormalCurveRendererW
 		{
@@ -825,12 +1058,21 @@ namespace ws.winx.unity
 				static FieldInfo FieldInfo_readOnly;
 				static FieldInfo FieldInfo_color;
 				static PropertyInfo PropertyInfo_renderer;
+				static PropertyInfo PropertyInfo_curve;
 				private object __instance;
 
 				public object wrapped {
 						get {
 								return __instance;
 						}
+						set {
+
+								__instance = value;
+						}
+				}
+
+				public AnimationCurve curve {
+						get{ return (AnimationCurve)PropertyInfo_curve.GetValue (__instance, null);}
 				}
 
 				public bool hidden {
@@ -865,42 +1107,41 @@ namespace ws.winx.unity
 		
 				private static void InitType ()
 				{
-						if (__RealType == null) {
-								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-								__RealType = assembly.GetType ("UnityEditor.CurveWrapper");
-				
-								method_ctor = __RealType.GetConstructor (new Type[] {
-					
-					
-				});
+						if (method_ctor == null) {
 
 								
-								FieldInfo_id = __RealType.GetField ("id");
+
+								method_ctor = GetWrappedType ().GetConstructor (new Type[] {});
+
+								
+
 								PropertyInfo_renderer = __RealType.GetProperty ("renderer");
+								PropertyInfo_curve = __RealType.GetProperty ("curve");
 
 								FieldInfo_groupId = __RealType.GetField ("groupId");
 								FieldInfo_color = __RealType.GetField ("color");
 								FieldInfo_hidden = __RealType.GetField ("hidden");
 								FieldInfo_readOnly = __RealType.GetField ("readOnly");
-
-				
+								FieldInfo_id = __RealType.GetField ("id");	
 						}
 
 			
 				}
 
-				public static Type GetType ()
+				public static Type GetWrappedType ()
 				{
-
-						Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-						return assembly.GetType ("UnityEditor.CurveWrapper");
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.CurveWrapper");
+						}
 						
+						return __RealType;
 
 				}
 		
 				public CurveWrapperW ()
 				{
-			
+						
 						InitType ();
 			
 						__instance = method_ctor.Invoke (new object[]{});
@@ -919,16 +1160,80 @@ namespace ws.winx.unity
 		{
 				private static Type __RealType;
 				private object instance;
-				private static MethodInfo MethodInfo_OnGUI ;
+				private static MethodInfo MethodInfo_OnGUI;
+				static MethodInfo MethodInfo_FrameSelected;
+				static MethodInfo MethodInfo_GetCurveAtPosition;
+				static MethodInfo MethodInfo_CreateKeyFromClick;
+				static MethodInfo MethodInfo_FindNearest;
+				static MethodInfo MethodInfo_getCurveWrapperById;
+				static MethodInfo MethodInfo_GetGUIPoint;
+				static MethodInfo MethodInfo_DeleteKeys;
+				private static PropertyInfo PropertyInfo_rect;
+				private static PropertyInfo PropertyInfo_scaleWithWindow;
+				private static PropertyInfo PropertyInfo_drawRect;
+				static PropertyInfo PropertyInfo_margin;
+				static PropertyInfo PropertyInfo_topmargin;
+				static PropertyInfo PropertyInfo_mousePositionInDrawing;
+				static FieldInfo FieldInfo_m_Selection;
+				static FieldInfo FieldInfo_m_Translation;
+				static FieldInfo FieldInfo_m_Scale;
+				static FieldInfo FieldInfo_m_DrawOrder;
 				static ConstructorInfo method_ctor;
 				AnimationCurve m_Curve;
 				Color m_Color;
 				static Styles ms_Styles;
-			    object __instance;
+				object __instance;
+				CurveMenuManagerW m_MenuManager;
 
-				Rect rect {
-						get;
-						set;
+				public object wrapped {
+						get {
+								return __instance;
+						}
+
+				}
+
+				public Rect rect {
+						get{ return (Rect)PropertyInfo_rect.GetValue (__instance, null);}
+						set{ PropertyInfo_rect.SetValue (__instance, value, null);}
+				}
+
+				public bool scaleWithWindow {
+						get{ return (bool)PropertyInfo_scaleWithWindow.GetValue (__instance, null);}
+						set{ PropertyInfo_scaleWithWindow.SetValue (__instance, value, null);}
+				}
+
+				public float margin {
+
+						set{ PropertyInfo_margin.SetValue (__instance, value, null);}
+				}
+
+				public float topmargin {
+			
+						set{ PropertyInfo_topmargin.SetValue (__instance, value, null);}
+				}
+
+				public Vector2 mousePositionInDrawing {
+						get{ return (Vector2)PropertyInfo_mousePositionInDrawing.GetValue (__instance, null);}
+
+				}
+
+				public Vector2 Scale {
+						get{ return (Vector2)FieldInfo_m_Scale.GetValue (__instance);}
+			
+				}
+
+				public Vector2 Translation {
+						get{ return (Vector2)FieldInfo_m_Translation.GetValue (__instance);}
+			
+				}
+
+				List<int> DrawOrder {
+						get{ return (List<int>)FieldInfo_m_DrawOrder.GetValue (__instance);}
+					
+				}
+
+				IList m_Selection {
+						get{ return FieldInfo_m_Selection.GetValue (__instance) as IList;}
 				}
 
 				bool hRangeLocked {
@@ -941,39 +1246,65 @@ namespace ws.winx.unity
 						set;
 				}
 
-				Rect drawRect {
-						get;
-						set;
+				void DeleteKeys (object userData)
+				{
+						MethodInfo_DeleteKeys.Invoke (__instance, new object[]{userData});
+				}
+
+				public Rect drawRect {
+						get{ return (Rect)PropertyInfo_drawRect.GetValue (__instance, null);}
 				}
 		
 				public static void InitType ()
 				{
-						if (__RealType == null) {
-								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-								__RealType = assembly.GetType ("UnityEditor.CurveEditor");
+						if (method_ctor == null) {
+								
 
 
 				
-								method_ctor = __RealType.GetConstructor (new Type[] {
-						typeof(Rect),CurveWrapperW.GetType ().MakeArrayType (),typeof(bool)
+								method_ctor = GetWrappedType ().GetConstructor (new Type[] {
+						typeof(Rect),CurveWrapperW.GetWrappedType ().MakeArrayType (),typeof(bool)
 						
 				});
+								
+								PropertyInfo_rect = __RealType.GetProperty ("rect");
+								PropertyInfo_scaleWithWindow = __RealType.GetProperty ("scaleWithWindow");
+								PropertyInfo_margin = __RealType.GetProperty ("margin");
+								PropertyInfo_topmargin = __RealType.GetProperty ("topmargin");
+								PropertyInfo_drawRect = __RealType.BaseType.GetProperty ("drawRect");
+								PropertyInfo_mousePositionInDrawing = __RealType.BaseType.GetProperty ("mousePositionInDrawing");
 
 
 								MethodInfo_OnGUI = __RealType.GetMethod ("OnGUI");
-				
-								//				FieldInfo_currentTime = realType.GetField ("currentTime");
-								//				FieldInfo_loop = realType.GetField ("loop");
-								//				FieldInfo_startTime = realType.GetField ("startTime");
-								//				FieldInfo_stopTime = realType.GetField ("stopTime");
-								//				FieldInfo_playbackSpeed = realType.GetField ("playbackSpeed");
-								//				MethodInfo_Update = realType.GetMethod ("Update");
-								//				PropertyInfo_deltaTime = realType.GetProperty ("deltaTime");
-								//				PropertyInfo_normalizedTime = realType.GetProperty ("normalizedTime");
-								//				PropertyInfo_playing = realType.GetProperty ("playing");
-								//				PropertyInfo_nextCurrentTime = realType.GetProperty ("nextCurrentTime");
+								MethodInfo_GetGUIPoint = __RealType.GetMethod ("GetGUIPoint", BindingFlags.NonPublic | BindingFlags.Instance);
+								MethodInfo_getCurveWrapperById = __RealType.GetMethod ("getCurveWrapperById");
+								MethodInfo_FrameSelected = __RealType.GetMethod ("FrameSelected");
+								MethodInfo_FindNearest = __RealType.GetMethod ("FindNearest", BindingFlags.NonPublic | BindingFlags.Instance);
+								MethodInfo_GetCurveAtPosition = __RealType.GetMethod ("GetCurveAtPosition", BindingFlags.NonPublic | BindingFlags.Instance);
+								MethodInfo_CreateKeyFromClick = __RealType.GetMethod ("CreateKeyFromClick", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[]{typeof(object)}, null);
+								MethodInfo_DeleteKeys = __RealType.GetMethod ("DeleteKeys", BindingFlags.NonPublic | BindingFlags.Instance);
+
+
+
+								FieldInfo_m_Translation = __RealType.BaseType.GetField ("m_Translation", BindingFlags.Instance | BindingFlags.NonPublic);
+								FieldInfo_m_Scale = __RealType.BaseType.GetField ("m_Scale", BindingFlags.Instance | BindingFlags.NonPublic);
+								FieldInfo_m_DrawOrder = __RealType.GetField ("m_DrawOrder", BindingFlags.Instance | BindingFlags.NonPublic);
+								FieldInfo_m_Selection = __RealType.GetField ("m_Selection", BindingFlags.Instance | BindingFlags.NonPublic);
+
+
 				
 						}
+				}
+
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.CurveEditor");
+						}
+			
+						return __RealType;
+			
 				}
 		
 				public CurveEditorW (Rect rect, CurveWrapperW[] curves, bool minimalGUI)
@@ -1001,16 +1332,16 @@ namespace ws.winx.unity
 		
 
 
-						Array curveWrapperArray = Array.CreateInstance (CurveWrapperW.GetType (), curves.Length);
+						Array curveWrapperArray = Array.CreateInstance (CurveWrapperW.GetWrappedType (), curves.Length);
 						NormalCurveRendererW renderer;
 		
 						AnimationCurve curve;
 						for (int i=0; i<curves.Length; i++) {
 								curve = curves [i];
 								curveWrapperW = new CurveWrapperW ();
-								curveWrapperW.id = "Curve".GetHashCode ();
+								curveWrapperW.id = ("Curve" + i).GetHashCode ();
 								curveWrapperW.groupId = -1;
-								curveWrapperW.color = Color.red;
+								curveWrapperW.color = new Color (UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
 								curveWrapperW.hidden = false;
 								curveWrapperW.readOnly = false;
 
@@ -1019,43 +1350,220 @@ namespace ws.winx.unity
 
 								curveWrapperW.renderer = renderer.wrapped;
 								
-				curveWrapperArray.SetValue(curveWrapperW.wrapped,i);
-				//((CurveWrapperW.GetType ().MakeArrayType)curveWrapperArray)[i] = curveWrapperW.wrapped;
+								curveWrapperArray.SetValue (curveWrapperW.wrapped, i);
+								
 
 
 						}
 
-						__instance = method_ctor.Invoke (new object[] {rect,curveWrapperArray,minimalGUI});
+						__instance = method_ctor.Invoke (new object[] {
+								rect,
+								curveWrapperArray,
+								minimalGUI
+						});
 
-			Debug.Log (__instance + "My");
+		
 			
 				}
 
-				void BeginViewGUI ()
+				int GetCurveAtPosition (Vector2 mousePosition, out Vector2 closestPointOnCurve)
 				{
-						throw new NotImplementedException ();
+						Vector2 vectorTemp = new Vector2 ();
+
+						object[] arguments = new object[] {
+							mousePosition,
+							vectorTemp
+			};
+
+						int result = (int)MethodInfo_GetCurveAtPosition.Invoke (__instance, arguments);
+
+						closestPointOnCurve = (Vector2)arguments [1];
+
+						return result;
 				}
 
-				void GridGUI ()
+				public void FrameSelected (bool horizontally, bool vertically)
 				{
-						throw new NotImplementedException ();
+						MethodInfo_FrameSelected.Invoke (__instance, new object[] {
+								horizontally,
+								vertically
+						});
 				}
 
-				void CurveGUI ()
+				CurveWrapperW getCurveWrapperById (int i)
 				{
-						throw new NotImplementedException ();
+						CurveWrapperW crv = new CurveWrapperW ();
+						crv.wrapped = MethodInfo_getCurveWrapperById.Invoke (__instance, new object[]{i});
+						return crv;
 				}
 
-				void EndViewGUI ()
+				Vector2 GetGUIPoint (Vector3 point)
 				{
-						throw new NotImplementedException ();
+						return (Vector2)MethodInfo_GetGUIPoint.Invoke (__instance, new object[]{point});
+				}
+
+				CurveSelectionW FindNearest (Vector2 mousePosition)
+				{
+						//return MethodInfo_FindNearest.Invoke (__instance, null);
+
+
+
+						mousePosition.x = mousePosition.x - this.drawRect.x;
+						mousePosition.y = mousePosition.y - this.drawRect.y;
+
+						int num = -1;
+						int keyIndex = -1;
+						float num2 = 64f;
+						for (int i = this.DrawOrder.Count - 1; i >= 0; i--) {
+
+
+
+								CurveWrapperW curveWrapperById = this.getCurveWrapperById (this.DrawOrder [i]);
+								if (!curveWrapperById.readOnly && !curveWrapperById.hidden) {
+										for (int j = 0; j < curveWrapperById.curve.keys.Length; j++) {
+												Keyframe keyframe = curveWrapperById.curve.keys [j];
+												float sqrMagnitude = (this.GetGUIPoint (new Vector2 (keyframe.time, keyframe.value)) - mousePosition).sqrMagnitude;
+												if (sqrMagnitude <= 16f) {
+														return new CurveSelectionW (curveWrapperById.id, this, j);
+												}
+												if (sqrMagnitude < num2) {
+														num = curveWrapperById.id;
+														keyIndex = j;
+														num2 = sqrMagnitude;
+												}
+										}
+										if (i == this.DrawOrder.Count - 1 && num >= 0) {
+												num2 = 16f;
+										}
+								}
+						}
+						if (num >= 0) {
+								return new CurveSelectionW (num, this, keyIndex);
+						}
+						return null;
+				}
+
+				Vector2 ViewToDrawingTransformPoint (Vector2 lhs)
+				{
+						return new Vector2 ((lhs.x - this.drawRect.x - this.Translation.x) / this.Scale.x, (lhs.y - this.drawRect.y - this.Translation.y) / this.Scale.y);
+				}
+
+				void CreateKeyFromClick (object userData)
+				{
+						MethodInfo_CreateKeyFromClick.Invoke (__instance, new object[]{userData});
 				}
 
 				public void DoEditor ()
 				{
-						Rect rect=(Rect)__RealType.GetProperty ("drawRect").GetValue (__instance, null);
+						//Rect rect=(Rect)__RealType.GetProperty ("drawRect").GetValue (__instance, null);
 
-						GUI.Label (rect, GUIContent.none, CurveEditorW.ms_Styles.curveEditorBackground);
+						GUI.Label (this.drawRect, GUIContent.none, CurveEditorW.ms_Styles.curveEditorBackground);
+						
+
+						//__RealType.
+						//	int controlID =GUIUtility.GetControlID ("SelectKeys".GetHashCode (), FocusType.Passive);
+
+
+						int controlID = GUIUtility.GetControlID (897560, FocusType.Passive);
+						Event current = Event.current;
+						bool shift = current.shift;
+						EventType typeForControl = current.GetTypeForControl (controlID);
+
+						//	Debug.Log (Event.current.type==EventType.ContextClick);
+
+
+
+
+						CurveSelectionW curveSelection = this.FindNearest (Event.current.mousePosition);
+						if (curveSelection != null) {
+		
+								List<KeyIdentifierW> list = new List<KeyIdentifierW> ();
+								bool flag2 = false;
+
+
+								CurveSelectionW current2 = new CurveSelectionW ();
+
+								foreach (var obj in this.m_Selection) {
+										
+										current2.wrapped = obj;
+
+										list.Add (new KeyIdentifierW (current2.curveWrapper.renderer, current2.curveID, current2.key));
+										if (current2.curveID == curveSelection.curveID && current2.key == curveSelection.key) {
+												flag2 = true;
+										}
+								}
+
+								if (!flag2) {
+										list.Clear ();
+										list.Add (new KeyIdentifierW (curveSelection.curveWrapper.renderer, curveSelection.curveID, curveSelection.key));
+										this.m_Selection.Clear ();
+										this.m_Selection.Add (curveSelection);
+								}
+
+								this.m_MenuManager = new CurveMenuManagerW (this);
+								GenericMenu genericMenu = new GenericMenu ();
+								string text;
+								if (list.Count > 1) {
+										text = "Delete Keys";
+								} else {
+										text = "Delete Key";
+								}
+								genericMenu.AddItem (new GUIContent (text), false, new GenericMenu.MenuFunction2 (this.DeleteKeys), list);
+								genericMenu.AddSeparator (string.Empty);
+								this.m_MenuManager.AddTangentMenuItems (genericMenu, list);
+								genericMenu.ShowAsContext ();
+								Event.current.Use ();
+						}
+
+
+
+//						switch (typeForControl) {
+//
+//						case EventType.MouseDown:
+//			
+//////				if (typeForControl == EventType.Layout)
+//////				{
+//////					HandleUtility.AddDefaultControl (controlID);
+//////					goto IL_3D0;
+//////				}
+//////				if (typeForControl != EventType.ContextClick)
+//////				{
+//////					goto IL_3D0;
+//////				}
+////								//if (this.drawRect.Contains (GUIClip.Unclip (Event.current.mousePosition))) {
+//								if (this.drawRect.Contains (Event.current.mousePosition)) {
+////
+////
+//										Vector2 vector;
+////										//int curveAtPosition = this.GetCurveAtPosition (base.mousePositionInDrawing, out vector);
+////
+////										Vector2 offset = new Vector2 ();
+////
+////										offset.x = Event.current.mousePosition.x - this.drawRect.x;
+////										offset.y = Event.current.mousePosition.y - this.drawRect.y;
+//										int curveAtPosition = this.GetCurveAtPosition (this.ViewToDrawingTransformPoint (Event.current.mousePosition), out vector);//this.GetCurveAtPosition (offset, out vector);
+////
+////
+////										Debug.Log ("Vector" + vector + " mouse:" + Event.current.mousePosition + " view to point:" + this.mousePositionInDrawing);
+//										Debug.Log ("Translation" + this.Translation + " Scale:" + this.Scale);
+////										Debug.Log ("----");
+//										if (curveAtPosition >= 0) {
+//
+//												//Debug.Log ("Curve pos:"+curveAtPosition);
+//												GenericMenu genericMenu = new GenericMenu ();
+//												genericMenu.AddItem (new GUIContent ("Add Key"), false, new GenericMenu.MenuFunction2 (this.CreateKeyFromClick), this.ViewToDrawingTransformPoint (Event.current.mousePosition));
+//												genericMenu.ShowAsContext ();
+//												Event.current.Use ();
+//										}
+//								}
+//
+//								break;
+//						}
+////
+
+
+
+
 						MethodInfo_OnGUI .Invoke (__instance, null);
 
 						//return new Rect (0f, 0f, base.position.width, base.position.height - 46f);
@@ -1142,37 +1650,6 @@ namespace ws.winx.unity
 }//namespace
 
 
-#region BlendTree Extension
-public static class BlendTreeEx
-{
-	
-		public static int GetRecursiveBlendParamCount (this BlendTree bt)
-		{
-				object val = bt.GetType ().GetProperty ("recursiveBlendParameterCount", BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Public).GetValue (bt, new object[]{});
-				return (int)val;
-		}
-
-		public static string GetRecursiveBlendParam (this BlendTree bt, int index)
-		{
-				object val = bt.GetType ().GetMethod ("GetRecursiveBlendParameter", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Invoke (bt, new object[]{index});
-				return (string)val;
-		}
-
-		public static float GetRecursiveBlendParamMax (this BlendTree bt, int index)
-		{
-				object val = bt.GetType ().GetMethod ("GetRecursiveBlendParameterMax", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Invoke (bt, new object[]{index});
-				return (float)val;
-		}
-
-		public static float GetRecursiveBlendParamMin (this BlendTree bt, int index)
-		{
-				object val = bt.GetType ().GetMethod ("GetRecursiveBlendParameterMin", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Invoke (bt, new object[]{index});
-				return (float)val;
-		}
-	
-}
-
-#endregion
 
 
 	

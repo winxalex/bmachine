@@ -18,7 +18,8 @@ namespace ws.winx.editor.bmachine.extensions
 		{
 
 			
-		float _valueCurrent;
+				float _valueCurrent;
+				
 			    
 				//
 				// Properties
@@ -43,11 +44,23 @@ namespace ws.winx.editor.bmachine.extensions
 
 						GUILayout.BeginHorizontal ();
 
-						GUILayout.Label (attribute.Min.ToString());
-								_valueCurrent=GUILayout.HorizontalSlider (_valueCurrent, attribute.Min, attribute.Max);
-									property.value = _valueCurrent;
-						GUILayout.Label (attribute.Max.ToString());
-									property.ApplyModifiedValue ();
+
+						if (attribute.Min < attribute.Max) {
+								if (attribute.HasEnableToggle)
+										attribute.Enabled = GUILayout.Toggle (attribute.Enabled, property.label);
+
+								if (attribute.Enabled) {
+									
+										GUILayout.Label (attribute.Min.ToString ());
+									
+										_valueCurrent = GUILayout.HorizontalSlider (_valueCurrent, attribute.Min, attribute.Max);
+										property.value = _valueCurrent;
+										GUILayout.Label (attribute.Max.ToString ());
+
+
+										property.ApplyModifiedValue ();
+								}
+						}
 					
 						GUILayout.EndHorizontal ();
 

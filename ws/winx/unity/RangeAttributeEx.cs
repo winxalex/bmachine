@@ -22,20 +22,24 @@ namespace ws.winx.unity
 				//
 				float _max = float.NaN;
 				float _min = float.NaN;
+				bool _enabled;
+				bool _hasEnableToggle;
 				string _fieldNameMax;
 				string _fieldNameMin;
-				FieldInfo _propertyMaxInfo;
-				FieldInfo _propertyMinInfo;
+				FieldInfo _fieldMaxInfo;
+				FieldInfo _fieldMinInfo;
+				string _fieldNameEnabled;
+				FieldInfo _fieldEnabledInfo;
 
 				public float Max {
 						get {
 
 								if (float.IsNaN (_max)) {
 										if (serializedObject != null) {
-												if (_propertyMaxInfo == null)
-														_propertyMaxInfo = this.serializedObject.GetType().GetField (this._fieldNameMax);
+												if (_fieldMaxInfo == null)
+														_fieldMaxInfo = this.serializedObject.GetType ().GetField (this._fieldNameMax);
 
-												return (float)_propertyMaxInfo.GetValue (serializedObject);
+												return (float)_fieldMaxInfo.GetValue (serializedObject);
 										}
 										return 1.0f;
 								} else
@@ -48,14 +52,46 @@ namespace ws.winx.unity
 				
 								if (float.IsNaN (_min)) {
 										if (serializedObject != null) {
-												if (_propertyMinInfo == null)
-														_propertyMinInfo = this.serializedObject.GetType().GetField (this._fieldNameMin);
+												if (_fieldMinInfo == null)
+														_fieldMinInfo = this.serializedObject.GetType ().GetField (this._fieldNameMin);
 
-												return (float)_propertyMinInfo.GetValue (serializedObject);
+												return (float)_fieldMinInfo.GetValue (serializedObject);
 										} else
 												return 0f;
 								} else
 										return _min;
+						}
+				}
+
+				public bool HasEnableToggle {
+						get {
+								return _hasEnableToggle;
+						}
+				}
+
+				public bool Enabled {
+						get {
+
+								if(_hasEnableToggle)
+									if (serializedObject != null) {
+											if (_fieldEnabledInfo == null)
+													_fieldEnabledInfo = this.serializedObject.GetType ().GetField (this._fieldNameEnabled);
+						
+											return (bool)_fieldEnabledInfo.GetValue (serializedObject);
+									} 
+
+								return _enabled;
+
+
+						}
+
+						set {
+								if (serializedObject != null) {
+										_fieldEnabledInfo.SetValue (serializedObject, value);
+								}
+
+								_enabled = value;
+
 						}
 				}
 	
@@ -70,11 +106,15 @@ namespace ws.winx.unity
 						this._max = max;
 				}
 
-				public RangeAttributeEx (string fieldNameMin, string fieldNameMax)
+				public RangeAttributeEx (string fieldNameMin, string fieldNameMax, string fieldNameEnabled=null)
 				{
 
 						this._fieldNameMin = fieldNameMin;
 						this._fieldNameMax = fieldNameMax;
+						this._fieldNameEnabled = fieldNameEnabled;
+
+						_hasEnableToggle = !String.IsNullOrEmpty (this._fieldNameEnabled);
+						_enabled = !_hasEnableToggle;
 				}
 
 

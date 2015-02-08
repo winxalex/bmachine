@@ -3,58 +3,63 @@ using System.Collections;
 using BehaviourMachine;
 using ws.winx.unity;
 
-
 namespace ws.winx.bmachine.extensions
 {
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Animation Curve")]
 		public class AnimationCurveNode : ActionNode
 		{
+
+
 				
 				public bool syncWithAnimation = true;
-
-		[MecanimStateInfoAttribute("Ani")]
+				[MecanimStateInfoAttribute("Animator")]
 				public MecanimStateInfo
-					animaStateInfoSelected;
-
-
+						animaStateInfoSelected;
 				[VariableInfo (requiredField = true,canBeConstant = false,tooltip = "Object.property or blackboard that will be controlled by Animation curve")]
 				public FloatVar
 						property;
 				public AnimationCurve curve;
 
 				//[HideInInspector]//doesn't work togheter
-				[RangeAttributeEx("timeStart","timeEnd")]
+				[RangeAttributeEx("timeStart","timeEnd","isTimeControlEnabled")]
 				public float
 						timeControl = 0f;
-
+				[HideInInspector]
+				public bool
+						isTimeControlEnabled = false;
 				[HideInInspector]
 				public float
 						timeStart;
 				[HideInInspector]
 				public float
 						timeEnd;
-
-				
-
 				Animator _animator;
 
-				public Animator Ani {
+				public Animator Animator {
 						get {
-							if(_animator==null) _animator = this.self.GetComponent<Animator> ();
-							return _animator;
+								if (_animator == null)
+										_animator = this.self.GetComponent<Animator> ();
+								return _animator;
 						}
-					}
+				}
 
 				float _timeCurrent;
+
+				public override void OnEnable ()
+				{
+						Debug.Log ("AniCurve Enabled");
+				}
 
 				public override void Awake ()
 				{
 
-					if (curve != null || curve.keys != null || curve.keys.Length >1) {
+						if (curve != null || curve.keys != null || curve.keys.Length > 1) {
 								timeStart = curve.keys [0].time;
 					
 								timeEnd = curve.keys [curve.length - 1].time;
 						}
+
+						//this.branch.
 						
 				}
 
@@ -63,13 +68,12 @@ namespace ws.winx.bmachine.extensions
 						curve = new AnimationCurve ();
 						_timeCurrent = 0f; 
 						//property = new ConcreteFloatVar ("mile", this.blackboard, 24);
-
+						//Debug.Log ("Reset");
 				}
-
 
 				public override void Start ()
 				{
-					_timeCurrent = timeStart;
+						_timeCurrent = timeStart;
 				}
 
 				public override Status Update ()
@@ -107,27 +111,34 @@ namespace ws.winx.bmachine.extensions
 								//check if selected and current state are equal
 								if (animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash) {
 										_timeCurrent = animatorStateInfoCurrent.normalizedTime;
-						
-										if (timeControl > 0)
+
+									
+
+										if (isTimeControlEnabled)
 												_animator.Update (timeControl - animatorStateInfoCurrent.normalizedTime);
+
 								}
 						} else {
-								if (timeControl > 0)
+
+								if (isTimeControlEnabled)
 										_timeCurrent = timeControl;
 								else
 										_timeCurrent += base.owner.deltaTime;
 								
 						}
-			
-			
-						if (_timeCurrent >= timeStart && _timeCurrent <= timeEnd)
-								property.Value = curve.Evaluate (_timeCurrent);
 
-						if (_timeCurrent >= timeEnd)
-								return Status.Success;
+		
+
+						if (!isTimeControlEnabled) {
+								if (_timeCurrent >= timeStart && _timeCurrent <= timeEnd)
+										property.Value = curve.Evaluate (_timeCurrent);
+
+								if (_timeCurrent >= timeEnd)
+										return Status.Success;
+						}
 				
 			 
-			Debug.Log ("Time current:"+_timeCurrent);
+						//Debug.Log ("Time current:"+_timeCurrent);
 
 	
 

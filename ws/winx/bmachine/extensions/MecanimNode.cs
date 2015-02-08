@@ -15,7 +15,7 @@ namespace ws.winx.bmachine.extensions
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
 		public class MecanimNode:CompositeNode
 		{
-
+				public CurveWrapperW[] curves;
 	    
 				[MecanimStateInfoAttribute("animator")]
 				public MecanimStateInfo
@@ -211,9 +211,7 @@ namespace ws.winx.bmachine.extensions
 						if (animaStateInfoSelected == null)
 								return Status.Failure;
 
-			if(animaStateInfoSelected.label.text=="Move"){
-				Debug.Log ("stop");
-			}
+
 
 						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
 			

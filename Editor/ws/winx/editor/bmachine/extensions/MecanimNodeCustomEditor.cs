@@ -32,8 +32,8 @@ namespace ws.winx.editor.bmachine.extensions
 		{
 
 				
-
-			
+				bool _curvesEditorShow;
+				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
 				GUIContent[] displayOptions;
 				List<MecanimStateInfo> animaInfoValues;
@@ -252,7 +252,15 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				public override void OnInspectorGUI ()
 				{
-						DrawDefaultInspector ();
+
+
+
+
+			DrawDefaultInspector ();
+
+
+
+					
 			
 						mecanimNode = target as MecanimNode;
 						Motion motion;
@@ -282,11 +290,99 @@ namespace ws.winx.editor.bmachine.extensions
 								// Get an iterator
 								//var iterator = serializedNode.GetIterator ();
 
+				//_curvesEditorShow=EditorGUILayout.Foldout(_curvesEditorShow,"Curves");
+				//EditorGUILayout.CurveField
+				int indentLevel=0;
+				Rect curveEditorRect;
+				//Rect curveEditorRect=GUILayoutUtility.GetLastRect();
+
+			
+				curveEditorRect=EditorGUILayout.BeginHorizontal();
+				
+				if(true){
+					
+					
+
+
+					
+					
+			
+					
+					
+					AnimationCurve curve1=new AnimationCurve();
+
+
+
+						curve1.AddKey(new Keyframe(0, 1));
+						curve1.AddKey(new Keyframe(1, 1));
+
+				
+
+					AnimationCurve curve2=new AnimationCurve();
+
+
+					float tan45 = Mathf.Tan(Mathf.Deg2Rad * 45);
+					
+				
+					curve2.AddKey(new Keyframe(0, 0, tan45, tan45));
+					curve2.AddKey(new Keyframe(1, 1, tan45, tan45));
+					
+					//	EditorGUI.indentLevel=0;
+
+
+						curveEditorRect.height=200;
+					    curveEditorRect.width=Screen.width-46f;
+
+
+				
+
+					if(curveEditor==null){
+						curveEditor=new CurveEditorW(new Rect(16,500,Screen.width-46,200),new AnimationCurve[]{curve1,curve2},false);
+						//CurveSelectionW crvSele=new CurveSelectionW(2,curveEditor,3);
+
+						//CurveMenuManagerW menu=new CurveMenuManagerW(curveEditor);
+						//menu.AddTangentMenuItems(null,null);
+						//curveEditor.topmargin = 500f;
+//						if (settings != null)
+//						{
+//							this.m_CurveEditor.settings = settings;
+//						}
+//						this.m_CurveEditor.settings.hTickLabelOffset = 10f;
+						bool horizontally = true;
+						bool vertically = true;
+//						if (this.m_CurveEditor.settings.hRangeMin != float.NegativeInfinity && this.m_CurveEditor.settings.hRangeMax != float.PositiveInfinity)
+//						{
+//							this.m_CurveEditor.SetShownHRangeInsideMargins (this.m_CurveEditor.settings.hRangeMin, this.m_CurveEditor.settings.hRangeMax);
+//							horizontally = false;
+//						}
+//						if (this.m_CurveEditor.settings.vRangeMin != float.NegativeInfinity && this.m_CurveEditor.settings.vRangeMax != float.PositiveInfinity)
+//						{
+//							this.m_CurveEditor.SetShownVRangeInsideMargins (this.m_CurveEditor.settings.vRangeMin, this.m_CurveEditor.settings.vRangeMax);
+//							vertically = false;
+//						}
+
+
+						curveEditor.FrameSelected (horizontally, vertically);
+
+					}
+
+					//curveEditor.rect=new Rect(0,500,Screen.width-46,150);
+					curveEditor.scaleWithWindow=false;
+
+					//Debug.Log("DrawRect "+curveEditor.drawRect);
+					//curveEditor.drawRect.y=0;
+					
+					curveEditor.DoEditor();
+
+					EditorGUILayout.EndHorizontal();
+					
+
+				
+				}
 									
 				
-								// Cache the indent level
-								int indentLevel = EditorGUI.indentLevel;
-
+								
+				return;
 
 								/////////// Avatar Preview GUI ////////////
 								
@@ -306,6 +402,8 @@ namespace ws.winx.editor.bmachine.extensions
 									
 										
 										Rect avatarRect = EditorGUILayout.BeginHorizontal ();
+
+										avatarRect.y=curveEditorRect.yMax;
 
 										avatarRect.y += 30f;
 										avatarRect.height = Screen.height - avatarRect.y - 20f;
