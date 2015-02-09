@@ -788,7 +788,7 @@ namespace ws.winx.unity
 				
 								MethodInfo_AddTangentMenuItems = __RealType.GetMethod ("AddTangentMenuItems", new Type[] {
 					typeof(GenericMenu),
-					typeof(List<>).MakeGenericType (__RealType)
+					typeof(List<>).MakeGenericType (KeyIdentifierW.GetWrappedType ())
 				});
 				
 						}
@@ -815,17 +815,10 @@ namespace ws.winx.unity
 			
 				}
 		
-				public void AddTangentMenuItems (GenericMenu menu, List<KeyIdentifierW> keyList)
+				public void AddTangentMenuItems (GenericMenu menu, object keyList)
 				{
 
 
-						IList keyListOriginal = (IList)Activator.CreateInstance (typeof(List<>).MakeGenericType (__RealType));
-
-						foreach (KeyIdentifierW keyIDWrapper in keyList) {
-								keyListOriginal.Add (keyIDWrapper.wrapped);
-
-
-						}
 						MethodInfo_AddTangentMenuItems.Invoke (__instance, new object[] {
 								menu,
 								keyList
@@ -850,14 +843,13 @@ namespace ws.winx.unity
 		
 				public static void InitType ()
 				{
-						if (__RealType == null) {
+						if (method_ctor == null) {
+								
+				
+				
 								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-								__RealType = assembly.GetType ("UnityEditor.KeyIdentifier");
-				
-				
-				
-								method_ctor = __RealType.GetConstructor (new Type[] {
-					assembly.GetType ("UnityEditor.CurveRenderer"),typeof(int),typeof(int)
+								method_ctor = GetWrappedType ().GetConstructor (new Type[] {
+								assembly.GetType ("UnityEditor.CurveRenderer"),typeof(int),typeof(int)
 						
 				});
 				
@@ -866,6 +858,16 @@ namespace ws.winx.unity
 						}
 			
 			
+				}
+
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.KeyIdentifier");
+						}
+
+						return __RealType;
 				}
 		
 				public KeyIdentifierW (object renderer, int curveId, int keyIndex)
@@ -893,7 +895,6 @@ namespace ws.winx.unity
 		{
 		
 				private static Type __RealType;
-				private static ConstructorInfo method_ctor;
 				private object __instance;
 				static FieldInfo FieldInfo_m_Host;
 				static PropertyInfo PropertyInfo_key;
@@ -915,15 +916,7 @@ namespace ws.winx.unity
 								FieldInfo_m_Host = __RealType.GetField ("m_Host", BindingFlags.Instance | BindingFlags.NonPublic);
 								PropertyInfo_key = __RealType.GetProperty ("key");
 								PropertyInfo_curveID = __RealType.GetProperty ("curveID");
-								PropertyInfo_curveWrapper = __RealType.GetProperty ("curveWrapper");
-
-
-				
-//								method_ctor = __RealType.GetConstructor (   new Type[] {
-//					typeof(int),assembly.GetType ("UnityEditor.CurveEditor"),typeof(int)
-//						
-//				});
-				
+								PropertyInfo_curveWrapper = __RealType.GetProperty ("curveWrapper", BindingFlags.Instance | BindingFlags.NonPublic);
 
 				
 						}
@@ -1164,7 +1157,6 @@ namespace ws.winx.unity
 				static MethodInfo MethodInfo_FrameSelected;
 				static MethodInfo MethodInfo_GetCurveAtPosition;
 				static MethodInfo MethodInfo_CreateKeyFromClick;
-				static MethodInfo MethodInfo_FindNearest;
 				static MethodInfo MethodInfo_getCurveWrapperById;
 				static MethodInfo MethodInfo_GetGUIPoint;
 				static MethodInfo MethodInfo_DeleteKeys;
@@ -1236,15 +1228,15 @@ namespace ws.winx.unity
 						get{ return FieldInfo_m_Selection.GetValue (__instance) as IList;}
 				}
 
-				bool hRangeLocked {
-						get;
-						set;
-				}
-
-				bool vRangeLocked {
-						get;
-						set;
-				}
+//				bool hRangeLocked {
+//						get;
+//						set;
+//				}
+//
+//				bool vRangeLocked {
+//						get;
+//						set;
+//				}
 
 				void DeleteKeys (object userData)
 				{
@@ -1279,7 +1271,6 @@ namespace ws.winx.unity
 								MethodInfo_GetGUIPoint = __RealType.GetMethod ("GetGUIPoint", BindingFlags.NonPublic | BindingFlags.Instance);
 								MethodInfo_getCurveWrapperById = __RealType.GetMethod ("getCurveWrapperById");
 								MethodInfo_FrameSelected = __RealType.GetMethod ("FrameSelected");
-								MethodInfo_FindNearest = __RealType.GetMethod ("FindNearest", BindingFlags.NonPublic | BindingFlags.Instance);
 								MethodInfo_GetCurveAtPosition = __RealType.GetMethod ("GetCurveAtPosition", BindingFlags.NonPublic | BindingFlags.Instance);
 								MethodInfo_CreateKeyFromClick = __RealType.GetMethod ("CreateKeyFromClick", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[]{typeof(object)}, null);
 								MethodInfo_DeleteKeys = __RealType.GetMethod ("DeleteKeys", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -1455,128 +1446,99 @@ namespace ws.winx.unity
 
 				public void DoEditor ()
 				{
-						//Rect rect=(Rect)__RealType.GetProperty ("drawRect").GetValue (__instance, null);
+						
 
 						GUI.Label (this.drawRect, GUIContent.none, CurveEditorW.ms_Styles.curveEditorBackground);
 						
 
-						//__RealType.
+						
 						//	int controlID =GUIUtility.GetControlID ("SelectKeys".GetHashCode (), FocusType.Passive);
 
 
-						int controlID = GUIUtility.GetControlID (897560, FocusType.Passive);
+						//int controlID = GUIUtility.GetControlID (897560, FocusType.Passive);
 						Event current = Event.current;
-						bool shift = current.shift;
-						EventType typeForControl = current.GetTypeForControl (controlID);
+						
+						//EventType typeForControl = current.GetTypeForControl (controlID);
 
-						//	Debug.Log (Event.current.type==EventType.ContextClick);
+						//EventType.ContextClick never fired???
+						if (current.type == EventType.MouseDown && current.button == 1 && this.drawRect.Contains (current.mousePosition)) {
 
 
+								
 
-
-						CurveSelectionW curveSelection = this.FindNearest (Event.current.mousePosition);
-						if (curveSelection != null) {
+								//check if clicked happen over key points
+								CurveSelectionW curveSelection = this.FindNearest (current.mousePosition);
+								if (curveSelection != null) {
 		
-								List<KeyIdentifierW> list = new List<KeyIdentifierW> ();
-								bool flag2 = false;
 
+					
+										IList list = (IList)Activator.CreateInstance (typeof(List<>).MakeGenericType (KeyIdentifierW.GetWrappedType ()));
+					
 
-								CurveSelectionW current2 = new CurveSelectionW ();
-
-								foreach (var obj in this.m_Selection) {
 										
-										current2.wrapped = obj;
+										bool flag2 = false;
+										KeyIdentifierW keyIdW;
 
-										list.Add (new KeyIdentifierW (current2.curveWrapper.renderer, current2.curveID, current2.key));
-										if (current2.curveID == curveSelection.curveID && current2.key == curveSelection.key) {
-												flag2 = true;
+										CurveSelectionW current2 = new CurveSelectionW ();
+
+										foreach (var obj in this.m_Selection) {
+										
+												current2.wrapped = obj;
+
+												keyIdW = new KeyIdentifierW (current2.curveWrapper.renderer, current2.curveID, current2.key);
+
+												list.Add (keyIdW.wrapped);
+												if (current2.curveID == curveSelection.curveID && current2.key == curveSelection.key) {
+														flag2 = true;
+												}
+										}
+
+										if (!flag2) {
+												list.Clear ();
+												keyIdW = new KeyIdentifierW (curveSelection.curveWrapper.renderer, curveSelection.curveID, curveSelection.key);
+												list.Add (keyIdW.wrapped);
+												this.m_Selection.Clear ();
+												this.m_Selection.Add (curveSelection.wrapped);
+										}
+
+										this.m_MenuManager = new CurveMenuManagerW (this);
+										GenericMenu genericMenu = new GenericMenu ();
+										string text;
+										if (list.Count > 1) {
+												text = "Delete Keys";
+										} else {
+												text = "Delete Key";
+										}
+										genericMenu.AddItem (new GUIContent (text), false, new GenericMenu.MenuFunction2 (this.DeleteKeys), list);
+										genericMenu.AddSeparator (string.Empty);
+										this.m_MenuManager.AddTangentMenuItems (genericMenu, list);
+										genericMenu.ShowAsContext ();
+										Event.current.Use ();
+								} else {//check if click happened on curve
+
+										Vector2 vector;
+				
+										int curveAtPosition = this.GetCurveAtPosition (this.ViewToDrawingTransformPoint (Event.current.mousePosition), out vector);//this.GetCurveAtPosition (offset, out vector);
+			
+										if (curveAtPosition >= 0) {
+					
+																
+												GenericMenu genericMenu = new GenericMenu ();
+												genericMenu.AddItem (new GUIContent ("Add Key"), false, new GenericMenu.MenuFunction2 (this.CreateKeyFromClick), this.ViewToDrawingTransformPoint (Event.current.mousePosition));
+												genericMenu.ShowAsContext ();
+												Event.current.Use ();
 										}
 								}
 
-								if (!flag2) {
-										list.Clear ();
-										list.Add (new KeyIdentifierW (curveSelection.curveWrapper.renderer, curveSelection.curveID, curveSelection.key));
-										this.m_Selection.Clear ();
-										this.m_Selection.Add (curveSelection);
-								}
-
-								this.m_MenuManager = new CurveMenuManagerW (this);
-								GenericMenu genericMenu = new GenericMenu ();
-								string text;
-								if (list.Count > 1) {
-										text = "Delete Keys";
-								} else {
-										text = "Delete Key";
-								}
-								genericMenu.AddItem (new GUIContent (text), false, new GenericMenu.MenuFunction2 (this.DeleteKeys), list);
-								genericMenu.AddSeparator (string.Empty);
-								this.m_MenuManager.AddTangentMenuItems (genericMenu, list);
-								genericMenu.ShowAsContext ();
-								Event.current.Use ();
 						}
 
-
-
-//						switch (typeForControl) {
-//
-//						case EventType.MouseDown:
-//			
-//////				if (typeForControl == EventType.Layout)
-//////				{
-//////					HandleUtility.AddDefaultControl (controlID);
-//////					goto IL_3D0;
-//////				}
-//////				if (typeForControl != EventType.ContextClick)
-//////				{
-//////					goto IL_3D0;
-//////				}
-////								//if (this.drawRect.Contains (GUIClip.Unclip (Event.current.mousePosition))) {
-//								if (this.drawRect.Contains (Event.current.mousePosition)) {
-////
-////
-//										Vector2 vector;
-////										//int curveAtPosition = this.GetCurveAtPosition (base.mousePositionInDrawing, out vector);
-////
-////										Vector2 offset = new Vector2 ();
-////
-////										offset.x = Event.current.mousePosition.x - this.drawRect.x;
-////										offset.y = Event.current.mousePosition.y - this.drawRect.y;
-//										int curveAtPosition = this.GetCurveAtPosition (this.ViewToDrawingTransformPoint (Event.current.mousePosition), out vector);//this.GetCurveAtPosition (offset, out vector);
-////
-////
-////										Debug.Log ("Vector" + vector + " mouse:" + Event.current.mousePosition + " view to point:" + this.mousePositionInDrawing);
-//										Debug.Log ("Translation" + this.Translation + " Scale:" + this.Scale);
-////										Debug.Log ("----");
-//										if (curveAtPosition >= 0) {
-//
-//												//Debug.Log ("Curve pos:"+curveAtPosition);
-//												GenericMenu genericMenu = new GenericMenu ();
-//												genericMenu.AddItem (new GUIContent ("Add Key"), false, new GenericMenu.MenuFunction2 (this.CreateKeyFromClick), this.ViewToDrawingTransformPoint (Event.current.mousePosition));
-//												genericMenu.ShowAsContext ();
-//												Event.current.Use ();
-//										}
-//								}
-//
-//								break;
-//						}
-////
-
+					
 
 
 
 						MethodInfo_OnGUI .Invoke (__instance, null);
 
-						//return new Rect (0f, 0f, base.position.width, base.position.height - 46f);
-//			this.rect = new Rect (0, 0, 300, 400);
-//			this.hRangeLocked = Event.current.shift;
-//			this.vRangeLocked = EditorGUI.actionKey;
-//			GUI.changed = false;
-//			GUI.Label (this.drawRect, GUIContent.none, CurveEditorW.ms_Styles.curveEditorBackground);
-//			this.BeginViewGUI ();
-//			this.GridGUI ();
-//			this.CurveGUI ();
-//			//this.DoWrapperPopups ();
-//			this.EndViewGUI ();
+
 
 
 				}
@@ -1589,56 +1551,10 @@ namespace ws.winx.unity
 				internal class Styles
 				{
 						public GUIStyle curveEditorBackground = "PopupCurveEditorBackground";
-//			public GUIStyle miniToolbarPopup = "MiniToolbarPopup";
-//			public GUIStyle miniToolbarButton = "MiniToolbarButtonLeft";
-//			public GUIStyle curveSwatch = "PopupCurveEditorSwatch";
-//			public GUIStyle curveSwatchArea = "PopupCurveSwatchBackground";
-//			public GUIStyle curveWrapPopup = "PopupCurveDropdown";
+
 				}
 		
-				//		private CurveWrapper[] GetCurveWrapperArray ()
-				//		{
-				//			if (this.m_Curve == null)
-				//			{
-				//				return new CurveWrapper[0];
-				//			}
-				//			CurveWrapper curveWrapper = new CurveWrapper ();
-				//			curveWrapper.id = "Curve".GetHashCode ();
-				//			curveWrapper.groupId = -1;
-				//			curveWrapper.color = this.m_Color;
-				//			curveWrapper.hidden = false;
-				//			curveWrapper.readOnly = false;
-				//			curveWrapper.renderer = new NormalCurveRenderer (this.m_Curve);
-				//			curveWrapper.renderer.SetWrap (this.m_Curve.preWrapMode, this.m_Curve.postWrapMode);
-				//			return new CurveWrapper[]
-				//			{
-				//				curveWrapper
-				//			};
-				//		}
-		
-		
-				//		this.m_CurveEditor = new CurveEditor (this.GetCurveEditorRect (), this.GetCurveWrapperArray (), true);
-				//		this.m_CurveEditor.curvesUpdated = new CurveEditor.CallbackFunction (this.UpdateCurve);
-				//		this.m_CurveEditor.scaleWithWindow = true;
-				//		this.m_CurveEditor.margin = 40f;
-				//		if (settings != null)
-				//		{
-				//			this.m_CurveEditor.settings = settings;
-				//		}
-				//		this.m_CurveEditor.settings.hTickLabelOffset = 10f;
-				//		bool horizontally = true;
-				//		bool vertically = true;
-				//		if (this.m_CurveEditor.settings.hRangeMin != float.NegativeInfinity && this.m_CurveEditor.settings.hRangeMax != float.PositiveInfinity)
-				//		{
-				//			this.m_CurveEditor.SetShownHRangeInsideMargins (this.m_CurveEditor.settings.hRangeMin, this.m_CurveEditor.settings.hRangeMax);
-				//			horizontally = false;
-				//		}
-				//		if (this.m_CurveEditor.settings.vRangeMin != float.NegativeInfinity && this.m_CurveEditor.settings.vRangeMax != float.PositiveInfinity)
-				//		{
-				//			this.m_CurveEditor.SetShownVRangeInsideMargins (this.m_CurveEditor.settings.vRangeMin, this.m_CurveEditor.settings.vRangeMax);
-				//			vertically = false;
-				//		}
-				//		this.m_CurveEditor.FrameSelected (horizontally, vertically);
+	
 		
 		}
 	
@@ -1655,182 +1571,5 @@ namespace ws.winx.unity
 	
 
 
-
-#region State Extension
-public static class StateEx
-{
-	
-		public static void SetMotion (this State state, Motion motion)
-		{
-				state.GetType ().GetMethod ("SetMotionInternal", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new System.Type[] {typeof(Motion)}, null).Invoke (state, new object[] {motion});
-		}
-	
-}
-#endregion
-
-
-public enum TangentMode
-{
-		Editable = 0,
-		Smooth = 1,
-		Linear = 2,
-		Stepped = Linear | Smooth,
-}
-	
-public enum TangentDirection
-{
-		Left,
-		Right
-}
-	
-public class KeyframeUtil
-{
-		
-		public static Keyframe GetNew (float time, float value, TangentMode leftAndRight)
-		{
-				return GetNew (time, value, leftAndRight, leftAndRight);
-		}
-		
-		public static Keyframe GetNew (float time, float value, TangentMode left, TangentMode right)
-		{
-				object boxed = new Keyframe (time, value); // cant use struct in reflection			
-			
-				SetKeyBroken (boxed, true);
-				SetKeyTangentMode (boxed, 0, left);
-				SetKeyTangentMode (boxed, 1, right);
-			
-				Keyframe keyframe = (Keyframe)boxed;
-				if (left == TangentMode.Stepped)
-						keyframe.inTangent = float.PositiveInfinity;
-				if (right == TangentMode.Stepped)
-						keyframe.outTangent = float.PositiveInfinity;
-			
-				return keyframe;
-		}
-		
-		
-		// UnityEditor.CurveUtility.cs (c) Unity Technologies
-		public static void SetKeyTangentMode (object keyframe, int leftRight, TangentMode mode)
-		{
-			
-				Type t = typeof(UnityEngine.Keyframe);
-				FieldInfo field = t.GetField ("m_TangentMode", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-				int tangentMode = (int)field.GetValue (keyframe);
-			
-				if (leftRight == 0) {
-						tangentMode &= -7;
-						tangentMode |= (int)mode << 1;
-				} else {
-						tangentMode &= -25;
-						tangentMode |= (int)mode << 3;
-				}
-			
-				field.SetValue (keyframe, tangentMode);
-				if (GetKeyTangentMode (tangentMode, leftRight) == mode)
-						return;
-				Debug.Log ("bug"); 
-		}
-		
-		// UnityEditor.CurveUtility.cs (c) Unity Technologies
-		public static TangentMode GetKeyTangentMode (int tangentMode, int leftRight)
-		{
-				if (leftRight == 0)
-						return (TangentMode)((tangentMode & 6) >> 1);
-				else
-						return (TangentMode)((tangentMode & 24) >> 3);
-		}
-		
-		// UnityEditor.CurveUtility.cs (c) Unity Technologies
-		public static TangentMode GetKeyTangentMode (Keyframe keyframe, int leftRight)
-		{
-				Type t = typeof(UnityEngine.Keyframe);
-				FieldInfo field = t.GetField ("m_TangentMode", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-				int tangentMode = (int)field.GetValue (keyframe);
-				if (leftRight == 0)
-						return (TangentMode)((tangentMode & 6) >> 1);
-				else
-						return (TangentMode)((tangentMode & 24) >> 3);
-		}
-		
-		
-		// UnityEditor.CurveUtility.cs (c) Unity Technologies
-		public static void SetKeyBroken (object keyframe, bool broken)
-		{
-				Type t = typeof(UnityEngine.Keyframe);
-				FieldInfo field = t.GetField ("m_TangentMode", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-				int tangentMode = (int)field.GetValue (keyframe);
-			
-				if (broken)
-						tangentMode |= 1;
-				else
-						tangentMode &= -2;
-				field.SetValue (keyframe, tangentMode);
-		}
-		
-}
-
-
-
-/*****************
- * Linear curve
-	AnimationCurve linearCurve = new AnimationCurve();
-// Add 2 keyframe on 0.5 and 1.0 seconds with 1 and 2 values
-linearCurve.AddKey(KeyframeUtil.GetNew(0.5f, 1.0f, TangentMode.Linear));
-linearCurve.AddKey(KeyframeUtil.GetNew(1.0f, 2.0f, TangentMode.Linear));
-// If you have at leas one keyframe with TangentMode.Linear you should recalculate tangents after you assign all values
-linearCurve.UpdateAllLinearTangents();
-// assign this curve to clip
-animationClip.SetCurve(gameObject, typeof(Transform),"localPosition.x", linearCurve);
-
-
-* Constant curve
-	This type of curve is very useful for m_IsActive properties (to enable and disable gameobjects)
-		AnimationCurve constantCurve = new AnimationCurve();
-
-constantCurve.AddKey(KeyframeUtil.GetNew(0.5f, 0.0f, TangentMode.Linear)); //false on 0.5 second
-constantCurve.AddKey(KeyframeUtil.GetNew(1.0f, 1.0f, TangentMode.Linear)); // true on 1.0 second
-
-animationClip.SetCurve(gameObject, typeof(GameObject),"m_IsActive", constantCurve);
-*/
-
-#region Curve Extension
-public static class CurveExtension
-{
-	
-		public static void UpdateAllLinearTangents (this AnimationCurve curve)
-		{
-				for (int i = 0; i < curve.keys.Length; i++) {
-						UpdateTangentsFromMode (curve, i);
-				}
-		}
-	
-		// UnityEditor.CurveUtility.cs (c) Unity Technologies
-		public static void UpdateTangentsFromMode (AnimationCurve curve, int index)
-		{
-				if (index < 0 || index >= curve.length)
-						return;
-				Keyframe key = curve [index];
-				if (KeyframeUtil.GetKeyTangentMode (key, 0) == TangentMode.Linear && index >= 1) {
-						key.inTangent = CalculateLinearTangent (curve, index, index - 1);
-						curve.MoveKey (index, key);
-				}
-				if (KeyframeUtil.GetKeyTangentMode (key, 1) == TangentMode.Linear && index + 1 < curve.length) {
-						key.outTangent = CalculateLinearTangent (curve, index, index + 1);
-						curve.MoveKey (index, key);
-				}
-				if (KeyframeUtil.GetKeyTangentMode (key, 0) != TangentMode.Smooth && KeyframeUtil.GetKeyTangentMode (key, 1) != TangentMode.Smooth)
-						return;
-				curve.SmoothTangents (index, 0.0f);
-		}
-	
-		// UnityEditor.CurveUtility.cs (c) Unity Technologies
-		private static float CalculateLinearTangent (AnimationCurve curve, int index, int toIndex)
-		{
-				return (float)(((double)curve [index].value - (double)curve [toIndex].value) / ((double)curve [index].time - (double)curve [toIndex].time));
-		}
-	
-}
-
-#endregion
 
 
