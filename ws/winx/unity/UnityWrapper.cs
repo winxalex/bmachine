@@ -1131,6 +1131,28 @@ namespace ws.winx.unity
 						return __RealType;
 
 				}
+
+
+				public void WrappCurve(AnimationCurve curve){
+			NormalCurveRendererW renderer;
+			
+
+
+
+				
+				this.groupId = -1;
+				curveWrapperW.color = new Color (UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+				curveWrapperW.hidden = false;
+				curveWrapperW.readOnly = false;
+				
+				renderer = new NormalCurveRendererW (curve);
+				renderer.SetWrap (curve.preWrapMode, curve.postWrapMode);
+				
+				curveWrapperW.renderer = renderer.wrapped;
+
+
+
+				}
 		
 				public CurveWrapperW ()
 				{
@@ -1151,6 +1173,7 @@ namespace ws.winx.unity
 	#region CurveEditorW
 		public class CurveEditorW
 		{
+				
 				private static Type __RealType;
 				private object instance;
 				private static MethodInfo MethodInfo_OnGUI;
@@ -1176,6 +1199,11 @@ namespace ws.winx.unity
 				static Styles ms_Styles;
 				object __instance;
 				CurveMenuManagerW m_MenuManager;
+
+				public delegate void SelectHandler (int index);
+	
+				//Defining event based on the above delegate
+				public event SelectHandler onSelect;
 
 				public object wrapped {
 						get {
@@ -1461,72 +1489,82 @@ namespace ws.winx.unity
 						//EventType typeForControl = current.GetTypeForControl (controlID);
 
 						//EventType.ContextClick never fired???
-						if (current.type == EventType.MouseDown && current.button == 1 && this.drawRect.Contains (current.mousePosition)) {
+						if (current.type == EventType.MouseDown && this.drawRect.Contains (current.mousePosition)) {
+								if (current.button == 1) {
 
 
 								
 
-								//check if clicked happen over key points
-								CurveSelectionW curveSelection = this.FindNearest (current.mousePosition);
-								if (curveSelection != null) {
+										//check if clicked happen over key points
+										CurveSelectionW curveSelection = this.FindNearest (current.mousePosition);
+										if (curveSelection != null) {
 		
 
 					
-										IList list = (IList)Activator.CreateInstance (typeof(List<>).MakeGenericType (KeyIdentifierW.GetWrappedType ()));
+												IList list = (IList)Activator.CreateInstance (typeof(List<>).MakeGenericType (KeyIdentifierW.GetWrappedType ()));
 					
 
 										
-										bool flag2 = false;
-										KeyIdentifierW keyIdW;
+												bool flag2 = false;
+												KeyIdentifierW keyIdW;
 
-										CurveSelectionW current2 = new CurveSelectionW ();
+												CurveSelectionW current2 = new CurveSelectionW ();
 
-										foreach (var obj in this.m_Selection) {
+												foreach (var obj in this.m_Selection) {
 										
-												current2.wrapped = obj;
+														current2.wrapped = obj;
 
-												keyIdW = new KeyIdentifierW (current2.curveWrapper.renderer, current2.curveID, current2.key);
+														keyIdW = new KeyIdentifierW (current2.curveWrapper.renderer, current2.curveID, current2.key);
 
-												list.Add (keyIdW.wrapped);
-												if (current2.curveID == curveSelection.curveID && current2.key == curveSelection.key) {
-														flag2 = true;
+														list.Add (keyIdW.wrapped);
+														if (current2.curveID == curveSelection.curveID && current2.key == curveSelection.key) {
+																flag2 = true;
+														}
 												}
-										}
 
-										if (!flag2) {
-												list.Clear ();
-												keyIdW = new KeyIdentifierW (curveSelection.curveWrapper.renderer, curveSelection.curveID, curveSelection.key);
-												list.Add (keyIdW.wrapped);
-												this.m_Selection.Clear ();
-												this.m_Selection.Add (curveSelection.wrapped);
-										}
+												if (!flag2) {
+														list.Clear ();
+														keyIdW = new KeyIdentifierW (curveSelection.curveWrapper.renderer, curveSelection.curveID, curveSelection.key);
+														list.Add (keyIdW.wrapped);
+														this.m_Selection.Clear ();
+														this.m_Selection.Add (curveSelection.wrapped);
+												}
 
-										this.m_MenuManager = new CurveMenuManagerW (this);
-										GenericMenu genericMenu = new GenericMenu ();
-										string text;
-										if (list.Count > 1) {
-												text = "Delete Keys";
-										} else {
-												text = "Delete Key";
-										}
-										genericMenu.AddItem (new GUIContent (text), false, new GenericMenu.MenuFunction2 (this.DeleteKeys), list);
-										genericMenu.AddSeparator (string.Empty);
-										this.m_MenuManager.AddTangentMenuItems (genericMenu, list);
-										genericMenu.ShowAsContext ();
-										Event.current.Use ();
-								} else {//check if click happened on curve
-
-										Vector2 vector;
-				
-										int curveAtPosition = this.GetCurveAtPosition (this.ViewToDrawingTransformPoint (Event.current.mousePosition), out vector);//this.GetCurveAtPosition (offset, out vector);
-			
-										if (curveAtPosition >= 0) {
-					
-																
+												this.m_MenuManager = new CurveMenuManagerW (this);
 												GenericMenu genericMenu = new GenericMenu ();
-												genericMenu.AddItem (new GUIContent ("Add Key"), false, new GenericMenu.MenuFunction2 (this.CreateKeyFromClick), this.ViewToDrawingTransformPoint (Event.current.mousePosition));
+												string text;
+												if (list.Count > 1) {
+														text = "Delete Keys";
+												} else {
+														text = "Delete Key";
+												}
+												genericMenu.AddItem (new GUIContent (text), false, new GenericMenu.MenuFunction2 (this.DeleteKeys), list);
+												genericMenu.AddSeparator (string.Empty);
+												this.m_MenuManager.AddTangentMenuItems (genericMenu, list);
 												genericMenu.ShowAsContext ();
 												Event.current.Use ();
+										} else {//check if click happened on curve
+
+												Vector2 vector;
+				
+												int curveAtPosition = this.GetCurveAtPosition (this.ViewToDrawingTransformPoint (Event.current.mousePosition), out vector);//this.GetCurveAtPosition (offset, out vector);
+			
+												if (curveAtPosition >= 0) {
+					
+																
+														GenericMenu genericMenu = new GenericMenu ();
+														genericMenu.AddItem (new GUIContent ("Add Key"), false, new GenericMenu.MenuFunction2 (this.CreateKeyFromClick), this.ViewToDrawingTransformPoint (Event.current.mousePosition));
+														genericMenu.ShowAsContext ();
+														Event.current.Use ();
+												}
+										}
+								} else {
+										Vector2 vector;
+					
+										int curveAtPosition = this.GetCurveAtPosition (this.ViewToDrawingTransformPoint (Event.current.mousePosition), out vector);//this.GetCurveAtPosition (offset, out vector);
+					
+										if (curveAtPosition > -1) {
+												onSelect (curveAtPosition);
 										}
 								}
 

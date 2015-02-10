@@ -15,8 +15,11 @@ namespace ws.winx.bmachine.extensions
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
 		public class MecanimNode:CompositeNode
 		{
-				public CurveWrapperW[] curves;
-	    
+				[HideInInspector]
+				public List<CurveProperty> curveProperties;
+
+
+				
 				[MecanimStateInfoAttribute("animator")]
 				public MecanimStateInfo
 						animaStateInfoSelected;
@@ -117,7 +120,8 @@ namespace ws.winx.bmachine.extensions
 						_animator = null;
 						
 						transitionDuration = 0f;
-
+						
+			curveProperties = new List<CurveProperty> ();
 						
 				}
 
@@ -195,13 +199,6 @@ namespace ws.winx.bmachine.extensions
 						animator.CrossFade (animaStateInfoSelected.hash, transitionDuration, animaStateInfoSelected.layer, timeNormalizedStart);
 			
 				}
-
-				
-
-
-
-
-
 
 				public override Status Update ()
 				{

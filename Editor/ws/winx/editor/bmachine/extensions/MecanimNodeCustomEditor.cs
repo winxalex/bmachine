@@ -31,7 +31,10 @@ namespace ws.winx.editor.bmachine.extensions
 		public class MecanimNodeCustomEditor : NodeEditor
 		{
 
-				
+				CurveProperty curvePropertySelected;
+				string[] curvePropertyDisplayOptions;
+		int curvePropertyIndexSelected;
+				Color colorSelected;
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
@@ -51,6 +54,8 @@ namespace ws.winx.editor.bmachine.extensions
 				GUIStyle playButtonStyle;
 				Vector2 playButtonSize;
 				AvatarPreviewW avatarPreview;
+				Vector2 curvePropertiesScroller;
+		        
 
 				//
 				// Nested Types
@@ -242,7 +247,12 @@ namespace ws.winx.editor.bmachine.extensions
 				}
 
 
+				void onCurveSelect(int index){
 
+					if(mecanimNode.curveProperties!=null)
+						curvePropertySelected = mecanimNode.curveProperties [index];
+
+				}
 
 	
           
@@ -255,14 +265,34 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
+			
+		
+
+
+
+
 
 			DrawDefaultInspector ();
 
+			mecanimNode = target as MecanimNode;
 
+			if (mecanimNode != null) {
+
+				int numCurves=mecanimNode.curveProperties.Length;
+				for(int i=0;i<numCurves;i++){
+					FloatProperty var=mecanimNode.curveProperties[i].property;
+					//var.target
 
 					
+					var.target=EditorGUILayout.ObjectField("target",var.target,typeof(UnityEngine.Object),true);
+					//var.b
+					if(var.target!=null){
+						//get var.target properties and fields and blackboard
+
+					}
+				}
 			
-						mecanimNode = target as MecanimNode;
+						
 						Motion motion;
 						if (mecanimNode.motionOverride == null)
 								motion = mecanimNode.animaStateInfoSelected.motion;
@@ -272,23 +302,22 @@ namespace ws.winx.editor.bmachine.extensions
 		
 			
 						
-						if (mecanimNode != null) {
+					
 
 
 								if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
 										Debug.LogError ("Can't override state that doesn't contain motion");
 								}
 								
-								// Get children nodes
-								//ActionNode[] children = randomChild.children;
-				
-								// Update serialized node data
-								if (Event.current.type == EventType.Layout) {
-										this.serializedNode.Update ();
-								}
-				
-								// Get an iterator
-								//var iterator = serializedNode.GetIterator ();
+								
+
+//				if (Event.current.type == EventType.Layout) {
+//					this.serializedNode.Update ();
+//				}
+
+
+			
+
 
 				//_curvesEditorShow=EditorGUILayout.Foldout(_curvesEditorShow,"Curves");
 				//EditorGUILayout.CurveField
@@ -296,92 +325,152 @@ namespace ws.winx.editor.bmachine.extensions
 				Rect curveEditorRect;
 				//Rect curveEditorRect=GUILayoutUtility.GetLastRect();
 
+
+
+
 			
-				curveEditorRect=EditorGUILayout.BeginHorizontal();
+
 				
 				if(true){
-					
-					
+					//Debug.Log("LAst"+GUILayoutUtility.GetLastRect()+" "+GUILayoutUtility.GetRect(100,200));
+
+					curveEditorRect=GUILayoutUtility.GetRect(Screen.width-46f,200);
+
+//					if(curveEditorRect.height<200) curveEditorRect.height=200;
+//					curveEditorRect.width=Screen.width-46;
+//					curveEditorRect.y=400;
+					//GUILayout.BeginArea(curveEditorRect);
+					//curveEditorRect=
 
 
-					
+
+						EditorGUILayout.BeginHorizontal();
+
+				//	curveEditorRect.y=curveEditorRect.height+16f;
+				//	curveEditorRect.height=200;
+				//	curveEditorRect.width=Screen.width-46f;
+				
+					Debug.Log(curveEditorRect+" "+Event.current.type);
+
+
 					
 			
 					
 					
-					AnimationCurve curve1=new AnimationCurve();
+//					AnimationCurve curve1=new AnimationCurve();
+//
+//
+//
+//						curve1.AddKey(new Keyframe(0, 1));
+//						curve1.AddKey(new Keyframe(1, 1));
+//
+//				
+//
+//					AnimationCurve curve2=new AnimationCurve();
+//
+//
+//					float tan45 = Mathf.Tan(Mathf.Deg2Rad * 45);
+//					
+//				
+//					curve2.AddKey(new Keyframe(0, 0, tan45, tan45));
+//					curve2.AddKey(new Keyframe(1, 1, tan45, tan45));
+
+					indentLevel=EditorGUI.indentLevel;
+						EditorGUI.indentLevel=0;
 
 
 
-						curve1.AddKey(new Keyframe(0, 1));
-						curve1.AddKey(new Keyframe(1, 1));
 
-				
-
-					AnimationCurve curve2=new AnimationCurve();
-
-
-					float tan45 = Mathf.Tan(Mathf.Deg2Rad * 45);
-					
-				
-					curve2.AddKey(new Keyframe(0, 0, tan45, tan45));
-					curve2.AddKey(new Keyframe(1, 1, tan45, tan45));
-					
-					//	EditorGUI.indentLevel=0;
-
-
-						curveEditorRect.height=200;
-					    curveEditorRect.width=Screen.width-46f;
-
-
-				
+					curveEditorRect.width=curveEditorRect.width-200;
 
 					if(curveEditor==null){
-						curveEditor=new CurveEditorW(new Rect(16,500,Screen.width-46,200),new AnimationCurve[]{curve1,curve2},false);
-						//CurveSelectionW crvSele=new CurveSelectionW(2,curveEditor,3);
 
-						//CurveMenuManagerW menu=new CurveMenuManagerW(curveEditor);
-						//menu.AddTangentMenuItems(null,null);
-						//curveEditor.topmargin = 500f;
-//						if (settings != null)
-//						{
-//							this.m_CurveEditor.settings = settings;
-//						}
-//						this.m_CurveEditor.settings.hTickLabelOffset = 10f;
-						bool horizontally = true;
-						bool vertically = true;
-//						if (this.m_CurveEditor.settings.hRangeMin != float.NegativeInfinity && this.m_CurveEditor.settings.hRangeMax != float.PositiveInfinity)
-//						{
-//							this.m_CurveEditor.SetShownHRangeInsideMargins (this.m_CurveEditor.settings.hRangeMin, this.m_CurveEditor.settings.hRangeMax);
-//							horizontally = false;
-//						}
-//						if (this.m_CurveEditor.settings.vRangeMin != float.NegativeInfinity && this.m_CurveEditor.settings.vRangeMax != float.PositiveInfinity)
-//						{
-//							this.m_CurveEditor.SetShownVRangeInsideMargins (this.m_CurveEditor.settings.vRangeMin, this.m_CurveEditor.settings.vRangeMax);
-//							vertically = false;
-//						}
+						curveEditor=new CurveEditorW(curveEditorRect,new AnimationCurve[]{curve1,curve2},false);
+					
+						curveEditor.FrameSelected (true, true);
+						curveEditor.scaleWithWindow=true;
 
-
-						curveEditor.FrameSelected (horizontally, vertically);
+						curveEditor.onSelect+=onCurveSelect;
 
 					}
+						else {
 
-					//curveEditor.rect=new Rect(0,500,Screen.width-46,150);
-					curveEditor.scaleWithWindow=false;
+						curveEditor.rect=curveEditorRect;
+						curveEditor.FrameSelected (false, false);
+					}
 
-					//Debug.Log("DrawRect "+curveEditor.drawRect);
-					//curveEditor.drawRect.y=0;
-					
+					//curveEditor.FrameSelected (true, true);
+					//curveEditor.scaleWithWindow=true;
+
+					EditorGUILayout.BeginVertical(new GUILayoutOption[] {GUILayout.Width(200)});
 					curveEditor.DoEditor();
+					EditorGUILayout.EndVertical();
+
+//					curvePropertiesScroller.x=curveEditorRect.x;
+//					curvePropertiesScroller.y=curveEditorRect.y;
+//
+//					curvePropertiesScroller=EditorGUILayout.BeginScrollView(curvePropertiesScroller);
+//							EditorGUILayout.BeginHorizontal();
+//					Color color=new Color();
+//					color=EditorGUILayout.ColorField(color);
+//
+//							EditorGUILayout.EndHorizontal();
+//						EditorGUILayout.EndScrollView();
+//
+
+
+										
+
+					if(GUILayout.Button("Add")){
+						CurveProperty newCurveProperty=new CurveProperty();
+						mecanimNode.curveProperties.Add(newCurveProperty);
+
+
+						//can be some preset
+						AnimationCurve curve1=new AnimationCurve();
+					
+												curve1.AddKey(new Keyframe(0, 1));
+												curve1.AddKey(new Keyframe(1, 1));
+
+						newCurveProperty.curveWrapperW.WrappCurve(curve1);
+						newCurveProperty.curveWrapperW.id=("Curve"+(mecanimNode.curveProperties.Count-1)).GetHashCode();
+						newCurveProperty.curveWrapperW.color=colorSelected;
+
+						curvePropertySelected=newCurveProperty;
+
+					}	
+
+
+					colorSelected=EditorGUILayout.ColorField(colorSelected);
+
+					curvePropertySelected.target=EditorGUILayout.ObjectField(curvePropertySelected.target,typeof(UnityEngine.Object),true);
+
+					//concat
+					//mecanimNode.blackboard.GetVariables<float>();
+
+					curvePropertyIndexSelected=EditorGUILayout.Popup(curvePropertyIndexSelected,curvePropertyDisplayOptions);
+
+					curvePropertySelected.property=curvePropertyDisplayOptions[curvePropertyIndexSelected];
+
 
 					EditorGUILayout.EndHorizontal();
-					
 
-				
+
+					//GUILayout.EndArea();
+
+					EditorGUI.indentLevel=indentLevel;
 				}
-									
+
+//				
+				EditorGUILayout.LabelField ("mile2");
+
+				EditorGUILayout.LabelField ("mile2");
+
+				EditorGUILayout.LabelField ("mile2");
+				EditorGUILayout.LabelField ("mile5");
+//				
 				
-								
+						
 				return;
 
 								/////////// Avatar Preview GUI ////////////
