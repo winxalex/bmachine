@@ -17,15 +17,18 @@ using System.Reflection;
 namespace ws.winx.unity{
 
 	[System.Serializable]
-	public class CurveProperty:IEquatable<CurveProperty>
+	public class CurveProperty:UnityEngine.Object,IEquatable<CurveProperty>
 	{
-		public CurveWrapperW curveWrapperW = new CurveWrapperW ();
+
 	
-		public FloatProperty property = new FloatProperty ();
 
 		//
 		// Fields
 		//
+
+		[HideInInspector]
+		public bool isStatic;
+
 		[NonSerialized]
 		private PropertyInfo m_PropertyInfo;
 		
@@ -44,14 +47,18 @@ namespace ws.winx.unity{
 	
 		public UnityEngine.Object target;
 		
-	
+		[ReflectedProperty ("target", "component", "isStatic", typeof(float)), BehaviourMachine.Tooltip ("The name of the property")]
 		public string property = string.Empty;
+
+		public CurveWrapperW curveWrapperW = new CurveWrapperW ();
+
+	
 
 
 		//
 		// Properties
 		//
-		public override float Value
+		public  float Value
 		{
 			get
 			{

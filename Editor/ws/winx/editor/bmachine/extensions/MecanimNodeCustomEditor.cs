@@ -255,6 +255,9 @@ namespace ws.winx.editor.bmachine.extensions
 				}
 
 	
+	
+
+
           
 
 				/// <summary>
@@ -278,19 +281,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 			if (mecanimNode != null) {
 
-				int numCurves=mecanimNode.curveProperties.Length;
-				for(int i=0;i<numCurves;i++){
-					FloatProperty var=mecanimNode.curveProperties[i].property;
-					//var.target
-
-					
-					var.target=EditorGUILayout.ObjectField("target",var.target,typeof(UnityEngine.Object),true);
-					//var.b
-					if(var.target!=null){
-						//get var.target properties and fields and blackboard
-
-					}
-				}
+			
 			
 						
 						Motion motion;
@@ -350,7 +341,7 @@ namespace ws.winx.editor.bmachine.extensions
 				//	curveEditorRect.height=200;
 				//	curveEditorRect.width=Screen.width-46f;
 				
-					Debug.Log(curveEditorRect+" "+Event.current.type);
+				//	Debug.Log(curveEditorRect+" "+Event.current.type);
 
 
 					
@@ -380,31 +371,32 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-
+					/////// CURVE EDITOR ////////
 					curveEditorRect.width=curveEditorRect.width-200;
 
-					if(curveEditor==null){
+//					if(curveEditor==null){
+//
+//						curveEditor=new CurveEditorW(curveEditorRect,new AnimationCurve[]{curve1,curve2},false);
+//					
+//						curveEditor.FrameSelected (true, true);
+//						curveEditor.scaleWithWindow=true;
+//
+//						curveEditor.onSelect+=onCurveSelect;
+//
+//					}
+//						else {
+//
+//						curveEditor.rect=curveEditorRect;
+//						curveEditor.FrameSelected (false, false);
+//					}
+//
+//
+//					EditorGUILayout.BeginVertical(new GUILayoutOption[] {GUILayout.Width(200)});
+//					curveEditor.DoEditor();
+//					EditorGUILayout.EndVertical();
 
-						curveEditor=new CurveEditorW(curveEditorRect,new AnimationCurve[]{curve1,curve2},false);
-					
-						curveEditor.FrameSelected (true, true);
-						curveEditor.scaleWithWindow=true;
 
-						curveEditor.onSelect+=onCurveSelect;
 
-					}
-						else {
-
-						curveEditor.rect=curveEditorRect;
-						curveEditor.FrameSelected (false, false);
-					}
-
-					//curveEditor.FrameSelected (true, true);
-					//curveEditor.scaleWithWindow=true;
-
-					EditorGUILayout.BeginVertical(new GUILayoutOption[] {GUILayout.Width(200)});
-					curveEditor.DoEditor();
-					EditorGUILayout.EndVertical();
 
 //					curvePropertiesScroller.x=curveEditorRect.x;
 //					curvePropertiesScroller.y=curveEditorRect.y;
@@ -443,14 +435,25 @@ namespace ws.winx.editor.bmachine.extensions
 
 					colorSelected=EditorGUILayout.ColorField(colorSelected);
 
+					if(curvePropertySelected!=null){
 					curvePropertySelected.target=EditorGUILayout.ObjectField(curvePropertySelected.target,typeof(UnityEngine.Object),true);
 
+
+					if(curvePropertySelected.target!=null){
+
+						//curvePropertySelected.target
 					//concat
 					//mecanimNode.blackboard.GetVariables<float>();
 
+
+
 					curvePropertyIndexSelected=EditorGUILayout.Popup(curvePropertyIndexSelected,curvePropertyDisplayOptions);
 
-					curvePropertySelected.property=curvePropertyDisplayOptions[curvePropertyIndexSelected];
+					//curvePropertySelected.property=curvePropertyDisplayOptions[curvePropertyIndexSelected];
+					
+					}
+
+					}
 
 
 					EditorGUILayout.EndHorizontal();

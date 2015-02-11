@@ -1040,6 +1040,7 @@ namespace ws.winx.unity
 	
 	
 	#region CurveWrapper
+		[Serializable]
 		public class CurveWrapperW
 		{
 		
@@ -1132,23 +1133,19 @@ namespace ws.winx.unity
 
 				}
 
-
-				public void WrappCurve(AnimationCurve curve){
-			NormalCurveRendererW renderer;
-			
-
-
-
+				public void WrappCurve (AnimationCurve curve)
+				{
+						NormalCurveRendererW renderer;
+	
+						this.groupId = -1;
+						this.color = new Color (UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+						this.hidden = false;
+						this.readOnly = false;
 				
-				this.groupId = -1;
-				curveWrapperW.color = new Color (UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-				curveWrapperW.hidden = false;
-				curveWrapperW.readOnly = false;
+						renderer = new NormalCurveRendererW (curve);
+						renderer.SetWrap (curve.preWrapMode, curve.postWrapMode);
 				
-				renderer = new NormalCurveRendererW (curve);
-				renderer.SetWrap (curve.preWrapMode, curve.postWrapMode);
-				
-				curveWrapperW.renderer = renderer.wrapped;
+						this.renderer = renderer.wrapped;
 
 
 

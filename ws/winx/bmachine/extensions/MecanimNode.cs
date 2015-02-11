@@ -2,6 +2,10 @@
 //            Behaviour Machine
 // Copyright © 2014 Anderson Campos Cardoso
 //----------------------------------------------
+//----------------------------------------------
+//           Mecanimnode
+// 			by Alex Winx
+//----------------------------------------------
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,10 +19,17 @@ namespace ws.winx.bmachine.extensions
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
 		public class MecanimNode:CompositeNode
 		{
+
+				
+				public CurveProperty testPrope;
+
+		public CurveProperty[] curveProperty;
+
 				[HideInInspector]
 				public List<CurveProperty> curveProperties;
 
-
+				
+				//public string property = string.Empty;
 				
 				[MecanimStateInfoAttribute("animator")]
 				public MecanimStateInfo
