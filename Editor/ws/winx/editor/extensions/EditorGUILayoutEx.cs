@@ -15,7 +15,7 @@ using System.Collections;
 using ws.winx.unity;
 using ws.winx.editor.extensions;
 using System.Reflection;
-using ws.winx.editor.utility;
+
 
 namespace ws.winx.editor.extensions
 {
@@ -41,6 +41,8 @@ namespace ws.winx.editor.extensions
 
 				public delegate void EventCallback (int ownerControlID,Event e);
 
+				public delegate void ObjectPropertyCallback(UnityEngine.Object @object,Type type, string property);
+
 
 
 
@@ -58,213 +60,11 @@ namespace ws.winx.editor.extensions
 				private static ToolTipStyles TOOLTIP_STYLES;
 
 
-				//
-				// Nested Types
-				//
-				private class TextColorStyles
-				{
-					public readonly Color labelTextColor;
-					public TextColorStyles ()
-					{
-						
-						this.labelTextColor = EditorStyles.label.normal.textColor;
-					}
-				}
-
-				private static TextColorStyles TEXTCOLOR_STYLES;
-			
-
-
-		#region CustomObjectPropertiesPopup
-
-
-		public  void CustomObjectPropertiesPopup (
-		GUIContent label,
-		UnityEngine.Object @object,string property,
-										Component component = null              
-		                    
-		                    )
-		{
-			if (EditorGUILayoutEx.TEXTCOLOR_STYLES == null)
-			{
-				EditorGUILayoutEx.TEXTCOLOR_STYLES = new EditorGUILayoutEx.TextColorStyles();
-			}
-
-
-				string text = (property.value as string) ?? string.Empty;
-				string text2 = (property.value as string) ?? string.Empty;
 				
-				//public ReflectedPropertyAttribute (string objectPropertyPath, string componentPropertyPath, string isStaticPropertyPath, Type propertyType)
-				//[ReflectedProperty ("target", "component", "isStatic", typeof(float)), Tooltip ("The name of the property")]
-				//public string property = string.Empty;
-				ReflectedPropertyAttribute reflectedPropertyAttribute = base.attribute as ReflectedPropertyAttribute;
-
-				SerializedNodeProperty componentProperty = null;
-				SerializedNodeProperty isStaticProperty = null;
-				string text3 = property.path;
-				int num = text3.LastIndexOf ('.');
-				if (num > -1)
-				{
-					text3 = text3.Remove (num + 1, text3.get_Length () - num - 1);
-				}
-				else
-				{
-					text3 = string.Empty;
-				}
-				NodePropertyIterator iterator = property.serializedNode.GetIterator ();
-				if (iterator.Find (text3 + reflectedPropertyAttribute.objectPropertyPath))
-				{
-					SerializedNodeProperty current = iterator.current;
-					@object = (current.value as Object);
-				}
-				if (iterator.Find (text3 + reflectedPropertyAttribute.isStaticPropertyPath))
-				{
-					isStaticProperty = iterator.current;
-					if ((bool)isStaticProperty.value)
-					{
-						text += " (static)";
-					}
-				}
-				if (iterator.Find (text3 + reflectedPropertyAttribute.componentPropertyPath))
-				{
-					componentProperty = iterator.current;
-					component = (componentProperty.value as Component);
-				}
-				if (string.IsNullOrEmpty (text2))
-				{
-					text = "No Property";
-				}
-				else
-				{
-					if (component != null)
-					{
-						text = component.GetType ().Name + "." + text;
-					}
-					else
-					{
-						if (@object != null)
-						{
-							text = @object.GetType ().Name + "." + text;
-						}
-						else
-						{
-							text = "No Property";
-						}
-					}
-				}
-				Type target = null;
-				if (component != null)
-				{
-					target = component.GetType ();
-				}
-				else
-				{
-					if (@object != null)
-					{
-						target = @object.GetType ();
-					}
-				}
-				if(!(target != null && !string.IsNullOrEmpty (text2) && (target.GetProperty (text2) != null || target.GetField (text2) != null)))
-				//if (!FieldUtility.HasMember (target, text2))
-				{
-					EditorStyles.label.normal.textColor=Color.red;
-				}
-				Rect rect = GUILayoutUtility.GetRect (GUIContent.none, EditorStyles.popup);
-				int controlID = GUIUtility.GetControlID (2);
-				Rect rect2 = EditorGUI.PrefixLabel (rect, controlID, label);
-				bool enabled = GUI.enabled;
-				GUI.enabled= (@object != null);
-				if (GUI.Button (rect2, (!string.IsNullOrEmpty (text)) ? text : "No Property", EditorStyles.popup) && @object != null && componentProperty != null && isStaticProperty != null)
-				{
-					GenericMenu genericMenu = new GenericMenu ();
-					List<string> list = new List<string> ();
-					list.Add ("No Property");
-					genericMenu.AddItem (new GUIContent ("No Property"), text == "No Property", delegate
-					                     {
-						componentProperty.value = null;
-						isStaticProperty.value = false;
-						property.value = string.Empty;
-					});
-					genericMenu.AddSeparator (string.Empty);
-					string text4 = @object.GetType ().Name + "/Static Properties/";
-					MemberInfo[] publicMembers = ReflectionUtility.GetPublicMembers (@object.GetType (), reflectedPropertyAttribute.propertyType, true, true, true);
-					if (publicMembers.Length > 0)
-					{
-						for (int i = 0; i < publicMembers.Length; i++)
-						{
-							string currentMemberName = publicMembers [i].Name;
-							genericMenu.AddItem (new GUIContent (text4 + currentMemberName), component == null && currentMemberName == text2, delegate
-							                     {
-								componentProperty.value = null;
-								isStaticProperty.value = true;
-								property.value = currentMemberName;
-							});
-						}
-					}
-					publicMembers = ReflectionUtility.GetPublicMembers (@object.GetType (), reflectedPropertyAttribute.propertyType, false, true, true);
-					for (int j = 0; j < publicMembers.Length; j++)
-					{
-						string currentMemberName = publicMembers [j].Name;
-						genericMenu.AddItem (new GUIContent (@object.GetType ().Name + "/" + currentMemberName), component == null && currentMemberName == text2, delegate
-						                     {
-							componentProperty.value = null;
-							isStaticProperty.value = false;
-							property.value = currentMemberName;
-						});
-					}
-					GameObject gameObject = @object as GameObject;
-					if (gameObject != null)
-					{
-						Component[] components = gameObject.GetComponents<Component> ();
-						for (int k = 0; k < components.Length; k++)
-						{
-							Component currentComponent = components [k];
-							Type type = currentComponent.GetType ();
-							string uniqueNameInList = StringUtility.GetUniqueNameInList (list, type.Name);
-							list.Add (uniqueNameInList);
-							text4 = uniqueNameInList + "/Static Properties/";
-							publicMembers =ReflectionUtility.GetPublicMembers (currentComponent.GetType (), reflectedPropertyAttribute.propertyType, true, true, true);
-							if (publicMembers.Length > 0)
-							{
-								for (int l = 0; l < publicMembers.Length; l++)
-								{
-									string currentMemberName = publicMembers [l].Name;
-									genericMenu.AddItem (new GUIContent (text4 + currentMemberName), currentComponent == component && currentMemberName == text2, delegate
-									                     {
-										componentProperty.value = currentComponent;
-										isStaticProperty.value = true;
-										property.value = currentMemberName;
-									});
-								}
-							}
-
-						publicMembers = ReflectionUtility.GetPublicMembers (currentComponent.GetType (), reflectedPropertyAttribute.propertyType, false, true, true);
-							for (int m = 0; m < publicMembers.Length; m++)
-							{
-								string currentMemberName = publicMembers [m].Name;
-								genericMenu.AddItem (new GUIContent (uniqueNameInList + "/" + currentMemberName), currentComponent == component && currentMemberName == text2, delegate
-								                     {
-									componentProperty.value = currentComponent;
-									isStaticProperty.value = false;
-									property.value = currentMemberName;
-								});
-							}
-						}
-					}
-					genericMenu.ShowAsContext ();
-				}
-				GUI.enabled= enabled;
-				EditorStyles.label.normal.textColor= TEXTCOLOR_STYLES.labelTextColor;
 			
-		}
 
 
-
-
-
-
-
-		#endregion
+	
 
 
 		#region CustomPopup

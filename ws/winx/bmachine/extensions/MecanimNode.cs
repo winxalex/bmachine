@@ -21,12 +21,11 @@ namespace ws.winx.bmachine.extensions
 		{
 
 				
-				public CurveProperty testPrope;
+				
 
-		public CurveProperty[] curveProperty;
+				public CurveProperty[] curveProperties;
 
-				[HideInInspector]
-				public List<CurveProperty> curveProperties;
+				
 
 				
 				//public string property = string.Empty;
@@ -132,7 +131,7 @@ namespace ws.winx.bmachine.extensions
 						
 						transitionDuration = 0f;
 						
-			curveProperties = new List<CurveProperty> ();
+			curveProperties = new CurveProperty[0];
 						
 				}
 

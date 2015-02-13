@@ -1,4 +1,4 @@
-﻿//----------------------------------------------
+//----------------------------------------------
 //            Behaviour Machine
 // Copyright © 2014 Anderson Campos Cardoso
 //----------------------------------------------
@@ -32,7 +32,14 @@ namespace ws.winx.editor.bmachine.extensions
 		{
 
 				CurveProperty curvePropertySelected;
+
+		UnityEngine.Object objectSelected;
+		GUIContent propertyPopupLabel = new GUIContent (String.Empty);
+		Property<float> propertySelected;
 				string[] curvePropertyDisplayOptions;
+
+		MethodInfo GetFloatVar_MethodInfo;
+
 		int curvePropertyIndexSelected;
 				Color colorSelected;
 				bool _curvesEditorShow;
@@ -271,7 +278,7 @@ namespace ws.winx.editor.bmachine.extensions
 			
 		
 
-
+			int i = 0;
 
 
 
@@ -409,49 +416,114 @@ namespace ws.winx.editor.bmachine.extensions
 //							EditorGUILayout.EndHorizontal();
 //						EditorGUILayout.EndScrollView();
 //
+					GUIContent[] displayOptions=null;
+					Property<float>[] values=null;
+
+					objectSelected=EditorGUILayout.ObjectField(objectSelected,typeof(UnityEngine.Object),true);
+
+			
+						
+
+					ws.winx.unity.Utility.ObjectToDisplayOptionsValues<float>(objectSelected,out displayOptions,out values);
 
 
-										
+
+
+					FloatVar[] floatVarsGlobal=GlobalBlackboard.Instance.floatVars;
+
+
+
+					int floatVarsLengthGlobal=floatVarsGlobal.Length;
+
+					FloatVar[] floatVarLocal=mecanimNode.blackboard.floatVars;
+
+					int floatVarsLengthLocal=floatVarLocal.Length;
+					int floatVarsMax=Mathf.Max(floatVarsLengthGlobal,floatVarsLengthLocal);
+
+					if(displayOptions!=null){
+						i=displayOptions.Length;
+						floatVarsMax=displayOptions.Length+i;
+						Array.Resize(ref displayOptions,displayOptions.Length+floatVarsLengthLocal+floatVarsLengthGlobal);
+						Array.Resize(ref values,displayOptions.Length+floatVarsLengthLocal+floatVarsLengthGlobal);
+
+
+					}
+					else{
+						displayOptions=new GUIContent[floatVarsLengthLocal+floatVarsLengthGlobal];
+						values=new Property<float>[floatVarsLengthLocal+floatVarsLengthGlobal];
+						i=0;
+
+					}
+
+					if(GetFloatVar_MethodInfo==null)
+					GetFloatVar_MethodInfo = mecanimNode.blackboard.GetType ().GetMethod ("GetFloatVar", new Type[]{typeof(string)});
+
+					int index=i;
+					for(;i<floatVarsMax;i++){
+						if(i<floatVarsLengthGlobal){
+
+							displayOptions[index]=new GUIContent("Global/"+floatVarsGlobal[i].name);
+							values[index]=new Property<float>(GetFloatVar_MethodInfo,GlobalBlackboard.Instance);
+							values[index].name=floatVarsGlobal[i].name;
+							index++;
+						}
+
+						if(i<floatVarsLengthLocal){
+							
+							displayOptions[index]=new GUIContent("Local/"+floatVarLocal[i].name);
+							values[index]=new Property<float>(GetFloatVar_MethodInfo,mecanimNode.blackboard);
+							values[index].name=floatVarLocal[i].name;
+							index++;
+						}
+						
+					}
+
+					//if(displayOptions!=null && values!=null && displayOptions.Length==values.Length){
+					propertySelected=EditorGUILayoutEx.CustomObjectPopup<Property<float>>(propertyPopupLabel,propertySelected,displayOptions,values);
+
+					Debug.Log(propertySelected.name);
+					colorSelected=EditorGUILayout.ColorField(colorSelected);					
 
 					if(GUILayout.Button("Add")){
-						CurveProperty newCurveProperty=new CurveProperty();
-						mecanimNode.curveProperties.Add(newCurveProperty);
+						//CurveProperty newCurveProperty=new CurveProperty(null,null);
+//								mecanimNode.curveProperties.Add(newCurveProperty);
+//
+//
+//								//can be some preset
+//								AnimationCurve curve1=new AnimationCurve();
+//							
+//														curve1.AddKey(new Keyframe(0, 1));
+//														curve1.AddKey(new Keyframe(1, 1));
+//
+//								newCurveProperty.curveWrapperW.WrappCurve(curve1);
+//								newCurveProperty.curveWrapperW.id=("Curve"+(mecanimNode.curveProperties.Count-1)).GetHashCode();
+//								newCurveProperty.curveWrapperW.color=colorSelected;
+//
+//								curvePropertySelected=newCurveProperty;
 
-
-						//can be some preset
-						AnimationCurve curve1=new AnimationCurve();
-					
-												curve1.AddKey(new Keyframe(0, 1));
-												curve1.AddKey(new Keyframe(1, 1));
-
-						newCurveProperty.curveWrapperW.WrappCurve(curve1);
-						newCurveProperty.curveWrapperW.id=("Curve"+(mecanimNode.curveProperties.Count-1)).GetHashCode();
-						newCurveProperty.curveWrapperW.color=colorSelected;
-
-						curvePropertySelected=newCurveProperty;
-
-					}	
-
-
-					colorSelected=EditorGUILayout.ColorField(colorSelected);
-
-					if(curvePropertySelected!=null){
-					curvePropertySelected.target=EditorGUILayout.ObjectField(curvePropertySelected.target,typeof(UnityEngine.Object),true);
-
-
-					if(curvePropertySelected.target!=null){
-
-						//curvePropertySelected.target
-					//concat
-					//mecanimNode.blackboard.GetVariables<float>();
+							}
 
 
 
-					curvePropertyIndexSelected=EditorGUILayout.Popup(curvePropertyIndexSelected,curvePropertyDisplayOptions);
+//							
+//
+							if(curvePropertySelected!=null){
+//							curvePropertySelected.target=EditorGUILayout.ObjectField(curvePropertySelected.target,typeof(UnityEngine.Object),true);
 
-					//curvePropertySelected.property=curvePropertyDisplayOptions[curvePropertyIndexSelected];
-					
-					}
+
+							if(curvePropertySelected.reflectedObject!=null){
+
+								//curvePropertySelected.target
+							//concat
+							//mecanimNode.blackboard.GetVariables<float>();
+
+
+							//EditorGUILayoutEx.CustomObjectPopup<>
+									//curvePropertyIndexSelected=EditorGUILayoutEx.Popup(curvePropertyIndexSelected.);
+
+									//curvePropertySelected.property=curvePropertyDisplayOptions[curvePropertyIndexSelected];
+							
+							}
 
 					}
 
@@ -584,7 +656,7 @@ namespace ws.winx.editor.bmachine.extensions
 				
 										//update time values 
 										int eventTimeValuesNumber = mecanimNode.children.Length;
-										for (int i=0; i<eventTimeValuesNumber; i++) {
+										for (i=0; i<eventTimeValuesNumber; i++) {
 												ev = ((SendEventNormalized)mecanimNode.children [i]);	
 												ev.timeNormalized = eventTimeValues [i];
 					

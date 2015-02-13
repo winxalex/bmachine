@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 
-namespace ws.winx.editor.utility
+namespace ws.winx.utility
 {
 
 	public class ReflectionUtility{
@@ -31,8 +31,16 @@ namespace ws.winx.editor.utility
 					list.Add (propertyInfo);
 				}
 			}
+
+
 			return list.ToArray ();
 		}
+
+
+
+
+
+
 	}
 
 

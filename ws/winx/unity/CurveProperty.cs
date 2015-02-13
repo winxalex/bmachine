@@ -14,41 +14,12 @@ using BehaviourMachine;
 using System.Reflection;
 
 
+
 namespace ws.winx.unity{
 
 	[System.Serializable]
-	public class CurveProperty:UnityEngine.Object,IEquatable<CurveProperty>
+	public class CurveProperty:Property<float>,IEquatable<CurveProperty>
 	{
-
-	
-
-		//
-		// Fields
-		//
-
-		[HideInInspector]
-		public bool isStatic;
-
-		[NonSerialized]
-		private PropertyInfo m_PropertyInfo;
-		
-		[NonSerialized]
-		private MemberInfo m_MemberInfo;
-		
-		[NonSerialized]
-		private object m_Target;
-		
-		[NonSerialized]
-		private FieldInfo m_FieldInfo;
-		
-
-		public Component component;
-		
-	
-		public UnityEngine.Object target;
-		
-		[ReflectedProperty ("target", "component", "isStatic", typeof(float)), BehaviourMachine.Tooltip ("The name of the property")]
-		public string property = string.Empty;
 
 		public CurveWrapperW curveWrapperW = new CurveWrapperW ();
 
@@ -58,127 +29,20 @@ namespace ws.winx.unity{
 		//
 		// Properties
 		//
-		public  float Value
+
+
+		//
+		// Constructor
+		//
+		public CurveProperty(MemberInfo memberInfo,UnityEngine.Object reflectedObject):base(memberInfo,reflectedObject)
 		{
-			get
-			{
-				if (this.m_MemberInfo == null)
-				{
-					this.Initialize ();
-				}
-				if (this.m_PropertyInfo != null)
-				{
-					return (float)this.m_PropertyInfo.GetValue (this.m_Target, null);
-				}
-				if (this.m_FieldInfo != null)
-				{
-					return (float)this.m_FieldInfo.GetValue (this.m_Target);
-				}
-				if (this.component == null)
-				{
-					Print.LogError (string.Concat (new object[]
-					                               {
-						"No property with name '",
-						this.property,
-						"' in the object '",
-						this.target,
-						"'."
-					}));
-				}
-				else
-				{
-					Print.LogError (string.Concat (new object[]
-					                               {
-						"No property with name '",
-						this.property,
-						"' in the component '",
-						this.target,
-						".",
-						this.component,
-						"'."
-					}));
-				}
-				return 0f;
-			}
-			set
-			{
-				if (this.m_MemberInfo == null)
-				{
-					this.Initialize ();
-				}
-				if (this.m_PropertyInfo != null)
-				{
-					this.m_PropertyInfo.SetValue (this.m_Target, value, null);
-				}
-				else
-				{
-					if (this.m_FieldInfo != null)
-					{
-						this.m_FieldInfo.SetValue (this.m_Target, value);
-					}
-					else
-					{
-						if (this.component == null)
-						{
-							Print.LogError (string.Concat (new object[]
-							                               {
-								"(FloatProperty) No property with name '",
-								this.property,
-								"' in the object '",
-								this.target,
-								"'."
-							}));
-						}
-						else
-						{
-							Print.LogError (string.Concat (new object[]
-							                               {
-								"No property with name '",
-								this.property,
-								"' in the component '",
-								this.target,
-								".",
-								this.component,
-								"'."
-							}));
-						}
-					}
-				}
-			}
+
+
+
 		}
 
 
 
-		//
-		// Methods
-		//
-		private void Initialize ()
-		{
-			if (this.target != null)
-			{
-				Type type;
-				if (this.component == null)
-				{
-					type = this.target.GetType ();
-					this.m_Target = ((!this.isStatic) ? this.target : null);
-				}
-				else
-				{
-					type = this.component.GetType ();
-					this.m_Target = ((!this.isStatic) ? this.component : null);
-				}
-				this.m_PropertyInfo = type.GetProperty (this.property);
-				if (this.m_PropertyInfo == null)
-				{
-					this.m_FieldInfo = type.GetField (this.property);
-					this.m_MemberInfo = this.m_FieldInfo;
-				}
-				else
-				{
-					this.m_MemberInfo = this.m_PropertyInfo;
-				}
-			}
-		}
 		
 		
 		#region IEquatable implementation
