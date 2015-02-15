@@ -24,9 +24,10 @@ namespace ws.winx.bmachine.extensions
 				
 
 				public CurveProperty[] curveProperties;
-
+				public CurveProperty curveProperty;
 				
-
+				public Property mile;
+				public Property[] miles;
 				
 				//public string property = string.Empty;
 				
@@ -130,8 +131,12 @@ namespace ws.winx.bmachine.extensions
 						_animator = null;
 						
 						transitionDuration = 0f;
+
+						//mile = new Property<float> (null, null);
+			//mile = (Property)ScriptableObject.CreateInstance<Property> ();
+			//miles = new Property[0];
 						
-			curveProperties = new CurveProperty[0];
+					//	curveProperties = new CurveProperty[0];
 						
 				}
 

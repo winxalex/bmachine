@@ -2,137 +2,184 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.Reflection;
+using ws.winx.utility;
 
-namespace ws.winx.unity{
-	[Serializable]
-	public class Property<T>:UnityEngine.Object,IEquatable<Property<T>>
-	{
-
-		public readonly Type reflectedType;
-		public readonly Type type;
-		public string name;
-		public UnityEngine.Object reflectedObject;
-		public readonly MemberInfo memberInfo;
-
-
-		//
-		// Properties
-		//
-		public  T Value
+namespace ws.winx.unity
+{
+		[Serializable]
+		public class Property:ScriptableObject,IProperty
 		{
-			get
-			{
-				if (this.memberInfo == null)
-				{
-					//this.Initialize ();
-				}
-				if (this.memberInfo is PropertyInfo)
-				{
-					return (T)((PropertyInfo)this.memberInfo).GetValue (this.reflectedObject, null);
-				}
-				if (this.memberInfo is FieldInfo)
-				{
-					return (T)((FieldInfo)this.memberInfo).GetValue (this.reflectedObject);
+
+				
+
+				public Type reflectedType {
+						get {
+								return memberInfo.ReflectedType;
+						}
 				}
 
-				if(this.memberInfo is MethodInfo){
+				public Type type {
+						get {
 
-					return (T)((MethodInfo)this.memberInfo).Invoke(this.reflectedObject,new object[]{this.name});
+								switch (memberInfo.MemberType) {
+								case MemberTypes.Field:
+										return ((FieldInfo)memberInfo).FieldType;
+								case MemberTypes.Property:
+										return ((PropertyInfo)memberInfo).PropertyType;
+							
+								case MemberTypes.Method:
+										return ((MethodInfo)memberInfo).ReturnType;
+								default:
+										throw new ArgumentException ("MemberInfo must be if type FieldInfo, PropertyInfo or MethodInfo", "member");
+								}
+				
+								
+						}
+				}
+
+				public string name;
+				public UnityEngine.Object reflectedInstance;
+				public MemberInfo memberInfo;
+
+				public MemberInfo MemberInfo {
+						get {
+								return memberInfo;
+						}
+						set {
+								memberInfo = value;
+
+
+								if ((memberInfo.MemberType == MemberTypes.Property) || (memberInfo.MemberType == MemberTypes.Field))
+										this.name = memberInfo.Name;
+					
+								
+					
+								this.memberInfo = memberInfo;
+								
+						}
 				}
 
 
-					Debug.LogError (string.Concat (new object[]
+
+
+				//
+				// Properties
+				//
+				public  object Value {
+						get {
+								if (this.memberInfo == null) {
+										//this.Initialize ();
+								}
+								if (this.memberInfo is PropertyInfo) {
+										return ((PropertyInfo)this.memberInfo).GetValue (this.reflectedInstance, null);
+								}
+								if (this.memberInfo is FieldInfo) {
+										return ((FieldInfo)this.memberInfo).GetValue (this.reflectedInstance);
+								}
+
+								if (this.memberInfo is MethodInfo) {
+
+										return ((MethodInfo)this.memberInfo).Invoke (this.reflectedInstance, new object[]{this.name});
+								}
+
+
+								Debug.LogError (string.Concat (new object[]
 					                               {
 						"No property with name '",
 						this.name,
 						"' in the component '",
-						this.reflectedObject
+						this.reflectedInstance
 						
 					}));
 
-				return default(T);
-			}
-			set
-			{
-				if (this.memberInfo == null)
-				{
-					//this.Initialize ();
-				}
-				if (this.memberInfo is PropertyInfo )
-				{
-					((PropertyInfo)this.memberInfo).SetValue (this.reflectedObject, value, null);
-				}
-				else
-				{
-					if (this.memberInfo is FieldInfo != null)
-					{
-						((FieldInfo)this.memberInfo).SetValue (this.reflectedObject, value);
-					}
-					else
-					{
+								return null;
+						}
+						set {
+								if (this.memberInfo == null) {
+										//this.Initialize ();
+								}
+								if (this.memberInfo is PropertyInfo) {
+										((PropertyInfo)this.memberInfo).SetValue (this.reflectedInstance, value, null);
+								} else {
+										if (this.memberInfo is FieldInfo != null) {
+												((FieldInfo)this.memberInfo).SetValue (this.reflectedInstance, value);
+										} else {
 
-							Debug.LogError (string.Concat (new object[]
+												Debug.LogError (string.Concat (new object[]
 							                               {
 								"No property with name '",
 								this.name,
 								"' in the component '",
-								this.reflectedObject
+								this.reflectedInstance
 								
 							}));
 
-					}
+										}
+								}
+						}
 				}
-			}
+
+
+				//
+				// Constructor
+				//
+				public Property ()
+				{
+
+				}
+
+//		public Property(MemberInfo memberInfo,UnityEngine.Object target){
+//
+//			if (memberInfo == null)
+//								return;
+//
+//			if(memberInfo is PropertyInfo || memberInfo is FieldInfo)
+//			this.name = memberInfo.Name;
+//
+//			this.reflectedObject = target;
+//
+//			this.memberInfo = memberInfo;
+//			this.reflectedType = memberInfo.ReflectedType;
+//
+//
+//
+//		}
+
+
+				//
+				// Methods
+				//
+				public T GetValue<T> ()
+				{
+						return (T)this.Value;
+				}
+
+
+				public void OnEnable() { hideFlags = HideFlags.HideAndDontSave; }
+
+//		public override int GetHashCode ()
+//		{
+//			return base.GetHashCode ();
+//		}
+
+
+
+				public override bool Equals (object obj)
+				{
+						if (obj == null || !(obj is Property))
+								return false;
+
+						Property other = (Property)obj;
+						return this.reflectedInstance.Equals (other.reflectedInstance) && this.reflectedType.Equals (other.reflectedType)
+								&& this.name.Equals (other.name);
+				}
+
+				public override string ToString ()
+				{
+						return "Property[" + name  + "] of type " + type + (this.reflectedInstance==null ? " on Static instance":" on instance of "+this.reflectedInstance);
+				}
+
+
 		}
-
-
-		//
-		// Constructor
-		//
-		public Property(MemberInfo memberInfo,UnityEngine.Object target){
-
-			if(memberInfo is PropertyInfo || memberInfo is FieldInfo)
-			this.name = memberInfo.Name;
-
-			this.reflectedObject = target;
-
-			this.memberInfo = memberInfo;
-			this.reflectedType = memberInfo.ReflectedType;
-
-
-
-		}
-
-
-		//
-		// Methods
-		//
-
-
-
-
-		#region IEquatable implementation
-		public bool Equals (Property<T> other)
-		{
-			if (other == null)
-				return false;
-			
-
-
-
-		
-
-
-			
-			return true;// this.reflectedObject.Equals(other.reflectedObject) && this.reflectedType.Equals(other.reflectedType)
-				//&& this.reflectedType.Equals(other.reflectedType);
-
-		}
-		#endregion
-
-
-
-	
-	}
 }
 

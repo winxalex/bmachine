@@ -35,7 +35,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 		UnityEngine.Object objectSelected;
 		GUIContent propertyPopupLabel = new GUIContent (String.Empty);
-		Property<float> propertySelected;
+		Property propertySelected;
 				string[] curvePropertyDisplayOptions;
 
 		MethodInfo GetFloatVar_MethodInfo;
@@ -309,12 +309,13 @@ namespace ws.winx.editor.bmachine.extensions
 								
 								
 
-//				if (Event.current.type == EventType.Layout) {
-//					this.serializedNode.Update ();
-//				}
+				if (Event.current.type == EventType.Layout) {
+					this.serializedNode.Update ();
+
+				}
 
 
-			
+				CurveProperty propertyNew=null;
 
 
 				//_curvesEditorShow=EditorGUILayout.Foldout(_curvesEditorShow,"Curves");
@@ -415,23 +416,30 @@ namespace ws.winx.editor.bmachine.extensions
 //
 //							EditorGUILayout.EndHorizontal();
 //						EditorGUILayout.EndScrollView();
+
+
+
+//					curvePropertySelected=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
+//
+//					if(curvePropertySelected!=null) Debug.Log ("why");
+//					return;
 //
 					GUIContent[] displayOptions=null;
-					Property<float>[] values=null;
+					CurveProperty[] values=null;
 
+
+					//select object which properties would be extracted
 					objectSelected=EditorGUILayout.ObjectField(objectSelected,typeof(UnityEngine.Object),true);
 
 			
 						
-
-					ws.winx.unity.Utility.ObjectToDisplayOptionsValues<float>(objectSelected,out displayOptions,out values);
-
-
-
+					if(objectSelected!=null){//extract properties
+						propertyPopupLabel.text="Select ["+objectSelected.name+"] property";
+						ws.winx.unity.Utility.ObjectToDisplayOptionsValues<float,CurveProperty>(objectSelected,out displayOptions,out values);
+					}else{//use Global and Local blackboard
+						propertyPopupLabel.text="Select blackboard variable";
 
 					FloatVar[] floatVarsGlobal=GlobalBlackboard.Instance.floatVars;
-
-
 
 					int floatVarsLengthGlobal=floatVarsGlobal.Length;
 
@@ -440,20 +448,13 @@ namespace ws.winx.editor.bmachine.extensions
 					int floatVarsLengthLocal=floatVarLocal.Length;
 					int floatVarsMax=Mathf.Max(floatVarsLengthGlobal,floatVarsLengthLocal);
 
-					if(displayOptions!=null){
-						i=displayOptions.Length;
-						floatVarsMax=displayOptions.Length+i;
-						Array.Resize(ref displayOptions,displayOptions.Length+floatVarsLengthLocal+floatVarsLengthGlobal);
-						Array.Resize(ref values,displayOptions.Length+floatVarsLengthLocal+floatVarsLengthGlobal);
-
-
-					}
-					else{
 						displayOptions=new GUIContent[floatVarsLengthLocal+floatVarsLengthGlobal];
-						values=new Property<float>[floatVarsLengthLocal+floatVarsLengthGlobal];
-						i=0;
 
-					}
+
+						values=new CurveProperty[floatVarsLengthLocal+floatVarsLengthGlobal];
+
+
+					
 
 					if(GetFloatVar_MethodInfo==null)
 					GetFloatVar_MethodInfo = mecanimNode.blackboard.GetType ().GetMethod ("GetFloatVar", new Type[]{typeof(string)});
@@ -462,70 +463,85 @@ namespace ws.winx.editor.bmachine.extensions
 					for(;i<floatVarsMax;i++){
 						if(i<floatVarsLengthGlobal){
 
-							displayOptions[index]=new GUIContent("Global/"+floatVarsGlobal[i].name);
-							values[index]=new Property<float>(GetFloatVar_MethodInfo,GlobalBlackboard.Instance);
-							values[index].name=floatVarsGlobal[i].name;
+								displayOptions[index]=new GUIContent("Global/"+floatVarsGlobal[i].name);
+								propertyNew=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
+
+								values[index]=propertyNew;
+								propertyNew.memberInfo=GetFloatVar_MethodInfo;
+								propertyNew.reflectedInstance=GlobalBlackboard.Instance;
+								values[index].name=floatVarsGlobal[i].name;
+
+
 							index++;
 						}
 
 						if(i<floatVarsLengthLocal){
-							
+							propertyNew=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
 							displayOptions[index]=new GUIContent("Local/"+floatVarLocal[i].name);
-							values[index]=new Property<float>(GetFloatVar_MethodInfo,mecanimNode.blackboard);
+							values[index]=propertyNew;
+								propertyNew.memberInfo=GetFloatVar_MethodInfo;
+								propertyNew.reflectedInstance=mecanimNode.blackboard;
 							values[index].name=floatVarLocal[i].name;
 							index++;
 						}
 						
 					}
+					}
+
 
 					//if(displayOptions!=null && values!=null && displayOptions.Length==values.Length){
-					propertySelected=EditorGUILayoutEx.CustomObjectPopup<Property<float>>(propertyPopupLabel,propertySelected,displayOptions,values);
+					//propertySelected=EditorGUILayoutEx.CustomObjectPopup<Property>(propertyPopupLabel,propertySelected,displayOptions,values);
 
-					Debug.Log(propertySelected.name);
-					colorSelected=EditorGUILayout.ColorField(colorSelected);					
 
-					if(GUILayout.Button("Add")){
-						//CurveProperty newCurveProperty=new CurveProperty(null,null);
-//								mecanimNode.curveProperties.Add(newCurveProperty);
-//
-//
-//								//can be some preset
-//								AnimationCurve curve1=new AnimationCurve();
-//							
-//														curve1.AddKey(new Keyframe(0, 1));
-//														curve1.AddKey(new Keyframe(1, 1));
-//
-//								newCurveProperty.curveWrapperW.WrappCurve(curve1);
-//								newCurveProperty.curveWrapperW.id=("Curve"+(mecanimNode.curveProperties.Count-1)).GetHashCode();
-//								newCurveProperty.curveWrapperW.color=colorSelected;
-//
-//								curvePropertySelected=newCurveProperty;
+//					curvePropertySelected=EditorGUILayoutEx.CustomObjectPopup<CurveProperty>(propertyPopupLabel,curvePropertySelected,displayOptions,values);
 
-							}
+					colorSelected=EditorGUILayout.ColorField(colorSelected);
+
+					//if(mecanimNode.mile!=null)
+					//Debug.Log("Mecanode"+mecanimNode.mile);
 
 
 
-//							
-//
-							if(curvePropertySelected!=null){
-//							curvePropertySelected.target=EditorGUILayout.ObjectField(curvePropertySelected.target,typeof(UnityEngine.Object),true);
+					if(GUILayout.Button("Add") && propertySelected!=null){
+
+						//mecanimNode.mile=propertySelected;
 
 
-							if(curvePropertySelected.reflectedObject!=null){
-
-								//curvePropertySelected.target
-							//concat
-							//mecanimNode.blackboard.GetVariables<float>();
 
 
-							//EditorGUILayoutEx.CustomObjectPopup<>
-									//curvePropertyIndexSelected=EditorGUILayoutEx.Popup(curvePropertyIndexSelected.);
 
-									//curvePropertySelected.property=curvePropertyDisplayOptions[curvePropertyIndexSelected];
+						CurveProperty newCurveProperty=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
+								//mecanimNode.curveProperties.Add(newCurveProperty);
+
+
+								//can be some preset
+								AnimationCurve curve1=new AnimationCurve();
 							
-							}
+														curve1.AddKey(new Keyframe(0, 1));
+														curve1.AddKey(new Keyframe(1, 1));
+
+								
+								newCurveProperty.id=("Curve"+mecanimNode.curveProperties.Length).GetHashCode();
+								newCurveProperty.color=colorSelected;
+								
+								curvePropertySelected=newCurveProperty;
+
+
+
+								Array.Resize(ref mecanimNode.curveProperties,mecanimNode.curveProperties.Length+1);
+
+								mecanimNode.curveProperties[mecanimNode.curveProperties.Length-1]=curvePropertySelected;
+
+
+						this.serializedNode.ApplyModifiedProperties();
 
 					}
+
+
+
+
+
+
 
 
 					EditorGUILayout.EndHorizontal();

@@ -1041,7 +1041,7 @@ namespace ws.winx.unity
 	
 	#region CurveWrapper
 		[Serializable]
-		public class CurveWrapperW
+		public class CurveWrapperW:ScriptableObject
 		{
 		
 				private static Type __RealType;
@@ -1067,6 +1067,18 @@ namespace ws.winx.unity
 
 				public AnimationCurve curve {
 						get{ return (AnimationCurve)PropertyInfo_curve.GetValue (__instance, null);}
+						set{
+								NormalCurveRendererW renderer;
+								
+
+								this.hidden = false;
+								this.readOnly = false;
+								
+								renderer = new NormalCurveRendererW (value);
+								renderer.SetWrap (value.preWrapMode, value.postWrapMode);
+								
+								this.renderer = renderer.wrapped;
+						}
 				}
 
 				public bool hidden {
@@ -1133,23 +1145,7 @@ namespace ws.winx.unity
 
 				}
 
-				public void WrappCurve (AnimationCurve curve)
-				{
-						NormalCurveRendererW renderer;
-	
-						this.groupId = -1;
-						this.color = new Color (UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-						this.hidden = false;
-						this.readOnly = false;
-				
-						renderer = new NormalCurveRendererW (curve);
-						renderer.SetWrap (curve.preWrapMode, curve.postWrapMode);
-				
-						this.renderer = renderer.wrapped;
-
-
-
-				}
+			
 		
 				public CurveWrapperW ()
 				{
@@ -1157,6 +1153,9 @@ namespace ws.winx.unity
 						InitType ();
 			
 						__instance = method_ctor.Invoke (new object[]{});
+
+						this.groupId = -1;
+						this.color = new Color (UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
 			
 				}
 		

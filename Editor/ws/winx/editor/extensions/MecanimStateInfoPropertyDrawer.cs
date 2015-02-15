@@ -11,6 +11,7 @@ using System.Linq;
 using ws.winx.unity;
 using System.Reflection;
 
+
 namespace ws.winx.editor.bmachine.extensions
 {
 		[CustomPropertyDrawer (typeof(MecanimStateInfoAttribute))]

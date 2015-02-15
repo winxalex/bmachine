@@ -18,44 +18,81 @@ using System.Reflection;
 namespace ws.winx.unity{
 
 	[System.Serializable]
-	public class CurveProperty:Property<float>,IEquatable<CurveProperty>
+	public class CurveProperty:Property
 	{
 
-		public CurveWrapperW curveWrapperW = new CurveWrapperW ();
+
+		[SerializeField]
+		private CurveWrapperW __curveWrapperW;
 
 	
+
+	
+
+
+
+
 
 
 		//
 		// Properties
 		//
+		public Color color {
+			get{ return __curveWrapperW.color;}
+			set{ __curveWrapperW.color = value;}
+		}
+
+		public int id {
+			get{ return __curveWrapperW.id;}
+			set{ __curveWrapperW.id=value;}
+		}
+
+		public AnimationCurve curve {
+			get {
+				return __curveWrapperW.curve;
+			}
+			set {
+				__curveWrapperW.curve = value;
+			}
+		}
+
+	
+		//public Property property;
+
 
 
 		//
 		// Constructor
 		//
-		public CurveProperty(MemberInfo memberInfo,UnityEngine.Object reflectedObject):base(memberInfo,reflectedObject)
+		public CurveProperty()//:base()
 		{
 
+			//ScriptableObject.CreateInstance<Property> ();
+		}
+
+		public void OnEnable ()
+		{
+			hideFlags = HideFlags.HideAndDontSave;
+
+			if(__curveWrapperW==null)
+				__curveWrapperW= (CurveWrapperW)ScriptableObject.CreateInstance<CurveWrapperW>();
 
 
 		}
 
-
-
 		
 		
-		#region IEquatable implementation
-		public bool Equals (CurveProperty other)
-		{
-			if (curveWrapperW.curve == null)
-								return false;
-
-		
-
-			return this.curveWrapperW.id == other.curveWrapperW.id;
-		}
-		#endregion
+//		#region IEquatable implementation
+//		public bool Equals (CurveProperty other)
+//		{
+//			if (curveWrapperW.curve == null)
+//								return false;
+//
+//		
+//
+//			return this.curveWrapperW.id == other.curveWrapperW.id;
+//		}
+//		#endregion
 	}
 }
 

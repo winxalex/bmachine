@@ -286,7 +286,7 @@ namespace ws.winx.editor.extensions
 						} else {
 				
 								//find label on displayOptions[i] which is value[i] == selectedObject
-								inxOfSelectedObject = values.IndexOf (selectedObject);
+								inxOfSelectedObject = values.IndexOf(selectedObject);
 								//Array.IndexOf (values, selectedObject);
 
 				

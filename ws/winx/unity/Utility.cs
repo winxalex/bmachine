@@ -9,7 +9,9 @@ namespace ws.winx.unity{
 
 	public class Utility
 	{
-		public static void ObjectToDisplayOptionsValues<T>(UnityEngine.Object @object,out GUIContent[] displayOptions,out Property<T>[] values){
+		public static void ObjectToDisplayOptionsValues<T,K> (UnityEngine.Object @object,out GUIContent[] displayOptions,out K[] values)
+			where K:Property
+		{
 			displayOptions = null;
 			values = null;
 
@@ -18,14 +20,15 @@ namespace ws.winx.unity{
 
 			Type target = null;
 			List<GUIContent> guiContentList = new List<GUIContent> ();
-			List<Property<T>> memberInfos = new List<Property<T>> ();
+			List<K> memberInfos = new List<K> ();
 			MemberInfo memberInfo;
+			K propertyNew;
 				
 					
 			 target = @object.GetType ();
 			
 			
-				string text = "No Property";
+				string text = "No K";
 
 
 				List<string> list = new List<string> ();
@@ -44,7 +47,9 @@ namespace ws.winx.unity{
 						memberInfo=publicMembers [i];
 						
 					guiContentList.Add(new GUIContent (text4 + memberInfo.Name));
-						memberInfos.Add(new Property<T>(memberInfo,null));                    
+					propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+					propertyNew.memberInfo=memberInfo;
+					memberInfos.Add (propertyNew);                   
 
 					}
 				}
@@ -56,7 +61,13 @@ namespace ws.winx.unity{
 					memberInfo=publicMembers [j];
 
 				guiContentList.Add(new GUIContent (@object.GetType ().Name + "/" + memberInfo.Name));
-					memberInfos.Add(new Property<T>(memberInfo,@object));
+
+			
+				propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+				propertyNew.memberInfo=memberInfo;
+				propertyNew.reflectedInstance=@object;
+				memberInfos.Add (propertyNew);
+
 
 				}
 				
@@ -84,7 +95,10 @@ namespace ws.winx.unity{
 								memberInfo=publicMembers [l];
 
 							guiContentList.Add (new GUIContent (text4 + memberInfo.Name));
-								memberInfos.Add (new Property<T>(memberInfo,null));
+
+							propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+							propertyNew.memberInfo=memberInfo;
+							memberInfos.Add (propertyNew);
 
 							}
 						}
@@ -96,7 +110,10 @@ namespace ws.winx.unity{
 							memberInfo=publicMembers [m];
 
 							guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
-							memberInfos.Add(new Property<T>(memberInfo,currentComponent));
+						propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+						propertyNew.memberInfo=memberInfo;
+						propertyNew.reflectedInstance=currentComponent;
+							memberInfos.Add(propertyNew);
 						}
 					}
 				}
