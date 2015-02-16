@@ -293,9 +293,9 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						Motion motion;
 						if (mecanimNode.motionOverride == null)
-								motion = mecanimNode.animaStateInfoSelected.motion;
+							motion = mecanimNode.animaStateInfoSelected.motion;
 						else
-								motion = mecanimNode.motionOverride;
+							motion = mecanimNode.motionOverride;
 	
 		
 			
@@ -456,36 +456,36 @@ namespace ws.winx.editor.bmachine.extensions
 
 					
 
-					if(GetFloatVar_MethodInfo==null)
-					GetFloatVar_MethodInfo = mecanimNode.blackboard.GetType ().GetMethod ("GetFloatVar", new Type[]{typeof(string)});
-
+				
 					int index=i;
+					FloatVar floatVar;
 					for(;i<floatVarsMax;i++){
 						if(i<floatVarsLengthGlobal){
+								floatVar=GlobalBlackboard.Instance.GetFloatVar(floatVarsGlobal[i].name);
 
-								displayOptions[index]=new GUIContent("Global/"+floatVarsGlobal[i].name);
+								displayOptions[index]=new GUIContent("Global/"+floatVar.name);
 								propertyNew=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
 
 								values[index]=propertyNew;
-								propertyNew.memberInfo=GetFloatVar_MethodInfo;
-								propertyNew.reflectedInstance=GlobalBlackboard.Instance;
-								values[index].name=floatVarsGlobal[i].name;
-
-
+								propertyNew.MemberInfo=floatVar.GetType().GetProperty("Value",BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+								propertyNew.reflectedInstance=floatVar;
+							
 							index++;
 						}
 
 						if(i<floatVarsLengthLocal){
+							floatVar=mecanimNode.blackboard.GetFloatVar(floatVarLocal[i].name);
 							propertyNew=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
-							displayOptions[index]=new GUIContent("Local/"+floatVarLocal[i].name);
+							displayOptions[index]=new GUIContent("Local/"+floatVar.name);
+
 							values[index]=propertyNew;
-								propertyNew.memberInfo=GetFloatVar_MethodInfo;
-								propertyNew.reflectedInstance=mecanimNode.blackboard;
-							values[index].name=floatVarLocal[i].name;
+							propertyNew.MemberInfo=floatVar.GetType().GetProperty("Value",BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+							propertyNew.reflectedInstance=floatVar;
+
 							index++;
 						}
 						
-					}
+					  }
 					}
 
 
@@ -493,40 +493,41 @@ namespace ws.winx.editor.bmachine.extensions
 					//propertySelected=EditorGUILayoutEx.CustomObjectPopup<Property>(propertyPopupLabel,propertySelected,displayOptions,values);
 
 
-//					curvePropertySelected=EditorGUILayoutEx.CustomObjectPopup<CurveProperty>(propertyPopupLabel,curvePropertySelected,displayOptions,values);
+					curvePropertySelected=EditorGUILayoutEx.CustomObjectPopup<CurveProperty>(propertyPopupLabel,curvePropertySelected,displayOptions,values);
 
 					colorSelected=EditorGUILayout.ColorField(colorSelected);
 
 					//if(mecanimNode.mile!=null)
 					//Debug.Log("Mecanode"+mecanimNode.mile);
 
+					if(curvePropertySelected!=null)
+						Debug.Log (curvePropertySelected.name+" value:"+curvePropertySelected.Value);
 
 
-					if(GUILayout.Button("Add") && propertySelected!=null){
-
-						//mecanimNode.mile=propertySelected;
-
-
+					if(GUILayout.Button("Add") && curvePropertySelected!=null){
 
 
 
-						CurveProperty newCurveProperty=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
+						mecanimNode.mile=(Property)ScriptableObject.CreateInstance<Property>();
+
+
+
 								//mecanimNode.curveProperties.Add(newCurveProperty);
 
 
 								//can be some preset
-								AnimationCurve curve1=new AnimationCurve();
+								AnimationCurve curveNew=new AnimationCurve();
 							
-														curve1.AddKey(new Keyframe(0, 1));
-														curve1.AddKey(new Keyframe(1, 1));
+														curveNew.AddKey(new Keyframe(0, 1));
+														curveNew.AddKey(new Keyframe(1, 1));
 
+								curvePropertySelected.curve=curveNew;
+								curvePropertySelected.id=("Curve"+mecanimNode.curveProperties.Length).GetHashCode();
+								curvePropertySelected.color=colorSelected;
 								
-								newCurveProperty.id=("Curve"+mecanimNode.curveProperties.Length).GetHashCode();
-								newCurveProperty.color=colorSelected;
-								
-								curvePropertySelected=newCurveProperty;
+								//curvePropertySelected=newCurveProperty;
 
-
+								mecanimNode.curveProperty=curvePropertySelected;
 
 								Array.Resize(ref mecanimNode.curveProperties,mecanimNode.curveProperties.Length+1);
 

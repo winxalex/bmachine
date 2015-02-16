@@ -68,12 +68,19 @@ namespace ws.winx.editor.extensions
 
 
 		#region CustomPopup
-
-
-
-
-
-
+		/// <summary>
+		/// Custom popup.
+		/// </summary>
+		/// <returns>The popup.</returns>
+		/// <param name="label">Label.</param>
+		/// <param name="selectedIndex">Selected index.</param>
+		/// <param name="displayOptions">Display options.</param>
+		/// <param name="values">Values.</param>
+		/// <param name="onSelection">On selection.</param>
+		/// <param name="onEvent">On event.</param>
+		/// <param name="style">Style.</param>
+		/// <param name="position">Position.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
 				public static int CustomPopup<T> (GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
 		                                 MenuCallaback<T> onSelection=null,
 		                                 EventCallback onEvent=null,

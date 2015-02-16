@@ -48,7 +48,7 @@ namespace ws.winx.unity{
 						
 					guiContentList.Add(new GUIContent (text4 + memberInfo.Name));
 					propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-					propertyNew.memberInfo=memberInfo;
+					propertyNew.MemberInfo=memberInfo;
 					memberInfos.Add (propertyNew);                   
 
 					}
@@ -64,7 +64,7 @@ namespace ws.winx.unity{
 
 			
 				propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-				propertyNew.memberInfo=memberInfo;
+				propertyNew.MemberInfo=memberInfo;
 				propertyNew.reflectedInstance=@object;
 				memberInfos.Add (propertyNew);
 
@@ -97,7 +97,7 @@ namespace ws.winx.unity{
 							guiContentList.Add (new GUIContent (text4 + memberInfo.Name));
 
 							propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-							propertyNew.memberInfo=memberInfo;
+							propertyNew.MemberInfo=memberInfo;
 							memberInfos.Add (propertyNew);
 
 							}
@@ -111,7 +111,7 @@ namespace ws.winx.unity{
 
 							guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
 						propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-						propertyNew.memberInfo=memberInfo;
+						propertyNew.MemberInfo=memberInfo;
 						propertyNew.reflectedInstance=currentComponent;
 							memberInfos.Add(propertyNew);
 						}

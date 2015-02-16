@@ -14,21 +14,21 @@ namespace ws.winx.unity
 
 				public Type reflectedType {
 						get {
-								return memberInfo.ReflectedType;
+								return __memberInfo.ReflectedType;
 						}
 				}
 
 				public Type type {
 						get {
 
-								switch (memberInfo.MemberType) {
+								switch (__memberInfo.MemberType) {
 								case MemberTypes.Field:
-										return ((FieldInfo)memberInfo).FieldType;
+										return ((FieldInfo)__memberInfo).FieldType;
 								case MemberTypes.Property:
-										return ((PropertyInfo)memberInfo).PropertyType;
+										return ((PropertyInfo)__memberInfo).PropertyType;
 							
 								case MemberTypes.Method:
-										return ((MethodInfo)memberInfo).ReturnType;
+										return ((MethodInfo)__memberInfo).ReturnType;
 								default:
 										throw new ArgumentException ("MemberInfo must be if type FieldInfo, PropertyInfo or MethodInfo", "member");
 								}
@@ -38,23 +38,25 @@ namespace ws.winx.unity
 				}
 
 				public string name;
-				public UnityEngine.Object reflectedInstance;
-				public MemberInfo memberInfo;
+				public System.Object reflectedInstance;
+				[SerializeField]
+				private MemberInfo
+						__memberInfo;
 
 				public MemberInfo MemberInfo {
 						get {
-								return memberInfo;
+								return __memberInfo;
 						}
 						set {
-								memberInfo = value;
+								__memberInfo = value;
 
 
-								if ((memberInfo.MemberType == MemberTypes.Property) || (memberInfo.MemberType == MemberTypes.Field))
-										this.name = memberInfo.Name;
+								if ((__memberInfo.MemberType == MemberTypes.Property) || (__memberInfo.MemberType == MemberTypes.Field))
+										this.name = __memberInfo.Name;
 					
 								
 					
-								this.memberInfo = memberInfo;
+								this.__memberInfo = __memberInfo;
 								
 						}
 				}
@@ -65,23 +67,58 @@ namespace ws.winx.unity
 				//
 				// Properties
 				//
+
+
+
+				/// <summary>
+				/// Gets or sets the value.
+				/// Property or Field 
+				/// Method in form of GetValueOfProperty("property name");
+				/// should return primitive
+				/// </summary>
+				/// <value>The value.</value>
 				public  object Value {
 						get {
-								if (this.memberInfo == null) {
+								if (this.__memberInfo == null) {
 										//this.Initialize ();
 								}
-								if (this.memberInfo is PropertyInfo) {
-										return ((PropertyInfo)this.memberInfo).GetValue (this.reflectedInstance, null);
+								if (this.__memberInfo is PropertyInfo) {
+										return ((PropertyInfo)this.__memberInfo).GetValue (this.reflectedInstance, null);
 								}
-								if (this.memberInfo is FieldInfo) {
-										return ((FieldInfo)this.memberInfo).GetValue (this.reflectedInstance);
+								if (this.__memberInfo is FieldInfo) {
+										return ((FieldInfo)this.__memberInfo).GetValue (this.reflectedInstance);
 								}
+								
+								if (this.__memberInfo is MethodInfo) {
+										if (String.IsNullOrEmpty (this.name)) {
+												Debug.LogError ("Property name is missing ");
+												return default(object);
+										}
 
-								if (this.memberInfo is MethodInfo) {
+										object result = ((MethodInfo)this.__memberInfo).Invoke (this.reflectedInstance, new object[]{this.name});
 
-										return ((MethodInfo)this.memberInfo).Invoke (this.reflectedInstance, new object[]{this.name});
+										Type t = result.GetType ();
+
+										if (t.IsPrimitive || t.IsValueType || t == typeof(Decimal) || t == typeof(String))				
+												return result;
+										else {//when object is returned try to find "Value" field or property to get primitive value from
+
+												MemberInfo m = t.GetField ("Value", BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+												if (m == null)
+														m = t.GetProperty ("Value", BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+												
+												if (m != null) {
+														this.__memberInfo = m;
+														this.reflectedInstance =  result;
+														return this.__memberInfo.GetValue (result);
+
+												}
+
+												Debug.LogError("Method "+this.__memberInfo.Name+ " doesn't return object that have 'Value' property");
+
+										}
 								}
-
 
 								Debug.LogError (string.Concat (new object[]
 					                               {
@@ -95,14 +132,14 @@ namespace ws.winx.unity
 								return null;
 						}
 						set {
-								if (this.memberInfo == null) {
+								if (this.__memberInfo == null) {
 										//this.Initialize ();
 								}
-								if (this.memberInfo is PropertyInfo) {
-										((PropertyInfo)this.memberInfo).SetValue (this.reflectedInstance, value, null);
+								if (this.__memberInfo is PropertyInfo) {
+										((PropertyInfo)this.__memberInfo).SetValue (this.reflectedInstance, value, null);
 								} else {
-										if (this.memberInfo is FieldInfo != null) {
-												((FieldInfo)this.memberInfo).SetValue (this.reflectedInstance, value);
+										if (this.__memberInfo is FieldInfo != null) {
+												((FieldInfo)this.__memberInfo).SetValue (this.reflectedInstance, value);
 										} else {
 
 												Debug.LogError (string.Concat (new object[]
@@ -154,8 +191,10 @@ namespace ws.winx.unity
 						return (T)this.Value;
 				}
 
-
-				public void OnEnable() { hideFlags = HideFlags.HideAndDontSave; }
+				public void OnEnable ()
+				{
+						hideFlags = HideFlags.HideAndDontSave;
+				}
 
 //		public override int GetHashCode ()
 //		{
@@ -176,7 +215,7 @@ namespace ws.winx.unity
 
 				public override string ToString ()
 				{
-						return "Property[" + name  + "] of type " + type + (this.reflectedInstance==null ? " on Static instance":" on instance of "+this.reflectedInstance);
+						return "Property[" + name + "] of type " + type + (this.reflectedInstance == null ? " on Static instance" : " on instance of " + this.reflectedInstance);
 				}
 
 
