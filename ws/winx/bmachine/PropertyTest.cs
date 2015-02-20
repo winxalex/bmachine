@@ -2,16 +2,22 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.Reflection;
-using ws.winx.utility;
 
-namespace ws.winx.unity
+
+using ws.winx.utility;
+using ws.winx.unity;
+using System.Runtime.Serialization.Formatters.Binary;
+using ws.winx.bmachine.extensions;
+using BehaviourMachine;
+
+
+namespace ws.winx.bmachine
 {
 		[Serializable]
-		public class Property:ScriptableObject,IProperty
+		public class PropertyTest:ScriptableObject,ISerializationCallbackReceiver//,IProperty
 		{
-
-
-
+				
+				
 
 				public Type reflectedType {
 						get {
@@ -38,13 +44,40 @@ namespace ws.winx.unity
 						}
 				}
 
+				[HideInInspector]
+				public byte[]
+						memberInfoSerialized;
+				[HideInInspector]
+				public byte[]
+						reflectedInstanceSerialized;
 				public string name;
-				public System.Object reflectedInstance;
+				[NonSerialized]
+				private object
+						__reflectedInstance;
 
+				public System.Object reflectedInstance {
+						get {
+								return __reflectedInstance;
+					
+						}
+						set {
+								__reflectedInstance = value;
+
+						   
+								__reflectedInstanceUnity=__reflectedInstance as UnityEngine.Object;
+					
+						}
+				}
+
+				public InternalBlackboard blackboard;
+
+				[SerializeField]
+				private UnityEngine.Object
+						__reflectedInstanceUnity;
 				[NonSerialized]
 				private MemberInfo
 						__memberInfo;
-
+		
 				public MemberInfo MemberInfo {
 						get {
 								return __memberInfo;
@@ -81,8 +114,10 @@ namespace ws.winx.unity
 				/// <value>The value.</value>
 				public  object Value {
 						get {
-								if (this.__memberInfo == null) {
-										//this.Initialize ();
+							if (this.__memberInfo == null) {
+
+									Debug.LogError ("Member Info Null");
+									return null;
 								}
 								if (this.__memberInfo is PropertyInfo) {
 										return ((PropertyInfo)this.__memberInfo).GetValue (this.reflectedInstance, null);
@@ -112,12 +147,12 @@ namespace ws.winx.unity
 												
 												if (m != null) {
 														this.__memberInfo = m;
-														this.reflectedInstance =  result;
+														this.reflectedInstance = result;
 														return this.__memberInfo.GetValue (result);
 
 												}
 
-												Debug.LogError("Method "+this.__memberInfo.Name+ " doesn't return object that have 'Value' property");
+												Debug.LogError ("Method " + this.__memberInfo.Name + " doesn't return object that have 'Value' property");
 
 										}
 								}
@@ -162,10 +197,53 @@ namespace ws.winx.unity
 				//
 				// Constructor
 				//
-				public Property ()
+				public PropertyTest ()
 				{
-			//Debug.Log ("Property COnstructor");
+
 				}
+
+		#region ISerializationCallbackReceiver implementation
+
+				public void OnBeforeSerialize ()
+				{
+
+						if (__memberInfo != null)
+								memberInfoSerialized = Utility.Serialize (this.__memberInfo);
+
+						if (__reflectedInstance != null && __reflectedInstanceUnity == null) {
+
+							BlackboardSurrogate surrogate=new BlackboardSurrogate();
+							surrogate.blackboard=blackboard;
+							Utility.AddSurrogate(blackboard.GetType(),surrogate);
+
+							reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
+						}
+
+		
+				}
+
+				public void OnAfterDeserialize ()
+				{
+						if (memberInfoSerialized != null)
+								__memberInfo = (MemberInfo)Utility.Deserialize (memberInfoSerialized);
+
+						if (reflectedInstanceSerialized != null) { 
+
+							
+
+							BlackboardSurrogate surrogate=new BlackboardSurrogate();
+							surrogate.blackboard=blackboard;
+							Utility.AddSurrogate(blackboard.GetType(),surrogate);
+				
+			
+							__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
+						}
+
+
+			
+				}
+
+		#endregion
 
 //		public Property(MemberInfo memberInfo,UnityEngine.Object target){
 //
@@ -193,9 +271,13 @@ namespace ws.winx.unity
 						return (T)this.Value;
 				}
 
+			
+
 				public void OnEnable ()
 				{
-						hideFlags = HideFlags.HideAndDontSave;
+						//	hideFlags = HideFlags.HideAndDontSave;
+
+					
 				}
 
 //		public override int GetHashCode ()

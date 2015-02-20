@@ -4,11 +4,20 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using ws.winx.utility;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using System.Runtime.Serialization;
 
 namespace ws.winx.unity{
 
 	public class Utility
 	{
+		static Utility(){
+
+			Debug.Log("Utility");
+		}
+
+
 		public static void ObjectToDisplayOptionsValues<T,K> (UnityEngine.Object @object,out GUIContent[] displayOptions,out K[] values)
 			where K:Property
 		{
@@ -126,6 +135,95 @@ namespace ws.winx.unity{
 				
 
 		}//end function
+
+		private static BinaryFormatter __binaryFormater;
+		private static SurrogateSelector __surrogateSelector;
+		private static StreamingContext __streamingContext;
+		
+		
+		public static ISerializationSurrogate GetSurrogate(Type type){
+			
+			if (__surrogateSelector == null)
+				return null;
+			
+			
+			ISurrogateSelector surrogateExist=null;
+			
+			
+			
+			return __surrogateSelector.GetSurrogate (type, __streamingContext, out surrogateExist);
+			
+		}
+		
+		public static void AddSurrogate(Type type,ISerializationSurrogate surrogate){
+			
+			if(__surrogateSelector==null){
+				
+				__surrogateSelector=new SurrogateSelector();
+				
+				__streamingContext=new StreamingContext();
+				
+			}
+			
+			ISurrogateSelector surrogateExist=null;
+			
+			
+			
+			__surrogateSelector.GetSurrogate (type, __streamingContext,out surrogateExist);
+			
+			if(surrogateExist==null)
+				
+				__surrogateSelector.AddSurrogate(type,__streamingContext, surrogate);
+			
+		}
+		
+		public static byte[] Serialize(object value){
+			
+			byte[] result;
+			
+			if (__binaryFormater == null)
+				__binaryFormater = new BinaryFormatter ();
+			
+			// try to serialize the interface to a string and store the result in our other dictionary
+			using (var stream = new System.IO.MemoryStream())
+			{
+				
+				__binaryFormater.SurrogateSelector=__surrogateSelector;
+				__binaryFormater.Serialize(stream, value);
+				stream.Flush();
+				result=stream.ToArray();
+			}
+			
+			
+			return result;
+		}
+		
+		public static object Deserialize(byte[] data){
+			
+			object result;
+			
+			if (__binaryFormater == null)
+				__binaryFormater = new BinaryFormatter ();
+			
+			using (var stream = new System.IO.MemoryStream())
+			{
+				stream.Write(data,0,data.Length);
+				stream.Seek(0, SeekOrigin.Begin);
+				
+				if(__surrogateSelector==null)
+					__surrogateSelector=__surrogateSelector;
+				
+				__binaryFormater.SurrogateSelector=__surrogateSelector;
+				
+				result=__binaryFormater.Deserialize(stream);
+				
+			}
+			
+			
+			return result;
+		}
+
+
 
 	}
 }

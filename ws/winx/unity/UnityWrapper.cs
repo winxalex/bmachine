@@ -7,6 +7,7 @@ using System.Reflection;
 using ws.winx.unity;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Linq;
 
 namespace ws.winx.unity
 {
@@ -1067,7 +1068,7 @@ namespace ws.winx.unity
 
 				public AnimationCurve curve {
 						get{ return (AnimationCurve)PropertyInfo_curve.GetValue (__instance, null);}
-						set{
+						set {
 								NormalCurveRendererW renderer;
 								
 
@@ -1144,8 +1145,6 @@ namespace ws.winx.unity
 						return __RealType;
 
 				}
-
-			
 		
 				public CurveWrapperW ()
 				{
@@ -1185,6 +1184,7 @@ namespace ws.winx.unity
 				static PropertyInfo PropertyInfo_margin;
 				static PropertyInfo PropertyInfo_topmargin;
 				static PropertyInfo PropertyInfo_mousePositionInDrawing;
+				static PropertyInfo PropertyInfo_animationCurves;
 				static FieldInfo FieldInfo_m_Selection;
 				static FieldInfo FieldInfo_m_Translation;
 				static FieldInfo FieldInfo_m_Scale;
@@ -1193,8 +1193,9 @@ namespace ws.winx.unity
 				AnimationCurve m_Curve;
 				Color m_Color;
 				static Styles ms_Styles;
-				object __instance;
+				private object __instance;
 				CurveMenuManagerW m_MenuManager;
+				CurveWrapperW[] _curveWrappersW;
 
 				public delegate void SelectHandler (int index);
 	
@@ -1262,6 +1263,19 @@ namespace ws.winx.unity
 //						set;
 //				}
 
+				public CurveWrapperW[] animationCurves {
+						set {
+						
+								value.Select ((item) => item.curve);
+								_curveWrappersW = value;
+
+								PropertyInfo_animationCurves.SetValue (__instance, CurveWrappersWToCurveWrappers (value),null);
+						}
+						get {
+								return _curveWrappersW;
+						}
+				}
+
 				void DeleteKeys (object userData)
 				{
 						MethodInfo_DeleteKeys.Invoke (__instance, new object[]{userData});
@@ -1289,8 +1303,9 @@ namespace ws.winx.unity
 								PropertyInfo_topmargin = __RealType.GetProperty ("topmargin");
 								PropertyInfo_drawRect = __RealType.BaseType.GetProperty ("drawRect");
 								PropertyInfo_mousePositionInDrawing = __RealType.BaseType.GetProperty ("mousePositionInDrawing");
-
-
+								PropertyInfo_animationCurves = __RealType.BaseType.GetProperty ("animationCurves");
+				
+				
 								MethodInfo_OnGUI = __RealType.GetMethod ("OnGUI");
 								MethodInfo_GetGUIPoint = __RealType.GetMethod ("GetGUIPoint", BindingFlags.NonPublic | BindingFlags.Instance);
 								MethodInfo_getCurveWrapperById = __RealType.GetMethod ("getCurveWrapperById");
@@ -1322,12 +1337,25 @@ namespace ws.winx.unity
 			
 				}
 		
-				public CurveEditorW (Rect rect, CurveWrapperW[] curves, bool minimalGUI)
+				public CurveEditorW (Rect rect, CurveWrapperW[] curveWrappers, bool minimalGUI)
 				{
+						
+						InitType ();
 			
 			
+						if (CurveEditorW.ms_Styles == null) {
+								CurveEditorW.ms_Styles = new CurveEditorW.Styles ();
+						}
+			
+			
+			
+						__instance = method_ctor.Invoke (new object[] {
+				rect,
+				CurveWrappersWToCurveWrappers (curveWrappers),
+				minimalGUI
+			});
 				}
-
+		
 				public CurveEditorW (Rect rect, AnimationCurve curve, bool minimalGUI):this(rect,new AnimationCurve[]{curve},minimalGUI)
 				{
 
@@ -1342,43 +1370,56 @@ namespace ws.winx.unity
 								CurveEditorW.ms_Styles = new CurveEditorW.Styles ();
 						}
 
-						CurveWrapperW curveWrapperW;
-
-		
-
-
-						Array curveWrapperArray = Array.CreateInstance (CurveWrapperW.GetWrappedType (), curves.Length);
-						NormalCurveRendererW renderer;
-		
-						AnimationCurve curve;
-						for (int i=0; i<curves.Length; i++) {
-								curve = curves [i];
-								curveWrapperW = new CurveWrapperW ();
-								curveWrapperW.id = ("Curve" + i).GetHashCode ();
-								curveWrapperW.groupId = -1;
-								curveWrapperW.color = new Color (UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-								curveWrapperW.hidden = false;
-								curveWrapperW.readOnly = false;
-
-								renderer = new NormalCurveRendererW (curve);
-								renderer.SetWrap (curve.preWrapMode, curve.postWrapMode);
-
-								curveWrapperW.renderer = renderer.wrapped;
-								
-								curveWrapperArray.SetValue (curveWrapperW.wrapped, i);
-								
-
-
-						}
+						
 
 						__instance = method_ctor.Invoke (new object[] {
 								rect,
-								curveWrapperArray,
+								AnimationCurvesToCurveWrappers (curves),
 								minimalGUI
 						});
 
 		
 			
+				}
+
+				Array CurveWrappersWToCurveWrappers (CurveWrapperW[] curveWrappers)
+				{
+
+						Array curveWrapperArray = Array.CreateInstance (CurveWrapperW.GetWrappedType (), curveWrappers.Length);
+			
+			
+						CurveWrapperW curveWrapperW;
+						for (int i=0; i<curveWrapperArray.Length; i++) {
+								curveWrapperW = curveWrappers [i];
+								curveWrapperArray.SetValue (curveWrapperW.wrapped, i);
+						}
+
+
+						_curveWrappersW = curveWrappers;
+
+						return curveWrappers;
+			
+				}
+		
+				Array AnimationCurvesToCurveWrappers (AnimationCurve[] curves)
+				{
+						CurveWrapperW curveWrapperW;
+						Array curveWrapperArray = Array.CreateInstance (CurveWrapperW.GetWrappedType (), curves.Length);
+						_curveWrappersW=new CurveWrapperW[curves.Length];
+				
+						AnimationCurve curve;
+						for (int i=0; i<curves.Length; i++) {
+								curve = curves [i];
+								_curveWrappersW[i]= curveWrapperW = new CurveWrapperW ();
+								curveWrapperW.id = ("Curve" + i).GetHashCode ();
+								curveWrapperW.curve = curve;
+						
+						
+								curveWrapperArray.SetValue (curveWrapperW.wrapped, i);
+						
+						}
+
+						return curveWrapperArray;
 				}
 
 				int GetCurveAtPosition (Vector2 mousePosition, out Vector2 closestPointOnCurve)

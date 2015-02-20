@@ -19,6 +19,7 @@ using ws.winx.unity;
 using ws.winx.editor.extensions;
 using Motion = UnityEngine.Motion;
 using StateMachine = UnityEditorInternal.StateMachine;
+using ws.winx.bmachine;
 
 namespace ws.winx.editor.bmachine.extensions
 {
@@ -382,9 +383,11 @@ namespace ws.winx.editor.bmachine.extensions
 					/////// CURVE EDITOR ////////
 					curveEditorRect.width=curveEditorRect.width-200;
 
+					//mecanimNode.curveProperties.Select ((item)=>item.curve);
+
 //					if(curveEditor==null){
 //
-//						curveEditor=new CurveEditorW(curveEditorRect,new AnimationCurve[]{curve1,curve2},false);
+//						curveEditor=new CurveEditorW(curveEditorRect,,false);
 //					
 //						curveEditor.FrameSelected (true, true);
 //						curveEditor.scaleWithWindow=true;
@@ -406,24 +409,12 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-//					curvePropertiesScroller.x=curveEditorRect.x;
-//					curvePropertiesScroller.y=curveEditorRect.y;
-//
-//					curvePropertiesScroller=EditorGUILayout.BeginScrollView(curvePropertiesScroller);
-//							EditorGUILayout.BeginHorizontal();
-//					Color color=new Color();
-//					color=EditorGUILayout.ColorField(color);
-//
-//							EditorGUILayout.EndHorizontal();
-//						EditorGUILayout.EndScrollView();
 
 
 
-//					curvePropertySelected=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
-//
-//					if(curvePropertySelected!=null) Debug.Log ("why");
-//					return;
-//
+
+
+
 					GUIContent[] displayOptions=null;
 					CurveProperty[] values=null;
 
@@ -500,12 +491,23 @@ namespace ws.winx.editor.bmachine.extensions
 					//if(mecanimNode.mile!=null)
 					//Debug.Log("Mecanode"+mecanimNode.mile);
 
-					if(curvePropertySelected!=null)
-						Debug.Log (curvePropertySelected.name+" value:"+curvePropertySelected.Value);
+					//if(curvePropertySelected!=null)
+					//	Debug.Log (curvePropertySelected.name+" value:"+curvePropertySelected.Value);
+
+					if(mecanimNode.propTest!=null)
+						Debug.Log (mecanimNode.propTest.name+" value:"+mecanimNode.propTest.Value);
 
 
 					if(GUILayout.Button("Add") && curvePropertySelected!=null){
 
+
+
+						//mecanimNode.propTest=null;//new PropertyTest();
+						mecanimNode.propTest=(PropertyTest)ScriptableObject.CreateInstance<PropertyTest>();//new PropertyTest();
+
+						mecanimNode.propTest.MemberInfo=curvePropertySelected.MemberInfo;
+						mecanimNode.propTest.reflectedInstance=curvePropertySelected.reflectedInstance;
+						mecanimNode.propTest.blackboard=this.mecanimNode.blackboard;///GlobalBlackboard.Instance;
 
 
 						mecanimNode.mile=(Property)ScriptableObject.CreateInstance<Property>();
@@ -535,6 +537,8 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 						this.serializedNode.ApplyModifiedProperties();
+
+						AssetDatabase.SaveAssets();
 
 					}
 

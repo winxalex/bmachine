@@ -20,14 +20,18 @@ namespace ws.winx.bmachine.extensions
 		public class MecanimNode:CompositeNode
 		{
 
-				
-				
 
+				
+				
+				public PropertyTest propTest;
+			
 				public CurveProperty[] curveProperties;
 				public CurveProperty curveProperty;
 				
 				public Property mile;
 				public Property[] miles;
+
+				
 				
 				//public string property = string.Empty;
 				
@@ -127,10 +131,14 @@ namespace ws.winx.bmachine.extensions
 		
 				public override void Reset ()
 				{
-						//Debug.Log (selectedAnimaStateInfo.label.text+">Reset");
+						Debug.Log (this.name+">Reset");
 						_animator = null;
 						
 						transitionDuration = 0f;
+
+
+
+//			
 
 						//mile = new Property<float> (null, null);
 			//mile = (Property)ScriptableObject.CreateInstance<Property> ();
@@ -140,21 +148,23 @@ namespace ws.winx.bmachine.extensions
 						
 				}
 
-//				public override void Awake ()
-//				{
-//          
-//					
-//			
-//				}
+				public override void Awake ()
+				{
+			Debug.Log ("Awake");
+//					BlackboardSurogate surrogate = new BlackboardSurogate ();
+//					surrogate.blackboard = GlobalBlackboard.Instance;
+//					Utility.AddSurrogate (typeof(BehaviourMachine.GlobalBlackboard), surrogate);
+			
+				}
 
 
 				//
-				//				public override void OnEnable ()
-				//				{
-				//			
-				//						Debug.Log (selectedAnimaStateInfo.label.text + ">Enable");
-				//
-				//				}
+//								public override void OnEnable ()
+//								{
+//							
+//									//	Debug.Log (animaStateInfoSelected.label.text + ">Enable");
+//				
+//								}
 				//		
 				//				public override void OnDisable ()
 				//				{

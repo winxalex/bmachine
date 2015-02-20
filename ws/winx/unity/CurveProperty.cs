@@ -22,8 +22,6 @@ namespace ws.winx.unity{
 	{
 
 
-		[SerializeField]
-		private CurveWrapperW __curveWrapperW;
 
 	
 
@@ -37,27 +35,15 @@ namespace ws.winx.unity{
 		//
 		// Properties
 		//
-		public Color color {
-			get{ return __curveWrapperW.color;}
-			set{ __curveWrapperW.color = value;}
-		}
+		public Color color;
 
-		public int id {
-			get{ return __curveWrapperW.id;}
-			set{ __curveWrapperW.id=value;}
-		}
+		
 
-		public AnimationCurve curve {
-			get {
-				return __curveWrapperW.curve;
-			}
-			set {
-				__curveWrapperW.curve = value;
-			}
-		}
+		public AnimationCurve curve;
+		
 
 	
-		//public Property property;
+		public int id;
 
 
 
@@ -74,25 +60,13 @@ namespace ws.winx.unity{
 		{
 			hideFlags = HideFlags.HideAndDontSave;
 
-			if(__curveWrapperW==null)
-				__curveWrapperW= (CurveWrapperW)ScriptableObject.CreateInstance<CurveWrapperW>();
 
 
 		}
 
 		
 		
-//		#region IEquatable implementation
-//		public bool Equals (CurveProperty other)
-//		{
-//			if (curveWrapperW.curve == null)
-//								return false;
-//
-//		
-//
-//			return this.curveWrapperW.id == other.curveWrapperW.id;
-//		}
-//		#endregion
+
 	}
 }
 
