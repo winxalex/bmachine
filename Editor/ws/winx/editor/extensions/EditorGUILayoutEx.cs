@@ -261,7 +261,16 @@ namespace ws.winx.editor.extensions
 						string buttonLabel;
 			
 			
-			
+			if (displayOptions == null || values == null ) {
+				Debug.LogError("Display options or values shouldn't be NULL");
+						return default(T);
+			}
+
+			if ((displayOptions != null && displayOptions.Length == 0) || (values != null && values.Count == 0)) {
+					return default(T);
+				}
+
+
 			
 			
 						//if selectionObject is null on Init

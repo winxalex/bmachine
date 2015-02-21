@@ -7,6 +7,7 @@ using ws.winx.utility;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Runtime.Serialization;
+using ws.winx.unity.surrogates;
 
 namespace ws.winx.unity{
 
@@ -14,9 +15,13 @@ namespace ws.winx.unity{
 	{
 		static Utility(){
 
-			Debug.Log("Utility");
+			AddSurrogate(typeof(UnityEngine.Vector3),new Vector3Surrogate());
+
+
 		}
 
+
+		//private UnityT
 
 		public static void ObjectToDisplayOptionsValues<T,K> (UnityEngine.Object @object,out GUIContent[] displayOptions,out K[] values)
 			where K:Property

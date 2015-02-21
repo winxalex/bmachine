@@ -1,4 +1,4 @@
-﻿//----------------------------------------------
+//----------------------------------------------
 //            Behaviour Machine
 // Copyright © 2014 Anderson Campos Cardoso
 //----------------------------------------------
@@ -21,9 +21,11 @@ namespace ws.winx.bmachine.extensions
 		{
 
 
+				public new BlackboardCustom blackboard{
+			get{  return (BlackboardCustom) base.blackboard; }
+		}
 				
-				
-				public PropertyTest propTest;
+				public UnityVariable propTest;
 			
 				public CurveProperty[] curveProperties;
 				public CurveProperty curveProperty;

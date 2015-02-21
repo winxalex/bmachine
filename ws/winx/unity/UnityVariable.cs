@@ -2,22 +2,18 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.Reflection;
-
-
 using ws.winx.utility;
 using ws.winx.unity;
 using System.Runtime.Serialization.Formatters.Binary;
-using ws.winx.bmachine.extensions;
-using BehaviourMachine;
 
 
-namespace ws.winx.bmachine
+namespace ws.winx.unity
 {
 		[Serializable]
-		public class PropertyTest:ScriptableObject,ISerializationCallbackReceiver//,IProperty
+		public class UnityVariable:ScriptableObject,ISerializationCallbackReceiver//,IProperty
 		{
 				
-				
+	
 
 				public Type reflectedType {
 						get {
@@ -25,19 +21,24 @@ namespace ws.winx.bmachine
 						}
 				}
 
-				public Type type {
+				public Type ValueType {
 						get {
 
-								switch (__memberInfo.MemberType) {
-								case MemberTypes.Field:
-										return ((FieldInfo)__memberInfo).FieldType;
-								case MemberTypes.Property:
-										return ((PropertyInfo)__memberInfo).PropertyType;
-							
-								case MemberTypes.Method:
-										return ((MethodInfo)__memberInfo).ReturnType;
-								default:
-										throw new ArgumentException ("MemberInfo must be if type FieldInfo, PropertyInfo or MethodInfo", "member");
+								if(__memberInfo!=null)
+								{
+										switch (__memberInfo.MemberType) {
+										case MemberTypes.Field:
+												return ((FieldInfo)__memberInfo).FieldType;
+										case MemberTypes.Property:
+												return ((PropertyInfo)__memberInfo).PropertyType;
+									
+										case MemberTypes.Method:
+												return ((MethodInfo)__memberInfo).ReturnType;
+										default:
+												throw new ArgumentException ("MemberInfo must be if type FieldInfo, PropertyInfo or MethodInfo", "member");
+										}
+								}else{
+									return __reflectedInstance.GetType();
 								}
 				
 								
@@ -64,16 +65,20 @@ namespace ws.winx.bmachine
 								__reflectedInstance = value;
 
 						   
-								__reflectedInstanceUnity=__reflectedInstance as UnityEngine.Object;
+								__reflectedInstanceUnity = __reflectedInstance as UnityEngine.Object;
 					
 						}
 				}
 
-				public InternalBlackboard blackboard;
-
 				[SerializeField]
 				private UnityEngine.Object
 						__reflectedInstanceUnity;
+				
+				
+			
+				
+
+				
 				[NonSerialized]
 				private MemberInfo
 						__memberInfo;
@@ -97,6 +102,9 @@ namespace ws.winx.bmachine
 				}
 
 
+				
+
+
 
 
 				//
@@ -114,10 +122,9 @@ namespace ws.winx.bmachine
 				/// <value>The value.</value>
 				public  object Value {
 						get {
-							if (this.__memberInfo == null) {
+								if (this.__memberInfo == null) {
 
-									Debug.LogError ("Member Info Null");
-									return null;
+										return this.reflectedInstance;
 								}
 								if (this.__memberInfo is PropertyInfo) {
 										return ((PropertyInfo)this.__memberInfo).GetValue (this.reflectedInstance, null);
@@ -170,7 +177,8 @@ namespace ws.winx.bmachine
 						}
 						set {
 								if (this.__memberInfo == null) {
-										//this.Initialize ();
+										this.reflectedInstance = value;
+										return;
 								}
 								if (this.__memberInfo is PropertyInfo) {
 										((PropertyInfo)this.__memberInfo).SetValue (this.reflectedInstance, value, null);
@@ -181,12 +189,12 @@ namespace ws.winx.bmachine
 
 												Debug.LogError (string.Concat (new object[]
 							                               {
-								"No property with name '",
-								this.name,
-								"' in the component '",
-								this.reflectedInstance
-								
-							}));
+																"No property with name '",
+																this.name,
+																"' in the component '",
+																this.reflectedInstance
+																
+															}));
 
 										}
 								}
@@ -197,7 +205,7 @@ namespace ws.winx.bmachine
 				//
 				// Constructor
 				//
-				public PropertyTest ()
+				public UnityVariable ()
 				{
 
 				}
@@ -210,13 +218,11 @@ namespace ws.winx.bmachine
 						if (__memberInfo != null)
 								memberInfoSerialized = Utility.Serialize (this.__memberInfo);
 
-						if (__reflectedInstance != null && __reflectedInstanceUnity == null) {
+						if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null)) {
 
-							BlackboardSurrogate surrogate=new BlackboardSurrogate();
-							surrogate.blackboard=blackboard;
-							Utility.AddSurrogate(blackboard.GetType(),surrogate);
+						
 
-							reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
+								reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
 						}
 
 		
@@ -224,19 +230,18 @@ namespace ws.winx.bmachine
 
 				public void OnAfterDeserialize ()
 				{
-						if (memberInfoSerialized != null)
+						if (memberInfoSerialized != null && memberInfoSerialized.Length>0)
 								__memberInfo = (MemberInfo)Utility.Deserialize (memberInfoSerialized);
 
-						if (reflectedInstanceSerialized != null) { 
+						if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
 
-							
-
-							BlackboardSurrogate surrogate=new BlackboardSurrogate();
-							surrogate.blackboard=blackboard;
-							Utility.AddSurrogate(blackboard.GetType(),surrogate);
-				
+						
 			
-							__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
+								__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
+
+						} else {
+								__reflectedInstance = __reflectedInstanceUnity;
+
 						}
 
 
@@ -266,13 +271,20 @@ namespace ws.winx.bmachine
 				//
 				// Methods
 				//
-				public T GetValue<T> ()
+				public virtual T GetValue<T> ()
 				{
+		
 						return (T)this.Value;
 				}
 
-			
 
+//				public virtual T GetValue<T> (Type t)
+//				{
+//					return (T)this.Value;
+//				}
+		
+		
+		
 				public void OnEnable ()
 				{
 						//	hideFlags = HideFlags.HideAndDontSave;
@@ -299,7 +311,7 @@ namespace ws.winx.bmachine
 
 				public override string ToString ()
 				{
-						return "Property[" + name + "] of type " + type + (this.reflectedInstance == null ? " on Static instance" : " on instance of " + this.reflectedInstance);
+						return "Property[" + name + "] of type " + ValueType + (this.reflectedInstance == null ? " on Static instance" : " on instance of " + this.reflectedInstance);
 				}
 
 
