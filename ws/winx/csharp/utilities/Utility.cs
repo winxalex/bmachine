@@ -83,14 +83,15 @@ namespace ws.winx.csharp.utilities
 			return o => o is T ? (Action)(() => action((T)o)) : (Action)null;
 		}
 
-		public static Func<Type, Action> Case<T>(Action action)
+		public static Func<Type, Action<object,object,object,object>> Case<T>(Action<object,object,object,object> action)
 		{
 
-			return o => IsSameOrSubclass(typeof(T),o) ? 
-				(Action)(() => action()) : (Action)null;
+			return  o => IsSameOrSubclass(typeof(T),o) ? 
+				action 
+					: (Action<object,object,object,object>)null;
 		}
 
-		private static bool IsSameOrSubclass(Type potentialBase, Type potentialDescendant)
+		public static bool IsSameOrSubclass(Type potentialBase, Type potentialDescendant)
 		{
 			return potentialDescendant.IsSubclassOf(potentialBase)
 				|| potentialDescendant == potentialBase;

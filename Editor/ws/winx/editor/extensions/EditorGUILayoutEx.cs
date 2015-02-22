@@ -531,6 +531,22 @@ namespace ws.winx.editor.extensions
 						genericMenu2.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
 						genericMenu2.ShowAsContext ();
 				}
+
+
+
+				public static GenericMenu GeneraterGenericMenu<T>(GUIContent[] displayOptions,IList<T> values,GenericMenu.MenuFunction2 callback){
+					
+						GenericMenu genericMenu = new GenericMenu ();
+			int count = displayOptions.Length;
+			for (int i=0; i<count; i++) {
+
+				genericMenu.AddItem (displayOptions[i], false, callback
+											,values[i]);
+			}
+
+
+					return genericMenu;
+				}
 		
 		
 				/// <summary>
@@ -849,7 +865,32 @@ namespace ws.winx.editor.extensions
 
 
 
+		
+		public static void DrawVector3Var (Rect rect, UnityVariable variable)
+		{
 
+			rect.width =Mathf.Max(Screen.width - 50,rect.width);
+			rect.yMin=rect.yMin + 3f;
+			rect.yMax=rect.xMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax=rect.xMax - 6f;
+			DrawName (new Rect (rect.x, rect.y, 80f, 16f), variable);
+			rect.xMin=rect.xMin + 84f;
+			rect.xMax=rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			rect.width = 100;
+
+			Vector3 vector = EditorGUI.Vector3Field (rect, string.Empty, (Vector3)variable.Value);
+			if (EditorGUI.EndChangeCheck () && vector != (Vector3)variable.Value)
+			{
+			
+					Undo.RecordObject (variable, "Variable Value");
+
+				variable.Value = vector;
+
+			}
+
+		}
 
 
 		public static void DrawBoolVar (Rect rect, UnityVariable variable)
@@ -906,6 +947,9 @@ namespace ws.winx.editor.extensions
 		
 		public static void DrawFloatVar (Rect rect, UnityVariable variable)
 		{
+
+
+			rect.width =Mathf.Max(Screen.width - 50,rect.width);
 			rect.yMin =rect.yMin + 3f;
 			rect.yMax =rect.yMax - 2f;
 			rect.xMin=rect.xMin + 6f;
@@ -1147,7 +1191,7 @@ namespace ws.winx.editor.extensions
 			rect.yMax =rect.yMax - 2f;
 			rect.xMin=rect.xMin + 6f;
 			rect.xMax =rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
 			rect.xMin=rect.xMin + 124f;
 			rect.xMax =rect.xMax - 19f;
 			EditorGUI.BeginChangeCheck ();
