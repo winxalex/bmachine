@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Collections.Generic;
 
 
-namespace ws.winx.utility
+namespace ws.winx.csharp
 {
 	public class RefToValue<T>
 	{

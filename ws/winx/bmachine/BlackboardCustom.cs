@@ -15,6 +15,7 @@ namespace ws.winx.bmachine
 		public class BlackboardCustom:InternalBlackboard
 		{
 
+			[UnityVariablePropertyAttribute("variableList")]
 			public List<UnityVariable> variablesList;
 
 

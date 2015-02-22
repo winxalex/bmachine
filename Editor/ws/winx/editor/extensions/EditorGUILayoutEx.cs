@@ -553,10 +553,10 @@ namespace ws.winx.editor.extensions
 				{
 						
 					
-			
+
 			
 						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
-						//Debug.Log ("Cid:" + controlID + " " + GUIUtility.hotControl);
+						//Debug.Log ("Cid:" + controlID + " " + GUIEditorGUILayoutEx.hotControl);
 			
 						if (controlID == CONTROL_ID) {
 								CONTROL_ID = -1;
@@ -846,5 +846,324 @@ namespace ws.winx.editor.extensions
 				}
 		#endregion
 
+
+
+
+
+
+
+		public static void DrawBoolVar (Rect rect, UnityVariable variable)
+		{
+			rect.yMin =rect.yMin + 3f;
+			rect.yMax =rect.yMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax =rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
+			rect.xMin=rect.xMin + 144f;
+			rect.xMax=rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			bool flag = EditorGUI.Toggle (rect, GUIContent.none, (bool)variable.Value);
+			if (EditorGUI.EndChangeCheck () && flag != (bool)variable.Value)
+			{
+
+					Undo.RecordObject(variable, "Variable Value");
+			
+				variable.Value = flag;
+
+			}
+			rect.x=rect.x + (rect.width + 2f);
+			rect.width=20f;
+			rect.yMin =rect.yMin - 2f;
+			rect.yMax =rect.yMax + 2f;
+
 		}
+		
+		public static void DrawColorVar (Rect rect, UnityVariable variable)
+		{
+			rect.yMin =rect.yMin + 3f;
+			rect.yMax =rect.yMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax =rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
+			rect.xMin=rect.xMin + 124f;
+			rect.xMax= rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			Color color = EditorGUI.ColorField (rect, GUIContent.none, (Color)variable.Value);
+			if (EditorGUI.EndChangeCheck () && color != (Color)variable.Value)
+			{
+
+					Undo.RecordObject (variable, "Variable Value");
+
+				   variable.Value = color;
+
+			}
+			rect.x=rect.x + (rect.width + 2f);
+			rect.width=20f;
+			rect.yMin =rect.yMin - 2f;
+			rect.yMax =rect.yMax + 2f;
+		
+		}
+		
+		public static void DrawFloatVar (Rect rect, UnityVariable variable)
+		{
+			rect.yMin =rect.yMin + 3f;
+			rect.yMax =rect.yMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax =rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
+			rect.xMin=rect.xMin + 144f;
+			rect.xMax=rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			float num = EditorGUI.FloatField (rect, GUIContent.none, (float)variable.Value);
+			if (EditorGUI.EndChangeCheck () && num != (float)variable.Value)
+			{
+
+					Undo.RecordObject (variable, "Variable Value");
+
+					variable.Value = num;
+
+			}
+			rect.x=rect.x + (rect.width + 2f);
+			rect.width=20f;
+			rect.yMin =rect.yMin - 2f;
+			rect.yMax =rect.yMax + 2f;
+
+		}
+
+
+		//TODO for now
+//		private static void DrawFsmEvent (Rect rect, FsmEvent fsmEvent)
+//		{
+//			rect.yMin =rect.yMin + 3f;
+//			rect.yMax =rect.yMax - 2f;
+//			rect.xMin=rect.xMin + 6f;
+//			rect.xMax =rect.xMax - 6f;
+//			bool enabled = GUI.enabled;
+//			GUI.enabled=!fsmEvent.isSystem;
+//			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), fsmEvent);
+//			GUI.enabled =enabled;
+//			rect.xMin=rect.xMin + 144f;
+//			rect.xMax = rect.xMax - 19f;
+//			EditorGUI.SelectableLabel (rect, fsmEvent.id.ToString ());
+//			rect.x=rect.x + (rect.width + 2f);
+//			rect.width=20f;
+//			rect.yMin =rect.yMin - 2f;
+//			rect.yMax =rect.yMax + 2f;
+//
+//		}
+		
+//		private static void DrawGameObjectVar (Rect rect, UnityVariable variable, bool isAsset)
+//		{
+//			rect.yMin =rect.yMin + 3f;
+//			rect.yMax=rect.yMax - 2f;
+//			rect.xMin=rect.xMin + 6f;
+//			rect.xMax =rect.xMax - 6f;
+//			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
+//			rect.xMin=rect.xMin + 84f;
+//			rect.xMax =rect.xMax - 19f;
+//			EditorGUI.BeginChangeCheck ();
+//			GameObject gameObject = EditorGUI.ObjectField (rect, GUIContent.none, variable.Value, typeof(GameObject), !isAsset) as GameObject;
+//			if (EditorGUI.EndChangeCheck () && gameObject != variable.Value)
+//			{
+//
+//				Undo.RecordObject (variable, "Variable Value");
+//
+//				variable.Value = gameObject;
+//				
+//			}
+//			rect.x=rect.x + (rect.width + 2f);
+//			rect.width=20f;
+//			rect.yMin =rect.yMin - 2f;
+//			rect.yMax =rect.yMax + 2f;
+//
+//		}
+		
+		public static void DrawIntVar (Rect rect, UnityVariable variable)
+		{
+
+			rect.yMin =rect.yMin + 3f;
+			rect.yMax =rect.yMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax =rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
+			rect.xMin=rect.xMin + 144f;
+			rect.xMax =rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			int num = EditorGUI.IntField (rect, GUIContent.none, (int)variable.Value);
+
+			if (EditorGUI.EndChangeCheck () && num != (int)variable.Value)
+			{
+
+					Undo.RecordObject (variable, "Variable Value");
+
+					variable.Value = num;
+				
+			}
+
+		
+
+		}
+		
+		public static void DrawUnityObject (Rect rect, UnityVariable variable)
+		{
+			rect.yMin =rect.yMin + 3f;
+			rect.yMax =rect.yMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax =rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
+			rect.xMin=rect.xMin + 84f;
+			rect.xMax =rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			UnityEngine.Object objectUnity = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, variable.ValueType, true);
+			if (EditorGUI.EndChangeCheck () && objectUnity != variable.Value)
+			{
+
+				Undo.RecordObject (variable, "Variable Value");
+
+				variable.Value = objectUnity;
+
+			}
+
+		
+
+		}
+		
+		public static void DrawName (Rect rect, UnityVariable variable)
+		{
+			EditorGUI.BeginChangeCheck ();
+			string text = EditorGUI.TextField (rect, variable.name);
+			if (EditorGUI.EndChangeCheck () && text != variable.name)
+			{
+
+				Undo.RecordObject (variable, "Variable Name");
+
+				variable.name = text;
+
+			}
+		}
+		
+		//		private static void DrawObjectVar (Rect rect, ObjectVar objectVar, bool isAsset)
+		//		{
+		//			rect.yMin =rect.yMin + 3f);
+		//			rect.yMax =rect.yMax - 2f);
+		//			rect.xMin=rect.xMin + 6f);
+		//			rect.xMax =rect.xMax - 6f);
+		//			rect.height =rect.height - 18f);
+		//			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), objectVar);
+		//			rect.xMin=rect.xMin + 84f);
+		//			rect.xMax =rect.xMax - 19f);
+		//			Type objectType = objectVar.ObjectType;
+		//			EditorGUI.BeginChangeCheck ();
+		//			Object @object = EditorGUI.ObjectField (rect, GUIContent.none, objectVar.Value, objectType, !isAsset);
+		//			if (EditorGUI.EndChangeCheck () && @object != objectVar.Value)
+		//			{
+		//				if (objectVar.blackboard != null)
+		//				{
+		//					Undo.RecordObject (objectVar.blackboard, "Variable Value");
+		//				}
+		//				objectVar.Value = @object;
+		//				if (objectVar.blackboard != null)
+		//				{
+		//					EditorEditorGUILayoutEx.SetDirty (objectVar.blackboard);
+		//				}
+		//			}
+		//			rect.y=rect.y + (rect.height + 3f));
+		//			string text = objectType.ToString ();
+		//			if (GUI.Button (rect, text, EditorStyles.get_popup ()))
+		//			{
+		//				GenericMenu genericMenu = new GenericMenu ();
+		//				genericMenu.AddItem (new GUIContent ("None"), string.IsNullOrEmpty (text), new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), new EditorGUILayoutEx.SetObjectVarType (objectVar, typeof(Object)));
+		//				Type[] derivedTypes = TypeEditorGUILayoutEx.GetDerivedTypes (typeof(Object));
+		//				for (int i = 0; i < derivedTypes.Length; i++)
+		//				{
+		//					string text2 = derivedTypes [i].ToString ();
+		//					genericMenu.AddItem (new GUIContent (text2.Replace ('.', '/')), text == text2, new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), new EditorGUILayoutEx.SetObjectVarType (objectVar, derivedTypes [i]));
+		//				}
+		//				genericMenu.ShowAsContext ();
+		//			}
+		//			rect.x=rect.x + (rect.width + 2f);
+		//			rect.y=rect.y - (rect.height + 3f));
+		//			rect.width=20f);
+		//			rect.yMin =rect.yMin - 2f);
+		//			rect.yMax =rect.yMax + 2f);
+		//			if (GUI.Button (rect, EditorGUILayoutEx.s_Styles.iconToolbarMinus, EditorGUILayoutEx.s_Styles.invisbleButton))
+		//			{
+		//				EditorGUILayoutEx.s_VariableToRemove = objectVar;
+		//			}
+		//		}
+		
+		public static void DrawQuaternionVar (Rect rect,UnityVariable variable)
+		{
+			rect.yMin =rect.yMin + 3f;
+			rect.yMax =rect.yMax - 2f;
+			rect.xMin =rect.xMin + 6f;
+			rect.xMax =rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
+			rect.xMin=rect.xMin + 84f;
+			rect.xMax =rect.xMax - 19f;
+			rect.y =rect.y - 16f;
+			Quaternion value=(Quaternion)variable.Value;
+			Vector4 vector = new Vector4 (value.x, value.y, value.z, value.w);
+			EditorGUI.BeginChangeCheck ();
+			Vector4 vector2 = EditorGUI.Vector4Field (rect, string.Empty, vector);
+			if (EditorGUI.EndChangeCheck () && vector != vector2)
+			{
+
+					Undo.RecordObject (variable, "Variable Value");
+
+
+				variable.Value = new Quaternion (vector2.x, vector2.y, vector2.z, vector2.w);
+			
+			}
+		
+		
+		}
+		
+		public static void DrawRectVar (Rect rect, UnityVariable variable)
+		{
+			rect.yMin=rect.yMin + 3f;
+			rect.yMax=rect.yMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax=rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height - 18f), variable);
+			rect.xMin=rect.xMin + 84f;
+			rect.xMax =rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			Rect rect2 = EditorGUI.RectField (rect, GUIContent.none, (Rect)variable.Value);
+			if (EditorGUI.EndChangeCheck () && rect2 != (Rect)variable.Value)
+			{
+
+					Undo.RecordObject (variable, "Variable Value");
+				
+					variable.Value = rect2;
+
+			}
+
+		}
+		
+		public static void DrawStringVar (Rect rect, UnityVariable variable)
+		{
+			rect.yMin =rect.yMin + 3f;
+			rect.yMax =rect.yMax - 2f;
+			rect.xMin=rect.xMin + 6f;
+			rect.xMax =rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
+			rect.xMin=rect.xMin + 124f;
+			rect.xMax =rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			string text = EditorGUI.TextField (rect, GUIContent.none, (string)variable.Value);
+			if (EditorGUI.EndChangeCheck () && text != (string)variable.Value)
+			{
+
+					Undo.RecordObject (variable, "Variable Value");
+				
+				variable.Value = text;
+
+			}
+
+		}
+		
+
+
+	}
 }

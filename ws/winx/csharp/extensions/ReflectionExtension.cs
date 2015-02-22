@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 
-namespace ws.winx.utility{
+namespace ws.winx.csharp.extensions{
 	public static class ReflectionExtension{
 		public static void SetValue(this MemberInfo member, object instance, object value)
 		{

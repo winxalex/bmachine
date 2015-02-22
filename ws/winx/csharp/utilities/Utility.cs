@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
+using System.Linq;
 
-namespace ws.winx.utility
+namespace ws.winx.csharp.utilities
 {
 
 	public class ReflectionUtility{
@@ -39,6 +40,61 @@ namespace ws.winx.utility
 
 
 
+
+
+	}
+
+
+	public class SwitchUtility{
+
+		public static Action<object> Switch(params Func<object, Action>[] tests)
+		{
+			return o =>
+			{
+				var @case = tests
+					.Select(f => f(o))
+						.FirstOrDefault(a => a != null);
+				
+				if (@case != null)
+				{
+					@case();
+				}
+			};
+		}
+
+
+		public static Action<Type> SwitchOfType(params Func<Type, Action>[] tests)
+		{
+			return o =>
+			{
+				var @case = tests
+					.Select(f => f(o))
+						.FirstOrDefault(a => a != null);
+				
+				if (@case != null)
+				{
+					@case();
+				}
+			};
+		}
+		
+		public static Func<object, Action> Case<T>(Action<T> action)
+		{
+			return o => o is T ? (Action)(() => action((T)o)) : (Action)null;
+		}
+
+		public static Func<Type, Action> Case<T>(Action action)
+		{
+
+			return o => IsSameOrSubclass(typeof(T),o) ? 
+				(Action)(() => action()) : (Action)null;
+		}
+
+		private static bool IsSameOrSubclass(Type potentialBase, Type potentialDescendant)
+		{
+			return potentialDescendant.IsSubclassOf(potentialBase)
+				|| potentialDescendant == potentialBase;
+		}
 
 
 	}
