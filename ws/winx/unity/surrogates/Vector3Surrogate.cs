@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using BehaviourMachine;
 
 namespace ws.winx.unity.surrogates{
+
 	public class Vector3Surrogate : ISerializationSurrogate
 	{
 		public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)

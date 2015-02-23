@@ -16,7 +16,10 @@ namespace ws.winx.bmachine
 		{
 
 		public GUIContent[] typesNames;
-			
+
+	
+
+		[HideInInspector]	
 		public List<UnityVariable> variablesList;
 
 

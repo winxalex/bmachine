@@ -38,7 +38,10 @@ namespace ws.winx.unity
 												throw new ArgumentException ("MemberInfo must be if type FieldInfo, PropertyInfo or MethodInfo", "member");
 										}
 								}else{
-									return __reflectedInstance.GetType();
+									if(__reflectedInstance!=null)
+										return __reflectedInstance.GetType();
+									else
+										return null;
 								}
 				
 								

@@ -17,7 +17,9 @@ namespace ws.winx.unity{
 		static Utility(){
 
 			AddSurrogate(typeof(UnityEngine.Vector3),new Vector3Surrogate());
-
+			AddSurrogate(typeof(UnityEngine.Color),new ColorSurrogate());
+			AddSurrogate(typeof(UnityEngine.Rect),new RectSurrogate());
+			AddSurrogate(typeof(UnityEngine.Quaternion),new QuaternionSurrogate());
 
 		}
 
