@@ -25,7 +25,21 @@ namespace ws.winx.unity{
 	
 
 		public static void ObjectToDisplayOptionsValues<T,K> (UnityEngine.Object @object,out GUIContent[] displayOptions,out K[] values)
-			where K:Property
+			where K:UnityVariable where T:Type
+		{
+			GUIContent[] tempDisplayOptions;
+			K[] tempValues;
+
+			ObjectToDisplayOptionsValues<K> (@object, typeof(T),out tempDisplayOptions,out tempValues);
+
+			displayOptions=tempDisplayOptions;
+			values=tempValues;
+
+		}
+
+
+		public static void ObjectToDisplayOptionsValues<K> (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out K[] values)
+				where K:UnityVariable
 		{
 			displayOptions = null;
 			values = null;
@@ -54,7 +68,7 @@ namespace ws.winx.unity{
 				
 				//GET OBJECT STATIC PROPERTIES
 				string text4 = target.Name + "/Static Properties/";
-				MemberInfo[] publicMembers = ReflectionUtility.GetPublicMembers (target, typeof(T), true, true, true);
+				MemberInfo[] publicMembers = ReflectionUtility.GetPublicMembers (target, type, true, true, true);
 				if (publicMembers.Length > 0)
 				{
 					for (int i = 0; i < publicMembers.Length; i++)
@@ -70,7 +84,7 @@ namespace ws.winx.unity{
 				}
 				
 				//GET OBJECT NON STATIC PROPERTIES
-				publicMembers = ReflectionUtility.GetPublicMembers (target, typeof(T), false, true, true);
+				publicMembers = ReflectionUtility.GetPublicMembers (target, type, false, true, true);
 				for (int j = 0; j < publicMembers.Length; j++)
 				{
 					memberInfo=publicMembers [j];
@@ -95,14 +109,14 @@ namespace ws.winx.unity{
 					for (int k = 0; k < components.Length; k++)
 					{
 						currentComponent = components [k];
-						Type type = currentComponent.GetType ();
-						string uniqueNameInList = StringUtility.GetUniqueNameInList (list, type.Name);
+						Type compType = currentComponent.GetType ();
+						string uniqueNameInList = StringUtility.GetUniqueNameInList (list, compType.Name);
 						list.Add (uniqueNameInList);
 						
 						
 						//STATIC PROPERTIES
 						text4 = uniqueNameInList + "/Static Properties/";
-						publicMembers =ReflectionUtility.GetPublicMembers (currentComponent.GetType (), typeof(T), true, true, true);
+						publicMembers =ReflectionUtility.GetPublicMembers (compType, type, true, true, true);
 						if (publicMembers.Length > 0)
 						{
 							for (int l = 0; l < publicMembers.Length; l++)
@@ -119,7 +133,7 @@ namespace ws.winx.unity{
 						}
 						
 						//NONSTATIC PROPERTIES
-						publicMembers = ReflectionUtility.GetPublicMembers (currentComponent.GetType (), typeof(T), false, true, true);
+						publicMembers = ReflectionUtility.GetPublicMembers (compType, type, false, true, true);
 						for (int m = 0; m < publicMembers.Length; m++)
 						{
 							memberInfo=publicMembers [m];

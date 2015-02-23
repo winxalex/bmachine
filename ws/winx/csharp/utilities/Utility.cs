@@ -63,33 +63,63 @@ namespace ws.winx.csharp.utilities
 		}
 
 
-		public static Action<Type> SwitchOfType(params Func<Type, Action>[] tests)
+		public static Action<Type> SwitchExecute (params Func<Type, Action>[] cases)
 		{
 			return o =>
 			{
-				var @case = tests
-					.Select(f => f(o))
-						.FirstOrDefault(a => a != null);
+				var @case = cases
+					.Select (f => f (o))
+						.FirstOrDefault (a => a != null);
+				
 				
 				if (@case != null)
 				{
 					@case();
 				}
+				
 			};
 		}
+
+
+		/// <summary>
+		/// Switch the specified cases.
+		/// </summary>
+		/// <param name="cases">Cases of method CaseIsClassOf or CaseIsTypeOf</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		/// <example> switch(</example>
+		public static Func<Type,T> Switch<T> (params Func<Type, T>[] cases)
+		{
+			return o =>
+			{
+				var @case = cases
+					.Select (f => f (o))
+						.FirstOrDefault (a => a != null);
+				
+				
+				return @case;
+
+			};
+		}
+
+
+		public static Func<Type, K> CaseIsClassOf<T,K> (K action)
+		{
+			
+			return  o => SwitchUtility.IsSameOrSubclass (typeof(T), o) ? 
+				action 
+					: default(K);
+		}
+
+
+
+
 		
-		public static Func<object, Action> Case<T>(Action<T> action)
+		public static Func<object, Action> CaseIsTypeOf<T>(Action<T> action)
 		{
 			return o => o is T ? (Action)(() => action((T)o)) : (Action)null;
 		}
 
-		public static Func<Type, Action<object,object,object,object>> Case<T>(Action<object,object,object,object> action)
-		{
 
-			return  o => IsSameOrSubclass(typeof(T),o) ? 
-				action 
-					: (Action<object,object,object,object>)null;
-		}
 
 		public static bool IsSameOrSubclass(Type potentialBase, Type potentialDescendant)
 		{
