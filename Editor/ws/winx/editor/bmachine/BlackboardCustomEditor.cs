@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using ws.winx.editor.extensions;
 using System.Linq;
 using ws.winx.csharp.utilities;
+using System.Runtime.Serialization;
 
 namespace ws.winx.editor.bmachine
 {
@@ -31,9 +32,13 @@ namespace ws.winx.editor.bmachine
 				GenericMenu genericMenu;
 				Func<Type,SwitchDrawerDelegate>  switchDrawer;
 				Action<Type> switchMenuTypes;
+				string _typeNameSelected="None";
+				SerializedProperty typesCustomSerialized;
+			
+			
 
 			
-				private delegate void SwitchDrawerDelegate (Rect rect,UnityVariable variable);
+				private delegate Rect SwitchDrawerDelegate (Rect rect,UnityVariable variable);
 
 				private void OnEnable ()
 				{
@@ -45,9 +50,9 @@ namespace ws.winx.editor.bmachine
 								SerializedProperty variableListSerialized = serializedObject.FindProperty ("variablesList");
 
 
-
-
-
+								typesCustomSerialized = serializedObject.FindProperty ("typesCustom");
+				
+				
 								__variablesReordableList = new ReorderableList (serializedObject, variableListSerialized, 
 				                                       true, true, true, true);
 								__variablesReordableList.drawElementCallback = onDrawElement;
@@ -55,10 +60,13 @@ namespace ws.winx.editor.bmachine
 								__variablesReordableList.onAddDropdownCallback = onAddDropdownCallback;
 
 								__variablesReordableList.drawHeaderCallback = onDrawHeaderElement;
+
+								__variablesReordableList.onRemoveCallback=onRmoveCallback;
 				
 
-								genericMenu = EditorGUILayoutEx.GeneraterGenericMenu<Type> (EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes, onMenuSelection);
+								genericMenu = EditorGUILayoutEx.GeneraterGenericMenu<Type> (EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes, onTypeSelection);
 
+								fillMenuCustomTypes();
 
 								switchDrawer = SwitchUtility.Switch (
 					new Func<Type, SwitchDrawerDelegate>[]{
@@ -72,7 +80,7 @@ namespace ws.winx.editor.bmachine
 					SwitchUtility.CaseIsClassOf<Rect,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawRectVar),
 					SwitchUtility.CaseIsClassOf<Color,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawColorVar),
 					SwitchUtility.CaseIsClassOf<Material,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
-					SwitchUtility.CaseIsClassOf<Texture,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
+					SwitchUtility.CaseIsClassOf<UnityEngine.Texture,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
 					SwitchUtility.CaseIsClassOf<GameObject,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
 				});
 
@@ -89,7 +97,7 @@ namespace ws.winx.editor.bmachine
 										AddVariableToList<String> ("New String", String.Empty, __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<bool,Action> (() => {
 										AddVariableToList<bool> ("New Bool", false, __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<Vector2,Action> (() => {
+					SwitchUtility.CaseIsClassOf<Vector3,Action> (() => {
 										AddVariableToList<Vector3> ("New Vector3", new Vector3 (), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<Quaternion,Action> (() => {
 										AddVariableToList<Quaternion> ("New Quaternion", new Quaternion (), __variablesReordableList);}),
@@ -97,11 +105,13 @@ namespace ws.winx.editor.bmachine
 										AddVariableToList<Color> ("New Color", new Color (), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<Rect,Action> (() => {
 										AddVariableToList<Rect> ("New Rect", new Rect (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<Texture,Action> (() => {
-										AddVariableToList<Texture> ("New Texture", new Texture (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<Material,Action> (() => {
-						AddVariableToList<Material> ("Material", new Material (Shader.Find ("Diffuse")), __variablesReordableList);}),
+					SwitchUtility.CaseIsClassOf<UnityEngine.Texture2D,Action> (() => {
+										AddVariableToList<UnityEngine.Texture2D> ("New Texture", new UnityEngine.Texture2D (2,2), __variablesReordableList);}),
+					SwitchUtility.CaseIsClassOf<UnityEngine.Texture3D,Action> (() => {
+						AddVariableToList<UnityEngine.Texture3D> ("New Texture", new UnityEngine.Texture3D (2,2,2,TextureFormat.ARGB32,false), __variablesReordableList);}),
 
+					SwitchUtility.CaseIsClassOf<Material,Action> (() => {
+										AddVariableToList<Material> ("Material", new Material (Shader.Find ("Diffuse")), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<GameObject,Action> (() => {
 										AddVariableToList<GameObject> ("New GameObject", new GameObject (), __variablesReordableList);})
 
@@ -113,8 +123,36 @@ namespace ws.winx.editor.bmachine
 
 				}
 
-				void AddVariableToList<T> (string name, T value, ReorderableList list)//,object referenceInstance
+		void fillMenuCustomTypes ()
+		{
+			Type[] derivedTypes = TypeUtility.GetDerivedTypes (typeof(System.Object));
+			for (int i = 0; i < derivedTypes.Length; i++) {
+				
+				
+				string text2 = derivedTypes [i].ToString ();
+				genericMenu.AddItem (new GUIContent ("Custom Object/"+text2.Replace ('.', '/')), _typeNameSelected == text2, onTypeNewSelected, derivedTypes [i]);
+			}
+
+			genericMenu.AddSeparator (string.Empty);
+			genericMenu.AddItem (new GUIContent ("Reload"), false, delegate {
+				fillMenuCustomTypes();
+			});
+			
+			
+			genericMenu.AddSeparator (string.Empty);
+			genericMenu.AddItem (new GUIContent ("Global Blackboard"), false, delegate {
+				EditorApplication.ExecuteMenuItem ("Tools/BehaviourMachine/Global Blackboard");
+			});
+		}
+		
+			void AddVariableToList<T> (string name, T value, ReorderableList list){
+			AddVariableToList (name, value, list);
+			}
+
+			void AddVariableToList (string name, object value, ReorderableList list)
 				{
+
+		
 
 						var index = list.serializedProperty.arraySize;
 						list.serializedProperty.arraySize++;
@@ -122,6 +160,7 @@ namespace ws.winx.editor.bmachine
 			
 						UnityVariable variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 						variable.name = name;
+						
 						variable.Value = value;
 			
 						var element = list.serializedProperty.GetArrayElementAtIndex (index);
@@ -130,24 +169,30 @@ namespace ws.winx.editor.bmachine
 						serializedObject.ApplyModifiedProperties ();
 				}
 
-				void onMenuSelection (object userData)
+
+
+
+				void onTypeSelection (object userData)
 				{
 
-						//this.GetType().MakeGenericType(new Type[]{type})
-						//AddVariableToList("New "+type.ToString(),default(type),__variablesReordableList);
-
-
+						switchMenuTypes ((Type)userData);
 		
 
 				}
 
+				void onRmoveCallback (ReorderableList list)
+				{
+					ReorderableList.defaultBehaviours.DoRemoveButton (list);
+					list.serializedProperty.arraySize--;//DON"T KNOW why this is nessery might be bug
+					//ReorderableList.defaultBehaviours.DoRemoveButton (list); 
+				}
 
 
-//					Assembly GetAssemblyByName(string name)
-//					{
-//						return AppDomain.CurrentDomain.GetAssemblies().
-//							SingleOrDefault(assembly => assembly.GetName().Name == name);
-//					}
+
+	
+		
+		
+	
 
 				void onAddDropdownCallback (Rect buttonRect, ReorderableList list)
 				{
@@ -160,20 +205,10 @@ namespace ws.winx.editor.bmachine
 						
 
 						
-						genericMenu.AddItem (new GUIContent ("Custom Object"), false, delegate {
+		
 
-						});
-						genericMenu.AddItem (new GUIContent ("FsmEvent"), false, delegate {
-								//maybe we go with UnityEvent
-
-								//new FsmEvent
-						});
-
-						genericMenu.AddSeparator (string.Empty);
-						genericMenu.AddItem (new GUIContent ("Global Blackboard"), false, delegate {
-								EditorApplication.ExecuteMenuItem ("Tools/BehaviourMachine/Global Blackboard");
-						});
-
+						
+			
 						genericMenu.ShowAsContext ();
 		
 				}
@@ -183,7 +218,14 @@ namespace ws.winx.editor.bmachine
 
 						SerializedProperty property = __variablesReordableList.serializedProperty.GetArrayElementAtIndex (index); 
 
+						if (property == null || property.objectReferenceValue == null) {
+								return;
+						}
+
 						DrawVariables (rect, property);
+
+						__variablesReordableList.elementHeight = rect.height;
+
 				}
 
 				void onDrawHeaderElement (Rect rect)
@@ -191,20 +233,10 @@ namespace ws.winx.editor.bmachine
 						EditorGUI.LabelField (rect, "Blackboard Variables:");
 				}
 
-				public void DrawVariables (Rect position, SerializedProperty property)
+				public Rect DrawVariables (Rect position, SerializedProperty property)
 				{
-						if (property == null || property.objectReferenceValue == null) {
-								return;
-						}
-
-	
 						//bool isAsset = AssetDatabase.Contains (blackboard.get_gameObject ());
-						//	EditorGUI.BeginChangeCheck ();
-
-		
-
-
-
+					
 						Type variableType;
 						UnityVariable currentVariable;
 						SwitchDrawerDelegate switchDrawerDelegate;
@@ -218,21 +250,49 @@ namespace ws.winx.editor.bmachine
 				
 						if (switchDrawerDelegate != null) {
 								//make drawing of the variable
-								switchDrawerDelegate (position, currentVariable);
+								return switchDrawerDelegate (position, currentVariable);
 						}
 
 
 
 		
-						//EditorGUI.EndChangeCheck ();
+						return position;
 		
 				}
 
+
+				void onTypeNewSelected(object userData){
+
+			//Debug.Log ( userData.ToString ());
+
+			//or use
+			//Activator.CreateInstance ((Type)userData);
+
+			AddVariableToList ("New " + userData.ToString (),FormatterServices.GetUninitializedObject((Type)userData),__variablesReordableList);
+
+
+
+
+			}
+
 				public override void OnInspectorGUI ()
 				{
+
+						base.DrawDefaultInspector ();
+
 						serializedObject.Update ();
 
 						__variablesReordableList.DoLayoutList ();
+					
+
+						
+
+					
+						
+
+
+
+
 						serializedObject.ApplyModifiedProperties ();
 				}
 		}

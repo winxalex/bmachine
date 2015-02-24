@@ -12,15 +12,21 @@ namespace ws.winx.bmachine
 		/// <summary>
 		/// Wrapper class for the InternalBlackboard component.
 		/// <summary>
-		public class BlackboardCustom:InternalBlackboard
+		public class BlackboardCustom:InternalBlackboard,ISerializationCallbackReceiver
 		{
 
 		public GUIContent[] typesNames;
 
-	
+		[HideInInspector]
+		public List<Type> typesCustom;
+
+		[HideInInspector]
+		public byte[] typesSerialized;
 
 		[HideInInspector]	
 		public List<UnityVariable> variablesList;
+
+		string _typeNameSelected="Select custom type";
 
 
 			public void AddProperty(UnityVariable prop){
@@ -34,6 +40,20 @@ namespace ws.winx.bmachine
 
 			}
 
+		#region ISerializationCallbackReceiver implementation
+		void ISerializationCallbackReceiver.OnBeforeSerialize ()
+		{
+			if (typesCustom != null) {
+				typesSerialized=Utility.Serialize(typesCustom);
+			}
+		}
+		void ISerializationCallbackReceiver.OnAfterDeserialize ()
+		{
+			if (typesSerialized != null && typesSerialized.Length > 0) {
+				typesCustom=(List<Type>)Utility.Deserialize(typesSerialized);
+			}
+		}
+		#endregion
 		}
 
 }

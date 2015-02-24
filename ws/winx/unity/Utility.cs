@@ -21,6 +21,8 @@ namespace ws.winx.unity{
 			AddSurrogate(typeof(UnityEngine.Rect),new RectSurrogate());
 			AddSurrogate(typeof(UnityEngine.Quaternion),new QuaternionSurrogate());
 
+		
+
 		}
 
 

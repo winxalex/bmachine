@@ -6,7 +6,6 @@ using ws.winx.unity;
 using System.Runtime.Serialization.Formatters.Binary;
 using ws.winx.csharp.extensions;
 
-
 namespace ws.winx.unity
 {
 		[Serializable]
@@ -21,28 +20,15 @@ namespace ws.winx.unity
 						}
 				}
 
+				private Type _valueType = typeof(System.Object);
+				[HideInInspector]
+				public byte[]
+						valueTypeSerialized;
+
 				public Type ValueType {
 						get {
 
-								if(__memberInfo!=null)
-								{
-										switch (__memberInfo.MemberType) {
-										case MemberTypes.Field:
-												return ((FieldInfo)__memberInfo).FieldType;
-										case MemberTypes.Property:
-												return ((PropertyInfo)__memberInfo).PropertyType;
-									
-										case MemberTypes.Method:
-												return ((MethodInfo)__memberInfo).ReturnType;
-										default:
-												throw new ArgumentException ("MemberInfo must be if type FieldInfo, PropertyInfo or MethodInfo", "member");
-										}
-								}else{
-									if(__reflectedInstance!=null)
-										return __reflectedInstance.GetType();
-									else
-										return null;
-								}
+								return _valueType;	
 				
 								
 						}
@@ -70,18 +56,13 @@ namespace ws.winx.unity
 						   
 								__reflectedInstanceUnity = __reflectedInstance as UnityEngine.Object;
 					
+								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity);
 						}
 				}
 
 				[SerializeField]
 				private UnityEngine.Object
 						__reflectedInstanceUnity;
-				
-				
-			
-				
-
-				
 				[NonSerialized]
 				private MemberInfo
 						__memberInfo;
@@ -93,13 +74,24 @@ namespace ws.winx.unity
 						set {
 								__memberInfo = value;
 
-
-								if ((__memberInfo.MemberType == MemberTypes.Property) || (__memberInfo.MemberType == MemberTypes.Field))
+								if (value != null) {
+									
 										this.name = __memberInfo.Name;
-					
+
+
+										if (__memberInfo.MemberType == MemberTypes.Field)
+												_valueType = ((FieldInfo)__memberInfo).FieldType;
+
+										if (__memberInfo.MemberType == MemberTypes.Property)
+												_valueType = ((PropertyInfo)__memberInfo).PropertyType;
+
+										throw new Exception ("Unsupported MemberInfo type. Only Properties and Fields supported");
+						
+									
+								}
+									
+
 								
-					
-								this.__memberInfo = __memberInfo;
 								
 						}
 				}
@@ -129,43 +121,14 @@ namespace ws.winx.unity
 
 										return this.reflectedInstance;
 								}
-								if (this.__memberInfo is PropertyInfo) {
+								if (this.__memberInfo.MemberType == MemberTypes.Field) {
 										return ((PropertyInfo)this.__memberInfo).GetValue (this.reflectedInstance, null);
 								}
-								if (this.__memberInfo is FieldInfo) {
+								if (this.__memberInfo.MemberType == MemberTypes.Property) {
 										return ((FieldInfo)this.__memberInfo).GetValue (this.reflectedInstance);
 								}
 								
-								if (this.__memberInfo is MethodInfo) {
-										if (String.IsNullOrEmpty (this.name)) {
-												Debug.LogError ("Property name is missing ");
-												return default(object);
-										}
-
-										object result = ((MethodInfo)this.__memberInfo).Invoke (this.reflectedInstance, new object[]{this.name});
-
-										Type t = result.GetType ();
-
-										if (t.IsPrimitive || t.IsValueType || t == typeof(Decimal) || t == typeof(String))				
-												return result;
-										else {//when object is returned try to find "Value" field or property to get primitive value from
-
-												MemberInfo m = t.GetField ("Value", BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
-												if (m == null)
-														m = t.GetProperty ("Value", BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-												
-												if (m != null) {
-														this.__memberInfo = m;
-														this.reflectedInstance = result;
-														return this.__memberInfo.GetValue (result);
-
-												}
-
-												Debug.LogError ("Method " + this.__memberInfo.Name + " doesn't return object that have 'Value' property");
-
-										}
-								}
+								
 
 								Debug.LogError (string.Concat (new object[]
 					                               {
@@ -179,8 +142,18 @@ namespace ws.winx.unity
 								return null;
 						}
 						set {
+
+
+								
+
+
 								if (this.__memberInfo == null) {
+										
 										this.reflectedInstance = value;
+
+										if (value != null)
+												_valueType = this.reflectedInstance.GetType ();
+
 										return;
 								}
 								if (this.__memberInfo is PropertyInfo) {
@@ -221,11 +194,17 @@ namespace ws.winx.unity
 						if (__memberInfo != null)
 								memberInfoSerialized = Utility.Serialize (this.__memberInfo);
 
+						valueTypeSerialized = Utility.Serialize (_valueType);
+
 						if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null)) {
 
 						
+								try {
+										reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
+								} catch (Exception ex) {
 
-								reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
+										Debug.Log (ex.Message);
+								}
 						}
 
 		
@@ -233,8 +212,11 @@ namespace ws.winx.unity
 
 				public void OnAfterDeserialize ()
 				{
-						if (memberInfoSerialized != null && memberInfoSerialized.Length>0)
+						if (memberInfoSerialized != null && memberInfoSerialized.Length > 0)
 								__memberInfo = (MemberInfo)Utility.Deserialize (memberInfoSerialized);
+
+						if (valueTypeSerialized != null && valueTypeSerialized.Length > 0)
+								_valueType = (Type)Utility.Deserialize (valueTypeSerialized);
 
 						if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
 
