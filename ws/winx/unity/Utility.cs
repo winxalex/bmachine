@@ -20,6 +20,7 @@ namespace ws.winx.unity{
 			AddSurrogate(typeof(UnityEngine.Color),new ColorSurrogate());
 			AddSurrogate(typeof(UnityEngine.Rect),new RectSurrogate());
 			AddSurrogate(typeof(UnityEngine.Quaternion),new QuaternionSurrogate());
+			AddSurrogate (typeof(BehaviourMachine.InternalBlackboard), new InternalBlackboardTempSurrogate ());
 
 		
 

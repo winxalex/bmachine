@@ -759,6 +759,9 @@ namespace ws.winx.unity
 
 
 
+
+
+
 		/// ///////////////  CURVE EDITOR  //////////////// 
 	 
 	#region CurveMenuManagerW
@@ -984,6 +987,10 @@ namespace ws.winx.unity
 		}
 	#endregion
 
+
+
+
+
 	#region NormalCurveRenderer
 		public class NormalCurveRendererW
 		{
@@ -997,11 +1004,22 @@ namespace ws.winx.unity
 						get{ return __instance;}
 				}
 
+
+					public static Type GetWrappedType ()
+					{
+						if (__RealType == null) {
+							Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+							__RealType = assembly.GetType ("UnityEditor.NormalCurveRenderer");
+						}
+						
+						return __RealType;
+						
+					}
+
 				public static void InitType ()
 				{
-						if (__RealType == null) {
-								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-								__RealType = assembly.GetType ("UnityEditor.NormalCurveRenderer");
+						if (method_ctor == null) {
+							
 
 
 
