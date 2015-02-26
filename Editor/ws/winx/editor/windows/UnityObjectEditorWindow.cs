@@ -1,36 +1,56 @@
 using UnityEditor;
+using System;
 using System.Collections;
 using ws.winx.unity;
 using System.Reflection;
 using ws.winx.csharp.extensions;
 using ws.winx.csharp.utilities;
 using UnityEngine;
+using ws.winx.editor.extensions;
 
 namespace ws.winx.editor.windows
 {
 		public class UnityObjectEditorWindow : EditorWindow
 		{
+				[NonSerialized]
 				private static UnityVariable __variable;
-				
+
+				[NonSerialized]
 				private static UnityVariable[] __properties;
+				private static System.Func<System.Type, EditorUtilityEx.SwitchDrawerDelegate> __switcher;
 
 				public static void Show (UnityVariable variable)
 				{
+
+						if (variable.Value == null || variable.ValueType==typeof(UnityEngine.Object))
+								return;
+
 						EditorWindow.GetWindow<UnityObjectEditorWindow> ();
 
 						__variable = variable;
 
+
+
 						MemberInfo[] memberInfos = ReflectionUtility.GetPublicMembers (__variable.ValueType, typeof(System.Object), false, true, true, true);
 
-			UnityVariable cvariable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-
+						UnityVariable cvariable;
 						int len = memberInfos.Length;
-						__properties=new UnityVariable[len];
+
+						if (__properties != null)
+								Array.Clear (__properties,0,__properties.Length);
+
+						__properties = new UnityVariable[len];
+
 						for (int i=0; i<len; i++) {
-								cvariable.MemberInfo=memberInfos[i];
-								cvariable.reflectedInstance=variable.reflectedInstance;
-							
+								cvariable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+								cvariable.serializable=false;
+								cvariable.MemberInfo = memberInfos [i];
+								cvariable.reflectedInstance = variable.reflectedInstance;
+								__properties [i] = cvariable;
 						}
+
+
+						__switcher = EditorUtilityEx.GetDefaultSwitchDrawer ();
 						
 
 				}
@@ -38,26 +58,27 @@ namespace ws.winx.editor.windows
 				void OnGUI ()
 				{
 
-					if (__variable != null && __properties!=null && __properties.Length) {// || __variable.ValueType.IsSubclassOf()
+						if (__variable != null && __properties != null && __properties.Length > 0) {// || __variable.ValueType.IsSubclassOf()
 								//find property Object Drawer or use default
 								Rect combinedPosition = new Rect (10, 10, 10, 25);
-								float height = combinedPosition.height = 21f;
+								float height = 0f;
 							
-								
+								EditorUtilityEx.SwitchDrawerDelegate switchDrawerDelegate;
 
-				
-								for (int i=0; i<__properties.Length; i++) {
-					BlackboardCustomEditor
-										switchDrawerDelegate = switchDrawer (__properties [i].ValueType);
+								int len = __properties.Length;
+								for (int i=0; i<len; i++) {
+
+										
+										switchDrawerDelegate = __switcher (__properties [i].ValueType);
+
+
+
 										if (switchDrawerDelegate != null) {
-																
-				
+										
+												height = switchDrawerDelegate (combinedPosition, __properties [i]).height;
 												
-												height = switchDrawerDelegate (position, __properties[i]).height;
-												combinedPosition.height += height;
-												position.y += height;
-												position.x = combinedPosition.x;
-												//	position.height=21f;
+												combinedPosition.y += height;
+											
 				
 										}
 			

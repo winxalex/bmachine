@@ -30,7 +30,7 @@ public static class ScriptableObjectUtility
 		
 		AssetDatabase.SaveAssets ();
 		AssetDatabase.Refresh();
-		EditorUtility.FocusProjectWindow ();
+		UnityEditor.EditorUtility.FocusProjectWindow ();
 		Selection.activeObject = asset;
 	}
 }

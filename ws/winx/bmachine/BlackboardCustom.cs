@@ -15,17 +15,13 @@ namespace ws.winx.bmachine
 		public class BlackboardCustom:InternalBlackboard,ISerializationCallbackReceiver
 		{
 
-		public GUIContent[] typesNames;
-
-		public dynamic kurle;
-
 		[HideInInspector]
 		public List<Type> typesCustom;
 
 		[HideInInspector]
 		public byte[] typesSerialized;
 
-		//[HideInInspector]	
+		[HideInInspector]//Uncoment for debug
 		public List<UnityVariable> variablesList;
 
 		string _typeNameSelected="Select custom type";

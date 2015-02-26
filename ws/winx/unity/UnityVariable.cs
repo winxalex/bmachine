@@ -12,7 +12,7 @@ namespace ws.winx.unity
 		public class UnityVariable:ScriptableObject,ISerializationCallbackReceiver//,IProperty
 		{
 				
-	
+				public bool serializable = true;
 
 				public Type reflectedType {
 						get {
@@ -56,7 +56,7 @@ namespace ws.winx.unity
 						   
 								__reflectedInstanceUnity = __reflectedInstance as UnityEngine.Object;
 					
-								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity);
+								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity+" Reflected instance:"+__reflectedInstance);
 						}
 				}
 
@@ -79,13 +79,13 @@ namespace ws.winx.unity
 										this.name = __memberInfo.Name;
 
 
-										if (__memberInfo.MemberType == MemberTypes.Field)
+										if (__memberInfo.MemberType == MemberTypes.Field) {
 												_valueType = ((FieldInfo)__memberInfo).FieldType;
 
-										if (__memberInfo.MemberType == MemberTypes.Property)
+										} else if (__memberInfo.MemberType == MemberTypes.Property)
 												_valueType = ((PropertyInfo)__memberInfo).PropertyType;
-
-										throw new Exception ("Unsupported MemberInfo type. Only Properties and Fields supported");
+										else
+												throw new Exception ("Unsupported MemberInfo type. Only Properties and Fields supported");
 						
 									
 								}
@@ -121,10 +121,10 @@ namespace ws.winx.unity
 
 										return this.reflectedInstance;
 								}
-								if (this.__memberInfo.MemberType == MemberTypes.Field) {
+								if (this.__memberInfo.MemberType == MemberTypes.Property) {
 										return ((PropertyInfo)this.__memberInfo).GetValue (this.reflectedInstance, null);
 								}
-								if (this.__memberInfo.MemberType == MemberTypes.Property) {
+								if (this.__memberInfo.MemberType == MemberTypes.Field) {
 										return ((FieldInfo)this.__memberInfo).GetValue (this.reflectedInstance);
 								}
 								
@@ -156,10 +156,10 @@ namespace ws.winx.unity
 
 										return;
 								}
-								if (this.__memberInfo is PropertyInfo) {
+								if (this.__memberInfo.MemberType == MemberTypes.Property) {
 										((PropertyInfo)this.__memberInfo).SetValue (this.reflectedInstance, value, null);
 								} else {
-										if (this.__memberInfo is FieldInfo != null) {
+										if (this.__memberInfo.MemberType == MemberTypes.Field) {
 												((FieldInfo)this.__memberInfo).SetValue (this.reflectedInstance, value);
 										} else {
 
@@ -190,20 +190,21 @@ namespace ws.winx.unity
 
 				public void OnBeforeSerialize ()
 				{
+						if (serializable) {
+								if (__memberInfo != null)
+										memberInfoSerialized = Utility.Serialize (this.__memberInfo);
 
-						if (__memberInfo != null)
-								memberInfoSerialized = Utility.Serialize (this.__memberInfo);
+								valueTypeSerialized = Utility.Serialize (_valueType);
 
-						valueTypeSerialized = Utility.Serialize (_valueType);
-
-						if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null)) {
+				if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null) && __reflectedInstance.GetType()!=typeof(UnityEngine.Object)) {
 
 						
-								try {
-										reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
-								} catch (Exception ex) {
+										try {
+												reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
+										} catch (Exception ex) {
 
-										Debug.Log (ex.Message);
+												Debug.Log (ex.Message + " name:" + this.name + " memInfo:" + __memberInfo + " " + __reflectedInstance + " " + __reflectedInstanceUnity);
+										}
 								}
 						}
 
@@ -212,21 +213,23 @@ namespace ws.winx.unity
 
 				public void OnAfterDeserialize ()
 				{
-						if (memberInfoSerialized != null && memberInfoSerialized.Length > 0)
-								__memberInfo = (MemberInfo)Utility.Deserialize (memberInfoSerialized);
+						if (serializable) {
+								if (memberInfoSerialized != null && memberInfoSerialized.Length > 0)
+										__memberInfo = (MemberInfo)Utility.Deserialize (memberInfoSerialized);
 
-						if (valueTypeSerialized != null && valueTypeSerialized.Length > 0)
-								_valueType = (Type)Utility.Deserialize (valueTypeSerialized);
+								if (valueTypeSerialized != null && valueTypeSerialized.Length > 0)
+										_valueType = (Type)Utility.Deserialize (valueTypeSerialized);
 
-						if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
+								if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
 
 						
 			
-								__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
+										__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
 
-						} else {
-								__reflectedInstance = __reflectedInstanceUnity;
+								} else {
+										__reflectedInstance = __reflectedInstanceUnity;
 
+								}
 						}
 
 

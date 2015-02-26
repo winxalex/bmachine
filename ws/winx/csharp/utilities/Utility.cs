@@ -28,7 +28,8 @@ namespace ws.winx.csharp.utilities
 			for (int j = 0; j < properties.Length; j++)
 			{
 				PropertyInfo propertyInfo = properties [j];
-				if ((propertyType == null || propertyInfo.PropertyType == propertyType) && ((canRead && propertyInfo.CanRead && (!canWrite || propertyInfo.CanWrite)) || (canWrite && propertyInfo.CanWrite && (!canRead || propertyInfo.CanRead))) || (isSubClass && propertyInfo.PropertyType.IsSubclassOf(propertyType)))
+				if ((propertyType == null || propertyInfo.PropertyType == propertyType || (isSubClass && propertyInfo.PropertyType.IsSubclassOf(propertyType))) 
+				    && ((canRead && propertyInfo.CanRead && (!canWrite || propertyInfo.CanWrite)) || (canWrite && propertyInfo.CanWrite && (!canRead || propertyInfo.CanRead))))
 				{
 					list.Add (propertyInfo);
 				}

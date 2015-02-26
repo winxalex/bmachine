@@ -23,6 +23,10 @@ namespace ws.winx.unity{
 			AddSurrogate(typeof(UnityEngine.Rect),new RectSurrogate());
 			AddSurrogate(typeof(UnityEngine.Quaternion),new QuaternionSurrogate());
 			AddSurrogate (typeof(BehaviourMachine.InternalBlackboard), new InternalBlackboardTempSurrogate ());
+			AddSurrogate (typeof(UnityEngine.Keyframe), new KeyFrameSurrogate ());
+			AddSurrogate (typeof(UnityEngine.AnimationCurve), new AnimationCurveSurrogate ());
+
+
 
 		
 
@@ -198,7 +202,7 @@ namespace ws.winx.unity{
 			}
 			
 			ISurrogateSelector surrogateExist=null;
-			
+
 			
 			
 			__surrogateSelector.GetSurrogate (type, __streamingContext,out surrogateExist);
