@@ -17,15 +17,22 @@ namespace ws.winx.editor{
 		static List<Func<Type,SwitchDrawerDelegate>> _drawers;
 		static Func<Type,SwitchDrawerDelegate> _defaultSwitchDrawer;
 		
-		public static void AddCustomDrawer (SwitchDrawerDelegate drawer)
+		public static void AddCustomDrawer<T> (SwitchDrawerDelegate drawer)
 		{
-			_drawers.Add (SwitchUtility.CaseIsClassOf<float,SwitchDrawerDelegate> (drawer));
+			if (_drawers == null)
+								_drawers = new List<Func<Type, SwitchDrawerDelegate>> ();
+
+			_drawers.Add (SwitchUtility.CaseIsClassOf<T,SwitchDrawerDelegate> (drawer));
 		}
 		
 		public static Func<Type, SwitchDrawerDelegate> GetDefaultSwitchDrawer ()
 		{
 			if (_defaultSwitchDrawer == null) {
-				_drawers = new List<Func<Type,SwitchDrawerDelegate>> (
+
+				if(_drawers==null)
+					_drawers=new List<Func<Type, SwitchDrawerDelegate>>();
+
+						_drawers.AddRange( 
 					
 					new Func<Type, SwitchDrawerDelegate>[]{
 					

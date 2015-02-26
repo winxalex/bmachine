@@ -71,10 +71,12 @@ namespace ws.winx.editor.bmachine
 
 								fillMenuCustomTypes ();
 
-
-								//EditorUtilityEx.AddCustomDrawer(
+								//How to add custom Drawer
+								EditorUtilityEx.AddCustomDrawer<FsmEvent> (myCustomDrawer);
 
 								switchDrawer = EditorUtilityEx.GetDefaultSwitchDrawer ();
+
+
 
 
 
@@ -283,6 +285,17 @@ namespace ws.winx.editor.bmachine
 		
 						return position;
 		
+				}
+
+				Rect myCustomDrawer (Rect position, UnityVariable variable)
+				{
+						position.width = 80f;
+						EditorGUILayoutEx.DrawName (position, variable);
+						position.width = Screen.width - 50f - position.width;
+						position.x += 90f;
+						EditorGUI.LabelField (position, new GUIContent (Guid.NewGuid ().ToString ()));
+
+						return position;
 				}
 
 				void onTypeCustomSelected (object userData)
