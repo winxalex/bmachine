@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Linq;
+using System.Reflection.Emit;
 
 namespace ws.winx.csharp.utilities
 {
 
 	public class ReflectionUtility{
 
-		public static MemberInfo[] GetPublicMembers (Type type, Type propertyType, bool staticMembers, bool canWrite, bool canRead)
+		public static MemberInfo[] GetPublicMembers (Type type, Type propertyType, bool staticMembers, bool canWrite, bool canRead, bool isSubClass=false)
 		{
 			List<MemberInfo> list = new List<MemberInfo> ();
 			BindingFlags bindingAttr = (!staticMembers) ? (BindingFlags.Instance | BindingFlags.Public) : (BindingFlags.Static | BindingFlags.Public);
@@ -18,7 +19,7 @@ namespace ws.winx.csharp.utilities
 			for (int i = 0; i < fields.Length; i++)
 			{
 				FieldInfo fieldInfo = fields [i];
-				if (propertyType == null || fieldInfo.FieldType == propertyType)
+				if (propertyType == null || fieldInfo.FieldType == propertyType || (isSubClass && fieldInfo.FieldType.IsSubclassOf(propertyType)))
 				{
 					list.Add (fieldInfo);
 				}
@@ -27,7 +28,7 @@ namespace ws.winx.csharp.utilities
 			for (int j = 0; j < properties.Length; j++)
 			{
 				PropertyInfo propertyInfo = properties [j];
-				if ((propertyType == null || propertyInfo.PropertyType == propertyType) && ((canRead && propertyInfo.CanRead && (!canWrite || propertyInfo.CanWrite)) || (canWrite && propertyInfo.CanWrite && (!canRead || propertyInfo.CanRead))))
+				if ((propertyType == null || propertyInfo.PropertyType == propertyType) && ((canRead && propertyInfo.CanRead && (!canWrite || propertyInfo.CanWrite)) || (canWrite && propertyInfo.CanWrite && (!canRead || propertyInfo.CanRead))) || (isSubClass && propertyInfo.PropertyType.IsSubclassOf(propertyType)))
 				{
 					list.Add (propertyInfo);
 				}
@@ -39,15 +40,14 @@ namespace ws.winx.csharp.utilities
 
 
 
-
-
-
 	}
 
 
 	public class SwitchUtility{
 
-		public static Action<object> Switch(params Func<object, Action>[] tests)
+
+
+		public static Action<object> Switch(IList<Func<object, Action>> tests)
 		{
 			return o =>
 			{
@@ -63,7 +63,7 @@ namespace ws.winx.csharp.utilities
 		}
 
 
-		public static Action<Type> SwitchExecute (params Func<Type, Action>[] cases)
+		public static Action<Type> SwitchExecute (IList<Func<Type,Action>> cases)
 		{
 			return o =>
 			{
@@ -87,7 +87,7 @@ namespace ws.winx.csharp.utilities
 		/// <param name="cases">Cases of method CaseIsClassOf or CaseIsTypeOf</param>
 		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		/// <example> switch(</example>
-		public static Func<Type,T> Switch<T> (params Func<Type, T>[] cases)
+		public static Func<Type,T> Switch<T> (IList<Func<Type, T>> cases)
 		{
 			return o =>
 			{

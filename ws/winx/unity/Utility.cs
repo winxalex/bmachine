@@ -10,10 +10,12 @@ using ws.winx.unity.surrogates;
 using ws.winx.csharp.utilities;
 
 
+
 namespace ws.winx.unity{
 
 	public class Utility
 	{
+	
 		static Utility(){
 
 			AddSurrogate(typeof(UnityEngine.Vector3),new Vector3Surrogate());
@@ -25,6 +27,11 @@ namespace ws.winx.unity{
 		
 
 		}
+
+
+
+
+
 
 
 	

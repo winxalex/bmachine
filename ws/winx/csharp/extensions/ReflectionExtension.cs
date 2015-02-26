@@ -25,22 +25,22 @@ namespace ws.winx.csharp.extensions{
 				throw new Exception("Property must be of type FieldInfo or PropertyInfo");
 		}
 		
-		//		public static Type GetType(this MemberInfo member)
-		//		{
-		//			switch (member.MemberType)
-		//			{
-		//			case MemberTypes.Field:
-		//				return ((FieldInfo)member).FieldType;
-		//			case MemberTypes.Property:
-		//				return ((PropertyInfo)member).PropertyType;
-		//			case MemberTypes.Event:
-		//				return ((EventInfo)member).EventHandlerType;
-		//			case MemberTypes.Method:
-		//				return ((MethodInfo)member).ReturnType;
-		//			default:
-		//				throw new ArgumentException("MemberInfo must be if type FieldInfo, PropertyInfo or EventInfo", "member");
-		//			}
-		//		}
+				public static Type GetMemberType(this MemberInfo member)
+				{
+					switch (member.MemberType)
+					{
+					case MemberTypes.Field:
+						return ((FieldInfo)member).FieldType;
+					case MemberTypes.Property:
+						return ((PropertyInfo)member).PropertyType;
+					case MemberTypes.Event:
+						return ((EventInfo)member).EventHandlerType;
+					case MemberTypes.Method:
+						return ((MethodInfo)member).ReturnType;
+					default:
+						throw new ArgumentException("MemberInfo must be if type FieldInfo, PropertyInfo or EventInfo", "member");
+					}
+				}
 	}
 }
 

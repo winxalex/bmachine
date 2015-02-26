@@ -921,6 +921,7 @@ namespace ws.winx.editor.extensions
 				{
 
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.xMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -948,6 +949,7 @@ namespace ws.winx.editor.extensions
 				public static Rect DrawBoolVar (Rect rect, UnityVariable variable)
 				{
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -975,6 +977,7 @@ namespace ws.winx.editor.extensions
 				public static Rect DrawColorVar (Rect rect, UnityVariable variable)
 				{
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
 
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
@@ -1001,9 +1004,12 @@ namespace ws.winx.editor.extensions
 		
 				public static Rect DrawFloatVar (Rect rect, UnityVariable variable)
 				{
-
+						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						//rect.height = 21;
+
+
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -1022,66 +1028,21 @@ namespace ws.winx.editor.extensions
 								EditorUtility.SetDirty (variable);
 
 						}
+
+			rectOrg.height = 21f;
 		
-						return rect;
+						return rectOrg;
 
 				}
-
-
-
-				
-
-
-				//TODO for now
-//		private static void DrawFsmEvent (Rect rect, FsmEvent fsmEvent)
-//		{
-//			rect.yMin =rect.yMin + 3f;
-//			rect.yMax =rect.yMax - 2f;
-//			rect.xMin=rect.xMin + 6f;
-//			rect.xMax =rect.xMax - 6f;
-//			bool enabled = GUI.enabled;
-//			GUI.enabled=!fsmEvent.isSystem;
-//			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), fsmEvent);
-//			GUI.enabled =enabled;
-//			rect.xMin=rect.xMin + 144f;
-//			rect.xMax = rect.xMax - 19f;
-//			EditorGUI.SelectableLabel (rect, fsmEvent.id.ToString ());
-//			rect.x=rect.x + (rect.width + 2f);
-//			rect.width=20f;
-//			rect.yMin =rect.yMin - 2f;
-//			rect.yMax =rect.yMax + 2f;
-//
-//		}
-		
-//		private static void DrawGameObjectVar (Rect rect, UnityVariable variable, bool isAsset)
-//		{
-//			rect.yMin =rect.yMin + 3f;
-//			rect.yMax=rect.yMax - 2f;
-//			rect.xMin=rect.xMin + 6f;
-//			rect.xMax =rect.xMax - 6f;
-//			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-//			rect.xMin=rect.xMin + 84f;
-//			rect.xMax =rect.xMax - 19f;
-//			EditorGUI.BeginChangeCheck ();
-//			GameObject gameObject = EditorGUI.ObjectField (rect, GUIContent.none, variable.Value, typeof(GameObject), !isAsset) as GameObject;
-//			if (EditorGUI.EndChangeCheck () && gameObject != variable.Value)
-//			{
-//
-//				Undo.RecordObject (variable, "Variable Value");
-//
-//				variable.Value = gameObject;
-//				
-//			}
-//			rect.x=rect.x + (rect.width + 2f);
-//			rect.width=20f;
-//			rect.yMin =rect.yMin - 2f;
-//			rect.yMax =rect.yMax + 2f;
-//
-//		}
 		
 				public static Rect DrawIntVar (Rect rect, UnityVariable variable)
 				{
+
+
+
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
+
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -1103,12 +1064,17 @@ namespace ws.winx.editor.extensions
 						}
 
 		
-			return rect;
+						return rect;
 				}
 
 				public static Rect DrawUnityObject (Rect rect, UnityVariable variable)
 				{
+						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
+
+
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -1124,9 +1090,13 @@ namespace ws.winx.editor.extensions
 
 								variable.Value = objectUnity;
 
+								EditorUtility.SetDirty (variable);
+
 						}
 
-						return rect;
+			rectOrg.height = 40f;
+
+						return rectOrg;
 
 				}
 
@@ -1232,6 +1202,8 @@ namespace ws.winx.editor.extensions
 				public Rect DrawObjectVar (Rect rect, UnityVariable variable)
 				{
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
+						//????/
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -1242,7 +1214,7 @@ namespace ws.winx.editor.extensions
 						rect.xMax = rect.xMax - 19f;
 						Type objectType = variable.ValueType;
 						EditorGUI.BeginChangeCheck ();
-						UnityEngine.Object @object = EditorGUI.ObjectField (rect, GUIContent.none,(UnityEngine.Object) variable.Value, objectType, true);
+						UnityEngine.Object @object = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, objectType, true);
 						if (EditorGUI.EndChangeCheck () && @object != variable.Value) {
 								
 								Undo.RecordObject (variable, "Variable Value");
@@ -1276,6 +1248,7 @@ namespace ws.winx.editor.extensions
 				public static Rect DrawQuaternionVar (Rect rect, UnityVariable variable)
 				{
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -1308,6 +1281,7 @@ namespace ws.winx.editor.extensions
 				public static Rect DrawRectVar (Rect rect, UnityVariable variable)
 				{
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
@@ -1334,6 +1308,7 @@ namespace ws.winx.editor.extensions
 				public static Rect DrawStringVar (Rect rect, UnityVariable variable)
 				{
 						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
 						rect.yMin = rect.yMin + 3f;
 						rect.yMax = rect.yMax - 2f;
 						rect.xMin = rect.xMin + 6f;
