@@ -18,7 +18,7 @@ using System.Reflection;
 namespace ws.winx.unity{
 
 	[System.Serializable]
-	public class CurveProperty:Property
+	public class CurveVariable:UnityVariable
 	{
 
 
@@ -50,7 +50,7 @@ namespace ws.winx.unity{
 		//
 		// Constructor
 		//
-		public CurveProperty()//:base()
+		public CurveVariable()//:base()
 		{
 
 			//ScriptableObject.CreateInstance<Property> ();

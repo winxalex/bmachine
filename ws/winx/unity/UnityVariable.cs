@@ -13,13 +13,6 @@ namespace ws.winx.unity
 		{
 				
 				public bool serializable = true;
-
-				public Type reflectedType {
-						get {
-								return __memberInfo.ReflectedType;
-						}
-				}
-
 				private Type _valueType = typeof(System.Object);
 				[HideInInspector]
 				public byte[]
@@ -56,7 +49,7 @@ namespace ws.winx.unity
 						   
 								__reflectedInstanceUnity = __reflectedInstance as UnityEngine.Object;
 					
-								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity+" Reflected instance:"+__reflectedInstance);
+								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity + " Reflected instance:" + __reflectedInstance);
 						}
 				}
 
@@ -196,7 +189,7 @@ namespace ws.winx.unity
 
 								valueTypeSerialized = Utility.Serialize (_valueType);
 
-				if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null) && __reflectedInstance.GetType()!=typeof(UnityEngine.Object)) {
+								if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null) && __reflectedInstance.GetType () != typeof(UnityEngine.Object)) {
 
 						
 										try {
@@ -238,22 +231,7 @@ namespace ws.winx.unity
 
 		#endregion
 
-//		public Property(MemberInfo memberInfo,UnityEngine.Object target){
-//
-//			if (memberInfo == null)
-//								return;
-//
-//			if(memberInfo is PropertyInfo || memberInfo is FieldInfo)
-//			this.name = memberInfo.Name;
-//
-//			this.reflectedObject = target;
-//
-//			this.memberInfo = memberInfo;
-//			this.reflectedType = memberInfo.ReflectedType;
-//
-//
-//
-//		}
+
 
 
 				//
@@ -264,14 +242,6 @@ namespace ws.winx.unity
 		
 						return (T)this.Value;
 				}
-
-
-//				public virtual T GetValue<T> (Type t)
-//				{
-//					return (T)this.Value;
-//				}
-		
-		
 		
 				public void OnEnable ()
 				{
@@ -289,12 +259,15 @@ namespace ws.winx.unity
 
 				public override bool Equals (object obj)
 				{
-						if (obj == null || !(obj is Property))
+						if (obj == null || !(obj is UnityVariable))
 								return false;
 
-						Property other = (Property)obj;
-						return this.reflectedInstance.Equals (other.reflectedInstance) && this.reflectedType.Equals (other.reflectedType)
-								&& this.name.Equals (other.name);
+						UnityVariable other = (UnityVariable)obj;
+
+						return 
+						(this.MemberInfo != null && this.MemberInfo.Equals (other.MemberInfo))
+								|| (this.reflectedInstance == null && this.reflectedInstance.Equals (other.reflectedInstance));
+								
 				}
 
 				public override string ToString ()

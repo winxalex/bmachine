@@ -19,6 +19,7 @@ using ws.winx.unity;
 using ws.winx.editor.extensions;
 using Motion = UnityEngine.Motion;
 
+
 using StateMachine = UnityEditorInternal.StateMachine;
 using ws.winx.bmachine;
 
@@ -33,14 +34,13 @@ namespace ws.winx.editor.bmachine.extensions
 		public class MecanimNodeCustomEditor : NodeEditor
 		{
 
-				CurveProperty curvePropertySelected;
-				UnityEngine.Object objectSelected;
+				CurveVariable curvePropertySelected;
+				UnityEngine.Object _objectSelected;
 				GUIContent propertyPopupLabel = new GUIContent (String.Empty);
-				Property propertySelected;
 				string[] curvePropertyDisplayOptions;
 				MethodInfo GetFloatVar_MethodInfo;
 				int curvePropertyIndexSelected;
-				Color colorSelected;
+				Color _colorSelected;
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
@@ -59,7 +59,8 @@ namespace ws.winx.editor.bmachine.extensions
 				Vector2 playButtonSize;
 				AvatarPreviewW avatarPreview;
 				Vector2 curvePropertiesScroller;
-				Type typeSelected;
+				Type _typeSelected;
+				UnityVariable _variableSelected;
 		        
 
 				//
@@ -254,14 +255,13 @@ namespace ws.winx.editor.bmachine.extensions
 				void onCurveSelect (int index)
 				{
 
-						if (mecanimNode.curveProperties != null)
-								curvePropertySelected = mecanimNode.curveProperties [index];
+						//	if (mecanimNode.curveProperties != null)
+						//			curvePropertySelected = mecanimNode.curveProperties [index];
 
 				}
 
 	
-	
-
+			
           
 
 				/// <summary>
@@ -269,12 +269,6 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				public override void OnInspectorGUI ()
 				{
-
-
-
-			
-		
-
 						int i = 0;
 
 
@@ -285,8 +279,6 @@ namespace ws.winx.editor.bmachine.extensions
 
 						if (mecanimNode != null) {
 
-			
-			
 						
 								Motion motion;
 								if (mecanimNode.motionOverride == null)
@@ -295,10 +287,6 @@ namespace ws.winx.editor.bmachine.extensions
 										motion = mecanimNode.motionOverride;
 	
 		
-			
-						
-					
-
 
 								if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
 										Debug.LogError ("Can't override state that doesn't contain motion");
@@ -312,9 +300,7 @@ namespace ws.winx.editor.bmachine.extensions
 								}
 
 
-								CurveProperty propertyNew = null;
-
-
+								
 								//_curvesEditorShow=EditorGUILayout.Foldout(_curvesEditorShow,"Curves");
 								//EditorGUILayout.CurveField
 								int indentLevel = 0;
@@ -330,6 +316,8 @@ namespace ws.winx.editor.bmachine.extensions
 								if (true) {
 										//Debug.Log("LAst"+GUILayoutUtility.GetLastRect()+" "+GUILayoutUtility.GetRect(100,200));
 
+
+										//This makes layout to work (Reserving space)
 										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 46f, 200);
 
 //					if(curveEditorRect.height<200) curveEditorRect.height=200;
@@ -381,26 +369,26 @@ namespace ws.winx.editor.bmachine.extensions
 
 										//mecanimNode.curveProperties.Select ((item)=>item.curve);
 
-//					if(curveEditor==null){
-//
-//						curveEditor=new CurveEditorW(curveEditorRect,,false);
-//					
-//						curveEditor.FrameSelected (true, true);
-//						curveEditor.scaleWithWindow=true;
-//
-//						curveEditor.onSelect+=onCurveSelect;
-//
-//					}
-//						else {
-//
-//						curveEditor.rect=curveEditorRect;
-//						curveEditor.FrameSelected (false, false);
-//					}
-//
-//
-//					EditorGUILayout.BeginVertical(new GUILayoutOption[] {GUILayout.Width(200)});
-//					curveEditor.DoEditor();
-//					EditorGUILayout.EndVertical();
+										if (curveEditor == null) {
+
+												curveEditor = new CurveEditorW (curveEditorRect, new AnimationCurve (), false);
+					
+												curveEditor.FrameSelected (true, true);
+												curveEditor.scaleWithWindow = true;
+
+												curveEditor.onSelect += onCurveSelect;
+
+										} else {
+
+												curveEditor.rect = curveEditorRect;
+												curveEditor.FrameSelected (false, false);
+												//curveEditor.animationCurves
+										}
+
+
+										EditorGUILayout.BeginVertical (new GUILayoutOption[] {GUILayout.Width (200)});
+										curveEditor.DoEditor ();
+										EditorGUILayout.EndVertical ();
 
 
 
@@ -412,165 +400,81 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 										GUIContent[] displayOptions = null;
-										CurveProperty[] values = null;
+										UnityVariable[] values = null;
 
 
 										//select object which properties would be extracted
-										objectSelected = EditorGUILayout.ObjectField (objectSelected, typeof(UnityEngine.Object), true);
+										_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
 
-										typeSelected = typeof(UnityEngine.Vector3);//typeof(float);
+										
+										_typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, _typeSelected, EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes);
 
-										//EditorGUILayout.P
+										
 						
-										if (objectSelected != null) {//extract properties
-												propertyPopupLabel.text = "Select [" + objectSelected.name + "] property";
-												//typeof(Vector3).MakeGenericType(
-												//ws.winx.unity.Utility.ObjectToDisplayOptionsValues<Vector3,CurveProperty>(objectSelected,out displayOptions,out values);
+										if (_objectSelected != null) {//extract properties
+												propertyPopupLabel.text = "Select [" + _objectSelected.name + "] property";
+												
+									
+												//get properties from object by object type
+												Utility.ObjectToDisplayOptionsValues<UnityVariable> (_objectSelected, _typeSelected, out displayOptions, out values);
+
+
 										} else {//use Global and Local blackboard
 
 
 												propertyPopupLabel.text = "Select blackboard variable";
 
 
-												List<UnityVariable> localBlackBoardList = mecanimNode.blackboard.GetPropertyBy (typeSelected);
+												List<UnityVariable> localBlackBoardList = mecanimNode.blackboard.GetPropertyBy (_typeSelected);
 
 
-//
+
 												displayOptions = localBlackBoardList.Select ((item) => new GUIContent (item.name)).ToArray ();
-//
-//
-												//values=localBlackBoardList.ToArray();
 
-												mecanimNode.propTest = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (propertyPopupLabel, mecanimNode.propTest, displayOptions, localBlackBoardList);
+
+												values = localBlackBoardList.ToArray ();
 
 										}
 
 					
+										_variableSelected = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (null, _variableSelected, displayOptions, values);
 
 				
-//					int index=i;
-//					FloatVar floatVar;
-//					for(;i<floatVarsMax;i++){
-//						if(i<floatVarsLengthGlobal){
-//								floatVar=GlobalBlackboard.Instance.GetFloatVar(floatVarsGlobal[i].name);
-//
-//								displayOptions[index]=new GUIContent("Global/"+floatVar.name);
-//								propertyNew=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
-//
-//								values[index]=propertyNew;
-//								propertyNew.MemberInfo=floatVar.GetType().GetProperty("Value",BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-//								propertyNew.reflectedInstance=floatVar;
-//							
-//							index++;
-//						}
-//
-//						if(i<floatVarsLengthLocal){
-//							
-//							floatVar=mecanimNode.blackboard.GetFloatVar(floatVarLocal[i].name);
-//								//mecanimNode.blackboard.a[0].GetType
-//
-//
-//							propertyNew=(CurveProperty)ScriptableObject.CreateInstance<CurveProperty>();
-//							displayOptions[index]=new GUIContent("Local/"+floatVar.name);
-//
-//							values[index]=propertyNew;
-//							propertyNew.MemberInfo=floatVar.GetType().GetProperty("Value",BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-//							propertyNew.reflectedInstance=floatVar;
-//
-//							index++;
-//						}
-//						
-//					  }
-//					}
+										_colorSelected = EditorGUILayout.ColorField (_colorSelected);
 
-
-										//if(displayOptions!=null && values!=null && displayOptions.Length==values.Length){
-										//propertySelected=EditorGUILayoutEx.CustomObjectPopup<Property>(propertyPopupLabel,propertySelected,displayOptions,values);
-										//((BehaviourMachine.Blackboard)this.mecanimNode.blackboard).a[3];
-
-				
-										//curvePropertySelected=EditorGUILayoutEx.CustomObjectPopup<CurveProperty>(propertyPopupLabel,curvePropertySelected,displayOptions,values);
-
-										colorSelected = EditorGUILayout.ColorField (colorSelected);
-
-										//if(mecanimNode.mile!=null)
-										//Debug.Log("Mecanode"+mecanimNode.mile);
-
-										//if(curvePropertySelected!=null)
-										//	Debug.Log (curvePropertySelected.name+" value:"+curvePropertySelected.Value);
-
-
-										//(mecanimNode.propTest.type) mecanimNode.propTest.GetValue<t>();
+									
+									
 
 
 
-										if (mecanimNode.propTest != null)
-												Debug.Log (mecanimNode.propTest.name + " value:" + mecanimNode.propTest.Value);
-
-
-										if (GUILayout.Button ("Add blackboard")) {
-												UnityVariable propTest = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-							
-												//propTest.MemberInfo=curvePropertySelected.MemberInfo;
-												//propTest.reflectedInstance=curvePropertySelected.reflectedInstance;
-												propTest.Value = new Vector3 (13, 115, 230);//4.5f;//
-												propTest.name = "test prop from local blackboar Vec";
-
-												mecanimNode.blackboard.AddProperty (propTest);
-										}
-
-
-										if (GUILayout.Button ("Change blackboard value")) {
-												//mecanimNode.blackboard.variablesList[0].Value=5.6f;
-												//	((Vector3)mecanimNode.blackboard.variablesList[1].Value).y=500;
-												Vector3 newValue = (Vector3)mecanimNode.blackboard.variablesList [1].Value;
-												newValue.y = 500;
-												mecanimNode.blackboard.variablesList [1].Value = newValue;
-										}
 						
 
-										if (GUILayout.Button ("Add") && mecanimNode.propTest != null) {
+										if (GUILayout.Button ("Add") && _variableSelected != null) {
 
 
+												//how to access elements in LIST !!!! ????
+												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+												if (iterator.Find ("variablesBindedToCurves")) {
 
-												//mecanimNode.propTest=null;//new PropertyTest();
-//						mecanimNode.propTest=(PropertyTest)ScriptableObject.CreateInstance<PropertyTest>();//new PropertyTest();
-//
-//						mecanimNode.propTest.MemberInfo=curvePropertySelected.MemberInfo;
-//						mecanimNode.propTest.reflectedInstance=curvePropertySelected.reflectedInstance;
-//					
-//
-//
-//
-//						mecanimNode.mile=(Property)ScriptableObject.CreateInstance<Property>();
-//
-//
-//
-//								//mecanimNode.curveProperties.Add(newCurveProperty);
-//
-//
-//								//can be some preset
-//								AnimationCurve curveNew=new AnimationCurve();
-//							
-//														curveNew.AddKey(new Keyframe(0, 1));
-//														curveNew.AddKey(new Keyframe(1, 1));
-//
-//								curvePropertySelected.curve=curveNew;
-//								curvePropertySelected.id=("Curve"+mecanimNode.curveProperties.Length).GetHashCode();
-//								curvePropertySelected.color=colorSelected;
-//								
-//								//curvePropertySelected=newCurveProperty;
-//
-//								mecanimNode.curveProperty=curvePropertySelected;
-//
-//								Array.Resize(ref mecanimNode.curveProperties,mecanimNode.curveProperties.Length+1);
-//
-//								mecanimNode.curveProperties[mecanimNode.curveProperties.Length-1]=curvePropertySelected;
+												SerializedNodeProperty variablesBindedToCurvesSerialized = iterator.current;
+													
+
+												}
+
+												List<UnityVariabl> mecanimNode.variablesBindedToCurves.ToList().Add(_variableSelected).
+												mecanimNode.variablesBindedToCurves=
+												mecanimNode.curvesColors.Add (_colorSelected);
+												mecanimNode.curves.Add (new AnimationCurve (new Keyframe[] {
+														new Keyframe (0f, 0f),
+														new Keyframe (1f, 1f)
+												}));
+
+
 
 
 												this.serializedNode.ApplyModifiedProperties ();
 
-												//AssetDatabase.SaveAssets();
+											
 
 										}
 

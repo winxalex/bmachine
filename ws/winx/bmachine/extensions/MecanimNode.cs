@@ -7,6 +7,7 @@
 // 			by Alex Winx
 //----------------------------------------------
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -19,23 +20,17 @@ namespace ws.winx.bmachine.extensions
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
 		public class MecanimNode:CompositeNode
 		{
+				
 
+				public new BlackboardCustom blackboard {
+						get{ return (BlackboardCustom)base.blackboard; }
+				}
 
-				public new BlackboardCustom blackboard{
-			get{  return (BlackboardCustom) base.blackboard; }
-		}
-				
-				public UnityVariable propTest;
-			
-				public CurveProperty[] curveProperties;
-				public CurveProperty curveProperty;
-				
-				public Property mile;
-				public Property[] miles;
+				public List<AnimationCurve> curves;
+				public List<Color> curvesColors;
 
-				
-				
-				//public string property = string.Empty;
+				[HideInInspector]
+				public UnityVariable[] variablesBindedToCurves;
 				
 				[MecanimStateInfoAttribute("animator")]
 				public MecanimStateInfo
@@ -133,26 +128,19 @@ namespace ws.winx.bmachine.extensions
 		
 				public override void Reset ()
 				{
-						Debug.Log (this.name+">Reset");
+						Debug.Log (this.name + ">Reset");
 						_animator = null;
 						
 						transitionDuration = 0f;
 
-
-
-//			
-
-						//mile = new Property<float> (null, null);
-			//mile = (Property)ScriptableObject.CreateInstance<Property> ();
-			//miles = new Property[0];
-						
-					//	curveProperties = new CurveProperty[0];
-						
+						curvesColors=new List<Color>();
+						curves=new List<AnimationCurve>();
+						variablesBindedToCurves=new UnityVariable[0];
 				}
 
 				public override void Awake ()
 				{
-			Debug.Log ("Awake");
+						Debug.Log ("Awake");
 //					BlackboardSurogate surrogate = new BlackboardSurogate ();
 //					surrogate.blackboard = GlobalBlackboard.Instance;
 //					Utility.AddSurrogate (typeof(BehaviourMachine.GlobalBlackboard), surrogate);

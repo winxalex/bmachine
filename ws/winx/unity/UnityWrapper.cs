@@ -1004,26 +1004,22 @@ namespace ws.winx.unity
 						get{ return __instance;}
 				}
 
-
-					public static Type GetWrappedType ()
-					{
+				public static Type GetWrappedType ()
+				{
 						if (__RealType == null) {
-							Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-							__RealType = assembly.GetType ("UnityEditor.NormalCurveRenderer");
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.NormalCurveRenderer");
 						}
 						
 						return __RealType;
 						
-					}
+				}
 
 				public static void InitType ()
 				{
 						if (method_ctor == null) {
 							
-
-
-
-								method_ctor = __RealType.GetConstructor (new Type[] {
+								method_ctor = GetWrappedType ().GetConstructor (new Type[] {
 					typeof(AnimationCurve)
 						
 				});
@@ -1060,7 +1056,7 @@ namespace ws.winx.unity
 	
 	#region CurveWrapper
 		[Serializable]
-		public class CurveWrapperW:ScriptableObject
+		public class CurveWrapperW
 		{
 		
 				private static Type __RealType;
@@ -1287,7 +1283,7 @@ namespace ws.winx.unity
 								value.Select ((item) => item.curve);
 								_curveWrappersW = value;
 
-								PropertyInfo_animationCurves.SetValue (__instance, CurveWrappersWToCurveWrappers (value),null);
+								PropertyInfo_animationCurves.SetValue (__instance, CurveWrappersWToCurveWrappers (value), null);
 						}
 						get {
 								return _curveWrappersW;
@@ -1423,12 +1419,12 @@ namespace ws.winx.unity
 				{
 						CurveWrapperW curveWrapperW;
 						Array curveWrapperArray = Array.CreateInstance (CurveWrapperW.GetWrappedType (), curves.Length);
-						_curveWrappersW=new CurveWrapperW[curves.Length];
+						_curveWrappersW = new CurveWrapperW[curves.Length];
 				
 						AnimationCurve curve;
 						for (int i=0; i<curves.Length; i++) {
 								curve = curves [i];
-								_curveWrappersW[i]= curveWrapperW = new CurveWrapperW ();
+								_curveWrappersW [i] = curveWrapperW = new CurveWrapperW ();
 								curveWrapperW.id = ("Curve" + i).GetHashCode ();
 								curveWrapperW.curve = curve;
 						

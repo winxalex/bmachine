@@ -293,7 +293,7 @@ namespace ws.winx.editor.bmachine
 						EditorGUILayoutEx.DrawName (position, variable);
 						position.width = Screen.width - 50f - position.width;
 						position.x += 90f;
-						EditorGUI.LabelField (position, new GUIContent (Guid.NewGuid ().ToString ()));
+						EditorGUI.LabelField (position, new GUIContent ((-1 * Mathf.Abs (Guid.NewGuid ().GetHashCode ())).ToString ()));
 
 						return position;
 				}
