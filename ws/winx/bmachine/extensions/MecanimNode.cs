@@ -26,8 +26,11 @@ namespace ws.winx.bmachine.extensions
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
 
-				public List<AnimationCurve> curves;
-				public List<Color> curvesColors;
+		[HideInInspector]
+				public AnimationCurve[] curves;
+
+		[HideInInspector]
+				public Color[] curvesColors;
 
 				[HideInInspector]
 				public UnityVariable[] variablesBindedToCurves;
@@ -91,7 +94,8 @@ namespace ws.winx.bmachine.extensions
 
 												//bind all clips from animator.runtimeAnimatorController to overrider
 												_animatorOverrideController.runtimeAnimatorController = animator.runtimeAnimatorController;
-										}
+					}												
+				
 
 								}
 
@@ -133,9 +137,10 @@ namespace ws.winx.bmachine.extensions
 						
 						transitionDuration = 0f;
 
-						curvesColors=new List<Color>();
-						curves=new List<AnimationCurve>();
+						curvesColors=new Color[0];
+						curves=new AnimationCurve[0];
 						variablesBindedToCurves=new UnityVariable[0];
+						
 				}
 
 				public override void Awake ()

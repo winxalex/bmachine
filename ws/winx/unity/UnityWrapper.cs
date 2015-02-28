@@ -1210,6 +1210,7 @@ namespace ws.winx.unity
 				private object __instance;
 				CurveMenuManagerW m_MenuManager;
 				CurveWrapperW[] _curveWrappersW;
+				private int _indexSelected = -1;
 
 				public delegate void SelectHandler (int index);
 	
@@ -1317,7 +1318,7 @@ namespace ws.winx.unity
 								PropertyInfo_topmargin = __RealType.GetProperty ("topmargin");
 								PropertyInfo_drawRect = __RealType.BaseType.GetProperty ("drawRect");
 								PropertyInfo_mousePositionInDrawing = __RealType.BaseType.GetProperty ("mousePositionInDrawing");
-								PropertyInfo_animationCurves = __RealType.BaseType.GetProperty ("animationCurves");
+								PropertyInfo_animationCurves = __RealType.GetProperty ("animationCurves");
 				
 				
 								MethodInfo_OnGUI = __RealType.GetMethod ("OnGUI");
@@ -1396,6 +1397,33 @@ namespace ws.winx.unity
 			
 				}
 
+				public void RemoveCurveAt (int index)
+				{
+						if (index > -1 && index < _curveWrappersW.Length) {
+								List<CurveWrapperW> list = _curveWrappersW.ToList ();
+								list.RemoveAt (index);
+								_curveWrappersW = list.ToArray ();
+						
+								PropertyInfo_animationCurves.SetValue (__instance, CurveWrappersWToCurveWrappers (_curveWrappersW), null);
+
+						}
+
+						_indexSelected = -1;
+				}
+
+				public void AddCurve (CurveWrapperW curveWrapperW)
+				{
+						int len = _curveWrappersW.Length;
+
+						curveWrapperW.id = ("Curve" + len).GetHashCode ();
+
+						Array.Resize (ref _curveWrappersW, len + 1);
+						_curveWrappersW [len] = curveWrapperW;
+
+						PropertyInfo_animationCurves.SetValue (__instance, CurveWrappersWToCurveWrappers (_curveWrappersW), null);
+						
+				}
+
 				Array CurveWrappersWToCurveWrappers (CurveWrapperW[] curveWrappers)
 				{
 
@@ -1405,13 +1433,14 @@ namespace ws.winx.unity
 						CurveWrapperW curveWrapperW;
 						for (int i=0; i<curveWrapperArray.Length; i++) {
 								curveWrapperW = curveWrappers [i];
+								curveWrapperW.id = ("Curve" + i).GetHashCode ();
 								curveWrapperArray.SetValue (curveWrapperW.wrapped, i);
 						}
 
 
 						_curveWrappersW = curveWrappers;
 
-						return curveWrappers;
+						return curveWrapperArray;
 			
 				}
 		
@@ -1615,7 +1644,24 @@ namespace ws.winx.unity
 										int curveAtPosition = this.GetCurveAtPosition (this.ViewToDrawingTransformPoint (Event.current.mousePosition), out vector);//this.GetCurveAtPosition (offset, out vector);
 					
 										if (curveAtPosition > -1) {
+												Color clr = this.animationCurves [curveAtPosition].color;
+												this.animationCurves [curveAtPosition].color = new Color (clr.r, clr.g, clr.b, 0.5f);
+													
+												if (_indexSelected > -1) {
+														clr = this.animationCurves [_indexSelected].color;
+														this.animationCurves [_indexSelected].color = new Color (clr.r, clr.g, clr.b, 1f);
+												}
+												
+												_indexSelected = curveAtPosition;
+
 												onSelect (curveAtPosition);
+										} else {
+												if (_indexSelected > -1) {
+														Color clr = this.animationCurves [_indexSelected].color;
+														this.animationCurves [_indexSelected].color = new Color (clr.r, clr.g, clr.b, 1f);
+												}
+
+												_indexSelected = -1;
 										}
 								}
 

@@ -21,7 +21,7 @@ namespace ws.winx.bmachine
 		[HideInInspector]
 		public byte[] typesSerialized;
 
-		[HideInInspector]//Uncoment for debug
+	//	[HideInInspector]//Uncoment for debug
 		public List<UnityVariable> variablesList;
 
 		string _typeNameSelected="Select custom type";

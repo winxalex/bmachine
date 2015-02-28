@@ -39,7 +39,7 @@ namespace ws.winx.editor.bmachine.extensions
 				GUIContent propertyPopupLabel = new GUIContent (String.Empty);
 				string[] curvePropertyDisplayOptions;
 				MethodInfo GetFloatVar_MethodInfo;
-				int curvePropertyIndexSelected;
+				int _curveIndexSelected;
 				Color _colorSelected;
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
@@ -61,6 +61,7 @@ namespace ws.winx.editor.bmachine.extensions
 				Vector2 curvePropertiesScroller;
 				Type _typeSelected;
 				UnityVariable _variableSelected;
+				
 		        
 
 				//
@@ -254,7 +255,13 @@ namespace ws.winx.editor.bmachine.extensions
 
 				void onCurveSelect (int index)
 				{
+						Debug.Log ("Curve " + index + " selected");
 
+						_curveIndexSelected = index;
+
+						if (index > -1 && index<mecanimNode.variablesBindedToCurves.Length) {
+								_variableSelected = mecanimNode.variablesBindedToCurves [index];
+						}
 						//	if (mecanimNode.curveProperties != null)
 						//			curvePropertySelected = mecanimNode.curveProperties [index];
 
@@ -273,7 +280,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-						DrawDefaultInspector ();
+						
 
 						mecanimNode = target as MecanimNode;
 
@@ -301,11 +308,11 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 								
-								//_curvesEditorShow=EditorGUILayout.Foldout(_curvesEditorShow,"Curves");
+								_curvesEditorShow=EditorGUILayout.Foldout(_curvesEditorShow,"Curves");
 								//EditorGUILayout.CurveField
 								int indentLevel = 0;
 								Rect curveEditorRect;
-								//Rect curveEditorRect=GUILayoutUtility.GetLastRect();
+								
 
 
 
@@ -313,65 +320,49 @@ namespace ws.winx.editor.bmachine.extensions
 			
 
 				
-								if (true) {
+								if (_curvesEditorShow) {
 										//Debug.Log("LAst"+GUILayoutUtility.GetLastRect()+" "+GUILayoutUtility.GetRect(100,200));
 
 
 										//This makes layout to work (Reserving space)
-										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 46f, 200);
+										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
 
-//					if(curveEditorRect.height<200) curveEditorRect.height=200;
-//					curveEditorRect.width=Screen.width-46;
-//					curveEditorRect.y=400;
-										//GUILayout.BeginArea(curveEditorRect);
-										//curveEditorRect=
+
 
 
 
 										EditorGUILayout.BeginHorizontal ();
 
-										//	curveEditorRect.y=curveEditorRect.height+16f;
-										//	curveEditorRect.height=200;
-										//	curveEditorRect.width=Screen.width-46f;
-				
-										//	Debug.Log(curveEditorRect+" "+Event.current.type);
-
-
-					
-			
-					
-					
-//					AnimationCurve curve1=new AnimationCurve();
-//
-//
-//
-//						curve1.AddKey(new Keyframe(0, 1));
-//						curve1.AddKey(new Keyframe(1, 1));
-//
-//				
-//
-//					AnimationCurve curve2=new AnimationCurve();
-//
-//
-//					float tan45 = Mathf.Tan(Mathf.Deg2Rad * 45);
-//					
-//				
-//					curve2.AddKey(new Keyframe(0, 0, tan45, tan45));
-//					curve2.AddKey(new Keyframe(1, 1, tan45, tan45));
-
+										
 										indentLevel = EditorGUI.indentLevel;
 										EditorGUI.indentLevel = 0;
 
 
 
 										/////// CURVE EDITOR ////////
-										curveEditorRect.width = curveEditorRect.width - 200;
+										curveEditorRect.width = curveEditorRect.width - 16f;
 
-										//mecanimNode.curveProperties.Select ((item)=>item.curve);
-
+										
 										if (curveEditor == null) {
 
-												curveEditor = new CurveEditorW (curveEditorRect, new AnimationCurve (), false);
+												CurveWrapperW[] curveWrappers;
+
+												int numCurves = mecanimNode.curves.Length;
+
+												curveWrappers = new CurveWrapperW[numCurves];
+
+												CurveWrapperW curveWrapperNew;
+
+												for (i=0; i<numCurves; i++) {
+														curveWrapperNew = new CurveWrapperW ();
+														curveWrapperNew.curve = mecanimNode.curves [i];
+														curveWrapperNew.color = mecanimNode.curvesColors [i];
+														curveWrappers [i] = curveWrapperNew;
+												}
+
+
+
+												curveEditor = new CurveEditorW (curveEditorRect, curveWrappers, false);
 					
 												curveEditor.FrameSelected (true, true);
 												curveEditor.scaleWithWindow = true;
@@ -379,10 +370,10 @@ namespace ws.winx.editor.bmachine.extensions
 												curveEditor.onSelect += onCurveSelect;
 
 										} else {
-
+												
 												curveEditor.rect = curveEditorRect;
 												curveEditor.FrameSelected (false, false);
-												//curveEditor.animationCurves
+												
 										}
 
 
@@ -412,7 +403,7 @@ namespace ws.winx.editor.bmachine.extensions
 										
 						
 										if (_objectSelected != null) {//extract properties
-												propertyPopupLabel.text = "Select [" + _objectSelected.name + "] property";
+												propertyPopupLabel.text = "Select [" + _objectSelected.name + "]";
 												
 									
 												//get properties from object by object type
@@ -422,7 +413,7 @@ namespace ws.winx.editor.bmachine.extensions
 										} else {//use Global and Local blackboard
 
 
-												propertyPopupLabel.text = "Select blackboard variable";
+												propertyPopupLabel.text = "Select blackboard";
 
 
 												List<UnityVariable> localBlackBoardList = mecanimNode.blackboard.GetPropertyBy (_typeSelected);
@@ -437,7 +428,7 @@ namespace ws.winx.editor.bmachine.extensions
 										}
 
 					
-										_variableSelected = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (null, _variableSelected, displayOptions, values);
+										_variableSelected = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (propertyPopupLabel, _variableSelected, displayOptions, values);
 
 				
 										_colorSelected = EditorGUILayout.ColorField (_colorSelected);
@@ -456,21 +447,44 @@ namespace ws.winx.editor.bmachine.extensions
 												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
 												if (iterator.Find ("variablesBindedToCurves")) {
 
-												SerializedNodeProperty variablesBindedToCurvesSerialized = iterator.current;
+														SerializedNodeProperty variablesBindedToCurvesSerialized = iterator.current;
 													
 
 												}
 
-												List<UnityVariabl> mecanimNode.variablesBindedToCurves.ToList().Add(_variableSelected).
-												mecanimNode.variablesBindedToCurves=
-												mecanimNode.curvesColors.Add (_colorSelected);
-												mecanimNode.curves.Add (new AnimationCurve (new Keyframe[] {
-														new Keyframe (0f, 0f),
-														new Keyframe (1f, 1f)
-												}));
+												List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
+												vList.Add (_variableSelected);
+												mecanimNode.variablesBindedToCurves = vList.ToArray ();
+
+												List<Color> cList = mecanimNode.curvesColors.ToList ();
+												_colorSelected.a = 1;
+												cList.Add (_colorSelected);
+												mecanimNode.curvesColors = cList.ToArray ();
+
+												List<AnimationCurve> crList = mecanimNode.curves.ToList ();
 
 
+												AnimationCurve curveAnimationNew;
 
+												curveAnimationNew = new AnimationCurve (new Keyframe[] {
+							new Keyframe (0f, 0f),
+							new Keyframe (1f, 1f)
+						});
+
+												//TODO add from preset
+												crList.Add (curveAnimationNew);
+
+												mecanimNode.curves = crList.ToArray ();
+
+												CurveWrapperW curveWrapperW = new CurveWrapperW ();
+												
+												curveWrapperW.color = _colorSelected;
+												
+												curveWrapperW.curve = curveAnimationNew;
+
+												curveEditor.AddCurve (curveWrapperW);
+
+												curveEditor.FrameSelected (true, true);
 
 												this.serializedNode.ApplyModifiedProperties ();
 
@@ -478,10 +492,32 @@ namespace ws.winx.editor.bmachine.extensions
 
 										}
 
+										if (GUILayout.Button ("Remove")) {
 
 
+												curveEditor.RemoveCurveAt (_curveIndexSelected);
 
 
+												List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
+												vList.RemoveAt (_curveIndexSelected);
+												mecanimNode.variablesBindedToCurves = vList.ToArray ();
+						
+												List<Color> cList = mecanimNode.curvesColors.ToList ();
+
+												cList.RemoveAt (_curveIndexSelected);
+												mecanimNode.curvesColors = cList.ToArray ();
+						
+												List<AnimationCurve> crList = mecanimNode.curves.ToList ();
+				
+												crList.RemoveAt (_curveIndexSelected);
+						
+												mecanimNode.curves = crList.ToArray ();
+
+												_curveIndexSelected=-1;
+
+												this.serializedNode.ApplyModifiedProperties ();
+
+											}
 
 
 
@@ -491,30 +527,26 @@ namespace ws.winx.editor.bmachine.extensions
 										//GUILayout.EndArea();
 
 										EditorGUI.indentLevel = indentLevel;
+								}else{
+											DrawDefaultInspector ();
+
 								}
 
-//				
-								EditorGUILayout.LabelField ("mile2");
 
-								EditorGUILayout.LabelField ("mile2");
-
-								EditorGUILayout.LabelField ("mile2");
-								EditorGUILayout.LabelField ("mile5");
-//				
-				
-						
-								return;
 
 								/////////// Avatar Preview GUI ////////////
 								
 				
 								if (!Application.isPlaying && motion != null) {
 						
-										EditorGUILayout.LabelField ("Events Timeline");
+									
 										
 
 										
+										//This makes layout to work (Reserving space)
+										Rect avatarRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
 
+										
 									
 										if (avatarPreview == null)
 												avatarPreview = new AvatarPreviewW (null, motion);
@@ -522,12 +554,10 @@ namespace ws.winx.editor.bmachine.extensions
 												avatarPreview.SetPreviewMotion (motion);
 									
 										
-										Rect avatarRect = EditorGUILayout.BeginHorizontal ();
+										
+										 EditorGUILayout.BeginHorizontal ();
 
-										avatarRect.y = curveEditorRect.yMax;
-
-										avatarRect.y += 30f;
-										avatarRect.height = Screen.height - avatarRect.y - 20f;
+										
 
 										if (eventTimeValues != null && Event.current.type == EventType.Repaint) {
 
@@ -557,7 +587,7 @@ namespace ws.winx.editor.bmachine.extensions
 										avatarPreview.timeControl.playbackSpeed = mecanimNode.speed;
 
 
-
+										
 
 
 										avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
@@ -595,8 +625,11 @@ namespace ws.winx.editor.bmachine.extensions
 					
 												eventTimeLineInitalized = true;
 										}
+
+										
 				
-										Rect timeLineRect = GUILayoutUtility.GetLastRect ();
+										Rect timeLineRect=GUILayoutUtility.GetRect (Screen.width - 16f, 50f);
+										//Rect timeLineRect = GUILayoutUtility.GetLastRect ();
 				
 										timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
 										timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
@@ -605,7 +638,7 @@ namespace ws.winx.editor.bmachine.extensions
 				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd
 										);
 				
-				
+										EditorGUILayout.LabelField ("Events Timeline");
 				
 										SendEventNormalized ev;
 				

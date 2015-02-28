@@ -49,7 +49,7 @@ namespace ws.winx.unity
 						   
 								__reflectedInstanceUnity = __reflectedInstance as UnityEngine.Object;
 					
-								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity + " Reflected instance:" + __reflectedInstance);
+//								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity + " Reflected instance:" + __reflectedInstance);
 						}
 				}
 
