@@ -1192,6 +1192,9 @@ namespace ws.winx.unity
 				static MethodInfo MethodInfo_getCurveWrapperById;
 				static MethodInfo MethodInfo_GetGUIPoint;
 				static MethodInfo MethodInfo_DeleteKeys;
+
+		static MethodInfo MethodInfo_DrawLine;
+
 				private static PropertyInfo PropertyInfo_rect;
 				private static PropertyInfo PropertyInfo_scaleWithWindow;
 				private static PropertyInfo PropertyInfo_drawRect;
@@ -1328,6 +1331,7 @@ namespace ws.winx.unity
 								MethodInfo_GetCurveAtPosition = __RealType.GetMethod ("GetCurveAtPosition", BindingFlags.NonPublic | BindingFlags.Instance);
 								MethodInfo_CreateKeyFromClick = __RealType.GetMethod ("CreateKeyFromClick", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[]{typeof(object)}, null);
 								MethodInfo_DeleteKeys = __RealType.GetMethod ("DeleteKeys", BindingFlags.NonPublic | BindingFlags.Instance);
+								MethodInfo_DrawLine = __RealType.GetMethod ("DrawLine", BindingFlags.NonPublic | BindingFlags.Instance);
 
 
 
@@ -1396,6 +1400,12 @@ namespace ws.winx.unity
 		
 			
 				}
+
+
+		public void DrawLine (Vector2 lhs, Vector2 rhs)
+		{
+			MethodInfo_DrawLine.Invoke(__instance,new object[]{lhs,rhs});
+		}
 
 				public void RemoveCurveAt (int index)
 				{
