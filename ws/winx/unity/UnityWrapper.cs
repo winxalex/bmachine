@@ -1192,14 +1192,22 @@ namespace ws.winx.unity
 				static MethodInfo MethodInfo_getCurveWrapperById;
 				static MethodInfo MethodInfo_GetGUIPoint;
 				static MethodInfo MethodInfo_DeleteKeys;
-
-		static MethodInfo MethodInfo_DrawLine;
-
 				private static PropertyInfo PropertyInfo_rect;
 				private static PropertyInfo PropertyInfo_scaleWithWindow;
 				private static PropertyInfo PropertyInfo_drawRect;
 				static PropertyInfo PropertyInfo_margin;
 				static PropertyInfo PropertyInfo_topmargin;
+				static PropertyInfo PropertyInfo_leftmargin;
+				static PropertyInfo PropertyInfo_rightmargin;
+				static PropertyInfo PropertyInfo_bottommargin;
+				static PropertyInfo PropertyInfo_vSlider;
+				static PropertyInfo PropertyInfo_hSlider;
+				static PropertyInfo PropertyInfo_hRangeMax;
+				static PropertyInfo PropertyInfo_hRangeMin;
+				static PropertyInfo PropertyInfo_vRangeMax;
+				static PropertyInfo PropertyInfo_vRangeMin;
+				static PropertyInfo PropertyInfo_vRangeLocked;
+				static PropertyInfo PropertyInfo_hRangeLocked;
 				static PropertyInfo PropertyInfo_mousePositionInDrawing;
 				static PropertyInfo PropertyInfo_animationCurves;
 				static FieldInfo FieldInfo_m_Selection;
@@ -1247,6 +1255,21 @@ namespace ws.winx.unity
 						set{ PropertyInfo_topmargin.SetValue (__instance, value, null);}
 				}
 
+				public float leftmargin {
+					
+						set{ PropertyInfo_leftmargin.SetValue (__instance, value, null);}
+				}
+
+				public float rightmargin {
+						
+						set{ PropertyInfo_rightmargin.SetValue (__instance, value, null);}
+				}
+
+				public float bottommargin {
+					
+						set{ PropertyInfo_bottommargin.SetValue (__instance, value, null);}
+				}
+
 				public Vector2 mousePositionInDrawing {
 						get{ return (Vector2)PropertyInfo_mousePositionInDrawing.GetValue (__instance, null);}
 
@@ -1271,15 +1294,52 @@ namespace ws.winx.unity
 						get{ return FieldInfo_m_Selection.GetValue (__instance) as IList;}
 				}
 
-//				bool hRangeLocked {
-//						get;
-//						set;
-//				}
-//
-//				bool vRangeLocked {
-//						get;
-//						set;
-//				}
+				public		bool hRangeLocked {
+
+						get{ return (bool)PropertyInfo_hRangeLocked.GetValue (__instance, null);}
+						set{ PropertyInfo_hRangeLocked.SetValue (__instance, value, null);}
+				}
+
+				public		bool vRangeLocked {
+						get{ return (bool)PropertyInfo_vRangeLocked.GetValue (__instance, null);}
+						set{ PropertyInfo_vRangeLocked.SetValue (__instance, value, null);}
+				}
+
+				public	bool hSlider {
+					
+						get{ return (bool)PropertyInfo_hSlider.GetValue (__instance, null);}
+						set{ PropertyInfo_hSlider.SetValue (__instance, value, null);}
+				}
+
+				public		bool vSlider {
+					
+						get{ return (bool)PropertyInfo_hSlider.GetValue (__instance, null);}
+						set{ PropertyInfo_vSlider.SetValue (__instance, value, null);}
+				}
+
+				public float hRangeMin {
+					
+						get{ return (float)PropertyInfo_hRangeMin.GetValue (__instance, null);}
+						set{ PropertyInfo_hRangeMin.SetValue (__instance, value, null);}
+				}
+
+				public float hRangeMax {
+					
+						get{ return (float)PropertyInfo_hRangeMax.GetValue (__instance, null);}
+						set{ PropertyInfo_hRangeMax.SetValue (__instance, value, null);}
+				}
+
+				public float vRangeMin {
+			
+						get{ return (float)PropertyInfo_vRangeMin.GetValue (__instance, null);}
+						set{ PropertyInfo_vRangeMin.SetValue (__instance, value, null);}
+				}
+		
+				public float vRangeMax {
+			
+						get{ return (float)PropertyInfo_vRangeMax.GetValue (__instance, null);}
+						set{ PropertyInfo_vRangeMax.SetValue (__instance, value, null);}
+				}
 
 				public CurveWrapperW[] animationCurves {
 						set {
@@ -1319,6 +1379,18 @@ namespace ws.winx.unity
 								PropertyInfo_scaleWithWindow = __RealType.GetProperty ("scaleWithWindow");
 								PropertyInfo_margin = __RealType.GetProperty ("margin");
 								PropertyInfo_topmargin = __RealType.GetProperty ("topmargin");
+								PropertyInfo_leftmargin = __RealType.GetProperty ("leftmargin");
+								PropertyInfo_rightmargin = __RealType.GetProperty ("rightmargin");
+								PropertyInfo_bottommargin = __RealType.GetProperty ("rightmargin");
+								PropertyInfo_vSlider = __RealType.GetProperty ("vSlider");
+								PropertyInfo_hSlider = __RealType.GetProperty ("hSlider");
+								PropertyInfo_hRangeMax = __RealType.GetProperty ("hRangeMax");
+								PropertyInfo_hRangeMin = __RealType.GetProperty ("hRangeMin");
+								PropertyInfo_vRangeMax = __RealType.GetProperty ("vRangeMax");
+								PropertyInfo_vRangeMin = __RealType.GetProperty ("vRangeMin");
+								PropertyInfo_vRangeLocked = __RealType.GetProperty ("vRangeLocked");
+								PropertyInfo_hRangeLocked = __RealType.GetProperty ("hRangeLocked");
+
 								PropertyInfo_drawRect = __RealType.BaseType.GetProperty ("drawRect");
 								PropertyInfo_mousePositionInDrawing = __RealType.BaseType.GetProperty ("mousePositionInDrawing");
 								PropertyInfo_animationCurves = __RealType.GetProperty ("animationCurves");
@@ -1331,8 +1403,7 @@ namespace ws.winx.unity
 								MethodInfo_GetCurveAtPosition = __RealType.GetMethod ("GetCurveAtPosition", BindingFlags.NonPublic | BindingFlags.Instance);
 								MethodInfo_CreateKeyFromClick = __RealType.GetMethod ("CreateKeyFromClick", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[]{typeof(object)}, null);
 								MethodInfo_DeleteKeys = __RealType.GetMethod ("DeleteKeys", BindingFlags.NonPublic | BindingFlags.Instance);
-								MethodInfo_DrawLine = __RealType.GetMethod ("DrawLine", BindingFlags.NonPublic | BindingFlags.Instance);
-
+								
 
 
 								FieldInfo_m_Translation = __RealType.BaseType.GetField ("m_Translation", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -1400,12 +1471,6 @@ namespace ws.winx.unity
 		
 			
 				}
-
-
-		public void DrawLine (Vector2 lhs, Vector2 rhs)
-		{
-			MethodInfo_DrawLine.Invoke(__instance,new object[]{lhs,rhs});
-		}
 
 				public void RemoveCurveAt (int index)
 				{
@@ -1664,7 +1729,7 @@ namespace ws.winx.unity
 												
 												_indexSelected = curveAtPosition;
 
-												onSelect (curveAtPosition);
+												
 										} else {
 												if (_indexSelected > -1) {
 														Color clr = this.animationCurves [_indexSelected].color;
@@ -1673,6 +1738,9 @@ namespace ws.winx.unity
 
 												_indexSelected = -1;
 										}
+
+
+											onSelect (_indexSelected);
 								}
 
 						}

@@ -26,15 +26,15 @@ namespace ws.winx.bmachine.extensions
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
 
-		[HideInInspector]
-				public AnimationCurve[] curves;
-
-		[HideInInspector]
-				public Color[] curvesColors;
-
 				[HideInInspector]
-				public UnityVariable[] variablesBindedToCurves;
-				
+				public AnimationCurve[]
+						curves;
+				[HideInInspector]
+				public Color[]
+						curvesColors;
+				[HideInInspector]
+				public UnityVariable[]
+						variablesBindedToCurves;
 				[MecanimStateInfoAttribute("animator")]
 				public MecanimStateInfo
 						animaStateInfoSelected;
@@ -94,7 +94,7 @@ namespace ws.winx.bmachine.extensions
 
 												//bind all clips from animator.runtimeAnimatorController to overrider
 												_animatorOverrideController.runtimeAnimatorController = animator.runtimeAnimatorController;
-					}												
+										}												
 				
 
 								}
@@ -137,18 +137,16 @@ namespace ws.winx.bmachine.extensions
 						
 						transitionDuration = 0f;
 
-						curvesColors=new Color[0];
-						curves=new AnimationCurve[0];
-						variablesBindedToCurves=new UnityVariable[0];
+						curvesColors = new Color[0];
+						curves = new AnimationCurve[0];
+						variablesBindedToCurves = new UnityVariable[0];
 						
 				}
 
 				public override void Awake ()
 				{
-						Debug.Log ("Awake");
-//					BlackboardSurogate surrogate = new BlackboardSurogate ();
-//					surrogate.blackboard = GlobalBlackboard.Instance;
-//					Utility.AddSurrogate (typeof(BehaviourMachine.GlobalBlackboard), surrogate);
+					//	Debug.Log ("Awake");
+//					
 			
 				}
 
@@ -384,8 +382,9 @@ namespace ws.winx.bmachine.extensions
 
 
 										//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
-
-										//characterControllerRadius.Value= curve.Evaluate(normalizedTimeCurrent);
+										int numCurves=curves.Length;
+										for(int j=0; j<numCurves;j++) 
+										variablesBindedToCurves[j].Value= curves[j].Evaluate(timeNormalizedCurrent);
 
 										normalizedTimeLast = timeNormalizedCurrent;
 
