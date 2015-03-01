@@ -57,6 +57,17 @@ namespace ws.winx.bmachine.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						timeNormalizedCurrent = 0f;
+
+
+		[HideInInspector]
+		public float
+			timeControl = 0.5f;
+
+
+
+
+		public bool
+			isTimeControlEnabled = false;
 				//	[HideInInspector]
 
 				public float speed = 1f;
@@ -382,6 +393,15 @@ namespace ws.winx.bmachine.extensions
 
 
 										//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
+
+
+
+					if (isTimeControlEnabled){
+						animator.Update (timeControl - animatorStateInfoCurrent.normalizedTime);
+
+					}
+
+										//Calculate curves values
 										int numCurves=curves.Length;
 										for(int j=0; j<numCurves;j++) 
 										variablesBindedToCurves[j].Value= curves[j].Evaluate(timeNormalizedCurrent);

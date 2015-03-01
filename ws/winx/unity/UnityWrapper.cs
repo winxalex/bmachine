@@ -569,7 +569,7 @@ namespace ws.winx.unity
 				//
 				// Nested Types
 				//
-				private class Styles
+				public class Styles
 				{
 						public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
 						public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
@@ -577,7 +577,15 @@ namespace ws.winx.unity
 						public GUIStyle timeScrubber = "TimeScrubber";
 				}
 		
-				private static Styles s_Styles;
+				static Styles s_Styles;
+
+				public static Styles style {
+					get {
+						if(s_Styles==null) s_Styles=new TimeControlW.Styles();
+						return s_Styles;
+					}
+				}
+
 				float m_MouseDrag;
 				bool m_WrapForwardDrag;
 				string[] displayNames;
