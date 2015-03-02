@@ -118,7 +118,107 @@ namespace ws.winx.editor.extensions
 				
 			
 
+		#region CustomHSlider
 
+		public static float CustomHSlider (Rect rect,float timeCurrent,float timeStart,float timeStop)
+		{
+
+			Event current = Event.current;
+			int controlID = GUIUtility.GetControlID (FocusType.Passive);//TimeControl.kScrubberIDHash, FocusType.Keyboard);
+			Rect rect2 = rect;
+			rect2.height = 21f;
+			Rect rect3 = rect2;
+
+
+			float m_MouseDrag = 0f;
+			bool mouseInteract = false;
+
+
+
+			switch (current.GetTypeForControl (controlID))
+			{
+			case EventType.MouseDown:
+				if (rect.Contains (current.mousePosition))
+				{
+					GUIUtility.keyboardControl = controlID;
+				}
+				if (rect3.Contains (current.mousePosition))
+				{
+					EditorGUIUtility.SetWantsMouseJumping (1);
+					GUIUtility.hotControl = controlID;
+					m_MouseDrag = Mathf.Clamp(current.mousePosition.x - rect3.xMin,0,rect3.xMax);
+					timeCurrent = m_MouseDrag * (timeStop - timeStart) / rect3.width + timeStart;
+				
+					mouseInteract=true;
+					current.Use ();
+				}
+				break;
+			case EventType.MouseUp:
+				if (GUIUtility.hotControl == controlID)
+				{
+					EditorGUIUtility.SetWantsMouseJumping (0);
+					GUIUtility.hotControl = 0;
+					current.Use ();
+				}
+				break;
+			case EventType.MouseDrag:
+				if (GUIUtility.hotControl == controlID)
+				{
+					m_MouseDrag = Mathf.Clamp(current.mousePosition.x - rect3.xMin,0,rect3.xMax);
+					timeCurrent = Mathf.Clamp (m_MouseDrag, 0f, rect3.width) * (timeStop - timeStart) / rect3.width + timeStart;
+					mouseInteract=true;
+					current.Use ();
+				}
+				break;
+			case EventType.KeyDown:
+				if (GUIUtility.keyboardControl == controlID)
+				{
+					if (current.keyCode == KeyCode.LeftArrow)
+					{
+//						if (this.currentTime - this.startTime > 0.01f)
+//						{
+//							this.deltaTime = -0.01f;
+//						}
+						current.Use ();
+					}
+					if (current.keyCode == KeyCode.RightArrow)
+					{
+//						if (this.stopTime - this.currentTime > 0.01f)
+//						{
+//							this.deltaTime = 0.01f;
+//						}
+						current.Use ();
+					}
+				}
+				break;
+			}
+
+			GUI.Box (rect2, GUIContent.none, TimeControlW.style.timeScrubber);
+		
+			if (GUIUtility.keyboardControl == controlID)
+			{
+				Handles.color = new Color (1f, 0f, 0f, 1f);
+			}
+			else
+			{
+				Handles.color = new Color (1f, 0f, 0f, 0.5f);
+			}
+
+
+			if(!mouseInteract)
+				m_MouseDrag=rect3.xMin+((timeCurrent - timeStart) * (rect3.width))/(timeStop - timeStart);
+		
+
+			Handles.DrawLine (new Vector2 (m_MouseDrag, rect3.yMin), new Vector2 (m_MouseDrag, rect3.yMax));
+
+
+
+		
+
+
+			return timeCurrent;
+		}
+		#endregion
 	
 
 

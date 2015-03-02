@@ -61,6 +61,8 @@ namespace ws.winx.editor.bmachine.extensions
 				Vector2 curvePropertiesScroller;
 				Type _typeSelected;
 				UnityVariable _variableSelected;
+
+				
 				
 		        
 
@@ -330,8 +332,6 @@ namespace ws.winx.editor.bmachine.extensions
 									
 
 										
-										indentLevel = EditorGUI.indentLevel;
-										EditorGUI.indentLevel = 0;
 
 
 
@@ -464,13 +464,13 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 												//how to access elements in LIST !!!! ????
-												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
-												if (iterator.Find ("variablesBindedToCurves")) {
-
-														SerializedNodeProperty variablesBindedToCurvesSerialized = iterator.current;
-													
-
-												}
+//												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+//												if (iterator.Find ("variablesBindedToCurves")) {
+//
+//														SerializedNodeProperty variablesBindedToCurvesSerialized = iterator.current;
+//													
+//
+//												}
 
 												List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
 												vList.Add (_variableSelected);
@@ -544,14 +544,29 @@ namespace ws.winx.editor.bmachine.extensions
 										EditorGUILayout.EndHorizontal ();
 
 
-										//GUILayout.EndArea();
+										
 
-										EditorGUI.indentLevel = indentLevel;
+									
 								} else {
 										DrawDefaultInspector ();
 
 								}
 								////////////////////////////////////////////////////////////////////////////
+			
+
+
+
+				if(Application.isPlaying){
+
+
+					Rect timeControlRect=GUILayoutUtility.GetRect(Screen.width-16f,26f);
+					timeControlRect.xMin+=38f;
+					timeControlRect.xMax-=70f;
+					mecanimNode.animatorTimeControl=EditorGUILayoutEx.CustomHSlider(mecanimNode.animatorTimeControl,mecanimNode.animatorTimeControl,0f,1f);
+					
+
+				}
+
 
 
 								/////////// AVATAR Preview GUI ////////////
