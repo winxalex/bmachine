@@ -120,104 +120,100 @@ namespace ws.winx.editor.extensions
 
 		#region CustomHSlider
 
-		public static float CustomHSlider (Rect rect,float timeCurrent,float timeStart,float timeStop)
-		{
-
-			Event current = Event.current;
-			int controlID = GUIUtility.GetControlID (FocusType.Passive);//TimeControl.kScrubberIDHash, FocusType.Keyboard);
-			Rect rect2 = rect;
-			rect2.height = 21f;
-			Rect rect3 = rect2;
-
-
-			float m_MouseDrag = 0f;
-			bool mouseInteract = false;
-
-
-
-			switch (current.GetTypeForControl (controlID))
-			{
-			case EventType.MouseDown:
-				if (rect.Contains (current.mousePosition))
+				public static float CustomHSlider (Rect rect, float value, float min, float max, GUIStyle background)
 				{
-					GUIUtility.keyboardControl = controlID;
-				}
-				if (rect3.Contains (current.mousePosition))
-				{
-					EditorGUIUtility.SetWantsMouseJumping (1);
-					GUIUtility.hotControl = controlID;
-					m_MouseDrag = Mathf.Clamp(current.mousePosition.x - rect3.xMin,0,rect3.xMax);
-					timeCurrent = m_MouseDrag * (timeStop - timeStart) / rect3.width + timeStart;
+
+						Event current = Event.current;
+						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;//TimeControl.kScrubberIDHash, FocusType.Keyboard);
+						Rect rect3 = rect;
+
+						rect3.height = 21f;// background.CalcSize().y;
+		
+
+
+
+
+						float m_MouseDrag = 0f;
+						bool interact = false;
+
+
+
+						switch (current.GetTypeForControl (controlID)) {
+						case EventType.MouseDown:
+								if (rect.Contains (current.mousePosition)) {
+										GUIUtility.keyboardControl = controlID;
+								}
+								if (rect3.Contains (current.mousePosition)) {
+										EditorGUIUtility.SetWantsMouseJumping (1);
+										GUIUtility.hotControl = controlID;
+										m_MouseDrag = Mathf.Clamp (current.mousePosition.x - rect3.xMin, 0, rect3.xMax);
+										value = m_MouseDrag * (max - min) / rect3.width + min;
 				
-					mouseInteract=true;
-					current.Use ();
-				}
-				break;
-			case EventType.MouseUp:
-				if (GUIUtility.hotControl == controlID)
-				{
-					EditorGUIUtility.SetWantsMouseJumping (0);
-					GUIUtility.hotControl = 0;
-					current.Use ();
-				}
-				break;
-			case EventType.MouseDrag:
-				if (GUIUtility.hotControl == controlID)
-				{
-					m_MouseDrag = Mathf.Clamp(current.mousePosition.x - rect3.xMin,0,rect3.xMax);
-					timeCurrent = Mathf.Clamp (m_MouseDrag, 0f, rect3.width) * (timeStop - timeStart) / rect3.width + timeStart;
-					mouseInteract=true;
-					current.Use ();
-				}
-				break;
-			case EventType.KeyDown:
-				if (GUIUtility.keyboardControl == controlID)
-				{
-					if (current.keyCode == KeyCode.LeftArrow)
-					{
+										interact = true;
+										current.Use ();
+								}
+								break;
+						case EventType.MouseUp:
+								if (GUIUtility.hotControl == controlID) {
+										EditorGUIUtility.SetWantsMouseJumping (0);
+										GUIUtility.hotControl = 0;
+										current.Use ();
+								}
+								break;
+						case EventType.MouseDrag:
+								if (GUIUtility.hotControl == controlID) {
+										m_MouseDrag = Mathf.Clamp (current.mousePosition.x - rect3.xMin, 0, rect3.xMax);
+										value = Mathf.Clamp (m_MouseDrag, 0f, rect3.width) * (max - min) / rect3.width + min;
+										interact = true;
+										current.Use ();
+								}
+								break;
+						case EventType.KeyDown:
+								if (GUIUtility.keyboardControl == controlID) {
+										if (current.keyCode == KeyCode.LeftArrow) {
 //						if (this.currentTime - this.startTime > 0.01f)
 //						{
 //							this.deltaTime = -0.01f;
 //						}
-						current.Use ();
-					}
-					if (current.keyCode == KeyCode.RightArrow)
-					{
+
+												interact = true;
+												current.Use ();
+										}
+										if (current.keyCode == KeyCode.RightArrow) {
 //						if (this.stopTime - this.currentTime > 0.01f)
 //						{
 //							this.deltaTime = 0.01f;
 //						}
-						current.Use ();
-					}
+
+												interact = true;
+												current.Use ();
+										}
+								}
+								break;
+						}
+
+						GUI.Box (rect3, GUIContent.none, background);
+		
+						if (GUIUtility.keyboardControl == controlID) {
+								Handles.color = new Color (1f, 0f, 0f, 1f);
+						} else {
+								Handles.color = new Color (1f, 0f, 0f, 0.5f);
+						}
+
+
+						if (!interact)
+								m_MouseDrag = rect3.xMin + ((value - min) * (rect3.width)) / (max - min);
+		
+
+						Handles.DrawLine (new Vector2 (m_MouseDrag, rect3.yMin), new Vector2 (m_MouseDrag, rect3.yMax));
+
+
+
+		
+
+
+						return value;
 				}
-				break;
-			}
-
-			GUI.Box (rect2, GUIContent.none, TimeControlW.style.timeScrubber);
-		
-			if (GUIUtility.keyboardControl == controlID)
-			{
-				Handles.color = new Color (1f, 0f, 0f, 1f);
-			}
-			else
-			{
-				Handles.color = new Color (1f, 0f, 0f, 0.5f);
-			}
-
-
-			if(!mouseInteract)
-				m_MouseDrag=rect3.xMin+((timeCurrent - timeStart) * (rect3.width))/(timeStop - timeStart);
-		
-
-			Handles.DrawLine (new Vector2 (m_MouseDrag, rect3.yMin), new Vector2 (m_MouseDrag, rect3.yMax));
-
-
-
-		
-
-
-			return timeCurrent;
-		}
 		#endregion
 	
 
@@ -275,7 +271,7 @@ namespace ws.winx.editor.extensions
 						}
 			
 			
-						//						//get current control ID
+						//get current control ID
 						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
 			
 						//if current == previous selected control => asign "selectedObject" and reset global
@@ -748,21 +744,23 @@ namespace ws.winx.editor.extensions
 			
 			
 			
-						//if time less then zero use mouse position for Add otherwise use outside value 
+						//if time less then zero use mouse position for Add otherwise use input param value 
 
 						float time = 0f;
-						if (rectLocal.Contains (Event.current.mousePosition)) {
-								time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 4);
-				 					
-						}
-
-			
-			
-			
 						int timeValuesNumber = timeValues.Length;
 						Rect[] positionsHitRectArray = new Rect[timeValuesNumber];
 						Rect[] positionsRectArray = new Rect[timeValuesNumber];
 						int timeValuesNumberOfTheSame = 0;//items that have same time
+
+						if (rectLocal.Contains (Event.current.mousePosition)) {
+								time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 4);
+				 					
+						} 
+
+			
+			
+			
+					
 
 						//mulitiplier simple changes the y position of the timeValue handle so
 						//same timeValues's hanldes are on of top of another
@@ -831,8 +829,8 @@ namespace ws.winx.editor.extensions
 			
 			
 			
-			
-			
+						//selected = new bool[timeValuesNumber];
+		
 						if (selected == null || selected.Length != timeValuesNumber) {
 								selected = new bool[timeValuesNumber];
 				
@@ -843,7 +841,7 @@ namespace ws.winx.editor.extensions
 				
 						}
 			
-			
+
 			
 			
 						Vector2 offset = Vector2.zero; 
@@ -853,10 +851,14 @@ namespace ws.winx.editor.extensions
 			
 						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (__eventMarkerTexture), positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
 			
-			
+						Debug.Log (highLevelEvent + " " + selected [0]);
 			
 						if (highLevelEvent != HighLevelEvent.None) {
 								switch (highLevelEvent) {
+
+								case HighLevelEvent.Click:
+										Debug.Log ("Click:" + clickedIndex);
+										break;
 								case HighLevelEvent.DoubleClick:
 										if (clickedIndex != -1) {
 												if (EditOpen != null) {
@@ -931,6 +933,10 @@ namespace ws.winx.editor.extensions
 										if (DragEnd != null) {
 												DragEnd (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID));
 										}
+
+					//if(GUIUtility.hotControl!=controlID)
+
+				
 					
 										break;
 								case HighLevelEvent.Delete:
@@ -938,7 +944,7 @@ namespace ws.winx.editor.extensions
 										break;
 								case HighLevelEvent.SelectionChanged:
 
-				//	Debug.Log("SelectionChanged");
+										Debug.Log ("SelectionChanged:" + clickedIndex);
 					
 										if (clickedIndex > -1) {
 						
@@ -956,7 +962,15 @@ namespace ws.winx.editor.extensions
 												selected = new bool[timeValuesNumber];
 										break;
 								}
+						} else {
+			
+								if (!rectLocal.Contains (Event.current.mousePosition) && Event.current.type == EventType.Repaint) 
+										selected = new bool[timeValuesNumber];
+
 						}
+
+				
+
 			
 			
 						int hoverInx = -1; 
@@ -1113,38 +1127,37 @@ namespace ws.winx.editor.extensions
 		
 				}
 
-
-		public static Rect DrawCurveVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+				public static Rect DrawCurveVar (Rect rect, UnityVariable variable)
+				{
+						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
+						rect.width = Mathf.Max (Screen.width - 50, rect.width);
+						rect.height = 21;
 			
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
-			rect.xMin = rect.xMin + 124f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			AnimationCurve curve = EditorGUI.CurveField (rect, GUIContent.none, (AnimationCurve)variable.Value);
-			if (EditorGUI.EndChangeCheck () && curve != (AnimationCurve)variable.Value) {
+						rect.yMin = rect.yMin + 3f;
+						rect.yMax = rect.yMax - 2f;
+						rect.xMin = rect.xMin + 6f;
+						rect.xMax = rect.xMax - 6f;
+						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
+						rect.xMin = rect.xMin + 124f;
+						rect.xMax = rect.xMax - 19f;
+						EditorGUI.BeginChangeCheck ();
+						AnimationCurve curve = EditorGUI.CurveField (rect, GUIContent.none, (AnimationCurve)variable.Value);
+						if (EditorGUI.EndChangeCheck () && curve != (AnimationCurve)variable.Value) {
 				
-				Undo.RecordObject (variable, "Variable Value");
+								Undo.RecordObject (variable, "Variable Value");
 				
-				variable.Value = curve;
+								variable.Value = curve;
 				
-				EditorUtility.SetDirty (variable);
-			}
+								EditorUtility.SetDirty (variable);
+						}
 			
 			
-			return rectOrg;
+						return rectOrg;
 			
-		}
+				}
 		
-		public static Rect DrawFloatVar (Rect rect, UnityVariable variable)
+				public static Rect DrawFloatVar (Rect rect, UnityVariable variable)
 				{
 						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 
@@ -1242,7 +1255,7 @@ namespace ws.winx.editor.extensions
 
 				}
 
-				public static void DrawName (Rect rect, UnityVariable variable,bool editable=true)
+				public static void DrawName (Rect rect, UnityVariable variable, bool editable=true)
 				{
 
 						if (!editable) {
@@ -1251,7 +1264,7 @@ namespace ws.winx.editor.extensions
 
 						EditorGUI.BeginChangeCheck ();
 
-						string	text= EditorGUI.TextField (rect, variable.name);
+						string text = EditorGUI.TextField (rect, variable.name);
 						
 							
 						if (EditorGUI.EndChangeCheck () && text != variable.name) {

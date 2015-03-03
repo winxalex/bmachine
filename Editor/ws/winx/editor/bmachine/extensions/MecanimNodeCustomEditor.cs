@@ -472,6 +472,9 @@ namespace ws.winx.editor.bmachine.extensions
 //
 //												}
 
+												_objectSelected=null;
+												_typeSelected=null;
+			
 												List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
 												vList.Add (_variableSelected);
 												mecanimNode.variablesBindedToCurves = vList.ToArray ();
@@ -562,7 +565,7 @@ namespace ws.winx.editor.bmachine.extensions
 					Rect timeControlRect=GUILayoutUtility.GetRect(Screen.width-16f,26f);
 					timeControlRect.xMin+=38f;
 					timeControlRect.xMax-=70f;
-					mecanimNode.animatorTimeControl=EditorGUILayoutEx.CustomHSlider(mecanimNode.animatorTimeControl,mecanimNode.animatorTimeControl,0f,1f);
+					mecanimNode.animatorTimeControl=EditorGUILayoutEx.CustomHSlider(timeControlRect,mecanimNode.animatorTimeControl,0f,1f,TimeControlW.style.timeScrubber);
 					
 
 				}
@@ -686,7 +689,8 @@ namespace ws.winx.editor.bmachine.extensions
 										//Rect timeLineRect = GUILayoutUtility.GetLastRect ();
 
 										timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
-										timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
+										timeLineRect.xMax -= EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
+										//timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
 										timeLineRect.width -= 66f;
 										EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
 				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd
