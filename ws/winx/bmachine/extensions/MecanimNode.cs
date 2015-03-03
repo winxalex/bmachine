@@ -61,14 +61,14 @@ namespace ws.winx.bmachine.extensions
 
 		[HideInInspector]
 		public float
-			animatorTimeControl = 0.5f;
+			animationRunTimeControl = 0.5f;
 
 
 
-
+		[HideInInspector]
 		public bool
-			isTimeControlEnabled = false;
-				//	[HideInInspector]
+			animationRunTimeControlEnabled = false;
+				
 
 				public float speed = 1f;
 				public float weight = 1f;
@@ -396,8 +396,8 @@ namespace ws.winx.bmachine.extensions
 
 
 
-					if (isTimeControlEnabled){
-						animator.Update (animatorTimeControl - animatorStateInfoCurrent.normalizedTime);
+					if (animationRunTimeControlEnabled){
+						animator.Update (animationRunTimeControl - animatorStateInfoCurrent.normalizedTime);
 
 					}
 

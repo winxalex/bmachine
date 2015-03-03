@@ -246,8 +246,8 @@ namespace ws.winx.editor.extensions
 						int len;
 						int inxd;
 					
-
-						if (!position.HasValue)
+		
+						if (position==null)
 								EditorGUILayout.BeginHorizontal ();
 						
 
@@ -390,7 +390,7 @@ namespace ws.winx.editor.extensions
 								menu.ShowAsContext ();
 						}
 
-						if (!position.HasValue)
+						if (position==null)
 								EditorGUILayout.EndHorizontal ();
 
 						return selectedIndex;
@@ -851,14 +851,14 @@ namespace ws.winx.editor.extensions
 			
 						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (__eventMarkerTexture), positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
 			
-						Debug.Log (highLevelEvent + " " + selected [0]);
+						
 			
 						if (highLevelEvent != HighLevelEvent.None) {
 								switch (highLevelEvent) {
 
-								case HighLevelEvent.Click:
-										Debug.Log ("Click:" + clickedIndex);
-										break;
+//								case HighLevelEvent.Click:
+//										
+//										break;
 								case HighLevelEvent.DoubleClick:
 										if (clickedIndex != -1) {
 												if (EditOpen != null) {
@@ -929,22 +929,18 @@ namespace ws.winx.editor.extensions
 										}
 					
 								case HighLevelEvent.EndDrag:
-					//Debug.Log("EndDrag");
+
 										if (DragEnd != null) {
 												DragEnd (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID));
 										}
 
-					//if(GUIUtility.hotControl!=controlID)
-
-				
-					
 										break;
 								case HighLevelEvent.Delete:
 										DeleteTimeValues (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, null, Delete), selected);
 										break;
 								case HighLevelEvent.SelectionChanged:
 
-										Debug.Log ("SelectionChanged:" + clickedIndex);
+										
 					
 										if (clickedIndex > -1) {
 						

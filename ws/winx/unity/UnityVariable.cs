@@ -33,7 +33,7 @@ namespace ws.winx.unity
 				[HideInInspector]
 				public byte[]
 						reflectedInstanceSerialized;
-				public string name;
+				
 				[NonSerialized]
 				private object
 						__reflectedInstance;
@@ -250,10 +250,10 @@ namespace ws.winx.unity
 					
 				}
 
-//		public override int GetHashCode ()
-//		{
-//			return base.GetHashCode ();
-//		}
+				public override int GetHashCode ()
+				{
+					return base.GetHashCode ();
+				}
 
 
 

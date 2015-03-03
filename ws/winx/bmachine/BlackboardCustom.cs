@@ -21,10 +21,10 @@ namespace ws.winx.bmachine
 		[HideInInspector]
 		public byte[] typesSerialized;
 
-	//	[HideInInspector]//Uncoment for debug
+		[HideInInspector]//Uncoment for debug
 		public List<UnityVariable> variablesList;
 
-		string _typeNameSelected="Select custom type";
+	
 
 
 			public void AddProperty(UnityVariable prop){
@@ -38,6 +38,12 @@ namespace ws.winx.bmachine
 
 			}
 
+
+		void Reset() {
+			variablesList = new List<UnityVariable>();
+			
+		}
+		
 		#region ISerializationCallbackReceiver implementation
 		void ISerializationCallbackReceiver.OnBeforeSerialize ()
 		{
@@ -53,6 +59,11 @@ namespace ws.winx.bmachine
 		}
 		#endregion
 		}
+
+
+
+
+
 
 }
 

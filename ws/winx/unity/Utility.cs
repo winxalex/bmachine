@@ -73,7 +73,7 @@ namespace ws.winx.unity{
 			 target = @object.GetType ();
 			
 			
-				string text = "No K";
+				
 
 
 				List<string> list = new List<string> ();
@@ -247,7 +247,7 @@ namespace ws.winx.unity{
 				stream.Seek(0, SeekOrigin.Begin);
 				
 				if(__surrogateSelector==null)
-					__surrogateSelector=__surrogateSelector;
+					__surrogateSelector=new SurrogateSelector();
 				
 				__binaryFormater.SurrogateSelector=__surrogateSelector;
 				
