@@ -27,38 +27,38 @@ namespace ws.winx.editor.extensions
 		/// <param name="parentName">Parent name.</param>
 		/// <param name="layer">Layer.</param>
 		/// <param name="resultsAnimaInfoList">Results anima info list.</param>
-		 static void processStateMachinePath (UnityEditorInternal.StateMachine stateMachine, string parentName, int layer, List<MecanimStateInfo> resultsAnimaInfoList)
+		 static void processStateMachinePath (UnityEditor.Animations.AnimatorStateMachine stateMachine, string parentName, int layer, List<MecanimStateInfo> resultsAnimaInfoList)
 		{
 			int numStates = 0;
 			int numStateMachines = 0;
 			
 			int currentStateInx;
 			int currentStateMachineInx;
-			UnityEditorInternal.StateMachine currentStateMachine;
+			UnityEditor.Animations.AnimatorStateMachine currentStateMachine;
 			string path;
 			
-			UnityEditorInternal.State state;
+			UnityEditor.Animations.AnimatorState state;
 			
-			numStates = stateMachine.stateCount;
+			numStates = stateMachine.states.Length;
 			
 			
 			
 			for (currentStateInx=0; currentStateInx<numStates; currentStateInx++) {
 				
 				
-				state = stateMachine.GetState (currentStateInx);
+				state = stateMachine.states[currentStateInx].state;
 		//	resultsAnimaInfoList.Add (new AnimaStateInfo (state.uniqueNameHash, new GUIContent (parentName + '/' + state.name), layer));
 //				
 				MecanimStateInfo info=ScriptableObject.CreateInstance<MecanimStateInfo>();
-				info.hash=state.uniqueNameHash;
+				info.hash=state.nameHash;
 				info.label= new GUIContent (parentName + '/' + state.name);
 				info.layer = layer;
-				info.motion=state.GetMotion();
+				info.motion=state.motion;
 
 			
 
-				if(info.motion is BlendTree){
-					BlendTree blendTree=info.motion as BlendTree;
+				if(info.motion is UnityEditor.Animations.BlendTree){
+					UnityEditor.Animations.BlendTree blendTree=info.motion as UnityEditor.Animations.BlendTree;
 					int count=blendTree.GetRecursiveBlendParamCount();
 
 					if(count>0){
@@ -84,11 +84,11 @@ namespace ws.winx.editor.extensions
 			}
 			
 			
-			numStateMachines = stateMachine.stateMachineCount;
+			numStateMachines = stateMachine.stateMachines.Length;
 			
 			if (numStateMachines > 0) {
 				for (currentStateMachineInx=0; currentStateMachineInx<numStateMachines; currentStateMachineInx++) {
-					currentStateMachine = stateMachine.GetStateMachine (currentStateMachineInx);
+					currentStateMachine = stateMachine.stateMachines[ currentStateMachineInx].stateMachine;
 					path = parentName + "/" + currentStateMachine.name;
 					
 					processStateMachinePath (currentStateMachine, path, layer, resultsAnimaInfoList);
@@ -107,13 +107,13 @@ namespace ws.winx.editor.extensions
 		/// </summary>
 		/// <returns>The anima states info.</returns>
 		/// <param name="aniController">Ani controller.</param>
-		public static List<MecanimStateInfo> getAnimaStatesInfo (AnimatorController aniController)
+		public static List<MecanimStateInfo> getAnimaStatesInfo (UnityEditor.Animations.AnimatorController aniController)
 		{
 			
-			AnimatorControllerLayer layer;
+			UnityEditor.Animations.AnimatorControllerLayer layer;
 			
 			
-			int numLayers = aniController.layerCount;
+			int numLayers = aniController.layers.Length;
 			
 			
 			int currentLayerInx = 0;
@@ -123,7 +123,7 @@ namespace ws.winx.editor.extensions
 			
 			
 			for (; currentLayerInx<numLayers; currentLayerInx++) {
-				layer = aniController.GetLayer (currentLayerInx);				                
+				layer = aniController.layers [currentLayerInx];				                
 				processStateMachinePath (layer.stateMachine, layer.name, currentLayerInx, animaStatesInfoList);	
 			}
 			

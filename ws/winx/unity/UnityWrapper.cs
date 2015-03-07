@@ -116,9 +116,9 @@ namespace ws.winx.unity
 				private static PropertyInfo PropertyInfo_Animator;
 				Texture image = null;
 				Rect lastRect;
-				AnimatorController _previewAnimatorController;
-				UnityEditorInternal.StateMachine _previewStateMachine;
-				State _previewState;
+				UnityEditor.Animations.AnimatorController _previewAnimatorController;
+				UnityEditor.Animations.AnimatorStateMachine _previewStateMachine;
+				UnityEditor.Animations.AnimatorState _previewState;
 				bool PrevIKOnFeet;
 				Motion _previewedMotion;
 	
@@ -222,11 +222,11 @@ namespace ws.winx.unity
 						//Debug.Log ("CreateStateMachine");
 			
 						if (_previewAnimatorController == null) {
-								_previewAnimatorController = new AnimatorController ();
+								_previewAnimatorController = new UnityEditor.Animations.AnimatorController ();
 								_previewAnimatorController.AddLayer ("previewLayer");
 								_previewAnimatorController.hideFlags = HideFlags.DontSave;
 				
-								_previewStateMachine = _previewAnimatorController.GetLayer (0).stateMachine;
+								_previewStateMachine = _previewAnimatorController.layers [0].stateMachine;
 								CreateParameters (motion);
 				
 								_previewState = _previewStateMachine.AddState ("previewState");
@@ -236,7 +236,7 @@ namespace ws.winx.unity
 								_previewState.hideFlags = HideFlags.DontSave;
 				
 				
-								AnimatorController.SetAnimatorController (this.Animator, _previewAnimatorController);
+								UnityEditor.Animations.AnimatorController.SetAnimatorController (this.Animator, _previewAnimatorController);
 								//Debug.Log ("Setting avatarPreview.Animator " + this.Animator.name + " to temp controller");
 						} 
 			
@@ -256,7 +256,7 @@ namespace ws.winx.unity
 				private void ClearPreviewStateMachine ()
 				{
 						if (this.Animator != null) {
-								AnimatorController.SetAnimatorController (this.Animator, null);
+								UnityEditor.Animations.AnimatorController.SetAnimatorController (this.Animator, null);
 						}
 						UnityEngine.Object.DestroyImmediate (this._previewAnimatorController);
 						UnityEngine.Object.DestroyImmediate (this._previewStateMachine);
@@ -280,11 +280,11 @@ namespace ws.winx.unity
 //				_previewAnimatorController.RemoveParameter (0);
 //			}
 			
-						if (motion is BlendTree) {
-								BlendTree blendTree = motion as BlendTree;
+						if (motion is UnityEditor.Animations.BlendTree) {
+								UnityEditor.Animations.BlendTree blendTree = motion as UnityEditor.Animations.BlendTree;
 				
 								for (int j = 0; j < blendTree.GetRecursiveBlendParamCount(); j++) {
-										_previewAnimatorController.AddParameter (blendTree.GetRecursiveBlendParam (j), AnimatorControllerParameterType.Float);
+										_previewAnimatorController.AddParameter (blendTree.GetRecursiveBlendParam (j), UnityEngine.AnimatorControllerParameterType.Float);
 								}
 						}
 			

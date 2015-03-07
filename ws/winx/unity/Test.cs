@@ -12,6 +12,6 @@ public class Test : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		bone.rigidbody.AddForce (-transform.forward * 500,ForceMode.Force);
+		bone.GetComponent<Rigidbody>().AddForce (-transform.forward * 500,ForceMode.Force);
 	}
 }

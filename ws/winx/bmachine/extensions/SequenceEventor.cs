@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BehaviourMachine;
 using UnityEngine;
 
@@ -88,10 +88,10 @@ namespace ws.winx.bmachine.extensions
 		
 		public void OnTick ()
 		{
-			if (this.status != Status.Running)
-			{
-				this.Start ();
-			}
+//			if (this.state != Status.Running)
+//			{
+//				this.Start ();
+//			}
 			
 			
 			

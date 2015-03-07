@@ -20,7 +20,7 @@ using ws.winx.editor.extensions;
 using Motion = UnityEngine.Motion;
 
 
-using StateMachine = UnityEditorInternal.StateMachine;
+using StateMachine = UnityEditor.Animations.AnimatorStateMachine;
 using ws.winx.bmachine;
 
 namespace ws.winx.editor.bmachine.extensions

@@ -18,7 +18,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 				GUIContent[] displayOptions;
 				List<MecanimStateInfo> animaStateInfoValues;
-				AnimatorController aniController;
+				UnityEditor.Animations.AnimatorController aniController;
 				MecanimStateInfo animaStateInfoSelected;
 				bool isListDirty = false;
 				UnityEngine.Motion motionSelected;
@@ -102,9 +102,9 @@ namespace ws.winx.editor.bmachine.extensions
 								runtimeContoller = attribute.Ani.runtimeAnimatorController;
 
 								if (runtimeContoller is AnimatorOverrideController)
-										aniController = ((AnimatorOverrideController)runtimeContoller).runtimeAnimatorController as AnimatorController;
+										aniController = ((AnimatorOverrideController)runtimeContoller).runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
 								else
-										aniController = runtimeContoller as AnimatorController;
+										aniController = runtimeContoller as UnityEditor.Animations.AnimatorController;
 
 								RegenerateAnimaStatesInfoList ();
 

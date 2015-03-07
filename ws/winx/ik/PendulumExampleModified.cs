@@ -68,7 +68,7 @@ namespace ws.winx.ik
 //				quat1=headTarget.transform.rotation;
 //				quat10=quat1*Quaternion.Inverse(quat0);
 //				headTarget.rigidbody.AddTorque(quat10.x,quat10.y,quat10.z,ForceMode.Force);
-				headTarget.rigidbody.AddTorque(-headTarget.right * 1000,ForceMode.Force);
+				headTarget.GetComponent<Rigidbody>().AddTorque(-headTarget.right * 1000,ForceMode.Force);
 
 					//	headTarget.rigidbody.AddRelativeTorque(headTarget.transform.up*1000);
 				//hitTarget.rigidbody.AddForce(direction *1000);

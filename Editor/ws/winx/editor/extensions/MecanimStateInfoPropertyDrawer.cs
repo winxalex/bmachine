@@ -44,7 +44,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <summary>
 				/// Regenerates the anima states info list.
 				/// </summary>
-				void RegenerateAnimaStatesInfoList (AnimatorController animatorController)
+				void RegenerateAnimaStatesInfoList (UnityEditor.Animations.AnimatorController animatorController)
 				{
 					
 						animaStateInfoValues = MecanimStateInfoUtility.getAnimaStatesInfo (animatorController);
@@ -70,7 +70,7 @@ namespace ws.winx.editor.bmachine.extensions
 	
 						
 
-						AnimatorController animatorController = ((MonoBehaviour)property.serializedObject.targetObject).GetComponent<Animator> ().runtimeAnimatorController as AnimatorController;
+						UnityEditor.Animations.AnimatorController animatorController = ((MonoBehaviour)property.serializedObject.targetObject).GetComponent<Animator> ().runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
 
 						if (animatorController != null) {
 
