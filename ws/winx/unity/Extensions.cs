@@ -177,17 +177,7 @@ animationClip.SetCurve(gameObject, typeof(GameObject),"m_IsActive", constantCurv
 	
 	#endregion
 
-	#region State Extension
-		public static class StateEx
-		{
-		
-				public static void SetMotion (this UnityEditor.Animations.AnimatorState state, Motion motion)
-				{
-						state.GetType ().GetMethod ("SetMotionInternal", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, new System.Type[] {typeof(Motion)}, null).Invoke (state, new object[] {motion});
-				}
-		
-		}
-	#endregion
+
 
 	#region BlendTreeExtension
 		public static class BlendTreeExtension

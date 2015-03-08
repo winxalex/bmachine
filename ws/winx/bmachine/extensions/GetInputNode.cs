@@ -9,8 +9,9 @@ using System.Text;
 using BehaviourMachine;
 using Motion=UnityEngine.Motion;
 using ws.winx.unity;
-using ws.winx.input.states;
 using ws.winx.input;
+using ws.winx.unity.attributes;
+using System;
 
 namespace ws.winx.bmachine.extensions
 {
@@ -24,7 +25,8 @@ namespace ws.winx.bmachine.extensions
 				public enum InputType {
 					GetInput,
 			        GetInputUp,
-					GetInputDown
+					GetInputDown,
+			        GetInputHold
 				}
 				
 				public float
@@ -36,7 +38,8 @@ namespace ws.winx.bmachine.extensions
 				public InputType
 						inputType;
 
-			
+		//[EnumAttribute("ws.winx.input.states.States")]//?????
+				[EnumAttribute(typeof(ws.winx.input.states.States))]
 				public int //this is enum from Status.cs generated
 					inputState;
 
@@ -48,16 +51,24 @@ namespace ws.winx.bmachine.extensions
 				//
 				public override void Reset ()
 				{
+					
 					variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+					variable.Value = 0f;//make it float type
 				}
 	
 				public override Status Update ()
 				{
 						if (inputType == InputType.GetInput)
 								variable.Value = InputManager.GetInput (this.inputState);
+						else if(inputType==InputType.GetInputDown)
+								variable.Value=InputManager.GetInputUp(this.inputState);
+			            else if(inputType==InputType.GetInputUp)
+								variable.Value=InputManager.GetInputUp(this.inputState);
+
+			Debug.Log (variable.Value);
 //						this.storeAxis.Value = Input.GetAxis ((!this.axisName.isNone) ? this.axisName.Value : "Horizontal");
 //						this.storeAxis.Value *= this.multiplier.Value;
-
+		//	Type t = Type.GetType ("ws.winx.input.states.States");
 
 						return Status.Success;
 				}

@@ -283,20 +283,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 						mecanimNode = target as MecanimNode;
 
-						if (mecanimNode != null) {
+							if (mecanimNode != null) {
 
 						
-								Motion motion;
-								if (mecanimNode.motionOverride == null && mecanimNode.animaStateInfoSelected != null)
-										motion = mecanimNode.animaStateInfoSelected.motion;
-								else
-										motion = mecanimNode.motionOverride;
-	
-		
+							Motion motion=null;					
 
-								if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
-										Debug.LogError ("Can't override state that doesn't contain motion");
-								}
+								
+
+								
 								
 								
 
@@ -308,20 +302,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 								
 								_curvesEditorShow = EditorGUILayout.Foldout (_curvesEditorShow, "Curves");
-								//EditorGUILayout.CurveField
-								int indentLevel = 0;
-								Rect curveEditorRect = new Rect (0, 0, 0, 0);
 								
+								int indentLevel = 0;
 
-
-
-
-			
-
+								Rect curveEditorRect = new Rect (0, 0, 0, 0);
+					
 				
 								if (_curvesEditorShow) {
-										//Debug.Log("LAst"+GUILayoutUtility.GetLastRect()+" "+GUILayoutUtility.GetRect(100,200));
-
+										
 
 										//This makes layout to work (Reserving space)
 										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
@@ -576,14 +564,34 @@ namespace ws.winx.editor.bmachine.extensions
 
 									
 								} else {
-										DrawDefaultInspector ();
+										DrawDefaultInspector();
 
+
+										
 								}
 								////////////////////////////////////////////////////////////////////////////
 			
 
+								if(mecanimNode.animaStateInfoSelected!=null){
+									
+									
+									//if there are no override use motion of selected AnimationState
+									if (mecanimNode.motionOverride == null)
+										motion = mecanimNode.animaStateInfoSelected.motion;
+									else //
+										motion = mecanimNode.motionOverride;
+									
+									
+									
+									if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
+										Debug.LogError ("Can't override state that doesn't contain motion");
+									}
+									
+									
+								}
+								
 
-
+								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
 								if (Application.isPlaying) {
 
 										mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
@@ -596,7 +604,7 @@ namespace ws.winx.editor.bmachine.extensions
 										}
 
 								}
-
+								///////////////////////////////////////////////////////////////
 
 
 								/////////// AVATAR Preview GUI ////////////

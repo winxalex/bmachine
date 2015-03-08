@@ -201,7 +201,7 @@ namespace ws.winx.unity
 
 						_previewedMotion = motion;
 
-						_previewState.SetMotion (motion);
+						_previewState.motion =motion;
 						CreateParameters (motion);
 						this.timeControl.currentTime = 0f;
 
@@ -231,7 +231,7 @@ namespace ws.winx.unity
 				
 								_previewState = _previewStateMachine.AddState ("previewState");
 				
-								_previewState.SetMotion (motion);
+								_previewState.motion =motion;
 								_previewState.iKOnFeet = this.IKOnFeet;
 								_previewState.hideFlags = HideFlags.DontSave;
 				

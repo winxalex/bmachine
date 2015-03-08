@@ -16,7 +16,7 @@ namespace ws.winx.editor.bmachine.extensions
 		public class UnityVariableNodePropertyDrawer : PropertyDrawer
 		{
 
-			
+
 
 				public new UnityVariablePropertyAttribute attribute { 
 						get{ return (UnityVariablePropertyAttribute)attribute;}
