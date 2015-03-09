@@ -59,7 +59,7 @@ namespace ws.winx.editor.bmachine.extensions
 				Vector2 playButtonSize;
 				AvatarPreviewW avatarPreview;
 				Vector2 curvePropertiesScroller;
-				Type _typeSelected;
+				
 				UnityVariable _variableSelected;
 				float timeNormalized = 0f;
 
@@ -288,12 +288,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 							Motion motion=null;					
 
-								
-
-								
-								
-								
-
+							
 								if (Event.current.type == EventType.Layout) {
 										this.serializedNode.Update ();
 
@@ -400,40 +395,49 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 												//select object which properties would be extracted
-												_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
+											//	_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
 
 										
-												_typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, _typeSelected, EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes);
+										//		_typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, _typeSelected, EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes);
 
 										
 						
-												if (_objectSelected != null) {//extract properties
-														propertyPopupLabel.text = "Select [" + _objectSelected.name + "]";
-												
-									
-														//get properties from object by object type
-														Utility.ObjectToDisplayOptionsValues<UnityVariable> (_objectSelected, _typeSelected, out displayOptions, out values);
+//												if (_objectSelected != null) {//extract properties
+//														propertyPopupLabel.text = "Select [" + _objectSelected.name + "]";
+//												
+//									
+//														//get properties from object by object type
+//														Utility.ObjectToDisplayOptionsValues<UnityVariable> (_objectSelected, _typeSelected, out displayOptions, out values);
+//
+//
+//												} else {//use Global and Local blackboard
 
 
-												} else {//use Global and Local blackboard
+														propertyPopupLabel.text = "Select blackboard var";
 
 
-														propertyPopupLabel.text = "Select blackboard";
+														List<UnityVariable> blackboardLocalList = mecanimNode.blackboard.GetVariableBy (typeof(float));
+
+														List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
+														
+
+														
 
 
-														List<UnityVariable> localBlackBoardList = mecanimNode.blackboard.GetPropertyBy (_typeSelected);
+														displayOptions = displayOptionsList.ToArray();
 
 
+														values = blackboardLocalList.ToArray ();
 
-														displayOptions = localBlackBoardList.Select ((item) => new GUIContent (item.name)).ToArray ();
+												//}
 
 
-														values = localBlackBoardList.ToArray ();
+						_variableSelected=EditorGUILayoutEx.UnityVariablePopup(new GUIContent("Var:"),_variableSelected,typeof(float),displayOptionsList,blackboardLocalList);
 
-												}
+
 
 					
-												_variableSelected = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (propertyPopupLabel, _variableSelected, displayOptions, values);
+										//		_variableSelected = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (propertyPopupLabel, _variableSelected, displayOptions, values);
 
 				
 												_colorSelected = EditorGUILayout.ColorField (_colorSelected);
@@ -519,7 +523,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 												//reset display
 												_objectSelected = null;
-												_typeSelected = null;
+												
 						
 												//this.serializedNode.ApplyModifiedProperties ();
 

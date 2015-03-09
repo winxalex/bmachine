@@ -10,7 +10,7 @@ using UnityEditorInternal;
 using System.Linq;
 using ws.winx.unity;
 
-namespace ws.winx.editor.bmachine.extensions
+namespace ws.winx.editor.bmachine.drawers
 {
 		[CustomNodePropertyDrawer (typeof(MecanimNodeBlendParameterAttribute))]
 		public class MecanimNodeBlendTreeParameterPropertyDrawer : NodePropertyDrawer

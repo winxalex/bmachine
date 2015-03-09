@@ -13,7 +13,7 @@ using System.Reflection;
 using ws.winx.unity.attributes;
 
 
-namespace ws.winx.editor.bmachine.extensions
+namespace ws.winx.editor.bmachine.drawers
 {
 		[CustomNodePropertyDrawer (typeof(EnumAttribute))]
 		public class EnumAttributeNodePropertyDrawer : NodePropertyDrawer

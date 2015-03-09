@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using BehaviourMachine;
 using ws.winx.unity;
+using ws.winx.unity.attributes;
 
 namespace ws.winx.bmachine.extensions
 {
@@ -12,6 +13,7 @@ namespace ws.winx.bmachine.extensions
 
 				
 				public bool syncWithAnimation = true;
+
 				[MecanimStateInfoAttribute("Animator")]
 				public MecanimStateInfo
 						animaStateInfoSelected;

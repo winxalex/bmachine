@@ -9,8 +9,9 @@ using BehaviourMachineEditor;
 using UnityEditorInternal;
 using System.Linq;
 using ws.winx.unity;
+using ws.winx.unity.attributes;
 
-namespace ws.winx.editor.bmachine.extensions
+namespace ws.winx.editor.bmachine.drawers
 {
 		[CustomNodePropertyDrawer (typeof(MecanimStateInfoAttribute))]
 		public class MecanimNodeStateInfoPropertyDrawer : NodePropertyDrawer

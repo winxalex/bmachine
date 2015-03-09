@@ -10,6 +10,7 @@ using UnityEditorInternal;
 using System.Linq;
 using ws.winx.unity;
 using System.Reflection;
+using ws.winx.unity.attributes;
 
 
 namespace ws.winx.editor.bmachine.extensions

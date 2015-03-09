@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Reflection;
 
-namespace ws.winx.unity
+namespace ws.winx.unity.attributes
 {
 		public class MecanimStateInfoAttribute:PropertyAttribute
 		{

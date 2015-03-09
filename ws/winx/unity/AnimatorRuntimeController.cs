@@ -6,6 +6,7 @@ using UnityEditor;
 
 using ws.winx.unity;
 using ws.winx.bmachine.extensions;
+using ws.winx.unity.attributes;
 
 namespace ws.winx.editor.extensions
 {

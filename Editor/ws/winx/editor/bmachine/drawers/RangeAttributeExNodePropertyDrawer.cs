@@ -11,7 +11,7 @@ using System.Linq;
 using ws.winx.unity;
 using System.Reflection;
 
-namespace ws.winx.editor.bmachine.extensions
+namespace ws.winx.editor.bmachine.drawers
 {
 		[CustomNodePropertyDrawer (typeof(RangeAttributeEx))]
 		public class RangeAttributeExNodePropertyDrawer : NodePropertyDrawer

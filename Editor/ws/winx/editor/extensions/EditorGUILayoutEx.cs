@@ -92,7 +92,7 @@ namespace ws.winx.editor.extensions
 						}
 				}
 
-				public delegate void MenuCallaback<T> (int selectedIndex,T SelectedObject,int controlID);
+				public delegate void MenuCallback<T> (int selectedIndex,T SelectedObject,int controlID);
 
 				public delegate void EventCallback (int ownerControlID,Event e);
 
@@ -233,7 +233,7 @@ namespace ws.winx.editor.extensions
 				/// <param name="position">Position.</param>
 				/// <typeparam name="T">The 1st type parameter.</typeparam>
 				public static int CustomPopup<T> (GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
-		                                 MenuCallaback<T> onSelection=null,
+		                                 MenuCallback<T> onSelection=null,
 		                                 EventCallback onEvent=null,
 		                                 GUIStyle style=null,
 		                                  UnityEngine.Rect? position=null
@@ -247,7 +247,7 @@ namespace ws.winx.editor.extensions
 						int inxd;
 					
 		
-						if (position==null)
+						if (position == null)
 								EditorGUILayout.BeginHorizontal ();
 						
 
@@ -259,17 +259,17 @@ namespace ws.winx.editor.extensions
 								if (position.HasValue)
 										EditorGUI.LabelField (position.Value, label, style);
 								else
-										EditorGUILayout.LabelField (label, style, GUILayout.Width (Screen.width * 0.35f));
+										EditorGUILayout.LabelField (label, style, GUILayout.Width (style.CalcSize (label).x));
 										
 						} else 	if (label != null) {
 							
 								if (position.HasValue)
 										position = EditorGUI.PrefixLabel (position.Value, label);
 								else
-										EditorGUILayout.LabelField (label, GUILayout.Width (Screen.width * 0.35f));
+										EditorGUILayout.LabelField (label, GUILayout.Width (GUI.skin.label.CalcSize (label).x));
 										
 						}
-			
+
 			
 						//get current control ID
 						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
@@ -390,7 +390,7 @@ namespace ws.winx.editor.extensions
 								menu.ShowAsContext ();
 						}
 
-						if (position==null)
+						if (position == null)
 								EditorGUILayout.EndHorizontal ();
 
 						return selectedIndex;
@@ -399,7 +399,7 @@ namespace ws.winx.editor.extensions
 
 		#region CustomObjectPopup
 				public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,
-		                                      MenuCallaback<T> onSelection=null,
+		                                      MenuCallback<T> onSelection=null,
 		                                      EventCallback onEvent=null,
 		                                      GUIStyle labelStyle=null,
 		                                      UnityEngine.Rect? position=null
@@ -1028,6 +1028,76 @@ namespace ws.winx.editor.extensions
 		#endregion
 
 
+		#region UnityVariablePopup
+				public static UnityVariable UnityVariablePopup (GUIContent propertyPopupLabel, UnityVariable _variableSelected, Type _typeSelected, List<GUIContent> displayOptions, List<UnityVariable> values)
+				{
+
+					
+
+						//add first element as custom (selection of Object properties)
+						//others are selection from provided list of values
+						displayOptions.Insert (0, new GUIContent ("Custom"));
+						values.Insert (0, null);// (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ());
+				
+
+						UnityVariable variableCurrent = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (propertyPopupLabel, _variableSelected, displayOptions.ToArray (), values);
+						
+
+						
+					
+						if (variableCurrent == null) {
+								//if variableSeleted is null while("Custom") is selected => create one
+								//create new UnityVariable only when switch from "values" to "custom"
+								if (_variableSelected == null || values.IndexOf (_variableSelected) > -1)
+										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+
+								UnityEngine.Object _objectSelected = null;
+
+								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
+								if (_variableSelected.reflectedInstance != null)
+								if (_variableSelected.reflectedInstance is Component)
+										_objectSelected = ((Component)_variableSelected.reflectedInstance).gameObject;
+								else
+										_objectSelected = _variableSelected.reflectedInstance as UnityEngine.Object;
+
+								//select object which properties would be extracted
+								_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
+					
+					
+								if (_objectSelected != null) {//extract properties
+										
+
+										GUIContent[] displayOptionsProperties;
+										object[] instances;
+										MemberInfo[] memberInfos;
+					
+										//get properties from object by object type
+										Utility.ObjectToDisplayOptionsValues (_objectSelected, _typeSelected, out displayOptionsProperties, out memberInfos, out instances);
+					
+										_variableSelected.MemberInfo = EditorGUILayoutEx.CustomObjectPopup<MemberInfo> (new GUIContent ("Properties"), 
+					                                                                        _variableSelected.MemberInfo, displayOptionsProperties, memberInfos
+										);
+
+										if (_variableSelected.MemberInfo != null) {
+												int inxSelectd = Array.IndexOf (memberInfos, _variableSelected.MemberInfo);
+												_variableSelected.reflectedInstance = instances [inxSelectd];
+										}
+											
+
+
+										
+								} 
+
+
+
+
+						} else
+								_variableSelected = variableCurrent;
+						
+					
+						return _variableSelected;
+				}
+		#endregion
 
 
 		#region Draw Variables

@@ -15,48 +15,50 @@ namespace ws.winx.bmachine
 		public class BlackboardCustom:InternalBlackboard,ISerializationCallbackReceiver
 		{
 
-		[HideInInspector]
-		public List<Type> typesCustom;
+				[HideInInspector]
+				public List<Type>
+						typesCustom;
+				[HideInInspector]
+				public byte[]
+						typesSerialized;
+				[HideInInspector]
+				//Uncoment for debug
+		public List<UnityVariable>
+						variablesList;
 
-		[HideInInspector]
-		public byte[] typesSerialized;
-
-		[HideInInspector]//Uncoment for debug
-		public List<UnityVariable> variablesList;
-
-	
-
-
-			public void AddProperty(UnityVariable prop){
+				public void AddVariable (UnityVariable prop)
+				{
 					
-					variablesList.Add (prop);
+						variablesList.Add (prop);
 
-			}
+				}
 
-			public List<UnityVariable> GetPropertyBy(Type type){
-					return variablesList.Where ((item) => item.ValueType == type).ToList();
+				public List<UnityVariable> GetVariableBy (Type type)
+				{
+						return variablesList.Where ((item) => item.ValueType == type).ToList ();
 
-			}
+				}
 
-
-		void Reset() {
-			variablesList = new List<UnityVariable>();
+				void Reset ()
+				{
+						variablesList = new List<UnityVariable> ();
 			
-		}
+				}
 		
 		#region ISerializationCallbackReceiver implementation
-		void ISerializationCallbackReceiver.OnBeforeSerialize ()
-		{
-			if (typesCustom != null) {
-				typesSerialized=Utility.Serialize(typesCustom);
-			}
-		}
-		void ISerializationCallbackReceiver.OnAfterDeserialize ()
-		{
-			if (typesSerialized != null && typesSerialized.Length > 0) {
-				typesCustom=(List<Type>)Utility.Deserialize(typesSerialized);
-			}
-		}
+				void ISerializationCallbackReceiver.OnBeforeSerialize ()
+				{
+						if (typesCustom != null) {
+								typesSerialized = Utility.Serialize (typesCustom);
+						}
+				}
+
+				void ISerializationCallbackReceiver.OnAfterDeserialize ()
+				{
+						if (typesSerialized != null && typesSerialized.Length > 0) {
+								typesCustom = (List<Type>)Utility.Deserialize (typesSerialized);
+						}
+				}
 		#endregion
 		}
 

@@ -14,6 +14,7 @@ using System.Text;
 using BehaviourMachine;
 using Motion=UnityEngine.Motion;
 using ws.winx.unity;
+using ws.winx.unity.attributes;
 
 namespace ws.winx.bmachine.extensions
 {

@@ -15,7 +15,7 @@ using System;
 
 namespace ws.winx.bmachine.extensions
 {
-	[NodeInfo (category = "Extensions/Input/", icon = "Axis", description = "Stores the value of the virtual axis identified by \"Axis Name\" in \"Store Axis\"", url = "http://docs.unity3d.com/Documentation/ScriptReference/Input.GetAxis.html")]
+	[NodeInfo (category = "Extensions/Input/", icon = "Axis", description = "Stores the value of the virtual axis identified by \"Axis Name\" in \"Store Axis\"", url = "")]
 		public class GetInputNode : ActionNode
 		{
 				//
@@ -43,7 +43,7 @@ namespace ws.winx.bmachine.extensions
 				public int //this is enum from Status.cs generated
 					inputState;
 
-
+				[UnityVariablePropertyAttribute(typeof(float))]
 				public UnityVariable variable;
 	
 				//

@@ -35,7 +35,88 @@ namespace ws.winx.unity{
 
 
 
+		public static void ObjectToDisplayOptionsValues (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out MemberInfo[] memeberInfoValues,out object[] instances)
 
+		{
+//			displayOptions = null;
+//			memeberInfoValues = null;
+//			instances = null;
+
+			
+			Type target = null;
+			List<GUIContent> guiContentList = new List<GUIContent> ();
+			List<MemberInfo> memberInfos = new List<MemberInfo> ();
+			List<object> instancesList = new List<object> ();
+			MemberInfo memberInfo;
+
+			
+			
+			target = @object.GetType ();
+			
+			
+			
+			
+			
+			List<string> list = new List<string> ();
+			
+			
+			
+			
+			
+
+			MemberInfo[] publicMembers ;
+
+			
+			//GET OBJECT NON STATIC PROPERTIES
+			publicMembers = ReflectionUtility.GetPublicMembers (target, type, false, true, true);
+			for (int j = 0; j < publicMembers.Length; j++)
+			{
+				memberInfo=publicMembers [j];
+				
+				guiContentList.Add(new GUIContent (@object.GetType ().Name + "/" + memberInfo.Name));
+				instancesList.Add(@object);
+				memberInfos.Add (memberInfo);
+				
+				
+			}
+			
+			//GET COMPONENTS IF GAME OBJECT
+			GameObject gameObject = @object as GameObject;
+			if (gameObject != null)
+			{
+				Component currentComponent=null;
+				Component[] components = gameObject.GetComponents<Component> ();
+				for (int k = 0; k < components.Length; k++)
+				{
+					currentComponent = components [k];
+					Type compType = currentComponent.GetType ();
+					string uniqueNameInList = StringUtility.GetUniqueNameInList (list, compType.Name);
+					list.Add (uniqueNameInList);
+					
+					
+
+					
+					//NONSTATIC PROPERTIES
+					publicMembers = ReflectionUtility.GetPublicMembers (compType, type, false, true, true);
+					for (int m = 0; m < publicMembers.Length; m++)
+					{
+						memberInfo=publicMembers [m];
+						
+						guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
+						instancesList.Add(currentComponent);
+						memberInfos.Add(memberInfo);
+					}
+				}
+			}
+			
+			
+			displayOptions=guiContentList.ToArray();
+			memeberInfoValues=memberInfos.ToArray();
+			instances=instancesList.ToArray();
+			
+			
+			
+		}//end function
 
 
 	

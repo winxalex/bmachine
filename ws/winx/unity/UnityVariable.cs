@@ -9,7 +9,7 @@ using ws.winx.csharp.extensions;
 namespace ws.winx.unity
 {
 		[Serializable]
-		public class UnityVariable:ScriptableObject,ISerializationCallbackReceiver//,IProperty
+		public class UnityVariable:ScriptableObject,ISerializationCallbackReceiver
 		{
 				
 				public bool serializable = true;
@@ -264,9 +264,11 @@ namespace ws.winx.unity
 
 						UnityVariable other = (UnityVariable)obj;
 
-						return 
-						(this.MemberInfo != null && this.MemberInfo.Equals (other.MemberInfo))
-								|| (this.reflectedInstance == null && this.reflectedInstance.Equals (other.reflectedInstance));
+			return this.GetInstanceID() == other.GetInstanceID();
+
+//						return 
+//						(this.MemberInfo != null && this.MemberInfo.Equals (other.MemberInfo))
+//								|| (this.reflectedInstance == null && this.reflectedInstance.Equals (other.reflectedInstance));
 								
 				}
 
