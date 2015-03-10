@@ -26,6 +26,8 @@ namespace ws.winx.bmachine
 		public List<UnityVariable>
 						variablesList;
 
+		private bool _deserialized=false;
+
 				public void AddVariable (UnityVariable prop)
 				{
 					
@@ -35,7 +37,12 @@ namespace ws.winx.bmachine
 
 				public List<UnityVariable> GetVariableBy (Type type)
 				{
-						return variablesList.Where ((item) => item.ValueType == type).ToList ();
+							//deserialization might not be ready
+							//if (variablesList == null || (variablesList.Count >0 && variablesList[0]==null)
+								if(!_deserialized)
+								return new List<UnityVariable> ();
+
+							return variablesList.Where ((item) => item.ValueType == type).ToList ();
 
 				}
 
@@ -58,6 +65,9 @@ namespace ws.winx.bmachine
 						if (typesSerialized != null && typesSerialized.Length > 0) {
 								typesCustom = (List<Type>)Utility.Deserialize (typesSerialized);
 						}
+
+
+						_deserialized = true;
 				}
 		#endregion
 		}

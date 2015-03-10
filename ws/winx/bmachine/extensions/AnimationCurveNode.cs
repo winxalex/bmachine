@@ -111,7 +111,7 @@ namespace ws.winx.bmachine.extensions
 								}
 
 								//check if selected and current state are equal
-								if (animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash) {
+								if (animatorStateInfoCurrent.shortNameHash == animaStateInfoSelected.hash) {
 										_timeCurrent = animatorStateInfoCurrent.normalizedTime;
 
 									

@@ -14,15 +14,15 @@ using ws.winx.bmachine;
 
 namespace ws.winx.editor.bmachine.drawers
 {
-		[CustomPropertyDrawer (typeof(UnityVariablePropertyAttribute))]
+		[CustomNodePropertyDrawer (typeof(UnityVariablePropertyAttribute))]
 		public class UnityVariableNodePropertyDrawer : NodePropertyDrawer
 		{
 
 
-
-				public new UnityVariablePropertyAttribute attribute { 
-						get{ return (UnityVariablePropertyAttribute)attribute;}
-				}
+		//make Unity crash
+//				public new UnityVariablePropertyAttribute attribute { 
+//						get{ return (UnityVariablePropertyAttribute)attribute;}
+//				}
 
 
 				private void OnEnable() {
@@ -52,19 +52,27 @@ namespace ws.winx.editor.bmachine.drawers
 				public override void OnGUI (SerializedNodeProperty property, ActionNode node, GUIContent guiContent)
 				{
 
+			//if (attribute == null || attribute.VariableType == null)
+							//	return;
+			UnityVariablePropertyAttribute att=(UnityVariablePropertyAttribute)attribute;
+
+			BlackboardCustom blackboard=node.blackboard as BlackboardCustom;
+
+			List<UnityVariable> blackboardLocalList = blackboard.GetVariableBy (att.VariableType);
+
 					
-						List<UnityVariable> blackboardLocalList=((BlackboardCustom)node.blackboard).GetVariableBy (attribute.type);
+					//	List<UnityVariable> blackboardLocalList=((BlackboardCustom)node.blackboard).GetVariableBy (attribute.type);
 
 			List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
 						
 						
 						
 						
-			property.value=EditorGUILayoutEx.UnityVariablePopup(new GUIContent("Var:"),property.value as UnityVariable,typeof(float),displayOptionsList,blackboardLocalList);
+			property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.VariableType,displayOptionsList,blackboardLocalList);
 						
 
 						
-
+		//	property.ApplyModifiedValue ();
 		
 						
 

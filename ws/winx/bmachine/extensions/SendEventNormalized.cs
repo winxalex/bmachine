@@ -43,7 +43,7 @@ namespace ws.winx.bmachine.extensions
 
 						//Debug.Log ("onUpdate");
 					
-						if (currentAnimatorStateInfo.nameHash == selectedAnimaStateInfo.hash) {
+						if (currentAnimatorStateInfo.shortNameHash == selectedAnimaStateInfo.hash) {
 								float timeNormalizedCurrent = currentAnimatorStateInfo.normalizedTime;
 
 						

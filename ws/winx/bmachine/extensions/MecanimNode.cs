@@ -41,12 +41,17 @@ namespace ws.winx.bmachine.extensions
 						animaStateInfoSelected;
 				public Motion motionOverride;
 				public bool loop = false;
-				[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.X)]
-				public int
-						blendParamXBlackboardBindID;
-				[MecanimNodeBlendParameterAttribute(axis=MecanimNodeBlendParameterAttribute.Axis.Y)]
-				public int
-						blendParamYBlackboardBindID;
+
+
+				
+
+				[UnityVariableProperty(typeof(float))]
+				public UnityVariable blendX;
+
+				[UnityVariableProperty(typeof(float))]
+				public UnityVariable blendY;
+
+
 				[RangeAttribute(0f,1f)]
 				public float
 						transitionDuration = 0.1f;
@@ -145,6 +150,7 @@ namespace ws.winx.bmachine.extensions
 				public override void Reset ()
 				{
 						Debug.Log (this.name + ">Reset");
+		
 						_animator = null;
 						
 						transitionDuration = 0f;
@@ -152,13 +158,19 @@ namespace ws.winx.bmachine.extensions
 						curvesColors = new Color[0];
 						curves = new AnimationCurve[0];
 						variablesBindedToCurves = new UnityVariable[0];
-						
+
+						blendX = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+						blendX.Value = 0f;//make it float type
+
+						blendY = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+						blendY.Value = 0f;//make it float type
+			
 				}
 
 				public override void Awake ()
 				{
 					//	Debug.Log ("Awake");
-//					
+					Debug.Log ("Crouch:" + Animator.StringToHash ("Crouch"));
 			
 				}
 
@@ -244,9 +256,9 @@ namespace ws.winx.bmachine.extensions
 			
 						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
 			
-						isSelectedAnimaInfoInTransition = animator.IsInTransition (animaStateInfoSelected.layer) && (animatorStateInfoNext.nameHash == animaStateInfoSelected.hash);
+						isSelectedAnimaInfoInTransition = animator.IsInTransition (animaStateInfoSelected.layer) && (animatorStateInfoNext.shortNameHash == animaStateInfoSelected.hash);
 			
-						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.nameHash == animaStateInfoSelected.hash;
+						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.shortNameHash == animaStateInfoSelected.hash;
 
 
 
@@ -255,9 +267,9 @@ namespace ws.winx.bmachine.extensions
 						//The second check ins't nessery if I could reset Status when this node is switched
 						if (this.status != Status.Running) {
 				
-								AnimationClip animationClipCurrent;
+								
 								if (motionOverride != null 
-										&& ((animationClipCurrent = animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion]) != (AnimationClip)motionOverride)) {
+										&& (animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] != (AnimationClip)motionOverride)) {
 					
 					
 										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
@@ -380,20 +392,22 @@ namespace ws.winx.bmachine.extensions
 										}
 
 							
-										if (animaStateInfoSelected.blendParamsIDs != null && (numBlendParamters = animaStateInfoSelected.blendParamsIDs.Length) > 0) {
+										
 
-												if (numBlendParamters > 1) {
-														animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (this.blendParamXBlackboardBindID).Value);
-														animator.SetFloat (animaStateInfoSelected.blendParamsIDs [1], this.blackboard.GetFloatVar (this.blendParamYBlackboardBindID).Value);
-
-												} else
-														animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], this.blackboard.GetFloatVar (blendParamXBlackboardBindID).Value);
-
-
-										}
-
-
-										//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
+					if (animaStateInfoSelected.blendParamsIDs != null && (numBlendParamters = animaStateInfoSelected.blendParamsIDs.Length) > 0) {
+						
+						if (numBlendParamters > 1) {
+							animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], (float)blendX.Value);
+							animator.SetFloat (animaStateInfoSelected.blendParamsIDs [1], (float)blendY.Value);
+							
+						} else
+							animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], (float)blendX.Value);
+						
+						
+					}
+					
+					
+					//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
 
 
 

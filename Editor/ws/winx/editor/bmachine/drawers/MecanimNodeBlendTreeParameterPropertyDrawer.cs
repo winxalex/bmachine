@@ -16,7 +16,7 @@ namespace ws.winx.editor.bmachine.drawers
 		public class MecanimNodeBlendTreeParameterPropertyDrawer : NodePropertyDrawer
 		{
 
-				MecanimStateInfo previousSelectAnimaInfo;
+				MecanimStateInfo animaStateInfoSelectedPrev;
 				GUIContent label = new GUIContent ();
 				Variable blackBoardVariableX;
 				Variable blackBoardVariableY;
@@ -56,14 +56,18 @@ namespace ws.winx.editor.bmachine.drawers
 				
 
 
-								if (previousSelectAnimaInfo != mecanimNode.animaStateInfoSelected) {
+								if (animaStateInfoSelectedPrev != mecanimNode.animaStateInfoSelected) {
 										blackboardFloatVariables = mecanimNode.blackboard.GetVariables (typeof(FloatVar));
 										
-										//concat global and local blackboards
+	//										concat global and local blackboards
 										blackboardFloatVariables.AddRange (GlobalBlackboard.Instance.GetVariables (typeof(FloatVar)));
 										
 										displayOptions = blackboardFloatVariables.Select (x => new GUIContent (x.name)).ToArray ();
 				
+
+
+
+
 								}
 				
 				
@@ -92,7 +96,7 @@ namespace ws.winx.editor.bmachine.drawers
 
 
 
-						previousSelectAnimaInfo = mecanimNode.animaStateInfoSelected;
+						animaStateInfoSelectedPrev = mecanimNode.animaStateInfoSelected;
 
 						
 
