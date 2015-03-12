@@ -87,18 +87,22 @@ namespace ws.winx.bmachine.extensions
 						sensitivity = 0.25f;
 						gravity = 0.3f;
 						dreadzone = 0.1f;
-			FullAxis = true;
+						FullAxis = true;
 					
 
 
+				}
+
+		public void onTick(){
+
+			Debug.Log ("tick");
 				}
 	
 				public override Status Update ()
 				{
 
-//			Debug.Log (" Hold" + InputManager.GetInputHold ((int)ws.winx.input.states.States.Crouch, player));
-//
-//			return Status.Success;
+
+				
 						
 
 						if (inputType == InputType.GetInput) {
@@ -115,14 +119,12 @@ namespace ws.winx.bmachine.extensions
 								
 
 								return Status.Success;
-						} 
-			else if (inputType == InputType.GetInputDown) {
+						} else if (inputType == InputType.GetInputDown) {
 								if (InputManager.GetInputDown (this.inputStatePos, player))
 										return Status.Success;
 
 								return Status.Failure;
-						}
-			else if (inputType == InputType.GetInputUp) {
+						} else if (inputType == InputType.GetInputUp) {
 								if (InputManager.GetInputUp (this.inputStatePos, player))
 										return Status.Success;
 				
