@@ -170,7 +170,7 @@ namespace ws.winx.bmachine.extensions
 				public override void Awake ()
 				{
 					//	Debug.Log ("Awake");
-					Debug.Log ("Crouch:" + Animator.StringToHash ("Crouch"));
+					
 			
 				}
 
