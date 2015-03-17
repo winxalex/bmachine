@@ -49,19 +49,24 @@ namespace ws.winx.bmachine.extensions
 				[EnumAttribute(typeof(ws.winx.input.states.States))]
 				public int //this is enum from Status.cs generated
 						inputStateNeg;
-				public bool FullAxis = true;
+
+				
+				public bool fullAxis = true;
+
 				[UnityVariablePropertyAttribute(typeof(float))]
 				public UnityVariable
 						variable;
-				[Range(0f,1f)]
+				
+				
 				public float
 						sensitivity = 0.25f;
-				[Range(0f,1f)]
+				
 				public float
 						dreadzone = 0.1f;
-				[Range(0f,1f)]
+				
 				public float
 						gravity = 0.3f;
+				
 				public float
 						multiplier = 1f;
 		
@@ -87,7 +92,7 @@ namespace ws.winx.bmachine.extensions
 						sensitivity = 0.25f;
 						gravity = 0.3f;
 						dreadzone = 0.1f;
-						FullAxis = true;
+						fullAxis = true;
 					
 
 
@@ -108,7 +113,7 @@ namespace ws.winx.bmachine.extensions
 						if (inputType == InputType.GetInput) {
 
 
-								if (FullAxis) {
+								if (fullAxis) {
 										variable.Value = multiplier * 
 												(Math.Abs (InputManager.GetInput (this.inputStatePos, player, sensitivity, dreadzone, gravity)) -
 												Math.Abs (InputManager.GetInput (this.inputStateNeg, player, sensitivity, dreadzone, gravity)));	
