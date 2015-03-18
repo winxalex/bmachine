@@ -31,9 +31,9 @@ namespace ws.winx.editor.bmachine.extensions
 				/// </summary>
 				public override void OnInspectorGUI ()
 				{
-						//DrawDefaultInspector();
+						
 
-						GetInputNode node = target as GetInputNode;
+						
 
 						//why is this line for???
 //						if (Event.current.type == EventType.Layout) {

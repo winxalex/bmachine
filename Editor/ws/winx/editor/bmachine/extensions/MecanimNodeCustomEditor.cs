@@ -35,7 +35,7 @@ namespace ws.winx.editor.bmachine.extensions
 		{
 
 				
-				UnityEngine.Object _objectSelected;
+				
 				GUIContent propertyPopupLabel = new GUIContent (String.Empty);
 				string[] curvePropertyDisplayOptions;
 				MethodInfo GetFloatVar_MethodInfo;
@@ -44,7 +44,7 @@ namespace ws.winx.editor.bmachine.extensions
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
-				GUIContent[] displayOptions;
+				
 				List<MecanimStateInfo> animaInfoValues;
 				MecanimStateInfo selectedAnimaStateInfo;
 				float[] eventTimeValues;
@@ -59,7 +59,6 @@ namespace ws.winx.editor.bmachine.extensions
 				Vector2 playButtonSize;
 				AvatarPreviewW avatarPreview;
 				Vector2 curvePropertiesScroller;
-				
 				UnityVariable _variableSelected;
 				float timeNormalized = 0f;
 
@@ -91,7 +90,43 @@ namespace ws.winx.editor.bmachine.extensions
 
 			
 
-			
+				public new void DrawDefaultInspector ()
+				{
+
+						MecanimNode node = ((MecanimNode)target);
+
+						NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+						
+
+						
+						int indentLevel = EditorGUI.indentLevel;
+						while (iterator.Next (iterator.current == null || (iterator.current.propertyType != NodePropertyType.Variable && !iterator.current.hideInInspector))) {
+								SerializedNodeProperty current = iterator.current;
+							
+							
+								if (!current.hideInInspector) {
+								
+										
+								
+										if (current.path == "blendX" && 
+					    node!=null && node.animaStateInfoSelected != null && 
+					    (node.animaStateInfoSelected.blendParamsIDs==null ||
+					    node.animaStateInfoSelected.blendParamsIDs.Length < 1))
+												continue;
+										if (current.path == "blendY" 
+					    && node!=null && node.animaStateInfoSelected != null && 
+					    (node.animaStateInfoSelected.blendParamsIDs==null ||
+					    node.animaStateInfoSelected.blendParamsIDs.Length < 2))
+												continue;
+
+										EditorGUI.indentLevel = indentLevel + iterator.depth;
+										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, this.target, null, true);
+								}
+						}
+
+						EditorGUI.indentLevel = indentLevel;
+
+				}
 
 
 
@@ -256,6 +291,11 @@ namespace ws.winx.editor.bmachine.extensions
 
 				}
 
+
+				/// <summary>
+				/// Ons the curve select.
+				/// </summary>
+				/// <param name="index">Index.</param>
 				void onCurveSelect (int index)
 				{
 						Debug.Log ("Curve " + index + " selected");
@@ -283,10 +323,10 @@ namespace ws.winx.editor.bmachine.extensions
 
 						mecanimNode = target as MecanimNode;
 
-							if (mecanimNode != null) {
+						if (mecanimNode != null) {
 
 						
-							Motion motion=null;					
+								Motion motion = null;					
 
 							
 								if (Event.current.type == EventType.Layout) {
@@ -369,8 +409,7 @@ namespace ws.winx.editor.bmachine.extensions
 										/////////////   ADD/REMOVE CURVE BINDED TO OBJECT PROP OR GLOBAL VARIABLE /////////////
 										EditorGUILayout.BeginHorizontal ();
 
-										GUIContent[] displayOptions = null;
-										UnityVariable[] values = null;
+										
 
 
 										//if curve is selected display curve properties
@@ -394,51 +433,22 @@ namespace ws.winx.editor.bmachine.extensions
 											
 
 
-												//select object which properties would be extracted
-											//	_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
-
-										
-										//		_typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, _typeSelected, EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes);
-
-										
-						
-//												if (_objectSelected != null) {//extract properties
-//														propertyPopupLabel.text = "Select [" + _objectSelected.name + "]";
-//												
-//									
-//														//get properties from object by object type
-//														Utility.ObjectToDisplayOptionsValues<UnityVariable> (_objectSelected, _typeSelected, out displayOptions, out values);
-//
-//
-//												} else {//use Global and Local blackboard
+												propertyPopupLabel.text = "Select blackboard var";
 
 
-														propertyPopupLabel.text = "Select blackboard var";
+												List<UnityVariable> blackboardLocalList = mecanimNode.blackboard.GetVariableBy (typeof(float));
 
-
-														List<UnityVariable> blackboardLocalList = mecanimNode.blackboard.GetVariableBy (typeof(float));
-
-														List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
+												List<GUIContent> displayOptionsList = blackboardLocalList.Select ((item) => new GUIContent ("Local/" + item.name)).ToList ();
 														
 
-														
+												
 
-
-														displayOptions = displayOptionsList.ToArray();
-
-
-														values = blackboardLocalList.ToArray ();
-
-												//}
-
-
-						_variableSelected=EditorGUILayoutEx.UnityVariablePopup(new GUIContent("Var:"),_variableSelected,typeof(float),displayOptionsList,blackboardLocalList);
+												_variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent ("Var:"), _variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
 
 
 
 					
-										//		_variableSelected = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (propertyPopupLabel, _variableSelected, displayOptions, values);
-
+										
 				
 												_colorSelected = EditorGUILayout.ColorField (_colorSelected);
 
@@ -521,13 +531,7 @@ namespace ws.winx.editor.bmachine.extensions
 												
 
 
-												//reset display
-												_objectSelected = null;
 												
-						
-												//this.serializedNode.ApplyModifiedProperties ();
-
-												//this.serializedNode.Update();
 
 										}
 
@@ -567,33 +571,34 @@ namespace ws.winx.editor.bmachine.extensions
 										
 
 									
-								} else {
-										DrawDefaultInspector();
-
+								} else {//not _curvesEditorShow => Default draw
+										
+										DrawDefaultInspector ();
 
 										
 								}
 								////////////////////////////////////////////////////////////////////////////
 			
 
-								if(mecanimNode.animaStateInfoSelected!=null){
+								//////////  MOTION OVERRIDE HANDLING  //////////
+								if (mecanimNode.animaStateInfoSelected != null) {
 									
 									
-									//if there are no override use motion of selected AnimationState
-									if (mecanimNode.motionOverride == null)
-										motion = mecanimNode.animaStateInfoSelected.motion;
-									else //
-										motion = mecanimNode.motionOverride;
+										//if there are no override use motion of selected AnimationState
+										if (mecanimNode.motionOverride == null)
+												motion = mecanimNode.animaStateInfoSelected.motion;
+										else //
+												motion = mecanimNode.motionOverride;
 									
 									
 									
-									if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
-										Debug.LogError ("Can't override state that doesn't contain motion");
-									}
+										if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
+												Debug.LogError ("Can't override state that doesn't contain motion");
+										}
 									
 									
 								}
-								
+								///////////////////////////////////////////////////
 
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
 								if (Application.isPlaying) {
