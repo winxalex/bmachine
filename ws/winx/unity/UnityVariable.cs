@@ -5,6 +5,9 @@ using System.Reflection;
 using ws.winx.unity;
 using System.Runtime.Serialization.Formatters.Binary;
 using ws.winx.csharp.extensions;
+using UnityEngine.Events;
+using UnityEditor;
+using System.CodeDom.Compiler;
 
 namespace ws.winx.unity
 {
@@ -27,13 +30,106 @@ namespace ws.winx.unity
 						}
 				}
 
+				//[SerializeField]
+				private SerializedProperty
+						__seralizedProperty;
+				//[SerializeField]
+				private SerializedObject
+						__seralizedObject;
+
+				public SerializedProperty serializedProperty {
+						get {
+
+								if (__seralizedProperty == null) {
+
+										using (Microsoft.CSharp.CSharpCodeProvider foo = 
+				       new Microsoft.CSharp.CSharpCodeProvider()) {
+					
+												CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+					
+											
+					
+												compilerParams.GenerateInMemory = true; 
+					
+												var assembyExcuting = Assembly.GetExecutingAssembly ();
+												
+												string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+						
+												string usingString = "using UnityEngine;";
+												
+												if (!(this.ValueType.IsPrimitive || this.ValueType == typeof(string))) {
+														string assemblyLocationVarable = Assembly.GetAssembly (this.ValueType).Location;
+														compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+
+														if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+
+																usingString += "using " + this.ValueType.Namespace + ";";
+														}
+												}
+							
+
+
+												compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+												compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+					
+					
+				
+					
+												var res = foo.CompileAssemblyFromSource (
+						compilerParams, String.Format (
+						
+						" {0}" +
+						
+														"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} field;}}"
+							, usingString, this.ValueType.ToString ())
+												);
+					
+					
+					
+					
+												if (res.Errors.Count > 0) {
+							
+														foreach (CompilerError CompErr in res.Errors) {
+																Debug.LogError (
+																		"Line number " + CompErr.Line +
+																		", Error Number: " + CompErr.ErrorNumber +
+																		", '" + CompErr.ErrorText + ";" 
+																);
+														}
+												} else {
+					
+														var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+							
+														ScriptableObject st = ScriptableObject.CreateInstance (type);
+								
+														type.GetField ("field").SetValue (st, this.Value);
+								
+								
+								
+														__seralizedObject = new SerializedObject (st);
+								
+														__seralizedProperty = __seralizedObject.FindProperty ("field");
+
+												}
+			
+										}
+
+								}
+
+
+								
+
+								return __seralizedProperty;
+					
+						}
+				}
+
 				[HideInInspector]
 				public byte[]
 						memberInfoSerialized;
 				[HideInInspector]
 				public byte[]
 						reflectedInstanceSerialized;
-				
 				[NonSerialized]
 				private object
 						__reflectedInstance;
@@ -48,6 +144,8 @@ namespace ws.winx.unity
 
 						   
 								__reflectedInstanceUnity = __reflectedInstance as UnityEngine.Object;
+
+								__event = __reflectedInstance as UnityEvent;
 					
 //								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity + " Reflected instance:" + __reflectedInstance);
 						}
@@ -56,6 +154,9 @@ namespace ws.winx.unity
 				[SerializeField]
 				private UnityEngine.Object
 						__reflectedInstanceUnity;
+
+				//[SerializeField]
+				private UnityEvent __event = null;
 				[NonSerialized]
 				private MemberInfo
 						__memberInfo;
@@ -137,13 +238,15 @@ namespace ws.winx.unity
 						set {
 
 
-								
+
 
 
 								if (this.__memberInfo == null) {
 										
 										this.reflectedInstance = value;
 
+										
+					
 										if (value != null)
 												_valueType = this.reflectedInstance.GetType ();
 
@@ -189,7 +292,7 @@ namespace ws.winx.unity
 
 								valueTypeSerialized = Utility.Serialize (_valueType);
 
-								if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null) && __reflectedInstance.GetType () != typeof(UnityEngine.Object)) {
+								if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null && __event == null) && __reflectedInstance.GetType () != typeof(UnityEngine.Object)) {
 
 						
 										try {
@@ -220,7 +323,10 @@ namespace ws.winx.unity
 										__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
 
 								} else {
-										__reflectedInstance = __reflectedInstanceUnity;
+										if (__reflectedInstanceUnity != null)
+												__reflectedInstance = __reflectedInstanceUnity;
+										//else if (__event != null)
+										//	__reflectedInstance = __event;
 
 								}
 						}
@@ -230,6 +336,32 @@ namespace ws.winx.unity
 				}
 
 		#endregion
+
+				public void ApplyModifiedProperties ()
+				{
+						if (__seralizedObject != null) {
+								__seralizedObject.ApplyModifiedProperties ();
+
+								if (this.ValueType == typeof(float)) {
+
+										this.Value = __seralizedProperty.floatValue;
+								} else
+
+				if (this.ValueType == typeof(int)) {
+					
+										this.Value = __seralizedProperty.intValue;
+								} else
+				if (this.ValueType == typeof(Vector3)) {
+					
+										this.Value = __seralizedProperty.vector3Value;
+								} else
+					
+					if (this.__reflectedInstance is UnityEngine.Object)
+										this.Value = __seralizedProperty.objectReferenceValue;
+
+
+						}
+				}
 
 
 
@@ -252,10 +384,8 @@ namespace ws.winx.unity
 
 				public override int GetHashCode ()
 				{
-					return base.GetHashCode ();
+						return base.GetHashCode ();
 				}
-
-
 
 				public override bool Equals (object obj)
 				{
@@ -264,11 +394,8 @@ namespace ws.winx.unity
 
 						UnityVariable other = (UnityVariable)obj;
 
-			return this.GetInstanceID() == other.GetInstanceID();
+						return this.GetInstanceID () == other.GetInstanceID ();
 
-//						return 
-//						(this.MemberInfo != null && this.MemberInfo.Equals (other.MemberInfo))
-//								|| (this.reflectedInstance == null && this.reflectedInstance.Equals (other.reflectedInstance));
 								
 				}
 
@@ -276,6 +403,8 @@ namespace ws.winx.unity
 				{
 						return "Property[" + name + "] of type " + ValueType + (this.reflectedInstance == null ? " on Static instance" : " on instance of " + this.reflectedInstance);
 				}
+
+			
 
 
 		}

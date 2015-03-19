@@ -17,6 +17,7 @@ using ws.winx.editor.extensions;
 using System.Reflection;
 using System.Linq;
 using BehaviourMachine;
+using UnityEngine.Events;
 
 namespace ws.winx.editor.extensions
 {
@@ -45,7 +46,8 @@ namespace ws.winx.editor.extensions
 												new GUIContent ("Texture3D"),
 												new GUIContent ("GameObject"),
 												new GUIContent ("AnimationCurve"),
-												new GUIContent ("AnimationClip")
+												new GUIContent ("AnimationClip"),
+												new GUIContent ("UnityEvent")
 										};
 				
 
@@ -72,7 +74,8 @@ namespace ws.winx.editor.extensions
 												typeof(Texture3D),
 												typeof(GameObject),
 												typeof(AnimationCurve),
-												typeof(AnimationClip)
+												typeof(AnimationClip),
+												typeof(UnityEvent)
 										};                        
 
 								}

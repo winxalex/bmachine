@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using System.Reflection;
 using ws.winx.csharp.extensions;
 using ws.winx.editor.windows;
+using UnityEngine.Events;
 
 namespace ws.winx.editor.bmachine
 {
@@ -33,7 +34,7 @@ namespace ws.winx.editor.bmachine
 				
 				ReorderableList  __variablesReordableList;
 				GenericMenu genericMenu;
-				Func<Type,EditorUtilityEx.SwitchDrawerDelegate>  switchDrawer;
+				
 				Action<Type> switchMenuTypes;
 				string _typeNameSelected = "None";
 				List<Type> typesCustom;
@@ -71,10 +72,9 @@ namespace ws.winx.editor.bmachine
 
 								fillMenuCustomTypes ();
 
-								//How to add custom Drawer
-								EditorUtilityEx.AddCustomDrawer<FsmEvent> (myCustomDrawer);
+								
 
-								switchDrawer = EditorUtilityEx.GetDefaultSwitchDrawer ();
+							
 
 
 
@@ -93,6 +93,8 @@ namespace ws.winx.editor.bmachine
 										AddVariableToList<bool> ("New Bool", false, __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<Vector3,Action> (() => {
 										AddVariableToList<Vector3> ("New Vector3", new Vector3 (), __variablesReordableList);}),
+					SwitchUtility.CaseIsClassOf<UnityEvent,Action> (() => {
+						AddVariableToList<UnityEvent> ("New UnityEvent", new UnityEvent(), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<Quaternion,Action> (() => {
 										AddVariableToList<Quaternion> ("New Quaternion", new Quaternion (), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<Color,Action> (() => {
@@ -108,9 +110,9 @@ namespace ws.winx.editor.bmachine
 										AddVariableToList<Material> ("Material", new Material (Shader.Find ("Diffuse")), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<GameObject,Action> (() => {
 										AddVariableToList<GameObject> ("New GameObject", new GameObject (), __variablesReordableList);}),
-						SwitchUtility.CaseIsClassOf<AnimationCurve,Action> (() => {
+					SwitchUtility.CaseIsClassOf<AnimationCurve,Action> (() => {
 										AddVariableToList<AnimationCurve> ("New AnimationCurve", new AnimationCurve (new Keyframe (0f, 0f), new Keyframe (1f, 1f)), __variablesReordableList);}),
-				SwitchUtility.CaseIsClassOf<AnimationClip,Action> (() => {
+					SwitchUtility.CaseIsClassOf<AnimationClip,Action> (() => {
 										AddVariableToList<AnimationClip> ("New AnimationClip", new AnimationClip (), __variablesReordableList);}),
 				
 				
@@ -205,7 +207,7 @@ namespace ws.winx.editor.bmachine
 			                                "Are you sure you want to delete the Unity Variable?", "Yes", "No")) {
 								ReorderableList.defaultBehaviours.DoRemoveButton (list);
 								
-								
+								list.serializedProperty.DeleteArrayElementAtIndex(list.index);
 								
 
 								serializedObject.ApplyModifiedProperties ();
@@ -257,28 +259,33 @@ namespace ws.winx.editor.bmachine
 						
 					
 						UnityVariable currentVariable;
-						EditorUtilityEx.SwitchDrawerDelegate switchDrawerDelegate;
+					
 
 		
 				
 
 						currentVariable = (UnityVariable)property.objectReferenceValue;
 
-						switchDrawerDelegate = switchDrawer (currentVariable.ValueType);
-				
-						if (switchDrawerDelegate != null) {
-								//make drawing of the variable
-								return switchDrawerDelegate (position, currentVariable);
-						} else {
+						
 
-							
+			PropertyDrawer drawer = EditorUtilityEx.GetDefaultDrawer();
+			
+			
+			Rect pos = new Rect (32, position.y, 80, 16);
 
-								EditorGUILayoutEx.DrawName (position, currentVariable);
+			EditorGUI.TextField(pos, currentVariable.name);
+			position.x = 113f;
+			position.width -= 80f;
+			drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent(""));
+			
+			currentVariable.ApplyModifiedProperties();
+			
+			//
 
 
 
 			
-						}
+					
 
 
 
@@ -287,16 +294,7 @@ namespace ws.winx.editor.bmachine
 		
 				}
 
-				Rect myCustomDrawer (Rect position, UnityVariable variable)
-				{
-						position.width = 80f;
-						EditorGUILayoutEx.DrawName (position, variable);
-						position.width = Screen.width - 50f - position.width;
-						position.x += 90f;
-						EditorGUI.LabelField (position, new GUIContent ((-1 * Mathf.Abs (Guid.NewGuid ().GetHashCode ())).ToString ()));
-
-						return position;
-				}
+				
 
 				void onTypeCustomSelected (object userData)
 				{

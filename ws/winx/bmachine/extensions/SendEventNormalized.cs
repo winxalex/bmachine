@@ -12,6 +12,7 @@ using BehaviourMachine;
 using UnityEngine;
 using ws.winx.unity;
 using UnityEngine.Events;
+using ws.winx.unity.attributes;
 
 namespace ws.winx.bmachine.extensions
 {
@@ -24,9 +25,13 @@ namespace ws.winx.bmachine.extensions
 
 				Animator _animator;
 				float _timeNormalizedLast;
-				[VariableInfo (requiredField = true,fixedType=true, tooltip = "Normalized time value from 0 to 1."), Range (0f, 1f)]
-				public FloatVar
+				[UnityVariablePropertyAttribute(typeof(float))]
+				public UnityVariable
 						timeNormalized;
+
+//				[VariableInfo (requiredField = true,fixedType=true, tooltip = "Normalized time value from 0 to 1."), Range (0f, 1f)]
+//				public FloatVar
+//						timeNormalized;
 				//public UnityEvent onAnimationEvent;
 			
 				public override void Awake ()
@@ -52,7 +57,7 @@ namespace ws.winx.bmachine.extensions
 
 								//Debug.Log ("timeNormalizedCurrent "+timeNormalizedCurrent);
 
-								if (timeNormalizedCurrent > timeNormalized && _timeNormalizedLast < timeNormalized) {
+								if (timeNormalizedCurrent > (float)timeNormalized.Value && _timeNormalizedLast < (float)timeNormalized.Value) {
 
 										//Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
 										//onAnimationEvent.Invoke ();
@@ -71,7 +76,9 @@ namespace ws.winx.bmachine.extensions
 				public override void Reset ()
 				{
 						//this.onAnimationEvent = new UnityEvent ();
-						this.timeNormalized = new ConcreteFloatVar ();
+						this.timeNormalized = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
+						this.timeNormalized.Value = 0f;
+
 						_timeNormalizedLast = 0f;
 				
 				}

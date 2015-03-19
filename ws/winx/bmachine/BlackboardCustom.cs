@@ -23,10 +23,10 @@ namespace ws.winx.bmachine
 						typesSerialized;
 				[HideInInspector]
 				//Uncoment for debug
-		public List<UnityVariable>
+				public List<UnityVariable>
 						variablesList;
 
-		private bool _deserialized=false;
+				private bool _deserialized=false;
 
 				public void AddVariable (UnityVariable prop)
 				{
@@ -49,6 +49,7 @@ namespace ws.winx.bmachine
 				void Reset ()
 				{
 						variablesList = new List<UnityVariable> ();
+						typesCustom = new List<Type> ();
 			
 				}
 		

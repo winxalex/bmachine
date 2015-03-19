@@ -75,8 +75,8 @@ namespace ws.winx.editor.bmachine.extensions
 						{
 								SendEventNormalized animationEvent = (SendEventNormalized)objX;
 								SendEventNormalized animationEvent2 = (SendEventNormalized)objY;
-								float time = animationEvent.timeNormalized;
-								float time2 = animationEvent2.timeNormalized;
+								float time = (float)animationEvent.timeNormalized.Value;
+								float time2 = (float)animationEvent2.timeNormalized.Value;
 								if (time != time2) {
 										return (int)Mathf.Sign (time - time2);
 								}
@@ -225,7 +225,7 @@ namespace ws.winx.editor.bmachine.extensions
 								inx = indexArray [m];
 								ev = ((SendEventNormalized)mecanimNode.children [m]);	
 								this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
-								this.eventTimeValues [m] = ev.timeNormalized; 
+								this.eventTimeValues [m] = (float)ev.timeNormalized.Value; 
 								this.eventDisplayNames [m] = ev.name;
 				
 						}
@@ -255,7 +255,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 								if (i < timeValuesNumber) {
 
-										child.timeNormalized = timeValues [i];
+										child.timeNormalized.Value = timeValues [i];
 										i++;
 								} else {
 										//remove localy from node parent
@@ -702,7 +702,7 @@ namespace ws.winx.editor.bmachine.extensions
 					
 												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
 												//select the time values from nodes
-												eventTimeValues = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).timeNormalized.Value).ToArray ();
+												eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.Value).ToArray ();
 												eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 												eventTimeValuesSelected = new bool[eventTimeValues.Length];
 					
@@ -737,7 +737,7 @@ namespace ws.winx.editor.bmachine.extensions
 										int eventTimeValuesNumber = mecanimNode.children.Length;
 										for (i=0; i<eventTimeValuesNumber; i++) {
 												ev = ((SendEventNormalized)mecanimNode.children [i]);	
-												ev.timeNormalized = eventTimeValues [i];
+												ev.timeNormalized.Value = eventTimeValues [i];
 					
 					
 												//if changes have been made in pop editor or SendEventNormailized inspector

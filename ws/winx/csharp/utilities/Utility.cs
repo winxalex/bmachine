@@ -8,7 +8,9 @@ using System.Reflection.Emit;
 
 namespace ws.winx.csharp.utilities
 {
-
+	/// <summary>
+	/// Reflection utility.
+	/// </summary>
 	public class ReflectionUtility{
 
 		public static MemberInfo[] GetPublicMembers (Type type, Type propertyType, bool staticMembers, bool canWrite, bool canRead, bool isSubClass=false)
@@ -41,9 +43,137 @@ namespace ws.winx.csharp.utilities
 
 
 
+
+		private static Dictionary<string, Type> s_LoadedType = new Dictionary<string, Type> ();
+		
+		private static Assembly[] s_LoadedAssemblies;
+		
+	
+		public static Assembly[] loadedAssemblies
+		{
+			get
+			{
+				if (ReflectionUtility.s_LoadedAssemblies == null)
+				{
+					//Assembly.GetExecutingAssembly();
+					ReflectionUtility.s_LoadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+				}
+				return ReflectionUtility.s_LoadedAssemblies;
+			}
+		}
+		
+	
+		
+		public static Type[] GetDerivedTypes (Type baseType)
+		{
+			List<Type> list = new List<Type> ();
+			Assembly[] loadedAssemblies = ReflectionUtility.loadedAssemblies;
+			int i = 0;
+			while (i < loadedAssemblies.Length)
+			{
+				Assembly assembly = loadedAssemblies [i];
+				Type[] exportedTypes;
+				try
+				{
+					exportedTypes =assembly.GetTypes();// assembly.GetExportedTypes ();
+				}
+				catch (ReflectionTypeLoadException)
+				{
+					Debug.LogWarning (string.Format ("Following assembly will be ignored due to type-loading errors: {0} ({1})", assembly.FullName , assembly.Location ));
+					goto IL_97;
+				}
+				goto IL_4A;
+			IL_97:
+					i++;
+				continue;
+			IL_4A:
+					for (int j = 0; j < exportedTypes.Length; j++)
+				{
+					Type type = exportedTypes [j];
+					if (!type.IsAbstract && type.IsSubclassOf (baseType) && type.FullName  != null)
+					{
+						list.Add (type);
+					}
+				}
+				goto IL_97;
+			}
+			list.Sort ((Type o1, Type o2) => o1.ToString ().CompareTo (o2.ToString ()));
+			return list.ToArray ();
+		}
+		
+		public static Type GetType (string name)
+		{
+			Type type = null;
+			if (ReflectionUtility.s_LoadedType.TryGetValue (name, out type))
+			{
+				return type;
+			}
+			//type = (Type.GetType (name + ",Assembly-CSharp-Editor-firstpass") ?? Type.GetType (name + ",Assembly-CSharp-Editor"));
+
+			type = Type.GetType (name);
+
+			if (type == null)
+			{
+				Assembly[] loadedAssemblies = ReflectionUtility.loadedAssemblies;
+				for (int i = 0; i < loadedAssemblies.Length; i++)
+				{
+					Assembly assembly = loadedAssemblies [i];
+					type = assembly.GetType (name);
+					if (type != null)
+					{
+						break;
+					}
+				}
+			}
+			ReflectionUtility.s_LoadedType.Add (name, type);
+			return type;
+		}
+	
+
+
+
+	}
+
+	/// <summary>
+	/// Attribute utility.
+	/// </summary>
+	public class AttributeUtility
+	{
+		//
+		// Static Methods
+		//
+		public static T GetAttribute<T> (MemberInfo memberInfo, bool inherite) where T : Attribute
+		{
+			if (memberInfo != null)
+			{
+				T[] array = memberInfo.GetCustomAttributes (typeof(T), inherite) as T[];
+				if (array != null && array.Length > 0)
+				{
+					return array [0];
+				}
+			}
+			return (T)((object)null);
+		}
+		
+		public static T GetAttribute<T> (Type type, bool inherite) where T : Attribute
+		{
+			if (type != null)
+			{
+				T[] array = type.GetCustomAttributes (typeof(T), inherite) as T[];
+				if (array != null && array.Length > 0)
+				{
+					return array [0];
+				}
+			}
+			return (T)((object)null);
+		}
+
 	}
 
 
+	/// <summary>
+	/// Switch utility.
+	/// </summary>
 	public class SwitchUtility{
 
 
