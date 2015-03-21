@@ -34,7 +34,6 @@ namespace ws.winx.editor.bmachine
 				
 				ReorderableList  __variablesReordableList;
 				GenericMenu genericMenu;
-				
 				Action<Type> switchMenuTypes;
 				string _typeNameSelected = "None";
 				List<Type> typesCustom;
@@ -94,7 +93,7 @@ namespace ws.winx.editor.bmachine
 					SwitchUtility.CaseIsClassOf<Vector3,Action> (() => {
 										AddVariableToList<Vector3> ("New Vector3", new Vector3 (), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<UnityEvent,Action> (() => {
-						AddVariableToList<UnityEvent> ("New UnityEvent", new UnityEvent(), __variablesReordableList);}),
+										AddVariableToList<UnityEvent> ("New UnityEvent", new UnityEvent (), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<Quaternion,Action> (() => {
 										AddVariableToList<Quaternion> ("New Quaternion", new Quaternion (), __variablesReordableList);}),
 					SwitchUtility.CaseIsClassOf<Color,Action> (() => {
@@ -194,7 +193,11 @@ namespace ws.winx.editor.bmachine
 				{
 						UnityVariable variable = list.serializedProperty.GetArrayElementAtIndex (list.index).objectReferenceValue as UnityVariable;
 
-						if (variable != null) {
+						//show popup just for complex types and UnityEvent
+						if (variable != null
+								&& (Array.IndexOf (EditorGUILayoutEx.unityTypes, variable.ValueType) < 0
+								|| variable.ValueType == typeof(UnityEvent)) 
+			    ) {
 								UnityObjectEditorWindow.Show (variable);
 
 
@@ -207,7 +210,7 @@ namespace ws.winx.editor.bmachine
 			                                "Are you sure you want to delete the Unity Variable?", "Yes", "No")) {
 								ReorderableList.defaultBehaviours.DoRemoveButton (list);
 								
-								list.serializedProperty.DeleteArrayElementAtIndex(list.index);
+								list.serializedProperty.DeleteArrayElementAtIndex (list.index);
 								
 
 								serializedObject.ApplyModifiedProperties ();
@@ -266,21 +269,31 @@ namespace ws.winx.editor.bmachine
 
 						currentVariable = (UnityVariable)property.objectReferenceValue;
 
-						
+						Type type = currentVariable.ValueType;
 
-			PropertyDrawer drawer = EditorUtilityEx.GetDefaultDrawer();
-			
-			
-			Rect pos = new Rect (32, position.y, 80, 16);
+						if (Array.IndexOf (EditorGUILayoutEx.unityTypes, type) < 0
+								|| type == typeof(UnityEvent)) {
 
-			EditorGUI.TextField(pos, currentVariable.name);
-			position.x = 113f;
-			position.width -= 80f;
-			drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent(""));
+								currentVariable.name = EditorGUI.TextField (position, currentVariable.name);
+
+						} else {
+								
+
+								PropertyDrawer drawer = EditorUtilityEx.GetDefaultDrawer ();
 			
-			currentVariable.ApplyModifiedProperties();
 			
-			//
+								Rect pos = new Rect (32, position.y, 80, 16);
+
+								EditorGUI.TextField (pos, currentVariable.name);
+								position.x = 113f;
+								position.width -= 80f;
+								drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent (""));
+			
+								currentVariable.ApplyModifiedProperties ();
+
+						}
+			
+					
 
 
 
@@ -293,8 +306,6 @@ namespace ws.winx.editor.bmachine
 						return position;
 		
 				}
-
-				
 
 				void onTypeCustomSelected (object userData)
 				{

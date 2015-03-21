@@ -346,17 +346,39 @@ namespace ws.winx.unity
 
 										this.Value = __seralizedProperty.floatValue;
 								} else
-
-				if (this.ValueType == typeof(int)) {
+								if (this.ValueType == typeof(bool)) {
 					
+										this.Value = __seralizedProperty.boolValue;
+								} else
+								if (this.ValueType == typeof(Bounds)) {
+					
+										this.Value = __seralizedProperty.boundsValue;
+								} else
+								if (this.ValueType == typeof(Color)) {
+					
+										this.Value = __seralizedProperty.colorValue;
+								} else
+								if (this.ValueType == typeof(Rect)) {
+					
+										this.Value = __seralizedProperty.rectValue;
+								} else
+								if (this.ValueType == typeof(int)) {
+									
 										this.Value = __seralizedProperty.intValue;
 								} else
-				if (this.ValueType == typeof(Vector3)) {
-					
+								if (this.ValueType == typeof(Vector3)) {
+									
 										this.Value = __seralizedProperty.vector3Value;
 								} else
+								if (this.ValueType == typeof(string)) {
+											
+										this.Value = __seralizedProperty.stringValue;
+								} else
+								if (this.ValueType == typeof(Quaternion)) {
 					
-					if (this.__reflectedInstance is UnityEngine.Object)
+										this.Value = __seralizedProperty.quaternionValue;
+								} else
+									if (this.__reflectedInstance is UnityEngine.Object)
 										this.Value = __seralizedProperty.objectReferenceValue;
 
 
