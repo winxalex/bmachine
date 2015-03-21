@@ -30,10 +30,13 @@ namespace ws.winx.unity
 						}
 				}
 
-				//[SerializeField]
+
+				/////////////////////////////////
+				// For reusing of Unity drawers		
+
 				private SerializedProperty
 						__seralizedProperty;
-				//[SerializeField]
+				
 				private SerializedObject
 						__seralizedObject;
 
@@ -155,8 +158,9 @@ namespace ws.winx.unity
 				private UnityEngine.Object
 						__reflectedInstanceUnity;
 
-				//[SerializeField]
-				private UnityEvent __event = null;
+				[SerializeField]
+				private UnityEvent __event;//this filed would have event even is empty
+
 				[NonSerialized]
 				private MemberInfo
 						__memberInfo;
@@ -325,8 +329,8 @@ namespace ws.winx.unity
 								} else {
 										if (__reflectedInstanceUnity != null)
 												__reflectedInstance = __reflectedInstanceUnity;
-										//else if (__event != null)
-										//	__reflectedInstance = __event;
+										else if (__event!=null && this.ValueType==typeof(UnityEvent))
+												__reflectedInstance = __event;
 
 								}
 						}

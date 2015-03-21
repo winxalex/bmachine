@@ -74,12 +74,12 @@ namespace ws.winx.editor
 				private static Dictionary<Type, PropertyDrawer> __drawers;
 				private static UnityDefaultPropertyDrawer __drawerDefault;
 
-		public static PropertyDrawer GetDefaultDrawer ()
-		{
-			if (__drawerDefault == null)
+				public static PropertyDrawer GetDefaultDrawer ()
+				{
+						if (__drawerDefault == null)
 								__drawerDefault = new UnityDefaultPropertyDrawer ();
-			return __drawerDefault;
-		}
+						return __drawerDefault;
+				}
 
 				//
 				// Static Methods
@@ -87,7 +87,7 @@ namespace ws.winx.editor
 				public static PropertyDrawer GetDrawer (Type type)
 				{
 						Type typeDrawer;
-						PropertyDrawer drawer=null;
+						PropertyDrawer drawer = null;
 						if (EditorUtilityEx.__drawers == null) {
 								
 
@@ -106,13 +106,13 @@ namespace ws.winx.editor
 
 
 												if (!EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
-												EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
-						}
-					}
+														EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
+												}
+										}
 								}
 						}
 
-						EditorUtilityEx.__drawers.TryGetValue (type,out drawer);
+						EditorUtilityEx.__drawers.TryGetValue (type, out drawer);
 						if (drawer != null) {
 								return  drawer;
 
@@ -120,7 +120,7 @@ namespace ws.winx.editor
 
 						EditorUtilityEx.__drawers.TryGetValue (type.BaseType, out drawer);
 						if (drawer != null) {
-							return drawer;
+								return drawer;
 						
 						}
 			

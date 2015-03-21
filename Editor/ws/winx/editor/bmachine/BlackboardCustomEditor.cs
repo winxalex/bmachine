@@ -284,7 +284,7 @@ namespace ws.winx.editor.bmachine
 			
 								Rect pos = new Rect (32, position.y, 80, 16);
 
-								EditorGUI.TextField (pos, currentVariable.name);
+								currentVariable.name=EditorGUI.TextField (pos, currentVariable.name);
 								position.x = 113f;
 								position.width -= 80f;
 								drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent (""));
