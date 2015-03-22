@@ -11,10 +11,12 @@ namespace ws.winx.unity.attributes
 
 
 		public Type VariableType;
+		public string Name;
 
-		public UnityVariablePropertyAttribute(Type type){
+		public UnityVariablePropertyAttribute(Type type,string name=""){
 
 			this.VariableType = type;
+			Name = name;
 		}
 	}
 
