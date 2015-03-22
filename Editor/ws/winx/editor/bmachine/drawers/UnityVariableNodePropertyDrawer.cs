@@ -53,6 +53,7 @@ namespace ws.winx.editor.bmachine.drawers
 				{
 
 
+
 					UnityVariablePropertyAttribute att=(UnityVariablePropertyAttribute)attribute;
 
 					BlackboardCustom blackboard=node.blackboard as BlackboardCustom;
@@ -67,7 +68,7 @@ namespace ws.winx.editor.bmachine.drawers
 			EditorGUILayout.LabelField (att.Name,new GUILayoutOption[]{GUILayout.MaxWidth(80)});
 								
 					property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.VariableType,displayOptionsList,blackboardLocalList);
-						property.ApplyModifiedValue ();	
+					//property.serializedNode.ApplyModifiedProperties ();
 			EditorGUILayout.EndHorizontal ();
 
 				}

@@ -43,7 +43,7 @@ namespace ws.winx.unity
 				public SerializedProperty serializedProperty {
 						get {
 
-								if (__seralizedProperty == null) {
+								if (__seralizedProperty == null && this.Value!=null) {
 
 										using (Microsoft.CSharp.CSharpCodeProvider foo = 
 				       new Microsoft.CSharp.CSharpCodeProvider()) {
@@ -83,7 +83,7 @@ namespace ws.winx.unity
 						
 						" {0}" +
 						
-														"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} field;}}"
+														"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
 							, usingString, this.ValueType.ToString ())
 												);
 					
@@ -105,13 +105,13 @@ namespace ws.winx.unity
 							
 														ScriptableObject st = ScriptableObject.CreateInstance (type);
 								
-														type.GetField ("field").SetValue (st, this.Value);
+														type.GetField ("value").SetValue (st, this.Value);
 								
 								
 								
 														__seralizedObject = new SerializedObject (st);
 								
-														__seralizedProperty = __seralizedObject.FindProperty ("field");
+														__seralizedProperty = __seralizedObject.FindProperty ("value");
 
 												}
 			

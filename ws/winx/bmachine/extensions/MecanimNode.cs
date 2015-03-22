@@ -71,7 +71,7 @@ namespace ws.winx.bmachine.extensions
 
 
 
-		[HideInInspector]
+		//[HideInInspector]
 		public bool
 			animationRunTimeControlEnabled = false;
 				

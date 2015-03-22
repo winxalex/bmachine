@@ -1094,7 +1094,8 @@ namespace ws.winx.editor.extensions
 								} else
 				
 								if (indexSelectedPrev == 1) {
-										_variableSelected.MemberInfo = null;//reset 
+										//_variableSelected.MemberInfo = null;//reset 
+										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
 
 								}
@@ -1108,10 +1109,14 @@ namespace ws.winx.editor.extensions
 										SerializedProperty elements = _variableSelected.serializedProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
 						
 										Rect rect = EditorGUILayout.GetControlRect (true, Math.Max(1,elements.arraySize) * 43 + 36f);
-					
-										EditorUtilityEx.GetDrawer (typeof(UnityEvent)).OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
+
+				
+					//WHY this not working. IT WORKS IN Unity PropertyDrawer
+					///EditorUtilityEx.GetDrawer (typeof(UnityEvent)).OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
+										new UnityEditorInternal.UnityEventDrawer().OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
 					                     
-										
+				//	Debug.Log(_variableSelected.GetInstanceID()+": elements:"+elements.arraySize+" type:"+_variableSelected.ValueType.ToString()+" value:"+_variableSelected.Value.ToString()+" reflected:"+_variableSelected.reflectedInstance.ToString());
+
 
 								} else {
 
@@ -1128,7 +1133,8 @@ namespace ws.winx.editor.extensions
 					
 								} else
 					
-					if (indexSelectedPrev == 0) {
+								if (indexSelectedPrev == 0) {
+										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 										_variableSelected.reflectedInstance = new UnityEngine.Object ();		
 								}
 				

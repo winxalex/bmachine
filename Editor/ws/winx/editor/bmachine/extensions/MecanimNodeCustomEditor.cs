@@ -149,7 +149,8 @@ namespace ws.winx.editor.bmachine.extensions
 						SendEventNormalized child = mecanimNode.children [args.selectedIndex] as SendEventNormalized;
 					
 		
-						child.timeNormalized.Value = args.selectedValue;
+						//child.timeNormalized.Value = args.selectedValue;
+						child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
 						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 				}
@@ -184,7 +185,8 @@ namespace ws.winx.editor.bmachine.extensions
 				
 						//add node to its parent list
 						mecanimNode.Insert (args.selectedIndex, child);
-						child.timeNormalized.Value = args.selectedValue;
+						//child.timeNormalized.Value = args.selectedValue;
+			child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
 
 						mecanimNode.tree.SaveNodes ();
 
@@ -225,7 +227,8 @@ namespace ws.winx.editor.bmachine.extensions
 								inx = indexArray [m];
 								ev = ((SendEventNormalized)mecanimNode.children [m]);	
 								this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
-								this.eventTimeValues [m] = (float)ev.timeNormalized.Value; 
+								//this.eventTimeValues [m] = (float)ev.timeNormalized.Value; 
+								this.eventTimeValues [m] = (float)ev.timeNormalized.serializedProperty.floatValue; 
 								this.eventDisplayNames [m] = ev.name;
 				
 						}
@@ -603,7 +606,7 @@ namespace ws.winx.editor.bmachine.extensions
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
 								if (Application.isPlaying) {
 
-										mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
+										//mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
 
 										if (mecanimNode.animationRunTimeControlEnabled) {
 												Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
@@ -702,7 +705,10 @@ namespace ws.winx.editor.bmachine.extensions
 					
 												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
 												//select the time values from nodes
-												eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.Value).ToArray ();
+												//eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.Value).ToArray ();
+						eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.serializedProperty.floatValue).ToArray ();
+
+
 												eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
 												eventTimeValuesSelected = new bool[eventTimeValues.Length];
 					
@@ -737,8 +743,8 @@ namespace ws.winx.editor.bmachine.extensions
 										int eventTimeValuesNumber = mecanimNode.children.Length;
 										for (i=0; i<eventTimeValuesNumber; i++) {
 												ev = ((SendEventNormalized)mecanimNode.children [i]);	
-												ev.timeNormalized.Value = eventTimeValues [i];
-					
+												//ev.timeNormalized.Value = eventTimeValues [i];
+												ev.timeNormalized.serializedProperty.floatValue = eventTimeValues [i];
 					
 												//if changes have been made in pop editor or SendEventNormailized inspector
 												if (ev.name != eventDisplayNames [i])

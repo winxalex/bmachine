@@ -33,9 +33,7 @@ namespace ws.winx.bmachine.extensions
 				public UnityVariable
 					unityEvent;
 
-		[UnityVariablePropertyAttribute(typeof(Vector3),"Events:")]
-		public UnityVariable
-			vec3;
+
 		
 		
 		
