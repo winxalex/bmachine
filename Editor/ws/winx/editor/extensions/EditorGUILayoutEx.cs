@@ -1099,6 +1099,10 @@ namespace ws.winx.editor.extensions
 										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
 
 								}
+
+								if(_variableSelected.reflectedInstance==null)
+								_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
+
 								
 								
 								if (_variableSelected.ValueType == typeof(UnityEvent)) {
@@ -1110,12 +1114,17 @@ namespace ws.winx.editor.extensions
 						
 										Rect rect = EditorGUILayout.GetControlRect (true, Math.Max(1,elements.arraySize) * 43 + 36f);
 
-				
-					//WHY this not working. IT WORKS IN Unity PropertyDrawer
-					///EditorUtilityEx.GetDrawer (typeof(UnityEvent)).OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
-										new UnityEditorInternal.UnityEventDrawer().OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
-					                     
-				//	Debug.Log(_variableSelected.GetInstanceID()+": elements:"+elements.arraySize+" type:"+_variableSelected.ValueType.ToString()+" value:"+_variableSelected.Value.ToString()+" reflected:"+_variableSelected.reflectedInstance.ToString());
+										//!!! UNITY DEVS DECIDED ONE DRAWER PER UNITYEVENT (WICKED STUFF)
+										if(_variableSelected.unityEventDrawer==null)	
+											_variableSelected.unityEventDrawer=new UnityEditorInternal.UnityEventDrawer();
+						
+						
+						
+											_variableSelected.unityEventDrawer.OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
+						
+						
+
+
 
 
 								} else {

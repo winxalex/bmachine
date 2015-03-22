@@ -75,8 +75,11 @@ namespace ws.winx.editor.bmachine.extensions
 						{
 								SendEventNormalized animationEvent = (SendEventNormalized)objX;
 								SendEventNormalized animationEvent2 = (SendEventNormalized)objY;
-								float time = (float)animationEvent.timeNormalized.Value;
-								float time2 = (float)animationEvent2.timeNormalized.Value;
+								//float time = (float)animationEvent.timeNormalized.Value;
+								//float time2 = (float)animationEvent2.timeNormalized.Value;
+
+				float time = (float)animationEvent.timeNormalized.serializedProperty.floatValue;
+				float time2 = (float)animationEvent2.timeNormalized.serializedProperty.floatValue;
 								if (time != time2) {
 										return (int)Mathf.Sign (time - time2);
 								}
@@ -258,7 +261,8 @@ namespace ws.winx.editor.bmachine.extensions
 
 								if (i < timeValuesNumber) {
 
-										child.timeNormalized.Value = timeValues [i];
+										//child.timeNormalized.Value = timeValues [i];
+										child.timeNormalized.serializedProperty.floatValue = timeValues [i];
 										i++;
 								} else {
 										//remove localy from node parent
@@ -606,14 +610,17 @@ namespace ws.winx.editor.bmachine.extensions
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
 								if (Application.isPlaying) {
 
+					NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+					if (iterator.Find ("animationRunTimeControlEnabled")) {
 										//mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
 
-										if (mecanimNode.animationRunTimeControlEnabled) {
+										if ((bool)iterator.current.value) {
 												Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
 												timeControlRect.xMin += 38f;
 												timeControlRect.xMax -= 70f;
 												timeNormalized = mecanimNode.animationRunTimeControl = EditorGUILayoutEx.CustomHSlider (timeControlRect, mecanimNode.animationRunTimeControl, 0f, 1f, TimeControlW.style.timeScrubber);
 										}
+					}
 
 								}
 								///////////////////////////////////////////////////////////////

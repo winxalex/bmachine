@@ -43,15 +43,25 @@ namespace ws.winx.editor.windows
 
 
 						if (__variable != null) {
-								PropertyDrawer drawer = EditorUtilityEx.GetDrawer (__variable.ValueType);
+								PropertyDrawer drawer;
+
+
+								if (__variable.ValueType == typeof(UnityEvent)) {
+										if (__variable.unityEventDrawer == null)
+												__variable.unityEventDrawer = new UnityEventDrawer ();
+										
+												drawer = __variable.unityEventDrawer;
+								}
+								else
+									drawer = EditorUtilityEx.GetDrawer (__variable.ValueType);
 
 				
-								Rect pos = new Rect (16, 16, Screen.width - 32, Screen.height-32);
+								Rect pos = new Rect (16, 16, Screen.width - 32, Screen.height - 32);
 
 
 								drawer.OnGUI (pos, __variable.serializedProperty, new GUIContent (__variable.name));
 
-								__variable.ApplyModifiedProperties();
+								__variable.ApplyModifiedProperties ();
 						}
 			
 

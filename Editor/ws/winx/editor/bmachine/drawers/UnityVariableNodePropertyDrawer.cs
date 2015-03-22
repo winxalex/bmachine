@@ -68,7 +68,7 @@ namespace ws.winx.editor.bmachine.drawers
 			EditorGUILayout.LabelField (att.Name,new GUILayoutOption[]{GUILayout.MaxWidth(80)});
 								
 					property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.VariableType,displayOptionsList,blackboardLocalList);
-					//property.serializedNode.ApplyModifiedProperties ();
+					property.serializedNode.ApplyModifiedProperties ();
 			EditorGUILayout.EndHorizontal ();
 
 				}

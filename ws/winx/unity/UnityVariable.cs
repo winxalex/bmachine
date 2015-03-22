@@ -36,14 +36,13 @@ namespace ws.winx.unity
 
 				private SerializedProperty
 						__seralizedProperty;
-				
 				private SerializedObject
 						__seralizedObject;
 
 				public SerializedProperty serializedProperty {
 						get {
 
-								if (__seralizedProperty == null && this.Value!=null) {
+								if (__seralizedProperty == null && this.Value != null) {
 
 										using (Microsoft.CSharp.CSharpCodeProvider foo = 
 				       new Microsoft.CSharp.CSharpCodeProvider()) {
@@ -157,9 +156,9 @@ namespace ws.winx.unity
 				[SerializeField]
 				private UnityEngine.Object
 						__reflectedInstanceUnity;
-
 				[SerializeField]
-				private UnityEvent __event;//this filed would have event even is empty
+				private UnityEvent
+						__event;//this filed would have event even is empty
 
 				[NonSerialized]
 				private MemberInfo
@@ -329,7 +328,7 @@ namespace ws.winx.unity
 								} else {
 										if (__reflectedInstanceUnity != null)
 												__reflectedInstance = __reflectedInstanceUnity;
-										else if (__event!=null && this.ValueType==typeof(UnityEvent))
+										else if (__event != null && this.ValueType == typeof(UnityEvent))
 												__reflectedInstance = __event;
 
 								}
@@ -381,7 +380,12 @@ namespace ws.winx.unity
 								if (this.ValueType == typeof(Quaternion)) {
 					
 										this.Value = __seralizedProperty.quaternionValue;
-								} else
+								} 
+				else
+								if (this.ValueType == typeof(AnimationCurve)) {
+										this.Value = __seralizedProperty.animationCurveValue;
+								}
+				else
 									if (this.__reflectedInstance is UnityEngine.Object)
 										this.Value = __seralizedProperty.objectReferenceValue;
 
@@ -389,8 +393,10 @@ namespace ws.winx.unity
 						}
 				}
 
+		[NonSerialized]
+		public PropertyDrawer unityEventDrawer;
 
-
+			
 
 				//
 				// Methods
