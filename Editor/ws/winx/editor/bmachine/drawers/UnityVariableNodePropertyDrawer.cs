@@ -63,11 +63,12 @@ namespace ws.winx.editor.bmachine.drawers
 					List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
 								
 								
-								
+			EditorGUILayout.BeginHorizontal ();
+			EditorGUILayout.LabelField (att.Name,new GUILayoutOption[]{GUILayout.MaxWidth(80)});
 								
 					property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.VariableType,displayOptionsList,blackboardLocalList);
 								
-	
+			EditorGUILayout.EndHorizontal ();
 
 				}
 		

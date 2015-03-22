@@ -1091,9 +1091,9 @@ namespace ws.winx.editor.extensions
 										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);
 					
-								}else
+								} else
 				
-								if (indexSelectedPrev==1) {
+								if (indexSelectedPrev == 1) {
 										_variableSelected.MemberInfo = null;//reset 
 										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
 
@@ -1101,11 +1101,16 @@ namespace ws.winx.editor.extensions
 								
 								
 								if (_variableSelected.ValueType == typeof(UnityEvent)) {
-										//UnityEditorInternal.ReorderableList list=new UnityEditorInternal.ReorderableList(null,null);
-										//list.GetHeight
+									
+										//list.elementHeight = 43f;
+										
 
-										//GUILayoutUtility.GetRect(Screen.width-32,list.GetHeight());
-
+										SerializedProperty elements = _variableSelected.serializedProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
+						
+										Rect rect = EditorGUILayout.GetControlRect (true, elements.arraySize * 43 + 32f);
+					
+										EditorUtilityEx.GetDrawer (typeof(UnityEvent)).OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
+					                                                    
 								} else {
 
 										EditorGUILayout.PropertyField (_variableSelected.serializedProperty);
@@ -1115,17 +1120,17 @@ namespace ws.winx.editor.extensions
 
 						} else if (indexSelected == 1) {
 
-				if (indexSelectedPrev > 1) {
-					_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-					_variableSelected.reflectedInstance = new UnityEngine.Object ();
+								if (indexSelectedPrev > 1) {
+										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+										_variableSelected.reflectedInstance = new UnityEngine.Object ();
 					
-				}else
+								} else
 					
-					if (indexSelectedPrev==0) {
-						_variableSelected.reflectedInstance = new UnityEngine.Object ();		
-					}
+					if (indexSelectedPrev == 0) {
+										_variableSelected.reflectedInstance = new UnityEngine.Object ();		
+								}
 				
-				UnityEngine.Object _objectSelected = null;
+								UnityEngine.Object _objectSelected = null;
 				
 								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
 								if (_variableSelected.reflectedInstance != null && (_variableSelected.reflectedInstance is UnityEngine.Object)) {

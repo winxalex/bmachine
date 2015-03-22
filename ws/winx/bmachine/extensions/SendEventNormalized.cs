@@ -25,13 +25,13 @@ namespace ws.winx.bmachine.extensions
 
 				Animator _animator;
 				float _timeNormalizedLast;
-				[UnityVariablePropertyAttribute(typeof(float))]
+				[UnityVariablePropertyAttribute(typeof(float),"Time:")]
 				public UnityVariable
 						timeNormalized;
 
-//				[UnityVariablePropertyAttribute(typeof(UnityEvent))]
-//				public UnityVariable
-//					unityEvent;
+				[UnityVariablePropertyAttribute(typeof(UnityEvent),"Events:")]
+				public UnityVariable
+					unityEvent;
 
 
 			
@@ -61,7 +61,7 @@ namespace ws.winx.bmachine.extensions
 								if (timeNormalizedCurrent > (float)timeNormalized.Value && _timeNormalizedLast < (float)timeNormalized.Value) {
 
 										//Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
-										//onAnimationEvent.Invoke ();
+										((UnityEvent)this.unityEvent.Value).Invoke ();
 										_timeNormalizedLast = timeNormalizedCurrent;
 										return Status.Success;
 								}
@@ -80,6 +80,9 @@ namespace ws.winx.bmachine.extensions
 						this.timeNormalized = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
 						this.timeNormalized.Value = 0f;
 
+						this.unityEvent = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
+						this.unityEvent.Value = new UnityEvent ();
+						
 						_timeNormalizedLast = 0f;
 				
 				}
