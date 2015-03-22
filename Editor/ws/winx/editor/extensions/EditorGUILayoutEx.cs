@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Linq;
 using BehaviourMachine;
 using UnityEngine.Events;
+using System.Runtime.Serialization;
 
 namespace ws.winx.editor.extensions
 {
@@ -1031,6 +1032,13 @@ namespace ws.winx.editor.extensions
 		#endregion
 
 
+//		public object UnityFactory(Type type,params object[] args){
+//
+//			if(Type
+//
+//		}
+
+
 		#region UnityVariablePopup
 				public static UnityVariable UnityVariablePopup (GUIContent propertyPopupLabel, UnityVariable _variableSelected, Type _typeSelected, List<GUIContent> displayOptions, List<UnityVariable> values)
 				{
@@ -1039,63 +1047,140 @@ namespace ws.winx.editor.extensions
 
 						//add first element as custom (selection of Object properties)
 						//others are selection from provided list of values
-						displayOptions.Insert (0, new GUIContent ("Custom"));
-						values.Insert (0, null);// (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ());
-				
+						displayOptions.Insert (0, new GUIContent ("Raw"));
+						displayOptions.Insert (1, new GUIContent ("Bind"));
 
-						UnityVariable variableCurrent = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (propertyPopupLabel, _variableSelected, displayOptions.ToArray (), values);
-						
 
-						
-					
-						if (variableCurrent == null) {
-								//if variableSeleted is null while("Custom") is selected => create one
-								//create new UnityVariable only when switch from "values" to "custom"
-								if (_variableSelected == null || values.IndexOf (_variableSelected) > -1)
-										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+						//values.Insert (0, null);// (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ());
+						//values.Insert (1, null);// (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ());
+							
+						int indexSelected;
+						int indexSelectedPrev;
 
-								UnityEngine.Object _objectSelected = null;
 
-								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
-								if (_variableSelected.reflectedInstance != null)
-								if (_variableSelected.reflectedInstance is Component)
-										_objectSelected = ((Component)_variableSelected.reflectedInstance).gameObject;
+						//if _variableSelected is NULL create new UnityVariable and add default type value
+						if (_variableSelected == null) {
+								indexSelected = 0;
+								_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+								_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);
+						} else 
+								indexSelected = values.IndexOf (_variableSelected);
+
+						//if UnityVariable is not in supplied list of values(most likely blackboard vars)
+						if (indexSelected < 0) {
+
+								//if memberInfo == null mean that UnityVariable aren't binded to some object's property
+								//but contain raw object value
+								if (_variableSelected.reflectedInstance == null || _variableSelected.ValueType == _variableSelected.reflectedInstance.GetType ())
+										indexSelected = 0;
 								else
-										_objectSelected = _variableSelected.reflectedInstance as UnityEngine.Object;
+										indexSelected = 1;
+							
+						} else {
+								indexSelected += 2;//shift cos of "Variable" and "Bind"
 
+						}
+
+						indexSelectedPrev = indexSelected;
+						indexSelected = EditorGUILayout.Popup (indexSelected, displayOptions.ToArray ());
+
+						//Debug.Log (indexSelected);
+						
+						if (indexSelected == 0) {
+								if (indexSelectedPrev > 1) {
+										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);
+					
+								}else
+				
+								if (indexSelectedPrev==1) {
+										_variableSelected.MemberInfo = null;//reset 
+										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
+
+								}
+								
+								
+								if (_variableSelected.ValueType == typeof(UnityEvent)) {
+										//UnityEditorInternal.ReorderableList list=new UnityEditorInternal.ReorderableList(null,null);
+										//list.GetHeight
+
+										//GUILayoutUtility.GetRect(Screen.width-32,list.GetHeight());
+
+								} else {
+
+										EditorGUILayout.PropertyField (_variableSelected.serializedProperty);
+										_variableSelected.ApplyModifiedProperties ();
+								}
+
+
+						} else if (indexSelected == 1) {
+
+				if (indexSelectedPrev > 1) {
+					_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+					_variableSelected.reflectedInstance = new UnityEngine.Object ();
+					
+				}else
+					
+					if (indexSelectedPrev==0) {
+						_variableSelected.reflectedInstance = new UnityEngine.Object ();		
+					}
+				
+				UnityEngine.Object _objectSelected = null;
+				
+								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
+								if (_variableSelected.reflectedInstance != null && (_variableSelected.reflectedInstance is UnityEngine.Object)) {
+
+										 
+
+										if (_variableSelected.reflectedInstance is Component)
+												_objectSelected = ((Component)_variableSelected.reflectedInstance).gameObject;
+										else
+												_objectSelected = _variableSelected.reflectedInstance as UnityEngine.Object;
+								} 
+						
 								//select object which properties would be extracted
 								_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
-					
-					
+						
+						
 								if (_objectSelected != null) {//extract properties
-										
-
+							
+							
 										GUIContent[] displayOptionsProperties;
 										object[] instances;
 										MemberInfo[] memberInfos;
-					
+							
 										//get properties from object by object type
 										Utility.ObjectToDisplayOptionsValues (_objectSelected, _typeSelected, out displayOptionsProperties, out memberInfos, out instances);
-					
+							
 										_variableSelected.MemberInfo = EditorGUILayoutEx.CustomObjectPopup<MemberInfo> (new GUIContent ("Properties"), 
-					                                                                        _variableSelected.MemberInfo, displayOptionsProperties, memberInfos
+							                                                                                _variableSelected.MemberInfo, displayOptionsProperties, memberInfos
 										);
-
+							
 										if (_variableSelected.MemberInfo != null) {
 												int inxSelectd = Array.IndexOf (memberInfos, _variableSelected.MemberInfo);
 												_variableSelected.reflectedInstance = instances [inxSelectd];
 										}
-											
-
-
-										
+							
+							
+							
+							
 								} 
+										
+					
+					
+					
+								
+
+
+						}//end if (selected inx==1)
+						else if (values != null && values.Count > 0) {
+								_variableSelected = values [indexSelected - 2];
+						}
+			
 
 
 
 
-						} else
-								_variableSelected = variableCurrent;
 						
 					
 						return _variableSelected;

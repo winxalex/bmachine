@@ -52,29 +52,22 @@ namespace ws.winx.editor.bmachine.drawers
 				public override void OnGUI (SerializedNodeProperty property, ActionNode node, GUIContent guiContent)
 				{
 
-			//if (attribute == null || attribute.VariableType == null)
-							//	return;
-			UnityVariablePropertyAttribute att=(UnityVariablePropertyAttribute)attribute;
 
-			BlackboardCustom blackboard=node.blackboard as BlackboardCustom;
+					UnityVariablePropertyAttribute att=(UnityVariablePropertyAttribute)attribute;
 
-			List<UnityVariable> blackboardLocalList = blackboard.GetVariableBy (att.VariableType);
+					BlackboardCustom blackboard=node.blackboard as BlackboardCustom;
 
-					
-					//	List<UnityVariable> blackboardLocalList=((BlackboardCustom)node.blackboard).GetVariableBy (attribute.type);
+					List<UnityVariable> blackboardLocalList = blackboard.GetVariableBy (att.VariableType);
 
-			List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
-						
-						
-						
-						
-			property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.VariableType,displayOptionsList,blackboardLocalList);
-						
-
-						
-		//	property.ApplyModifiedValue ();
-		
-						
+							
+					List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
+								
+								
+								
+								
+					property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.VariableType,displayOptionsList,blackboardLocalList);
+								
+	
 
 				}
 		

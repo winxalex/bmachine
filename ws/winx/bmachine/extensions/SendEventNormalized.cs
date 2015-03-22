@@ -29,10 +29,11 @@ namespace ws.winx.bmachine.extensions
 				public UnityVariable
 						timeNormalized;
 
-//				[VariableInfo (requiredField = true,fixedType=true, tooltip = "Normalized time value from 0 to 1."), Range (0f, 1f)]
-//				public FloatVar
-//						timeNormalized;
-				//public UnityEvent onAnimationEvent;
+//				[UnityVariablePropertyAttribute(typeof(UnityEvent))]
+//				public UnityVariable
+//					unityEvent;
+
+
 			
 				public override void Awake ()
 				{

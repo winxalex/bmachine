@@ -11,10 +11,6 @@ namespace ws.winx.editor.drawers
 		{
 			EditorGUI.PropertyField (position, property, label,true);
 
-//			if (label == null)
-//								EditorGUILayout.PropertyField (property, true);
-//			else
-//			EditorGUILayout.PropertyField (property, label,true);
 		}	
 	}
 }
