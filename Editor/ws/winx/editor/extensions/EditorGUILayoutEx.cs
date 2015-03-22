@@ -1102,18 +1102,20 @@ namespace ws.winx.editor.extensions
 								
 								if (_variableSelected.ValueType == typeof(UnityEvent)) {
 									
-										//list.elementHeight = 43f;
+										//list.elementHeight = 43f;//MAGIC NUMBER
 										
 
 										SerializedProperty elements = _variableSelected.serializedProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
 						
-										Rect rect = EditorGUILayout.GetControlRect (true, elements.arraySize * 43 + 32f);
+										Rect rect = EditorGUILayout.GetControlRect (true, Math.Max(1,elements.arraySize) * 43 + 36f);
 					
 										EditorUtilityEx.GetDrawer (typeof(UnityEvent)).OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
-					                                                    
+					                     
+										
+
 								} else {
 
-										EditorGUILayout.PropertyField (_variableSelected.serializedProperty);
+										EditorGUILayout.PropertyField (_variableSelected.serializedProperty,new GUIContent(""));
 										_variableSelected.ApplyModifiedProperties ();
 								}
 
