@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using ws.winx.unity;
+using ws.winx.unity.attributes;
 
 namespace ws.winx.bmachine
 {
@@ -15,6 +16,7 @@ namespace ws.winx.bmachine
 		public class BlackboardCustom:InternalBlackboard,ISerializationCallbackReceiver
 		{
 
+
 				[HideInInspector]
 				public List<Type>
 						typesCustom;
@@ -22,7 +24,7 @@ namespace ws.winx.bmachine
 				public byte[]
 						typesSerialized;
 				[HideInInspector]
-				//Uncoment for debug
+				//Comment for debug
 				public List<UnityVariable>
 						variablesList;
 

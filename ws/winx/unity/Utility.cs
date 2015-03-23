@@ -25,6 +25,7 @@ namespace ws.winx.unity{
 			AddSurrogate (typeof(BehaviourMachine.InternalBlackboard), new InternalBlackboardTempSurrogate ());
 			AddSurrogate (typeof(UnityEngine.Keyframe), new KeyFrameSurrogate ());
 			AddSurrogate (typeof(UnityEngine.AnimationCurve), new AnimationCurveSurrogate ());
+			AddSurrogate (typeof(UnityEngine.Bounds), new BoundsSurrogate ());
 
 
 

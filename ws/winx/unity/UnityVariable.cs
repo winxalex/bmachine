@@ -381,8 +381,18 @@ namespace ws.winx.unity
 					
 										this.Value = __seralizedProperty.quaternionValue;
 								} 
+								else
+								if (this.ValueType == typeof(Rect)) {
+									
+									this.Value = __seralizedProperty.rectValue;
+								} 
+								else
+								if (this.ValueType == typeof(Bounds)) {
+									
+									this.Value = __seralizedProperty.boundsValue;
+								} 
 				else
-								if (this.ValueType == typeof(AnimationCurve)) {
+				if (this.ValueType == typeof(AnimationCurve)) {
 										this.Value = __seralizedProperty.animationCurveValue;
 								}
 				else

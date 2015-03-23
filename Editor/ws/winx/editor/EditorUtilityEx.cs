@@ -71,6 +71,8 @@ namespace ws.winx.editor
 				//
 				// Static Fields
 				//
+
+				//Dictionary of Attribute-Type|PropertyDrawer
 				private static Dictionary<Type, PropertyDrawer> __drawers;
 				private static UnityDefaultPropertyDrawer __drawerDefault;
 
@@ -84,6 +86,9 @@ namespace ws.winx.editor
 				//
 				// Static Methods
 				//
+				
+
+
 				public static PropertyDrawer GetDrawer (Type type)
 				{
 						Type typeDrawer;
@@ -103,10 +108,12 @@ namespace ws.winx.editor
 										if (attribute != null) {
 												Type typeProperty = (Type)attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (attribute);
 
+												
 
-
-												if (!EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
+												if (!(typeProperty is Attribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
 														EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
+												
+							//Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name);
 												}
 										}
 								}

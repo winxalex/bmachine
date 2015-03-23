@@ -34,7 +34,6 @@ namespace ws.winx.editor.bmachine
 				
 				ReorderableList  __variablesReordableList;
 				GenericMenu genericMenu;
-				Action<Type> switchMenuTypes;
 				string _typeNameSelected = "None";
 				List<Type> typesCustom;
 
@@ -65,6 +64,8 @@ namespace ws.winx.editor.bmachine
 								__variablesReordableList.onRemoveCallback = onRemoveCallback;
 
 								__variablesReordableList.onSelectCallback = onSelectCallback;
+
+								__variablesReordableList.elementHeight=32f;
 				
 
 								genericMenu = EditorGUILayoutEx.GeneraterGenericMenu<Type> (EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes, onTypeSelection);
@@ -79,47 +80,7 @@ namespace ws.winx.editor.bmachine
 
 
 
-								switchMenuTypes = SwitchUtility.SwitchExecute (
-					new Func<Type, Action>[]{
-
-					SwitchUtility.CaseIsClassOf<float,Action> (() => {
-										AddVariableToList<float> ("New Float", 0f, __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<int,Action> (() => {
-										AddVariableToList<int> ("New Int", 0, __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<string,Action> (() => {
-										AddVariableToList<String> ("New String", String.Empty, __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<bool,Action> (() => {
-										AddVariableToList<bool> ("New Bool", false, __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<Vector3,Action> (() => {
-										AddVariableToList<Vector3> ("New Vector3", new Vector3 (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<UnityEvent,Action> (() => {
-										AddVariableToList<UnityEvent> ("New UnityEvent", new UnityEvent (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<Quaternion,Action> (() => {
-										AddVariableToList<Quaternion> ("New Quaternion", new Quaternion (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<Color,Action> (() => {
-										AddVariableToList<Color> ("New Color", new Color (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<Rect,Action> (() => {
-										AddVariableToList<Rect> ("New Rect", new Rect (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<UnityEngine.Texture2D,Action> (() => {
-										AddVariableToList<UnityEngine.Texture2D> ("New Texture", new UnityEngine.Texture2D (2, 2), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<UnityEngine.Texture3D,Action> (() => {
-										AddVariableToList<UnityEngine.Texture3D> ("New Texture", new UnityEngine.Texture3D (2, 2, 2, TextureFormat.ARGB32, false), __variablesReordableList);}),
-
-					SwitchUtility.CaseIsClassOf<Material,Action> (() => {
-										AddVariableToList<Material> ("Material", new Material (Shader.Find ("Diffuse")), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<GameObject,Action> (() => {
-										AddVariableToList<GameObject> ("New GameObject", new GameObject (), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<AnimationCurve,Action> (() => {
-										AddVariableToList<AnimationCurve> ("New AnimationCurve", new AnimationCurve (new Keyframe (0f, 0f), new Keyframe (1f, 1f)), __variablesReordableList);}),
-					SwitchUtility.CaseIsClassOf<AnimationClip,Action> (() => {
-										AddVariableToList<AnimationClip> ("New AnimationClip", new AnimationClip (), __variablesReordableList);}),
-				
-				
-					SwitchUtility.CaseIsClassOf<UnityEngine.Object,Action> (() => {
-										AddVariableToList<UnityEngine.Object> ("Name of Variable", new UnityEngine.Object (), __variablesReordableList);})
-
-						}
-								);
+								
 
 
 						}
@@ -184,9 +145,22 @@ namespace ws.winx.editor.bmachine
 				void onTypeSelection (object userData)
 				{
 
-						switchMenuTypes ((Type)userData);
-		
+						
+						Type type = (Type)userData;
+						if (type == typeof(Texture2D))
+								AddVariableToList ("New " + type.Name, new Texture2D (2, 2), __variablesReordableList);
+						else if (type == typeof(string))
+								AddVariableToList ("New " + type.Name, String.Empty, __variablesReordableList);
+						else if (type == typeof(AnimationCurve))
+								AddVariableToList ("New " + type.Name, new Material (Shader.Find ("Diffuse")), __variablesReordableList);
+						else if (type == typeof(AnimationCurve))
+								AddVariableToList ("New " + type.Name, new AnimationCurve (new Keyframe (0f, 0f, 0f, 0f), new Keyframe (1f, 1f, 0f, 0f)), __variablesReordableList);
+						else if (type == typeof(Texture3D))
+								AddVariableToList ("New " + type.Name, new Texture3D (2, 2, 2, TextureFormat.ARGB32, false), __variablesReordableList);
+						else
+								AddVariableToList ("New " + type.Name, FormatterServices.GetUninitializedObject (type), __variablesReordableList);
 
+					
 				}
 
 				void onSelectCallback (ReorderableList list)
@@ -269,28 +243,37 @@ namespace ws.winx.editor.bmachine
 
 						currentVariable = (UnityVariable)property.objectReferenceValue;
 
-						Type type = currentVariable.ValueType;
+						
+						
+						if (currentVariable != null && currentVariable.serializedProperty != null) {
 
-						if (Array.IndexOf (EditorGUILayoutEx.unityTypes, type) < 0
-								|| type == typeof(UnityEvent)) {
+								Type type = currentVariable.ValueType;
 
-								currentVariable.name = EditorGUI.TextField (position, currentVariable.name);
+								if (Array.IndexOf (EditorGUILayoutEx.unityTypes, type) < 0
+										|| type == typeof(UnityEvent)) {
 
-						} else {
-								
+										currentVariable.name = EditorGUI.TextField (position, currentVariable.name);
 
-								PropertyDrawer drawer = EditorUtilityEx.GetDefaultDrawer ();
+								} else {
+										PropertyDrawer drawer;
+
+										
+										drawer=EditorUtilityEx.GetDrawer(type);
+										
+										if(drawer==null)
+										 drawer= EditorUtilityEx.GetDefaultDrawer ();
 			
 			
-								Rect pos = new Rect (32, position.y, 80, 16);
+										Rect pos = new Rect (32, position.y, 80, 16);
 
-								currentVariable.name=EditorGUI.TextField (pos, currentVariable.name);
-								position.x = 113f;
-								position.width -= 80f;
-								drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent (""));
+										currentVariable.name = EditorGUI.TextField (pos, currentVariable.name);
+										position.x = 113f;
+										position.width -= 80f;
+										drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent (""));
 			
-								currentVariable.ApplyModifiedProperties ();
+										currentVariable.ApplyModifiedProperties ();
 
+								}
 						}
 			
 					
