@@ -90,7 +90,11 @@ namespace ws.winx.editor.bmachine
 				void fillMenuCustomTypes ()
 				{
 						genericMenu.AddSeparator (string.Empty);
-						genericMenu.AddItem (new GUIContent ("Any UnityObject"), false, onTypeSelection, typeof(UnityEngine.Object));
+						genericMenu.AddItem (new GUIContent ("Any UnityObject"), false, onTypeSelection, typeof(UnityEngine.Object)
+
+
+
+			                     );
 
 
 						Type[] derivedTypes = TypeUtility.GetDerivedTypes (typeof(System.Object));
@@ -151,7 +155,7 @@ namespace ws.winx.editor.bmachine
 								AddVariableToList ("New " + type.Name, new Texture2D (2, 2), __variablesReordableList);
 						else if (type == typeof(string))
 								AddVariableToList ("New " + type.Name, String.Empty, __variablesReordableList);
-						else if (type == typeof(AnimationCurve))
+						else if (type == typeof(Material))
 								AddVariableToList ("New " + type.Name, new Material (Shader.Find ("Diffuse")), __variablesReordableList);
 						else if (type == typeof(AnimationCurve))
 								AddVariableToList ("New " + type.Name, new AnimationCurve (new Keyframe (0f, 0f, 0f, 0f), new Keyframe (1f, 1f, 0f, 0f)), __variablesReordableList);
