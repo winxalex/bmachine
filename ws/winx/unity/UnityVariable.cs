@@ -44,77 +44,7 @@ namespace ws.winx.unity
 
 								if (__seralizedProperty == null && this.Value != null) {
 
-										using (Microsoft.CSharp.CSharpCodeProvider foo = 
-				       new Microsoft.CSharp.CSharpCodeProvider()) {
-					
-												CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
-					
-											
-					
-												compilerParams.GenerateInMemory = true; 
-					
-												var assembyExcuting = Assembly.GetExecutingAssembly ();
-												
-												string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
-						
-												string usingString = "using UnityEngine;";
-												
-												if (!(this.ValueType.IsPrimitive || this.ValueType == typeof(string))) {
-														string assemblyLocationVarable = Assembly.GetAssembly (this.ValueType).Location;
-														compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
-
-														if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
-
-																usingString += "using " + this.ValueType.Namespace + ";";
-														}
-												}
-							
-
-
-												compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
-												compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
-					
-					
-				
-					
-												var res = foo.CompileAssemblyFromSource (
-						compilerParams, String.Format (
-						
-						" {0}" +
-						
-														"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-							, usingString, this.ValueType.ToString ())
-												);
-					
-					
-					
-					
-												if (res.Errors.Count > 0) {
-							
-														foreach (CompilerError CompErr in res.Errors) {
-																Debug.LogError (
-																		"Line number " + CompErr.Line +
-																		", Error Number: " + CompErr.ErrorNumber +
-																		", '" + CompErr.ErrorText + ";" 
-																);
-														}
-												} else {
-					
-														var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
-							
-														ScriptableObject st = ScriptableObject.CreateInstance (type);
-								
-														type.GetField ("value").SetValue (st, this.Value);
-								
-								
-								
-														__seralizedObject = new SerializedObject (st);
-								
-														__seralizedProperty = __seralizedObject.FindProperty ("value");
-
-												}
-			
-										}
+										CreateSerializedProperty();
 
 								}
 
@@ -125,6 +55,10 @@ namespace ws.winx.unity
 					
 						}
 				}
+
+
+
+
 
 				[HideInInspector]
 				public byte[]
@@ -241,7 +175,11 @@ namespace ws.winx.unity
 						set {
 
 
+								if(value==null){
+									__seralizedProperty=null;
+									__seralizedObject=null;
 
+								}
 
 
 								if (this.__memberInfo == null) {
@@ -343,7 +281,11 @@ namespace ws.winx.unity
 				public void ApplyModifiedProperties ()
 				{
 						if (__seralizedObject != null) {
+
+							
 								__seralizedObject.ApplyModifiedProperties ();
+
+
 
 								if (this.ValueType == typeof(float)) {
 
@@ -391,13 +333,13 @@ namespace ws.winx.unity
 									
 									this.Value = __seralizedProperty.boundsValue;
 								} 
-				else
-				if (this.ValueType == typeof(AnimationCurve)) {
+								else
+								if (this.ValueType == typeof(AnimationCurve)) {
 										this.Value = __seralizedProperty.animationCurveValue;
 								}
-				else
+								else
 									if (this.__reflectedInstance is UnityEngine.Object)
-										this.Value = __seralizedProperty.objectReferenceValue;
+										  this.Value = __seralizedProperty.objectReferenceValue;
 
 
 						}
@@ -444,6 +386,83 @@ namespace ws.winx.unity
 				public override string ToString ()
 				{
 						return "Property[" + name + "] of type " + ValueType + (this.reflectedInstance == null ? " on Static instance" : " on instance of " + this.reflectedInstance);
+				}
+
+				void CreateSerializedProperty(){
+
+					using (Microsoft.CSharp.CSharpCodeProvider foo = 
+					       new Microsoft.CSharp.CSharpCodeProvider()) {
+						
+						CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+						
+						
+						
+						compilerParams.GenerateInMemory = true; 
+						
+						var assembyExcuting = Assembly.GetExecutingAssembly ();
+						
+						string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+						
+						string usingString = "using UnityEngine;";
+						
+						if (!(this.ValueType.IsPrimitive || this.ValueType == typeof(string))) {
+							string assemblyLocationVarable = Assembly.GetAssembly (this.ValueType).Location;
+							compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+							
+							if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+								
+								usingString += "using " + this.ValueType.Namespace + ";";
+							}
+						}
+						
+						
+						
+						compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+						compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+						
+						
+						
+						
+						var res = foo.CompileAssemblyFromSource (
+							compilerParams, String.Format (
+							
+							" {0}" +
+							
+							"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+							, usingString, this.ValueType.ToString ())
+							);
+						
+						
+						
+						
+						if (res.Errors.Count > 0) {
+							
+							foreach (CompilerError CompErr in res.Errors) {
+								Debug.LogError (
+									"Line number " + CompErr.Line +
+									", Error Number: " + CompErr.ErrorNumber +
+									", '" + CompErr.ErrorText + ";" 
+									);
+							}
+						} else {
+							
+							var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+							
+							ScriptableObject st = ScriptableObject.CreateInstance (type);
+							
+							type.GetField ("value").SetValue (st, this.Value);
+							
+							
+							
+							__seralizedObject = new SerializedObject (st);
+							
+							__seralizedProperty = __seralizedObject.FindProperty ("value");
+							
+						}
+						
+					}
+
+
 				}
 
 			

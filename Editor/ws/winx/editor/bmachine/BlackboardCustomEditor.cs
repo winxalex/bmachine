@@ -144,6 +144,8 @@ namespace ws.winx.editor.bmachine
 						element.objectReferenceValue = variable;
 			
 						serializedObject.ApplyModifiedProperties ();
+
+						
 				}
 
 				void onTypeSelection (object userData)
@@ -273,10 +275,24 @@ namespace ws.winx.editor.bmachine
 										currentVariable.name = EditorGUI.TextField (pos, currentVariable.name);
 										position.x = 113f;
 										position.width -= 80f;
+
+					EditorGUI.BeginChangeCheck ();
+				
+
+
 										drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent (""));
 			
-										currentVariable.ApplyModifiedProperties ();
+					if (EditorGUI.EndChangeCheck ()) {
+						
+						currentVariable.ApplyModifiedProperties ();
 
+						
+						EditorUtility.SetDirty (currentVariable);
+
+
+						
+					}
+										
 								}
 						}
 			
