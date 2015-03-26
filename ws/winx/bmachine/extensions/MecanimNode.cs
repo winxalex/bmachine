@@ -149,7 +149,7 @@ namespace ws.winx.bmachine.extensions
 		
 				public override void Reset ()
 				{
-						Debug.Log (this.name + ">Reset");
+//						Debug.Log (this.name + ">Reset");
 		
 						_animator = null;
 						

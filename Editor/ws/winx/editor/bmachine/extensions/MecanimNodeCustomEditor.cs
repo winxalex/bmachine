@@ -44,7 +44,6 @@ namespace ws.winx.editor.bmachine.extensions
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
-				
 				List<MecanimStateInfo> animaInfoValues;
 				MecanimStateInfo selectedAnimaStateInfo;
 				float[] eventTimeValues;
@@ -78,8 +77,8 @@ namespace ws.winx.editor.bmachine.extensions
 								//float time = (float)animationEvent.timeNormalized.Value;
 								//float time2 = (float)animationEvent2.timeNormalized.Value;
 
-				float time = (float)animationEvent.timeNormalized.serializedProperty.floatValue;
-				float time2 = (float)animationEvent2.timeNormalized.serializedProperty.floatValue;
+								float time = (float)animationEvent.timeNormalized.serializedProperty.floatValue;
+								float time2 = (float)animationEvent2.timeNormalized.serializedProperty.floatValue;
 								if (time != time2) {
 										return (int)Mathf.Sign (time - time2);
 								}
@@ -112,14 +111,14 @@ namespace ws.winx.editor.bmachine.extensions
 										
 								
 										if (current.path == "blendX" && 
-					    node!=null && node.animaStateInfoSelected != null && 
-					    (node.animaStateInfoSelected.blendParamsIDs==null ||
-					    node.animaStateInfoSelected.blendParamsIDs.Length < 1))
+												node != null && node.animaStateInfoSelected != null && 
+												(node.animaStateInfoSelected.blendParamsIDs == null ||
+												node.animaStateInfoSelected.blendParamsIDs.Length < 1))
 												continue;
 										if (current.path == "blendY" 
-					    && node!=null && node.animaStateInfoSelected != null && 
-					    (node.animaStateInfoSelected.blendParamsIDs==null ||
-					    node.animaStateInfoSelected.blendParamsIDs.Length < 2))
+												&& node != null && node.animaStateInfoSelected != null && 
+												(node.animaStateInfoSelected.blendParamsIDs == null ||
+												node.animaStateInfoSelected.blendParamsIDs.Length < 2))
 												continue;
 
 										EditorGUI.indentLevel = indentLevel + iterator.depth;
@@ -189,7 +188,7 @@ namespace ws.winx.editor.bmachine.extensions
 						//add node to its parent list
 						mecanimNode.Insert (args.selectedIndex, child);
 						//child.timeNormalized.Value = args.selectedValue;
-			child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
+						child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
 
 						mecanimNode.tree.SaveNodes ();
 
@@ -348,7 +347,11 @@ namespace ws.winx.editor.bmachine.extensions
 								int indentLevel = 0;
 
 								Rect curveEditorRect = new Rect (0, 0, 0, 0);
+
+
+
 					
+			
 				
 								if (_curvesEditorShow) {
 										
@@ -408,6 +411,8 @@ namespace ws.winx.editor.bmachine.extensions
 
 										
 										curveEditor.DoEditor ();
+
+										
 				
 										///////////////////////////////////////////////////////////////////////////////
 
@@ -544,29 +549,69 @@ namespace ws.winx.editor.bmachine.extensions
 
 										if (GUILayout.Button ("Remove") || Event.current.keyCode == KeyCode.Delete) {
 
-
+												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
 												curveEditor.RemoveCurveAt (_curveIndexSelected);
 
+												if (iterator.Find ("variablesBindedToCurves")) {
+												
+														List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
+														vList.RemoveAt (_curveIndexSelected);
+														iterator.current.value = vList.ToArray ();
+														iterator.current.ApplyModifiedValue ();
 
-												List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
-												vList.RemoveAt (_curveIndexSelected);
-												mecanimNode.variablesBindedToCurves = vList.ToArray ();
-						
-												List<Color> cList = mecanimNode.curvesColors.ToList ();
+												}
 
-												cList.RemoveAt (_curveIndexSelected);
-												mecanimNode.curvesColors = cList.ToArray ();
-						
-												List<AnimationCurve> crList = mecanimNode.curves.ToList ();
+
+												if (iterator.Find ("curvesColors")) {
+														List<Color> cList = mecanimNode.curvesColors.ToList ();
+
+														cList.RemoveAt (_curveIndexSelected);
+														iterator.current.value = cList.ToArray ();
+														iterator.current.ApplyModifiedValue ();
+												}
+
+
+												if (iterator.Find ("curves")) {
+							
+														SerializedNodeProperty curves = iterator.current;
+														List<AnimationCurve> crList = mecanimNode.curves.ToList ();
 				
-												crList.RemoveAt (_curveIndexSelected);
+														crList.RemoveAt (_curveIndexSelected);
 						
-												mecanimNode.curves = crList.ToArray ();
+														iterator.current.value = crList.ToArray ();
+														iterator.current.ApplyModifiedValue ();
+												}
+
+
 
 												_curveIndexSelected = -1;
 
 												this.serializedNode.ApplyModifiedProperties ();
 				
+
+										}
+
+
+
+
+										if (Application.isPlaying) {
+												if (GUILayout.Button ("Preserve")) {
+
+														NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+														if (iterator.Find ("curves")) {
+																SerializedNodeProperty curves = iterator.current;
+																//curves.value=mecanimNode.curves;
+
+
+																//Debug.Log(mecanimNode.curves[0].keys[1].value+" "+	((AnimationCurve[])curves.value)[0].keys[1].value);
+																//this.serializedNode.ApplyModifiedProperties ();
+														}
+													
+													
+
+													
+
+												}
 
 										}
 
@@ -584,6 +629,10 @@ namespace ws.winx.editor.bmachine.extensions
 
 										
 								}
+
+								
+
+
 								////////////////////////////////////////////////////////////////////////////
 			
 
@@ -610,17 +659,17 @@ namespace ws.winx.editor.bmachine.extensions
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
 								if (Application.isPlaying) {
 
-					NodePropertyIterator iterator = this.serializedNode.GetIterator ();
-					if (iterator.Find ("animationRunTimeControlEnabled")) {
-										//mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
+										NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+										if (iterator.Find ("animationRunTimeControlEnabled")) {
+												//mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
 
-										if ((bool)iterator.current.value) {
-												Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
-												timeControlRect.xMin += 38f;
-												timeControlRect.xMax -= 70f;
-												timeNormalized = mecanimNode.animationRunTimeControl = EditorGUILayoutEx.CustomHSlider (timeControlRect, mecanimNode.animationRunTimeControl, 0f, 1f, TimeControlW.style.timeScrubber);
+												if ((bool)iterator.current.value) {
+														Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
+														timeControlRect.xMin += 38f;
+														timeControlRect.xMax -= 70f;
+														timeNormalized = mecanimNode.animationRunTimeControl = EditorGUILayoutEx.CustomHSlider (timeControlRect, mecanimNode.animationRunTimeControl, 0f, 1f, TimeControlW.style.timeScrubber);
+												}
 										}
-					}
 
 								}
 								///////////////////////////////////////////////////////////////
@@ -713,7 +762,7 @@ namespace ws.winx.editor.bmachine.extensions
 												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
 												//select the time values from nodes
 												//eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.Value).ToArray ();
-						eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.serializedProperty.floatValue).ToArray ();
+												eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.serializedProperty.floatValue).ToArray ();
 
 
 												eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
