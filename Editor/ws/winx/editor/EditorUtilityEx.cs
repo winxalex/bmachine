@@ -8,6 +8,7 @@ using ws.winx.unity;
 using ws.winx.editor.extensions;
 using System.Reflection;
 using ws.winx.editor.drawers;
+using System.IO;
 
 namespace ws.winx.editor
 {
@@ -143,8 +144,37 @@ namespace ws.winx.editor
 
 
 
+					[MenuItem("Assets/Create/Asset From Selected")]
+					public static void CreateAssetFromSelected() {
+						if (Selection.activeObject != null && Selection.activeObject is MonoScript) {
+
+							if (File.Exists (Path.Combine (Path.Combine (Application.dataPath, "Resources"), "UnityClipboard.asset"))) {
+								
+								if (EditorUtility.DisplayDialog ("UnityClipboard Asset Exists!",
+								                                 "Are you sure you overwrite?", "Yes", "Cancel")) {
+									AssetDatabase.CreateAsset (ScriptableObject.CreateInstance(Selection.activeObject.name), "Assets/Resources/UnityClipboard.asset");
+								}
+							} else {
+									AssetDatabase.CreateAsset (ScriptableObject.CreateInstance(Selection.activeObject.name), "Assets/Resources/UnityClipboard.asset");
+							}
+							
+							
+						}
+					}
 
 
+					private static UnityClipboard __clipboard;
+
+					public static UnityClipboard Clipboard {
+						get {
+								if(__clipboard==null){
+													
+									__clipboard=Resources.Load<UnityClipboard> ("UnityClipboard");
+								}
+
+								return __clipboard;
+						}
+					}
 
 
 

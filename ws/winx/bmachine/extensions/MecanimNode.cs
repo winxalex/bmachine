@@ -428,7 +428,7 @@ namespace ws.winx.bmachine.extensions
 			
 								} else {
 
-										Debug.LogWarning ("MecanimNode Update on wrong  AnimaState");
+//										Debug.LogWarning ("MecanimNode Update on wrong  AnimaState");
 										//this.status = Status.Error;
 										//return;
 								

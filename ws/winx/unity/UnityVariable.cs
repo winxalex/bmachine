@@ -240,7 +240,7 @@ namespace ws.winx.unity
 												reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
 										} catch (Exception ex) {
 
-												Debug.Log (ex.Message + " name:" + this.name + " memInfo:" + __memberInfo + " " + __reflectedInstance + " " + __reflectedInstanceUnity);
+												Debug.LogWarning (ex.Message + " name:" + this.name + " memInfo:" + __memberInfo + " " + __reflectedInstance + " " + __reflectedInstanceUnity);
 										}
 								}
 						}
