@@ -24,6 +24,11 @@ namespace ws.winx.unity.surrogates{
 
 			info.AddValue("keysn", len);
 
+
+			//info.AddValue ("postWrapMode", vector.postWrapMode);
+			//info.AddValue ("preWrapMode", vector.preWrapMode);
+
+
 			///!!! 
 			//info.AddValue("keys", vector.keys);
 
@@ -32,6 +37,11 @@ namespace ws.winx.unity.surrogates{
 		public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
 		{
 			Keyframe[] keyframes; 
+
+			AnimationCurve curve=new AnimationCurve();
+
+		//	curve.preWrapMode=(WrapMode)info.GetValue("preWrapMode",typeof(WrapMode));
+		//	curve.postWrapMode=(WrapMode)info.GetValue("postWrapMode",typeof(WrapMode));
 
 			int numKeys=info.GetInt32("keysn");
 
@@ -45,12 +55,16 @@ namespace ws.winx.unity.surrogates{
 				keyframeCurrent.inTangent=info.GetSingle("keyin"+i);
 				keyframeCurrent.outTangent=info.GetSingle("keyout"+i);
 			}
+
+
+			curve.keys = keyframes;
+
 		
 			// don't know how to make connection between AnimaitonCurver and Keyframes surrogate
 			// AnimationCurve surrogate keys are constructed before thoose in Keyframe surrogate resulting in 0,0 Keyframes
 			//return new AnimationCurve((Keyframe[])info.GetValue ("keys", typeof(Keyframe[])));
 
-			return new AnimationCurve(keyframes);
+			return curve;
 
 
 		}

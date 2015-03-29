@@ -13,6 +13,9 @@ namespace ws.winx.unity.surrogates{
 		
 			info.AddValue("t", vector.time);
 			info.AddValue ("v", vector.value);
+			info.AddValue ("it", vector.inTangent);
+			info.AddValue ("ot", vector.outTangent);
+			info.AddValue ("mod", vector.tangentMode);
 
 			//Debug.Log ("Keyframe t:" + vector.time + " v:" + vector.value);
 
@@ -28,9 +31,12 @@ namespace ws.winx.unity.surrogates{
 			Keyframe keyframe=(Keyframe)obj;
 			keyframe.time=(float)info.GetValue("t",typeof(float));
 			keyframe.value=(float)info.GetValue("v",typeof(float));
+			keyframe.inTangent=info.GetSingle ("it");
+			keyframe.outTangent=info.GetSingle ("ot");
+			keyframe.tangentMode=info.GetInt32 ("mod");
 
 
-			return null;
+			return keyframe;
 
 			//return new Keyframe(,(float)info.GetValue("v",typeof(float)));
 		}

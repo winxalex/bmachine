@@ -1,6 +1,8 @@
 //----------------------------------------------
 //            Behaviour Machine
 // Copyright © 2014 Anderson Campos Cardoso
+//
+//     MecanimNodeEditor(Alex Winx)
 //----------------------------------------------
 using System;
 using System.Collections;
@@ -60,10 +62,12 @@ namespace ws.winx.editor.bmachine.extensions
 				Vector2 curvePropertiesScroller;
 				UnityVariable _variableSelected;
 				float timeNormalized = 0f;
-
 				SerializedNodeProperty curvesSerialized;
 				SerializedNodeProperty curvesColorsSerialized;
 				SerializedNodeProperty variablesBindedToCurvesSerialized;
+				AnimationCurve[] curves;
+				Color[] curveColors;
+				UnityVariable[] variablesBindedToCurves; 
 				
 				
 		        
@@ -362,25 +366,30 @@ namespace ws.winx.editor.bmachine.extensions
 										//This makes layout to work (Reserving space)
 										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
 
-									/////// INIT SERIALIZED NODE PROPERTIES //////
-									if(curvesSerialized==null){
-										NodePropertyIterator iterator=this.serializedNode.GetIterator();
-										if( iterator.Find ("curves"))
-											curvesSerialized=iterator.current;
-										else
-											Debug.LogError("MecananimNode should have public field 'curves'");
+										/////// INIT SERIALIZED NODE PROPERTIES //////
+										if (curvesSerialized == null) {
+												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+												if (iterator.Find ("curves"))
+														curvesSerialized = iterator.current;
+												else
+														Debug.LogError ("MecananimNode should have public field 'curves'");
 										
-										if( iterator.Find ("curvesColors"))
-											curvesColorsSerialized=iterator.current;
-										else
-											Debug.LogError("MecananimNode should have public field 'curvesColors'");
+												if (iterator.Find ("curvesColors"))
+														curvesColorsSerialized = iterator.current;
+												else
+														Debug.LogError ("MecananimNode should have public field 'curvesColors'");
 										
-										if (iterator.Find ("variablesBindedToCurves")) 
-											variablesBindedToCurvesSerialized=iterator.current;
-										
-										else
-											Debug.LogError("MecananimNode should have public field 'variablesBindedToCurves'");
-									}
+												if (iterator.Find ("variablesBindedToCurves")) 
+														variablesBindedToCurvesSerialized = iterator.current;
+												else
+														Debug.LogError ("MecananimNode should have public field 'variablesBindedToCurves'");
+
+
+
+												curves = (AnimationCurve[])curvesSerialized.value;
+												curveColors = (Color[])curvesColorsSerialized.value;
+												variablesBindedToCurves = (UnityVariable[])variablesBindedToCurvesSerialized.value;
+										}
 
 
 
@@ -392,8 +401,8 @@ namespace ws.winx.editor.bmachine.extensions
 										if (curveEditor == null) {
 
 												CurveWrapperW[] curveWrappers;
-
-												int numCurves = mecanimNode.curves.Length;
+												
+												int numCurves = curves.Length;
 
 												curveWrappers = new CurveWrapperW[numCurves];
 
@@ -401,8 +410,8 @@ namespace ws.winx.editor.bmachine.extensions
 
 												for (i=0; i<numCurves; i++) {
 														curveWrapperNew = new CurveWrapperW ();
-														curveWrapperNew.curve = mecanimNode.curves [i];
-														curveWrapperNew.color = mecanimNode.curvesColors [i];
+														curveWrapperNew.curve = curves [i];
+														curveWrapperNew.color = curveColors [i];
 														curveWrappers [i] = curveWrapperNew;
 												}
 
@@ -448,20 +457,24 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 										//if curve is selected display curve properties
-										if (_curveIndexSelected > -1 && _curveIndexSelected < mecanimNode.variablesBindedToCurves.Length) {
+										if (_curveIndexSelected > -1 && _curveIndexSelected < variablesBindedToCurves.Length) {
 												
-												UnityVariable variableSelected = mecanimNode.variablesBindedToCurves [_curveIndexSelected];
+												UnityVariable variableSelected =variablesBindedToCurves [_curveIndexSelected];
 											
 
 												EditorGUILayout.LabelField (variableSelected.name, new GUILayoutOption[]{});
 
 												EditorGUI.BeginChangeCheck ();
-												mecanimNode.curvesColors [_curveIndexSelected] = EditorGUILayout.ColorField (mecanimNode.curvesColors [_curveIndexSelected]);
+												Color colorNew = EditorGUILayout.ColorField (curveColors [_curveIndexSelected]);
 										
 					
 												if (EditorGUI.EndChangeCheck ()) {
-														curveEditor.animationCurves [_curveIndexSelected].color = mecanimNode.curvesColors [_curveIndexSelected];
-														this.serializedNode.ApplyModifiedProperties ();
+														curveEditor.animationCurves [_curveIndexSelected].color = colorNew;
+														curveColors[_curveIndexSelected]=colorNew;
+														curvesColorsSerialized.ValueChanged();
+														curvesColorsSerialized.ApplyModifiedValue();
+														
+														
 												}
 					
 										} else {
@@ -499,10 +512,10 @@ namespace ws.winx.editor.bmachine.extensions
 
 												
 												
-														List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
-														vList.Add (_variableSelected);
-														variablesBindedToCurvesSerialized.value = vList.ToArray ();
-														variablesBindedToCurvesSerialized.ApplyModifiedValue ();
+												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
+												vList.Add (_variableSelected);
+												variablesBindedToCurvesSerialized.value =variablesBindedToCurves= vList.ToArray ();
+												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
 
 
 												
@@ -510,11 +523,11 @@ namespace ws.winx.editor.bmachine.extensions
 												
 
 														
-														List<Color> cList = mecanimNode.curvesColors.ToList ();
-														_colorSelected.a = 1;
-														cList.Add (_colorSelected);
-														curvesColorsSerialized.value = cList.ToArray ();
-														curvesColorsSerialized.ApplyModifiedValue ();	
+												List<Color> cList = curveColors.ToList ();
+												_colorSelected.a = 1;
+												cList.Add (_colorSelected);
+												curvesColorsSerialized.value =curveColors= cList.ToArray ();
+												curvesColorsSerialized.ApplyModifiedValue ();	
 														
 												
 
@@ -526,32 +539,32 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 												
-														List<AnimationCurve> crList = mecanimNode.curves.ToList ();
+												List<AnimationCurve> crList = curves.ToList ();
 
-														curveAnimationNew = new AnimationCurve (new Keyframe[] {
+												curveAnimationNew = new AnimationCurve (new Keyframe[] {
 							new Keyframe (0f, 0f),
 							new Keyframe (1f, 1f)
 						});
 
-														//TODO add from preset
-														crList.Add (curveAnimationNew);
+												//TODO add from preset
+												crList.Add (curveAnimationNew);
 							
-														curvesSerialized.value = crList.ToArray ();
-														curvesSerialized.ApplyModifiedValue ();
+												curvesSerialized.value = curves=crList.ToArray ();
+												curvesSerialized.ApplyModifiedValue ();
 
 
 
 
-														///add curve wrapped to CurveEditor
-														CurveWrapperW curveWrapperW = new CurveWrapperW ();
+												///add curve wrapped to CurveEditor
+												CurveWrapperW curveWrapperW = new CurveWrapperW ();
 															
-														curveWrapperW.color = _colorSelected;
+												curveWrapperW.color = _colorSelected;
 															
-														curveWrapperW.curve = curveAnimationNew;
+												curveWrapperW.curve = curveAnimationNew;
 															
-														curveEditor.AddCurve (curveWrapperW);
+												curveEditor.AddCurve (curveWrapperW);
 															
-														curveEditor.FrameSelected (true, true);
+												curveEditor.FrameSelected (true, true);
 							
 												
 						
@@ -571,31 +584,31 @@ namespace ws.winx.editor.bmachine.extensions
 
 												
 												
-														List<UnityVariable> vList = mecanimNode.variablesBindedToCurves.ToList ();
-														vList.RemoveAt (_curveIndexSelected);
-														variablesBindedToCurvesSerialized.value = vList.ToArray ();
-														variablesBindedToCurvesSerialized.ApplyModifiedValue ();
+												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
+												vList.RemoveAt (_curveIndexSelected);
+												variablesBindedToCurvesSerialized.value =variablesBindedToCurves= vList.ToArray ();
+												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
 
 												
 
 
 												
-														List<Color> cList = mecanimNode.curvesColors.ToList ();
+												List<Color> cList = curveColors.ToList ();
 
-														cList.RemoveAt (_curveIndexSelected);
-														curvesColorsSerialized.value = cList.ToArray ();
-														curvesColorsSerialized.ApplyModifiedValue ();
+												cList.RemoveAt (_curveIndexSelected);
+												curvesColorsSerialized.value =curveColors= cList.ToArray ();
+												curvesColorsSerialized.ApplyModifiedValue ();
 												
 
 
 												
 														
-														List<AnimationCurve> crList = mecanimNode.curves.ToList ();
+												List<AnimationCurve> crList = curves.ToList ();
 				
-														crList.RemoveAt (_curveIndexSelected);
+												crList.RemoveAt (_curveIndexSelected);
 						
-														curvesSerialized.value = crList.ToArray ();
-														curvesSerialized.ApplyModifiedValue ();
+												curvesSerialized.value =curves= crList.ToArray ();
+												curvesSerialized.ApplyModifiedValue ();
 												
 
 
@@ -607,10 +620,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 										}
 
-					//ActionNode[] nodes=this.target.tree.GetComponents<>();
+
+
+										//ActionNode[] nodes=this.target.tree.GetComponents<>();
 						
-				//if (EditorApplication.isPlaying || EditorApplication.isPaused) {
-												if (GUILayout.Button ("Preserve")) {
+										//if (EditorApplication.isPlaying || EditorApplication.isPaused) {
+										if (GUILayout.Button ("Preserve")) {
+
+						Debug.Log("ID:"+this.serializedNode.target.instanceID);
 //
 //												//EditorUtilityEx.Clipboard.add(0,curvesSerialized);
 //						NodePropertyIterator itr;
@@ -624,29 +641,29 @@ namespace ws.winx.editor.bmachine.extensions
 //						//save
 //						((MecanimNode)this.serializedNode.target).testVar.OnBeforeSerialize();
 //									//EditorUtility.SetDirty(this.serializedNode.target.tree);
-			EditorUtilityEx.Clipboard.add(0,curvesSerialized.value);	
+												//EditorUtilityEx.Clipboard.add (0, curvesSerialized.value);	
 
-												}
+										}
 
-									//	}
+										//	}
 
 
 				
 
 
-					//if(!EditorApplication.isPlaying){
-					//	object restoredObject=EditorUtilityEx.Clipboard.restore(0);
+										//if(!EditorApplication.isPlaying){
+										//	object restoredObject=EditorUtilityEx.Clipboard.restore(0);
 
-					//}
-				if(GUILayout.Button("Restore")){
+										//}
+										if (GUILayout.Button ("Restore")) {
 
-					//((MecanimNode)this.serializedNode.target).testVar.OnBeforeSerialize();
+												//((MecanimNode)this.serializedNode.target).testVar.OnBeforeSerialize();
 
-						object restoredObject=EditorUtilityEx.Clipboard.restore(0);
-						curvesSerialized.value=restoredObject;
-						curvesSerialized.ApplyModifiedValue();
+												object restoredObject = EditorUtilityEx.Clipboard.restore (0);
+												curvesSerialized.value = restoredObject;
+												curvesSerialized.ApplyModifiedValue ();
 
-				}
+										}
 
 
 
