@@ -25,7 +25,7 @@ namespace ws.winx.csharp.extensions{
 				throw new Exception("Property must be of type FieldInfo or PropertyInfo");
 		}
 		
-				public static Type GetMemberType(this MemberInfo member)
+				public static Type GetUnderlyingType(this MemberInfo member)
 				{
 					switch (member.MemberType)
 					{

@@ -51,6 +51,7 @@ public class TestFunctionContainerEditor : Editor {
 		EditorGUI.BeginChangeCheck ();
 		base.OnInspectorGUI ();
 
+		Debug.Log ("Target ID:"+ target.GetInstanceID ());
 
 
 		if (EditorGUI.EndChangeCheck ()) {

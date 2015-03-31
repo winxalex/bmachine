@@ -114,7 +114,7 @@ namespace ws.winx.editor
 												if (!(typeProperty is Attribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
 														EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
 												
-							//Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name);
+														//Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name);
 												}
 										}
 								}
@@ -138,43 +138,47 @@ namespace ws.winx.editor
 
 						return __drawerDefault;
 				}
-		
 
+				[MenuItem("Assets/Create/Asset From Selected")]
+				public static void CreateAssetFromSelected ()
+				{
+						if (Selection.activeObject != null && Selection.activeObject is MonoScript && ((MonoScript)Selection.activeObject).GetClass ().IsSubclassOf (typeof(ScriptableObject))) 
+								CreateAssetFromName (Selection.activeObject.name);
+				}
 
+				public static void CreateAssetFromName (String name)
+				{
 
-
-
-					[MenuItem("Assets/Create/Asset From Selected")]
-					public static void CreateAssetFromSelected() {
-						if (Selection.activeObject != null && Selection.activeObject is MonoScript) {
-
-							if (File.Exists (Path.Combine (Path.Combine (Application.dataPath, "Resources"), "UnityClipboard.asset"))) {
-								
+						if (File.Exists (Path.Combine (Path.Combine (Application.dataPath, "Resources"), name + ".asset"))) {
+							
 								if (EditorUtility.DisplayDialog ("UnityClipboard Asset Exists!",
-								                                 "Are you sure you overwrite?", "Yes", "Cancel")) {
-									AssetDatabase.CreateAsset (ScriptableObject.CreateInstance(Selection.activeObject.name), "Assets/Resources/UnityClipboard.asset");
+							                                 "Are you sure you overwrite?", "Yes", "Cancel")) {
+										AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (Selection.activeObject.name), "Assets/Resources/" + name + ".asset");
 								}
-							} else {
-									AssetDatabase.CreateAsset (ScriptableObject.CreateInstance(Selection.activeObject.name), "Assets/Resources/UnityClipboard.asset");
-							}
-							
-							
+						} else {
+				
+								AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (Selection.activeObject.name), "Assets/Resources/" + name + ".asset");
 						}
-					}
+			
+				}
 
+				private static UnityClipboard __clipboard;
 
-					private static UnityClipboard __clipboard;
-
-					public static UnityClipboard Clipboard {
+				public static UnityClipboard Clipboard {
 						get {
-								if(__clipboard==null){
+								if (__clipboard == null) {
 													
-									__clipboard=Resources.Load<UnityClipboard> ("UnityClipboard");
+										__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
+
+										if (__clipboard == null)
+												AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (Selection.activeObject.name), "Assets/Resources/UnityClipboard.asset");
+
+										__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
 								}
 
 								return __clipboard;
 						}
-					}
+				}
 
 
 

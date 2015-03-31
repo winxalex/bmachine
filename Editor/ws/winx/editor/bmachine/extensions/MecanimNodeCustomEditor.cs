@@ -67,7 +67,8 @@ namespace ws.winx.editor.bmachine.extensions
 				SerializedNodeProperty variablesBindedToCurvesSerialized;
 				AnimationCurve[] curves;
 				Color[] curveColors;
-				UnityVariable[] variablesBindedToCurves; 
+				UnityVariable[] variablesBindedToCurves;
+				bool _changesPreserve;
 				
 				
 		        
@@ -129,7 +130,11 @@ namespace ws.winx.editor.bmachine.extensions
 												continue;
 
 										EditorGUI.indentLevel = indentLevel + iterator.depth;
+
+
 										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, this.target, null, true);
+										
+										
 								}
 						}
 
@@ -331,13 +336,32 @@ namespace ws.winx.editor.bmachine.extensions
 						int i = 0;
 
 
-
+						//////  RESTORE SAVED  //////
+						//restore and delete clipboard
 						
 
 						mecanimNode = target as MecanimNode;
 
 						if (mecanimNode != null) {
 
+								if (EditorApplication.isPlaying || EditorApplication.isPaused) {
+								
+
+										if (GUILayout.Button ("Preserve")) {
+
+											
+												serializedNode.ApplyModifiedProperties();
+												EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields () );
+									
+										}
+								} else {
+										if (GUILayout.Button ("Apply")) {
+												EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
+												curvesSerialized = null;
+												this.serializedNode.Update ();
+										}
+
+								}
 						
 								Motion motion = null;					
 
@@ -459,7 +483,7 @@ namespace ws.winx.editor.bmachine.extensions
 										//if curve is selected display curve properties
 										if (_curveIndexSelected > -1 && _curveIndexSelected < variablesBindedToCurves.Length) {
 												
-												UnityVariable variableSelected =variablesBindedToCurves [_curveIndexSelected];
+												UnityVariable variableSelected = variablesBindedToCurves [_curveIndexSelected];
 											
 
 												EditorGUILayout.LabelField (variableSelected.name, new GUILayoutOption[]{});
@@ -470,9 +494,9 @@ namespace ws.winx.editor.bmachine.extensions
 					
 												if (EditorGUI.EndChangeCheck ()) {
 														curveEditor.animationCurves [_curveIndexSelected].color = colorNew;
-														curveColors[_curveIndexSelected]=colorNew;
-														curvesColorsSerialized.ValueChanged();
-														curvesColorsSerialized.ApplyModifiedValue();
+														curveColors [_curveIndexSelected] = colorNew;
+														curvesColorsSerialized.ValueChanged ();
+														curvesColorsSerialized.ApplyModifiedValue ();
 														
 														
 												}
@@ -514,7 +538,7 @@ namespace ws.winx.editor.bmachine.extensions
 												
 												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
 												vList.Add (_variableSelected);
-												variablesBindedToCurvesSerialized.value =variablesBindedToCurves= vList.ToArray ();
+												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
 												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
 
 
@@ -526,7 +550,7 @@ namespace ws.winx.editor.bmachine.extensions
 												List<Color> cList = curveColors.ToList ();
 												_colorSelected.a = 1;
 												cList.Add (_colorSelected);
-												curvesColorsSerialized.value =curveColors= cList.ToArray ();
+												curvesColorsSerialized.value = curveColors = cList.ToArray ();
 												curvesColorsSerialized.ApplyModifiedValue ();	
 														
 												
@@ -549,7 +573,7 @@ namespace ws.winx.editor.bmachine.extensions
 												//TODO add from preset
 												crList.Add (curveAnimationNew);
 							
-												curvesSerialized.value = curves=crList.ToArray ();
+												curvesSerialized.value = curves = crList.ToArray ();
 												curvesSerialized.ApplyModifiedValue ();
 
 
@@ -586,7 +610,7 @@ namespace ws.winx.editor.bmachine.extensions
 												
 												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
 												vList.RemoveAt (_curveIndexSelected);
-												variablesBindedToCurvesSerialized.value =variablesBindedToCurves= vList.ToArray ();
+												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
 												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
 
 												
@@ -596,7 +620,7 @@ namespace ws.winx.editor.bmachine.extensions
 												List<Color> cList = curveColors.ToList ();
 
 												cList.RemoveAt (_curveIndexSelected);
-												curvesColorsSerialized.value =curveColors= cList.ToArray ();
+												curvesColorsSerialized.value = curveColors = cList.ToArray ();
 												curvesColorsSerialized.ApplyModifiedValue ();
 												
 
@@ -607,7 +631,7 @@ namespace ws.winx.editor.bmachine.extensions
 				
 												crList.RemoveAt (_curveIndexSelected);
 						
-												curvesSerialized.value =curves= crList.ToArray ();
+												curvesSerialized.value = curves = crList.ToArray ();
 												curvesSerialized.ApplyModifiedValue ();
 												
 
@@ -622,50 +646,15 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-										//ActionNode[] nodes=this.target.tree.GetComponents<>();
-						
-										//if (EditorApplication.isPlaying || EditorApplication.isPaused) {
-										if (GUILayout.Button ("Preserve")) {
-
-						Debug.Log("ID:"+this.serializedNode.target.instanceID);
-//
-//												//EditorUtilityEx.Clipboard.add(0,curvesSerialized);
-//						NodePropertyIterator itr;
-//						itr=this.serializedNode.GetIterator();
-//						itr.Find("testVar");
-//
-//							//itr.current.value=(UnityVariable)ScriptableObject.CreateInstance<UnityVariable>();
-//							//((UnityVariable)itr.current.value).Value=curvesSerialized.value;
-//						((MecanimNode)this.serializedNode.target).testVar.Value=curvesSerialized.value;
-//
-//						//save
-//						((MecanimNode)this.serializedNode.target).testVar.OnBeforeSerialize();
-//									//EditorUtility.SetDirty(this.serializedNode.target.tree);
-												//EditorUtilityEx.Clipboard.add (0, curvesSerialized.value);	
-
-										}
-
-										//	}
+										
 
 
 				
 
 
-										//if(!EditorApplication.isPlaying){
-										//	object restoredObject=EditorUtilityEx.Clipboard.restore(0);
+										
 
-										//}
-										if (GUILayout.Button ("Restore")) {
-
-												//((MecanimNode)this.serializedNode.target).testVar.OnBeforeSerialize();
-
-												object restoredObject = EditorUtilityEx.Clipboard.restore (0);
-												curvesSerialized.value = restoredObject;
-												curvesSerialized.ApplyModifiedValue ();
-
-										}
-
-
+										
 
 										EditorGUILayout.EndHorizontal ();
 
