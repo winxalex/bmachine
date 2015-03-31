@@ -350,15 +350,32 @@ namespace ws.winx.editor.bmachine.extensions
 										if (GUILayout.Button ("Preserve")) {
 
 											
-												serializedNode.ApplyModifiedProperties();
-												EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields () );
+												serializedNode.ApplyModifiedProperties ();
+												EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
 									
 										}
 								} else {
-										if (GUILayout.Button ("Apply")) {
+										if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
 												EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
 												curvesSerialized = null;
-												this.serializedNode.Update ();
+												NodePropertyIterator iterator = serializedNode.GetIterator ();
+
+												while (iterator.Next (true)) {
+														
+
+														iterator.current.ValueChanged ();
+														
+														this.serializedNode.Update ();
+
+														iterator.current.ApplyModifiedValue();
+												}
+
+												
+
+												
+												
+											
+												
 										}
 
 								}

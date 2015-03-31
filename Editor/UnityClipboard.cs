@@ -48,6 +48,13 @@ public class UnityClipboard : ScriptableObject
 				//AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(
 		}
 
+		public bool HasBeenPreseved(int uid){
+		if (__objectInstanceMembers == null)
+						return false;
+
+			return __objectInstanceMembers.ContainsKey (uid);
+		}
+
 		public void preserve (int uid, System.Object obj, MemberInfo[] members=null)
 		{
 				if (!EditorApplication.isPlaying && !EditorApplication.isPaused) {
