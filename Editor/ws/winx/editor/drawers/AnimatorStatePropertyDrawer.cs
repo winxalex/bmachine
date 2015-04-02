@@ -16,8 +16,8 @@ using UnityEditor.Animations;
 
 namespace ws.winx.editor.drawers
 {
-		[CustomPropertyDrawer (typeof(MecanimStateInfoAttribute))]
-		public class MecanimStateInfoPropertyDrawer : PropertyDrawer
+		[CustomPropertyDrawer (typeof(AnimatorStateAttribute))]
+		public class AnimatorStatePropertyDrawer : PropertyDrawer
 		{
 
 				GUIContent[] displayOptions;
@@ -33,34 +33,16 @@ namespace ws.winx.editor.drawers
 				//
 				// Properties
 				//
-				public new MecanimStateInfoAttribute attribute {
+				public new AnimatorStateAttribute attribute {
 						get {
 						
-								return  (MecanimStateInfoAttribute)base.attribute;
+								return  (AnimatorStateAttribute)base.attribute;
 						}
 				}
 
 
 
 
-//				/// <summary>
-//				/// Regenerates the anima states info list.
-//				/// </summary>
-//				void RegenerateAnimaStatesInfoList (UnityEditor.Animations.AnimatorController animatorController)
-//				{
-//					
-//						animaStateInfoValues = MecanimUtility.GetAnimatorStates (animatorController);
-//						displayOptions = MecanimUtility.GetDisplayOptions (animatorController);
-//					
-//					
-//					
-//						if (animaStateInfoSelected != null) {
-//						
-//								animaStateInfoSelected = animaStateInfoValues.FirstOrDefault ((item) => {
-//										return item.hash == animaStateInfoSelected.hash;});
-//						}
-//					
-//				}
 
 				public override float GetPropertyHeight (SerializedProperty property, GUIContent label)
 				{
@@ -71,13 +53,13 @@ namespace ws.winx.editor.drawers
 				{
 	
 						
-
+			//TODO change to obtain controller thru property.serializedObject.Find(attribute.animator)....
 						UnityEditor.Animations.AnimatorController animatorController = ((MonoBehaviour)property.serializedObject.targetObject).GetComponent<Animator> ().runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
 
 						if (animatorController != null) {
 
 
-								//RegenerateAnimaStatesInfoList (animatorController);
+								
 
 										animaStateInfoValues = MecanimUtility.GetAnimatorStates (animatorController);
 										displayOptions = MecanimUtility.GetDisplayOptions (animatorController);
@@ -100,12 +82,7 @@ namespace ws.winx.editor.drawers
 			
 								property.objectReferenceValue = animaStateInfoSelected;
 
-								//if (EditorGUI.EndChangeCheck ()) {
-
-
-								//}
-
-								//EditorGUI.EndProperty ();
+								
 					
 						}
 								

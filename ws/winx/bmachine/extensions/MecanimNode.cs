@@ -37,27 +37,20 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public UnityVariable[]
 						variablesBindedToCurves;
-
-				[MecanimStateInfoAttribute("animator","layer")]
-				public AnimatorState animatorStateSelected;
-
+				[AnimatorStateAttribute("animator","layer")]
+				public AnimatorState
+						animatorStateSelected;
 				[HideInInspector]
-				public int layer;
-
-
+				public int
+						layer;
 				public Motion motionOverride;
 				public bool loop = false;
-
-				
-				
-
 				[UnityVariableProperty(typeof(float))]
-				public UnityVariable blendX;
-
+				public UnityVariable
+						blendX;
 				[UnityVariableProperty(typeof(float))]
-				public UnityVariable blendY;
-
-
+				public UnityVariable
+						blendY;
 				[RangeAttribute(0f,1f)]
 				public float
 						transitionDuration = 0.1f;
@@ -69,22 +62,18 @@ namespace ws.winx.bmachine.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						timeNormalizedCurrent = 0f;
-
-
-		[HideInInspector]
-		public float
-			animationRunTimeControl = 0.5f;
+				[HideInInspector]
+				public float
+						animationRunTimeControl = 0.5f;
 
 
 
-		//[HideInInspector]
-		public bool
-			animationRunTimeControlEnabled = false;
-				
-
+				//[HideInInspector]
+				public bool
+						animationRunTimeControlEnabled = false;
 				public float speed = 1f;
 				public float weight = 1f;
-				Animator _animator;
+				
 				float normalizedTimeLast = 0f;
 				int numBlendParamters;
 				AnimatorStateInfo animatorStateInfoCurrent;
@@ -93,16 +82,10 @@ namespace ws.winx.bmachine.extensions
 				bool isSelectedAnimaInfoInTransition;
 				List<int> _treeInx;
 				int _LastTickedChildren = -1;
-		                         
-				public Animator animator {
-						get {
-								if (_animator == null) {
-										_animator = self.GetComponent<Animator> ();
-									
-								}
-								return _animator;
-						}
-				}
+		           
+				[HideInInspector]
+				public Animator animator;
+
 
 				AnimatorOverrideController _animatorOverrideController;
 
@@ -124,6 +107,14 @@ namespace ws.winx.bmachine.extensions
 
 								return _animatorOverrideController;
 						}
+				}
+
+				public override void OnEnable ()
+				{
+				//	Debug.Log ("OnEnable");
+					base.OnEnable ();
+				//	animator = self.GetComponent<Animator> ();
+					
 				}
 
 				public override void Remove (ActionNode child)
@@ -155,9 +146,9 @@ namespace ws.winx.bmachine.extensions
 		
 				public override void Reset ()
 				{
-//						Debug.Log (this.name + ">Reset");
-		
-						_animator = null;
+				
+						animator = self.GetComponent<Animator> ();
+
 						
 						transitionDuration = 0f;
 
@@ -175,13 +166,13 @@ namespace ws.winx.bmachine.extensions
 
 				public override void Awake ()
 				{
-					//	Debug.Log ("Awake");
-				//animaStateInfoSelected1 = ((AnimatorController)animator.runtimeAnimatorController).
-				//layers [0].stateMachine.states [0].state;
+						//	Debug.Log ("Awake");
+						//animaStateInfoSelected1 = ((AnimatorController)animator.runtimeAnimatorController).
+						//layers [0].stateMachine.states [0].state;
 
-					if (animatorStateSelected != null) {
+						if (animatorStateSelected != null) {
 						
-					}
+						}
 			
 				}
 
@@ -405,41 +396,41 @@ namespace ws.winx.bmachine.extensions
 							
 										
 
-					if (animatorStateSelected != null && animatorStateSelected.motion!=null && animatorStateSelected.motion is BlendTree) {
+										if (animatorStateSelected != null && animatorStateSelected.motion != null && animatorStateSelected.motion is BlendTree) {
 
-						BlendTree blendTree=animatorStateSelected.motion as BlendTree;
+												BlendTree blendTree = animatorStateSelected.motion as BlendTree;
 
 
 
-						if (!String.IsNullOrEmpty(blendTree.blendParameter)) {
-							animator.SetFloat (blendTree.blendParameter, (float)blendX.Value);
+												if (!String.IsNullOrEmpty (blendTree.blendParameter)) {
+														animator.SetFloat (blendTree.blendParameter, (float)blendX.Value);
 
-							if(!String.IsNullOrEmpty(blendTree.blendParameterY)){
-								animator.SetFloat(blendTree.blendParameterY,(float)blendY.Value);
+														if (!String.IsNullOrEmpty (blendTree.blendParameterY)) {
+																animator.SetFloat (blendTree.blendParameterY, (float)blendY.Value);
 
-							}
+														}
 							
-						} 
+												} 
 
 							
 						
 						
-					}
+										}
 					
 					
-					//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
+										//Debug.Log (animaStateInfoSelected.label.text + ">Update at: " + timeNormalizedCurrent);	
 
 
 
-					if (animationRunTimeControlEnabled){
-						animator.Update (animationRunTimeControl - animatorStateInfoCurrent.normalizedTime);
+										if (animationRunTimeControlEnabled) {
+												animator.Update (animationRunTimeControl - animatorStateInfoCurrent.normalizedTime);
 
-					}
+										}
 
 										//Calculate curves values
-										int numCurves=curves.Length;
-										for(int j=0; j<numCurves;j++) 
-										variablesBindedToCurves[j].Value= curves[j].Evaluate(timeNormalizedCurrent);
+										int numCurves = curves.Length;
+										for (int j=0; j<numCurves; j++) 
+												variablesBindedToCurves [j].Value = curves [j].Evaluate (timeNormalizedCurrent);
 
 										normalizedTimeLast = timeNormalizedCurrent;
 

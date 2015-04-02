@@ -16,7 +16,7 @@ namespace ws.winx.bmachine.extensions
 				
 				public bool syncWithAnimation = true;
 
-				[MecanimStateInfoAttribute("Animator","layer")]
+				[AnimatorStateAttribute("animator","layer")]
 				public AnimatorState
 						animaStateInfoSelected;
 				[VariableInfo (requiredField = true,canBeConstant = false,tooltip = "Object.property or blackboard that will be controlled by Animation curve")]
@@ -41,15 +41,9 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public float
 						timeEnd;
-				Animator _animator;
+				
 
-				public Animator Animator {
-						get {
-								if (_animator == null)
-										_animator = this.self.GetComponent<Animator> ();
-								return _animator;
-						}
-				}
+				public Animator animator;
 
 				float _timeCurrent;
 
@@ -67,16 +61,16 @@ namespace ws.winx.bmachine.extensions
 								timeEnd = curve.keys [curve.length - 1].time;
 						}
 
-						//this.branch.
+						
 						
 				}
 
 				public override void Reset ()
 				{
+						animator = this.self.GetComponent<Animator> ();
 						curve = new AnimationCurve ();
 						_timeCurrent = 0f; 
-						//property = new ConcreteFloatVar ("mile", this.blackboard, 24);
-						//Debug.Log ("Reset");
+						
 				}
 
 				public override void Start ()
@@ -96,7 +90,7 @@ namespace ws.winx.bmachine.extensions
 
 
 
-						if (_animator != null) {
+						if (animator != null) {
 
 								//time should be normalized in 0-1 when animator.normalizedTime is used as time ticker
 								if (timeStart > 1f || timeEnd > 1f || timeStart < 0f || timeEnd < 0f)
@@ -105,15 +99,15 @@ namespace ws.winx.bmachine.extensions
 
 								
 								//take Animator AnimaStateInfo 
-								AnimatorStateInfo animatorStateInfoCurrent = _animator.GetCurrentAnimatorStateInfo (layer);
+								AnimatorStateInfo animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (layer);
 				
 		
 
 			
-								if (_animator.IsInTransition (layer)) {
-										animatorStateInfoCurrent = _animator.GetNextAnimatorStateInfo (layer);
+								if (animator.IsInTransition (layer)) {
+										animatorStateInfoCurrent = animator.GetNextAnimatorStateInfo (layer);
 								} else {
-										animatorStateInfoCurrent = _animator.GetCurrentAnimatorStateInfo (layer);
+										animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (layer);
 								}
 
 								//check if selected and current state are equal
@@ -123,7 +117,7 @@ namespace ws.winx.bmachine.extensions
 									
 
 										if (isTimeControlEnabled)
-												_animator.Update (timeControl - animatorStateInfoCurrent.normalizedTime);
+												animator.Update (timeControl - animatorStateInfoCurrent.normalizedTime);
 
 								}
 						} else {

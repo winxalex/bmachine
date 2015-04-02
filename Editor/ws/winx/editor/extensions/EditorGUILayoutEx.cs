@@ -19,6 +19,7 @@ using System.Linq;
 using BehaviourMachine;
 using UnityEngine.Events;
 using System.Runtime.Serialization;
+using ws.winx.csharp.extensions;
 
 namespace ws.winx.editor.extensions
 {
@@ -406,7 +407,7 @@ namespace ws.winx.editor.extensions
 		#endregion
 
 		#region CustomObjectPopup
-		public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,Func<T,T,bool> comparer,
+		public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,Func<T,T,bool> comparer=null,
 		                                      MenuCallback<T> onSelection=null,
 		                                      EventCallback onEvent=null,
 		                                      GUIStyle labelStyle=null,
@@ -462,14 +463,18 @@ namespace ws.winx.editor.extensions
 				
 						} else {
 								if (comparer != null)
-					inxOfSelectedObject = Array.FindIndex (values, (itm)=>{ return comparer (itm,selectedObject);});
-								else
+				{
+
+									inxOfSelectedObject = values.FindIndex(selectedObject,comparer);
+					Debug.Log(inxOfSelectedObject);
+				}
+								else{
 				
 								//find label on displayOptions[i] which is value[i] == selectedObject
 								//!!! don't forget to implement IComparable or override Equals on custom objects
 										inxOfSelectedObject = values.IndexOf (selectedObject);
-								//Array.IndexOf (values, selectedObject);
-
+				}
+								
 				
 								inxOfSelectedObject = CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
 				

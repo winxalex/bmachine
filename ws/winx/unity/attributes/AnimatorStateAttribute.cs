@@ -9,11 +9,33 @@
 // ------------------------------------------------------------------------------
 using System;
 using UnityEngine;
-namespace ws.winx.bmachine.extensions
+using UnityEditor;
+using System.Reflection;
+
+namespace ws.winx.unity.attributes
 {
-		public class MecanimNodeEventorStateInfoAttribute:PropertyAttribute
+		public class AnimatorStateAttribute:PropertyAttribute
 		{
-		  
+
+				
+				public string animatorFieldName;
+
+				public string layerIndexFieldName;
+
+
+
+
+
+				public AnimatorStateAttribute (string fieldNameAnimator, string fieldNameLayerIndex)
+				{
+						layerIndexFieldName = fieldNameLayerIndex;
+
+						animatorFieldName = fieldNameAnimator;
+				}
+
+
 		}
+
+		
 }
 
