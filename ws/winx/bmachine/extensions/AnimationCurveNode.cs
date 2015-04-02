@@ -3,6 +3,8 @@ using System.Collections;
 using BehaviourMachine;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
+using ws.winx.editor.extensions;
+using UnityEditor.Animations;
 
 namespace ws.winx.bmachine.extensions
 {
@@ -14,13 +16,17 @@ namespace ws.winx.bmachine.extensions
 				
 				public bool syncWithAnimation = true;
 
-				[MecanimStateInfoAttribute("Animator")]
-				public MecanimStateInfo
+				[MecanimStateInfoAttribute("Animator","layer")]
+				public AnimatorState
 						animaStateInfoSelected;
 				[VariableInfo (requiredField = true,canBeConstant = false,tooltip = "Object.property or blackboard that will be controlled by Animation curve")]
 				public FloatVar
 						property;
 				public AnimationCurve curve;
+
+				
+
+				public int layer;
 
 				//[HideInInspector]//doesn't work togheter
 				[RangeAttributeEx("timeStart","timeEnd","isTimeControlEnabled")]
@@ -99,19 +105,19 @@ namespace ws.winx.bmachine.extensions
 
 								
 								//take Animator AnimaStateInfo 
-								AnimatorStateInfo animatorStateInfoCurrent = _animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+								AnimatorStateInfo animatorStateInfoCurrent = _animator.GetCurrentAnimatorStateInfo (layer);
 				
 		
 
 			
-								if (_animator.IsInTransition (animaStateInfoSelected.layer)) {
-										animatorStateInfoCurrent = _animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
+								if (_animator.IsInTransition (layer)) {
+										animatorStateInfoCurrent = _animator.GetNextAnimatorStateInfo (layer);
 								} else {
-										animatorStateInfoCurrent = _animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+										animatorStateInfoCurrent = _animator.GetCurrentAnimatorStateInfo (layer);
 								}
 
 								//check if selected and current state are equal
-								if (animatorStateInfoCurrent.shortNameHash == animaStateInfoSelected.hash) {
+								if (animatorStateInfoCurrent.shortNameHash == animaStateInfoSelected.nameHash) {
 										_timeCurrent = animatorStateInfoCurrent.normalizedTime;
 
 									

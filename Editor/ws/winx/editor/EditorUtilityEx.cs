@@ -9,6 +9,7 @@ using ws.winx.editor.extensions;
 using System.Reflection;
 using ws.winx.editor.drawers;
 using System.IO;
+using UnityEditor.Animations;
 
 namespace ws.winx.editor
 {
@@ -107,15 +108,19 @@ namespace ws.winx.editor
 
 
 										if (attribute != null) {
-												Type typeProperty = (Type)attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic).GetValue (attribute);
+						FieldInfo m_TypeFieldInfo = attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
+
+						if(m_TypeFieldInfo!=null){
+												Type typeProperty=(Type)m_TypeFieldInfo.GetValue (attribute);
 
 												
 
-												if (!(typeProperty is Attribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
+												if (typeProperty!=null && !(typeProperty.IsAssignableFrom(typeof(Attribute))) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
 														EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
 												
 														//Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name);
 												}
+						}
 										}
 								}
 						}
@@ -179,9 +184,6 @@ namespace ws.winx.editor
 								return __clipboard;
 						}
 				}
-
-
-
 
 
 

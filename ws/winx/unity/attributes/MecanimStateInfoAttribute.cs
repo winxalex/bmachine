@@ -22,6 +22,14 @@ namespace ws.winx.unity.attributes
 				PropertyInfo _animatorPropertyInfo;
 				string _fieldNameAnimator;
 				public object serializedObject;
+				string _fieldNameLayerIndex;
+
+				public int LayerIndex {
+						set { 
+								serializedObject.GetType ().GetField (_fieldNameLayerIndex).SetValue (serializedObject, value);
+						}
+
+				}
 
 				public Animator Ani {
 						get {
@@ -44,8 +52,9 @@ namespace ws.winx.unity.attributes
 						}
 				}
 
-				public MecanimStateInfoAttribute (string fieldNameAnimator)
+				public MecanimStateInfoAttribute (string fieldNameAnimator, string fieldNameLayerIndex)
 				{
+						_fieldNameLayerIndex = fieldNameLayerIndex;
 
 						_fieldNameAnimator = fieldNameAnimator;
 				}

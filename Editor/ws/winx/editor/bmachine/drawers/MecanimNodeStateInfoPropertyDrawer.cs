@@ -1,12 +1,12 @@
 using BehaviourMachine;
 using System;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 using ws.winx.bmachine.extensions;
 using ws.winx.editor.extensions;
 using System.Collections.Generic;
 using BehaviourMachineEditor;
-using UnityEditorInternal;
 using System.Linq;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
@@ -17,10 +17,10 @@ namespace ws.winx.editor.bmachine.drawers
 		public class MecanimNodeStateInfoPropertyDrawer : NodePropertyDrawer
 		{
 
-				GUIContent[] displayOptions;
-				List<MecanimStateInfo> animaStateInfoValues;
-				UnityEditor.Animations.AnimatorController aniController;
-				MecanimStateInfo animaStateInfoSelected;
+				GUIContent[] animatorStateDisplayOptions;
+				AnimatorState[] animatorStateValues;
+				AnimatorController aniController;
+				AnimatorState animatorStateSelected;
 				bool isListDirty = false;
 				UnityEngine.Motion motionSelected;
 
@@ -30,10 +30,10 @@ namespace ws.winx.editor.bmachine.drawers
 				// Properties
 				//
 				public new MecanimStateInfoAttribute attribute {
-					get {
+						get {
 						
-						return  (MecanimStateInfoAttribute)base.attribute;
-					}
+								return  (MecanimStateInfoAttribute)base.attribute;
+						}
 				}
 
 
@@ -41,43 +41,27 @@ namespace ws.winx.editor.bmachine.drawers
 				// Methods
 				//
 		
-				/// <summary>
-				/// Ons the assets re imported.
-				/// </summary>
-				/// <param name="importedAssetsPath">Imported assets path.</param>
-				void onAssetsReImported (string[] importedAssetsPath)
-				{
-
-		
-						//check if the reimported asset is our aniController
-						if (Array.FindIndex (importedAssetsPath, (path) => {
-								return System.IO.Path.GetFileNameWithoutExtension (path) == aniController.name;}) > -1) {
-
-								isListDirty = true;
-
-						}
 			
-				}
 
 
 				/// <summary>
 				/// Regenerates the anima states info list.
 				/// </summary>
-				void RegenerateAnimaStatesInfoList ()
-				{
-
-						animaStateInfoValues = MecanimStateInfoUtility.getAnimaStatesInfo (aniController);
-						displayOptions = animaStateInfoValues.Select (x => x.label).ToArray ();
-
-						isListDirty = false;
-			
-						if (animaStateInfoSelected != null) {
-				
-								animaStateInfoSelected = animaStateInfoValues.FirstOrDefault ((item) => {
-										return item.hash == animaStateInfoSelected.hash;});
-						}
-
-				}
+//				void RegenerateAnimaStatesInfoList ()
+//				{
+//
+//						animaStateInfoValues = MecanimUtility.getAnimaStatesInfo (aniController);
+//						displayOptions = animaStateInfoValues.Select (x => x.path).ToArray ();
+//
+//						isListDirty = false;
+//			
+//						if (animaStateInfoSelected != null) {
+//				
+//								animaStateInfoSelected = animaStateInfoValues.FirstOrDefault ((item) => {
+//										return item.hash == animaStateInfoSelected.hash;});
+//						}
+//
+//				}
 	
 
 			
@@ -94,39 +78,73 @@ namespace ws.winx.editor.bmachine.drawers
 
 						attribute.serializedObject = node;
 					
-						animaStateInfoSelected = property.value as MecanimStateInfo;
+						animatorStateSelected = property.value as AnimatorState;
+
+						//property.path
+
+						//node.GetType().GetField(property.path).Attributes
+						//property.serializedNode
 
 
-						if (displayOptions == null || isListDirty) {
-								RuntimeAnimatorController runtimeContoller;
+						
+						RuntimeAnimatorController runtimeContoller;
 				   
-								runtimeContoller = attribute.Ani.runtimeAnimatorController;
+						runtimeContoller = attribute.Ani.runtimeAnimatorController;
 
-								if (runtimeContoller is AnimatorOverrideController)
-										aniController = ((AnimatorOverrideController)runtimeContoller).runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
-								else
-										aniController = runtimeContoller as UnityEditor.Animations.AnimatorController;
+						if (runtimeContoller is AnimatorOverrideController)
+								aniController = ((AnimatorOverrideController)runtimeContoller).runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+						else
+								aniController = runtimeContoller as UnityEditor.Animations.AnimatorController;
 
-								RegenerateAnimaStatesInfoList ();
+								
+								
+						animatorStateDisplayOptions = MecanimUtility.GetDisplayOptions (aniController);
+						animatorStateValues = MecanimUtility.GetAnimatorStates (aniController);
 
-
-
-								//add handler to modification of AnimatorController
-								AssetPostProcessorEventDispatcher.Imported += new AssetPostProcessorEventDispatcher.ImportedEventHandler (onAssetsReImported);
-						}
+										
+						int selectedIndex;
 		
+						EditorGUI.BeginChangeCheck ();
+
+						if (animatorStateSelected != null) {
+								selectedIndex = Array.FindIndex (animatorStateValues, (item) =>
+								item.GetInstanceID () == animatorStateSelected.GetInstanceID ()
+								);
+
+						} else {
+								if (animatorStateValues.Length > 0) {
+										animatorStateSelected = animatorStateValues [0];
+										selectedIndex = 0;
+											property.value = animatorStateSelected;
+											
+											attribute.LayerIndex = MecanimUtility.GetLayerIndex (aniController, animatorStateSelected);
+											
+											
+											property.ApplyModifiedValue ();
+								} else {
+										selectedIndex = -1;
+								}
+						}
+
+						selectedIndex = EditorGUILayout.Popup (selectedIndex, animatorStateDisplayOptions);
+
+						if (selectedIndex > -1)
+								animatorStateSelected = animatorStateValues [selectedIndex];
+
+						//animatorStateSelected = EditorGUILayoutEx.CustomObjectPopup (guiContent, animatorStateSelected, animatorStateDisplayOptions, animatorStateValues);
 						
-						animaStateInfoSelected = EditorGUILayoutEx.CustomObjectPopup (guiContent, animaStateInfoSelected, displayOptions, animaStateInfoValues);
-						
-						if (animaStateInfoSelected.motion == null)
+						if (animatorStateSelected.motion == null)
 								Debug.LogError ("Selected state doesn't have Motion set");
 
 
+						if (EditorGUI.EndChangeCheck ()) {
+								property.value = animatorStateSelected;
 
-						property.value = animaStateInfoSelected;
+								attribute.LayerIndex = MecanimUtility.GetLayerIndex (aniController, animatorStateSelected);
+								
 
-		
-						property.ApplyModifiedValue ();
+								property.ApplyModifiedValue ();
+						}
 
 				}
 		

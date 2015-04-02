@@ -13,7 +13,7 @@ using System.Text;
 using BehaviourMachine;
 using BehaviourMachineEditor;
 using UnityEditor;
-using UnityEditorInternal;
+
 using UnityEngine;
 using ws.winx.bmachine.extensions;
 using ws.winx.csharp.extensions;
@@ -24,6 +24,7 @@ using Motion = UnityEngine.Motion;
 
 using StateMachine = UnityEditor.Animations.AnimatorStateMachine;
 using ws.winx.bmachine;
+using UnityEditor.Animations;
 
 namespace ws.winx.editor.bmachine.extensions
 {
@@ -46,8 +47,8 @@ namespace ws.winx.editor.bmachine.extensions
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
-				List<MecanimStateInfo> animaInfoValues;
-				MecanimStateInfo selectedAnimaStateInfo;
+				
+				AnimatorState selectedAnimaStateInfo;
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
 				bool eventTimeLineInitalized;
@@ -116,17 +117,25 @@ namespace ws.winx.editor.bmachine.extensions
 							
 								if (!current.hideInInspector) {
 								
+					if(current.path=="motionOverride" && node != null && node.animatorStateSelected != null && 
+					   node.animatorStateSelected.motion != null &&
+					 node.animatorStateSelected.motion is BlendTree)
+						continue;
 										
 								
 										if (current.path == "blendX" && 
-												node != null && node.animaStateInfoSelected != null && 
-												(node.animaStateInfoSelected.blendParamsIDs == null ||
-												node.animaStateInfoSelected.blendParamsIDs.Length < 1))
+												node != null && node.animatorStateSelected != null && 
+												(node.animatorStateSelected.motion == null ||
+					 !(node.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)node.animatorStateSelected.motion).blendParameter))
+					 ))
+											
+
 												continue;
 										if (current.path == "blendY" 
-												&& node != null && node.animaStateInfoSelected != null && 
-												(node.animaStateInfoSelected.blendParamsIDs == null ||
-												node.animaStateInfoSelected.blendParamsIDs.Length < 2))
+												&& node != null && node.animatorStateSelected != null && 
+												(node.animatorStateSelected.motion == null ||
+					 !(node.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)node.animatorStateSelected.motion).blendParameterY))
+					 ))
 												continue;
 
 										EditorGUI.indentLevel = indentLevel + iterator.depth;
@@ -693,18 +702,18 @@ namespace ws.winx.editor.bmachine.extensions
 			
 
 								//////////  MOTION OVERRIDE HANDLING  //////////
-								if (mecanimNode.animaStateInfoSelected != null) {
+								if (mecanimNode.animatorStateSelected != null) {
 									
 									
 										//if there are no override use motion of selected AnimationState
 										if (mecanimNode.motionOverride == null)
-												motion = mecanimNode.animaStateInfoSelected.motion;
+												motion = mecanimNode.animatorStateSelected.motion;
 										else //
 												motion = mecanimNode.motionOverride;
 									
 									
 									
-										if (mecanimNode.motionOverride != null && mecanimNode.animaStateInfoSelected.motion == null) {
+										if (mecanimNode.motionOverride != null && mecanimNode.animatorStateSelected.motion == null) {
 												Debug.LogError ("Can't override state that doesn't contain motion");
 										}
 									

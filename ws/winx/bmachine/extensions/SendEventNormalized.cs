@@ -13,6 +13,7 @@ using UnityEngine;
 using ws.winx.unity;
 using UnityEngine.Events;
 using ws.winx.unity.attributes;
+using UnityEditor.Animations;
 
 namespace ws.winx.bmachine.extensions
 {
@@ -34,7 +35,7 @@ namespace ws.winx.bmachine.extensions
 					unityEvent;
 
 
-		
+				
 		
 		
 				public override void Awake ()
@@ -46,12 +47,13 @@ namespace ws.winx.bmachine.extensions
 
 				public override Status Update ()
 				{
-						MecanimStateInfo selectedAnimaStateInfo = ((MecanimNode)this.branch).animaStateInfoSelected;
-						AnimatorStateInfo currentAnimatorStateInfo = _animator.GetCurrentAnimatorStateInfo (selectedAnimaStateInfo.layer);
+						AnimatorState animatorStateSelected = ((MecanimNode)this.branch).animatorStateSelected;
+						int layer= ((MecanimNode)this.branch).layer;
+						AnimatorStateInfo currentAnimatorStateInfo = _animator.GetCurrentAnimatorStateInfo (layer);
 
 						//Debug.Log ("onUpdate");
 					
-						if (currentAnimatorStateInfo.shortNameHash == selectedAnimaStateInfo.hash) {
+						if (currentAnimatorStateInfo.shortNameHash == animatorStateSelected.nameHash) {
 								float timeNormalizedCurrent = currentAnimatorStateInfo.normalizedTime;
 
 						

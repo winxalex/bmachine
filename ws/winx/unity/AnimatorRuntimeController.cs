@@ -7,6 +7,7 @@ using UnityEditor;
 using ws.winx.unity;
 using ws.winx.bmachine.extensions;
 using ws.winx.unity.attributes;
+using UnityEditor.Animations;
 
 namespace ws.winx.editor.extensions
 {
@@ -14,9 +15,12 @@ namespace ws.winx.editor.extensions
 		[RequireComponent(typeof(Animator))]
 		public class AnimatorRuntimeController:MonoBehaviour
 		{
-				[MecanimStateInfoAttribute("_animator")]
-				public MecanimStateInfo
+				[MecanimStateInfoAttribute("_animator","layer")]
+				public AnimatorState
 						animaStateInfoSelected;
+
+				public int layer;
+
 				[RangeAttribute(0f,1f)]
 				public float
 						timeNormalized;
@@ -62,14 +66,14 @@ namespace ws.winx.editor.extensions
 						if (_animator == null)
 								return;
 			
-						if (_animator.IsInTransition (animaStateInfoSelected.layer)) {
-								animatorStateInfo = _animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
+						if (_animator.IsInTransition (layer)) {
+								animatorStateInfo = _animator.GetNextAnimatorStateInfo (layer);
 						} else {
-								animatorStateInfo = _animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+								animatorStateInfo = _animator.GetCurrentAnimatorStateInfo (layer);
 						}
 			
 			
-						if (animatorStateInfo.nameHash == animaStateInfoSelected.hash) {
+						if (animatorStateInfo.nameHash == animaStateInfoSelected.nameHash) {
 				
 				
 								float timeDelta = 0f;
@@ -87,7 +91,7 @@ namespace ws.winx.editor.extensions
 				
 						} else {
 				
-								_animator.CrossFade (animaStateInfoSelected.hash, 0f);
+								_animator.CrossFade (animaStateInfoSelected.nameHash, 0f);
 						}
 				}
 

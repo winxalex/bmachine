@@ -406,10 +406,11 @@ namespace ws.winx.editor.extensions
 		#endregion
 
 		#region CustomObjectPopup
-				public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,
+		public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,Func<T,T,bool> comparer,
 		                                      MenuCallback<T> onSelection=null,
 		                                      EventCallback onEvent=null,
 		                                      GUIStyle labelStyle=null,
+
 		                                      UnityEngine.Rect? position=null
 		                                      
 				)
@@ -460,9 +461,13 @@ namespace ws.winx.editor.extensions
 								}
 				
 						} else {
+								if (comparer != null)
+					inxOfSelectedObject = Array.FindIndex (values, (itm)=>{ return comparer (itm,selectedObject);});
+								else
 				
 								//find label on displayOptions[i] which is value[i] == selectedObject
-								inxOfSelectedObject = values.IndexOf (selectedObject);
+								//!!! don't forget to implement IComparable or override Equals on custom objects
+										inxOfSelectedObject = values.IndexOf (selectedObject);
 								//Array.IndexOf (values, selectedObject);
 
 				
@@ -1104,8 +1109,8 @@ namespace ws.winx.editor.extensions
 
 								}
 
-								if(_variableSelected.reflectedInstance==null)
-								_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
+								if (_variableSelected.reflectedInstance == null)
+										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
 
 								
 								
@@ -1116,15 +1121,15 @@ namespace ws.winx.editor.extensions
 
 										SerializedProperty elements = _variableSelected.serializedProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
 						
-										Rect rect = EditorGUILayout.GetControlRect (true, Math.Max(1,elements.arraySize) * 43 + 36f);
+										Rect rect = EditorGUILayout.GetControlRect (true, Math.Max (1, elements.arraySize) * 43 + 36f);
 
 										//!!! UNITY DEVS DECIDED ONE DRAWER PER UNITYEVENT (WICKED STUFF)
-										if(_variableSelected.unityEventDrawer==null)	
-											_variableSelected.unityEventDrawer=new UnityEditorInternal.UnityEventDrawer();
+										if (_variableSelected.unityEventDrawer == null)	
+												_variableSelected.unityEventDrawer = new UnityEditorInternal.UnityEventDrawer ();
 						
 						
 						
-											_variableSelected.unityEventDrawer.OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
+										_variableSelected.unityEventDrawer.OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
 						
 						
 
@@ -1133,7 +1138,7 @@ namespace ws.winx.editor.extensions
 
 								} else {
 
-										EditorGUILayout.PropertyField (_variableSelected.serializedProperty,new GUIContent(""));
+										EditorGUILayout.PropertyField (_variableSelected.serializedProperty, new GUIContent (""));
 										_variableSelected.ApplyModifiedProperties ();
 								}
 

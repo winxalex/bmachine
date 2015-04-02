@@ -11,6 +11,7 @@ using System.Linq;
 using ws.winx.unity;
 using System.Reflection;
 using ws.winx.unity.attributes;
+using UnityEditor.Animations;
 
 
 namespace ws.winx.editor.drawers
@@ -20,8 +21,8 @@ namespace ws.winx.editor.drawers
 		{
 
 				GUIContent[] displayOptions;
-				List<MecanimStateInfo> animaStateInfoValues;
-				MecanimStateInfo animaStateInfoSelected;
+				AnimatorState[] animaStateInfoValues;
+				AnimatorState animaStateInfoSelected;
 				
 				UnityEngine.Motion motionSelected;
 
@@ -42,24 +43,24 @@ namespace ws.winx.editor.drawers
 
 
 
-				/// <summary>
-				/// Regenerates the anima states info list.
-				/// </summary>
-				void RegenerateAnimaStatesInfoList (UnityEditor.Animations.AnimatorController animatorController)
-				{
-					
-						animaStateInfoValues = MecanimStateInfoUtility.getAnimaStatesInfo (animatorController);
-						displayOptions = animaStateInfoValues.Select (x => x.label).ToArray ();
-					
-					
-					
-						if (animaStateInfoSelected != null) {
-						
-								animaStateInfoSelected = animaStateInfoValues.FirstOrDefault ((item) => {
-										return item.hash == animaStateInfoSelected.hash;});
-						}
-					
-				}
+//				/// <summary>
+//				/// Regenerates the anima states info list.
+//				/// </summary>
+//				void RegenerateAnimaStatesInfoList (UnityEditor.Animations.AnimatorController animatorController)
+//				{
+//					
+//						animaStateInfoValues = MecanimUtility.GetAnimatorStates (animatorController);
+//						displayOptions = MecanimUtility.GetDisplayOptions (animatorController);
+//					
+//					
+//					
+//						if (animaStateInfoSelected != null) {
+//						
+//								animaStateInfoSelected = animaStateInfoValues.FirstOrDefault ((item) => {
+//										return item.hash == animaStateInfoSelected.hash;});
+//						}
+//					
+//				}
 
 				public override float GetPropertyHeight (SerializedProperty property, GUIContent label)
 				{
@@ -76,23 +77,25 @@ namespace ws.winx.editor.drawers
 						if (animatorController != null) {
 
 
-								RegenerateAnimaStatesInfoList (animatorController);
+								//RegenerateAnimaStatesInfoList (animatorController);
 
+										animaStateInfoValues = MecanimUtility.GetAnimatorStates (animatorController);
+										displayOptions = MecanimUtility.GetDisplayOptions (animatorController);
 
 								
 								EditorGUI.indentLevel = 0;
 
 
 			
+			
 
-
-								animaStateInfoSelected = property.objectReferenceValue as MecanimStateInfo;
+								animaStateInfoSelected = property.objectReferenceValue as AnimatorState;
 
 
 								//EditorGUI.BeginProperty (position, label, property);
 								// Check if it was modified this frame, to avoid overwriting the property constantly
 								//EditorGUI.BeginChangeCheck ();
-								animaStateInfoSelected = EditorGUILayoutEx.CustomObjectPopup (label, animaStateInfoSelected, displayOptions, animaStateInfoValues, null, null, null, position) as MecanimStateInfo;
+								animaStateInfoSelected = EditorGUILayoutEx.CustomObjectPopup (label, animaStateInfoSelected, displayOptions, animaStateInfoValues,null, null, null, null, position) as AnimatorState;
 
 			
 								property.objectReferenceValue = animaStateInfoSelected;

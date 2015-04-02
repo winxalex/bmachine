@@ -15,6 +15,7 @@ using BehaviourMachine;
 using Motion=UnityEngine.Motion;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
+using UnityEditor.Animations;
 
 namespace ws.winx.bmachine.extensions
 {
@@ -36,13 +37,18 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public UnityVariable[]
 						variablesBindedToCurves;
-				[MecanimStateInfoAttribute("animator")]
-				public MecanimStateInfo
-						animaStateInfoSelected;
+
+				[MecanimStateInfoAttribute("animator","layer")]
+				public AnimatorState animatorStateSelected;
+
+				[HideInInspector]
+				public int layer;
+
+
 				public Motion motionOverride;
 				public bool loop = false;
 
-
+				
 				
 
 				[UnityVariableProperty(typeof(float))]
@@ -170,7 +176,12 @@ namespace ws.winx.bmachine.extensions
 				public override void Awake ()
 				{
 					//	Debug.Log ("Awake");
-					
+				//animaStateInfoSelected1 = ((AnimatorController)animator.runtimeAnimatorController).
+				//layers [0].stateMachine.states [0].state;
+
+					if (animatorStateSelected != null) {
+						
+					}
 			
 				}
 
@@ -238,7 +249,7 @@ namespace ws.winx.bmachine.extensions
 			
 			
 						//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
-						animator.CrossFade (animaStateInfoSelected.hash, transitionDuration, animaStateInfoSelected.layer, timeNormalizedStart);
+						animator.CrossFade (animatorStateSelected.nameHash, transitionDuration, layer, timeNormalizedStart);
 			
 				}
 
@@ -247,18 +258,18 @@ namespace ws.winx.bmachine.extensions
 					
 						
 
-						if (animaStateInfoSelected == null)
+						if (animatorStateSelected == null)
 								return Status.Failure;
 
 
-
-						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (animaStateInfoSelected.layer);
+						
+						animatorStateInfoCurrent = animator.GetCurrentAnimatorStateInfo (layer);
 			
-						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (animaStateInfoSelected.layer);
+						animatorStateInfoNext = animator.GetNextAnimatorStateInfo (layer);
 			
-						isSelectedAnimaInfoInTransition = animator.IsInTransition (animaStateInfoSelected.layer) && (animatorStateInfoNext.shortNameHash == animaStateInfoSelected.hash);
+						isSelectedAnimaInfoInTransition = animator.IsInTransition (layer) && (animatorStateInfoNext.shortNameHash == animatorStateSelected.nameHash);
 			
-						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.shortNameHash == animaStateInfoSelected.hash;
+						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.shortNameHash == animatorStateSelected.nameHash;
 
 
 
@@ -269,12 +280,12 @@ namespace ws.winx.bmachine.extensions
 				
 								
 								if (motionOverride != null 
-										&& (animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] != (AnimationClip)motionOverride)) {
+										&& (animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride)) {
 					
 					
 										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
 					
-										animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] = (AnimationClip)motionOverride;
+										animatorOverrideController [(AnimationClip)animatorStateSelected.motion] = (AnimationClip)motionOverride;
 					
 										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
 					
@@ -294,7 +305,7 @@ namespace ws.winx.bmachine.extensions
 				
 								animator.speed = this.speed;
 				
-								animator.SetLayerWeight (animaStateInfoSelected.layer, this.weight);
+								animator.SetLayerWeight (layer, this.weight);
 				
 								//this.Start ();	
 
@@ -367,7 +378,7 @@ namespace ws.winx.bmachine.extensions
 																return Status.Success;
 												
 														} else {
-																animator.Play (animaStateInfoSelected.hash, animaStateInfoSelected.layer, timeNormalizedStart);
+																animator.Play (animatorStateSelected.nameHash, layer, timeNormalizedStart);
 																return Status.Running;
 														}
 
@@ -394,14 +405,23 @@ namespace ws.winx.bmachine.extensions
 							
 										
 
-					if (animaStateInfoSelected.blendParamsIDs != null && (numBlendParamters = animaStateInfoSelected.blendParamsIDs.Length) > 0) {
-						
-						if (numBlendParamters > 1) {
-							animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], (float)blendX.Value);
-							animator.SetFloat (animaStateInfoSelected.blendParamsIDs [1], (float)blendY.Value);
+					if (animatorStateSelected != null && animatorStateSelected.motion!=null && animatorStateSelected.motion is BlendTree) {
+
+						BlendTree blendTree=animatorStateSelected.motion as BlendTree;
+
+
+
+						if (!String.IsNullOrEmpty(blendTree.blendParameter)) {
+							animator.SetFloat (blendTree.blendParameter, (float)blendX.Value);
+
+							if(!String.IsNullOrEmpty(blendTree.blendParameterY)){
+								animator.SetFloat(blendTree.blendParameterY,(float)blendY.Value);
+
+							}
 							
-						} else
-							animator.SetFloat (animaStateInfoSelected.blendParamsIDs [0], (float)blendX.Value);
+						} 
+
+							
 						
 						
 					}
@@ -449,9 +469,9 @@ namespace ws.winx.bmachine.extensions
 
 				public override void End ()
 				{
-						if (animaStateInfoSelected != null)
+						if (animatorStateSelected != null)
 			   			//restore layer weight
-								animator.SetLayerWeight (animaStateInfoSelected.layer, 0);
+								animator.SetLayerWeight (layer, 0);
 				}
 
 
