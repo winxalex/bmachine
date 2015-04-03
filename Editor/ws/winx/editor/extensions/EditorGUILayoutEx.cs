@@ -407,7 +407,7 @@ namespace ws.winx.editor.extensions
 		#endregion
 
 		#region CustomObjectPopup
-		public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values,Func<T,T,bool> comparer=null,
+				public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values, Func<T,T,bool> comparer=null,
 		                                      MenuCallback<T> onSelection=null,
 		                                      EventCallback onEvent=null,
 		                                      GUIStyle labelStyle=null,
@@ -462,18 +462,16 @@ namespace ws.winx.editor.extensions
 								}
 				
 						} else {
-								if (comparer != null)
-				{
+								if (comparer != null) {
 
-									inxOfSelectedObject = values.FindIndex(selectedObject,comparer);
-					Debug.Log(inxOfSelectedObject);
-				}
-								else{
+										inxOfSelectedObject = values.FindIndex (selectedObject, comparer);
+										Debug.Log (inxOfSelectedObject);
+								} else {
 				
-								//find label on displayOptions[i] which is value[i] == selectedObject
-								//!!! don't forget to implement IComparable or override Equals on custom objects
+										//find label on displayOptions[i] which is value[i] == selectedObject
+										//!!! don't forget to implement IComparable or override Equals on custom objects
 										inxOfSelectedObject = values.IndexOf (selectedObject);
-				}
+								}
 								
 				
 								inxOfSelectedObject = CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
@@ -1085,10 +1083,11 @@ namespace ws.winx.editor.extensions
 
 								//if memberInfo == null mean that UnityVariable aren't binded to some object's property
 								//but contain raw object value
-								if (_variableSelected.reflectedInstance == null || _variableSelected.ValueType == _variableSelected.reflectedInstance.GetType ())
+								if (_variableSelected.reflectedInstance == null || !(_variableSelected.reflectedInstance is UnityEngine.Object)) {
 										indexSelected = 0;
-								else
+								} else {
 										indexSelected = 1;
+								}
 							
 						} else {
 								indexSelected += 2;//shift cos of "Variable" and "Bind"
@@ -1100,13 +1099,16 @@ namespace ws.winx.editor.extensions
 
 						//Debug.Log (indexSelected);
 						
+
+						//----- RAW --------//
 						if (indexSelected == 0) {
+								//FROM ANY TO RAW
 								if (indexSelectedPrev > 1) {
 										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);
 					
 								} else
-				
+								//BIND TO RAW
 								if (indexSelectedPrev == 1) {
 										//_variableSelected.MemberInfo = null;//reset 
 										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
@@ -1118,7 +1120,8 @@ namespace ws.winx.editor.extensions
 										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
 
 								
-								
+								//////// CHOOSE DRAWER ///////
+
 								if (_variableSelected.ValueType == typeof(UnityEvent)) {
 									
 										//list.elementHeight = 43f;//MAGIC NUMBER

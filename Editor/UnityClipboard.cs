@@ -31,9 +31,11 @@ public class UnityClipboard : ScriptableObject
 				public int uid;
 				public MemberInfo[] members;
 				public object[] values;
+				public Dictionary<MemberInfo,int[]> membersInstanceIDs;
+				public Dictionary<MemberInfo,SerializedObject> memberInfoScriptableObject;
+
+
 				
-
-
 		}
 
 		public void OnReset ()
@@ -48,11 +50,12 @@ public class UnityClipboard : ScriptableObject
 				//AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(
 		}
 
-		public bool HasBeenPreseved(int uid){
-		if (__objectInstanceMembers == null)
+		public bool HasBeenPreseved (int uid)
+		{
+				if (__objectInstanceMembers == null)
 						return false;
 
-			return __objectInstanceMembers.ContainsKey (uid);
+				return __objectInstanceMembers.ContainsKey (uid);
 		}
 
 		public void preserve (int uid, System.Object obj, MemberInfo[] members=null)
@@ -70,12 +73,14 @@ public class UnityClipboard : ScriptableObject
 			
 				ObjectInfo objInfo;
 
-				if (__objectInstanceMembers.ContainsKey (uid))
+				if (__objectInstanceMembers.ContainsKey (uid)) {
 						objInfo = __objectInstanceMembers [uid];
-				else {
+						
+				} else {
 
 						objInfo = new ObjectInfo ();
-						
+						objInfo.membersInstanceIDs = new Dictionary<MemberInfo, int[]> ();
+						objInfo.memberInfoScriptableObject = new Dictionary<MemberInfo, SerializedObject> ();
 				}
 
 				objInfo.uid = uid;
@@ -85,15 +90,99 @@ public class UnityClipboard : ScriptableObject
 						members = obj.GetType ().GetFields ();
 
 
-		//remove ScriptableObjects
-		members = members.Select ((Item) => Item).Where ((item) =>   !item.GetUnderlyingType ().IsSubclassOf(typeof(ScriptableObject)) &&  !(item.GetUnderlyingType().IsArray && item.GetUnderlyingType ().GetElementType().IsSubclassOf(typeof(ScriptableObject)))).ToArray ();
+				//remove ScriptableObjects or Array of ScirptableObjects
+				objInfo.members = members.Select ((Item) => Item).Where ((item) => !item.GetUnderlyingType ().IsSubclassOf (typeof(ScriptableObject)) && !(item.GetUnderlyingType ().IsArray && item.GetUnderlyingType ().GetElementType ().IsSubclassOf (typeof(ScriptableObject)))).ToArray ();
+
 
 				
-				objInfo.members = members;
+				MemberInfo[] scriptableObjectsMemberInfo = members.Select ((Item) => Item).Where ((item) => item.GetUnderlyingType ().IsSubclassOf (typeof(ScriptableObject)) || (item.GetUnderlyingType ().IsArray && (item.GetUnderlyingType ().GetElementType ().IsSubclassOf (typeof(ScriptableObject))))).ToArray ();
+				ScriptableObject scriptableObjectCurrent;
+				MemberInfo memberInfoCurrent;
+				ScriptableObject scriptableObjectClone;
+
+				if (scriptableObjectsMemberInfo.Length > 0) {
+						for (int i=0; i<scriptableObjectsMemberInfo.Length; i++) {
+								memberInfoCurrent = scriptableObjectsMemberInfo [i];
+								if (memberInfoCurrent.GetUnderlyingType ().IsArray) {
+								} else {
+										//SerializedObject clone=new SerializedObject(
+										//EditorUtility.CopySerialized(),clone);
+
+										//UnityVariable var = (UnityVariable)
+										//var.OnBeforeSerialize ();
+					objInfo.memberInfoScriptableObject [memberInfoCurrent] = new SerializedObject ((UnityEngine.Object)memberInfoCurrent.GetValue (obj));
+
+								}
+						}
+				}
 
 
 
+				//clean .asset from any left
+				foreach (var memberInfoInstanceIDPair in objInfo.membersInstanceIDs) {
+						memberInfoCurrent = memberInfoInstanceIDPair.Key;
+						//remove previous clones from .asset
+						
+						int[] IDs = objInfo.membersInstanceIDs [memberInfoCurrent];
+						
+						// destroy object and its footprint in .asset
+						for (int k=0; k<IDs.Length; k++)
+								UnityEngine.Object.DestroyImmediate (EditorUtility.InstanceIDToObject (IDs [k]), true);
+						
+				}
+		
+		
+//		if (scriptableObjectsMemberInfo.Length > 0) {
+//						for (int i=0; i<scriptableObjectsMemberInfo.Length; i++) {
+//								memberInfoCurrent = scriptableObjectsMemberInfo [i];
+//								if (memberInfoCurrent.GetUnderlyingType ().IsArray) {
+//										IList so = (IList)memberInfoCurrent.GetValue (obj);
+//										List<int> instanceIDs = new List<int> ();
+//										for (int j = 0; j < so.Count; j++) {
+//												scriptableObjectCurrent = so [j] as ScriptableObject;
+//												if (scriptableObjectCurrent != null) {
+//				
+//															
+//														scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectCurrent);
+//														//save instanceIDs so can be used whild restore fro accesing cloned
+//														instanceIDs.Add (scriptableObjectClone.GetInstanceID ());
+//							
+//														//save to .asset
+//														AssetDatabase.AddObjectToAsset (scriptableObjectClone, this);
+//												}
+//										}
+//
+//					
+//								if (instanceIDs.Count > 0){
+//												objInfo.membersInstanceIDs [memberInfoCurrent] = instanceIDs.ToArray ();
+//										}
+//
+//								} else {
+//										scriptableObjectCurrent = memberInfoCurrent.GetValue (obj) as ScriptableObject;
+//										
+//										if (scriptableObjectCurrent != null) {
+//
+//
+//												scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectCurrent);
+//
+//												//save cloned SO id's
+//												objInfo.membersInstanceIDs [memberInfoCurrent] = new int[]{  scriptableObjectClone.GetInstanceID ()};
+//											
+//												//save to .asset
+//												AssetDatabase.AddObjectToAsset (scriptableObjectClone, this);
+//					//	AssetDatabase.AddObjectToAsset (((UnityVariable)scriptableObjectClone).__reflectedInstanceUnity, this);
+//										}
+//					
+//
+//								}
+//						}
+//
+//						AssetDatabase.SaveAssets ();
+//						
+//				}
 
+
+				//get values from Members of Obj
 				objInfo.values = FormatterServices.GetObjectData (obj, objInfo.members);		
 
 				__objectInstanceMembers [uid] = objInfo;
@@ -110,7 +199,7 @@ public class UnityClipboard : ScriptableObject
 
 		}
 
-		public object restore (int uid, System.Object obj)
+		public void restore (int uid, System.Object obj)
 		{
 				if (EditorApplication.isPlaying || EditorApplication.isPaused) {
 						Debug.LogError ("Restore can be done only in Editor mode");
@@ -118,44 +207,96 @@ public class UnityClipboard : ScriptableObject
 
 				if (__objectInstanceMembers != null && __objectInstanceMembers.ContainsKey (uid)) {
 						ObjectInfo objInfo = __objectInstanceMembers [uid];
+
+						//restore values of normal members(not ScriptableObjects)
 						FormatterServices.PopulateObjectMembers (obj, objInfo.members, objInfo.values);
-						__objectInstanceMembers.Remove (uid);
+
+						foreach (var memberInfoInstanceIDPair in objInfo.memberInfoScriptableObject) {
+								SerializedObject serializedObject = memberInfoInstanceIDPair.Value;
+								
+								SerializedObject serializedObjectCurrent = new SerializedObject ((UnityEngine.Object)memberInfoInstanceIDPair.Key.GetValue (obj));
+								SerializedProperty serializedPropertyCurrent;
+
+								serializedPropertyCurrent = serializedObject.GetIterator ();
+
+
+
+								while (serializedPropertyCurrent.Next(true)) {
+					;
+										serializedObjectCurrent.CopyFromSerializedProperty (serializedPropertyCurrent);
+								}
+
+								serializedObjectCurrent.ApplyModifiedProperties ();
+								
 				}
 
-//		if (itemIDs.Contains (id)) {
-//			int assetID=assetIDs[itemIDs[id]];
-//			UnityVariable variable=(UnityVariable)EditorUtility.InstanceIDToObject(assetID);
-//			variable.OnAfterDeserialize();
-//			return variable.Value;
-//		}
 
-				return null;
-		}
-
-//	public void add(int id,System.Object value){
+//			ScriptableObject scriptableObjectSaved;
+//			ScriptableObject scriptableObjectClone;
+//						foreach (var memberInfoInstanceIDPair in objInfo.membersInstanceIDs) {
+//								
+//								if (memberInfoInstanceIDPair.Key.GetUnderlyingType ().IsArray) {
+//										IList scriptableObjectArray = (IList)memberInfoInstanceIDPair.Key.GetValue (obj);
 //
-//		if (!itemIDs.Contains (id)) {
-//						itemIDs.Add (id);
+//									
+//				
+//										
+//										for (int j = 0; j < scriptableObjectArray.Count; j++) {
+//												
+//												
+//										//get saved object from .asset
+//										scriptableObjectSaved = (ScriptableObject)EditorUtility.InstanceIDToObject (memberInfoInstanceIDPair.Value [j]);
+//										
+//										//clone
+//										scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectSaved);
+//										
+//										//apply
+//										scriptableObjectArray[j]=scriptableObjectClone;
+//							
+//										// destroy object and its footprint in .asset
+//										UnityEngine.Object.DestroyImmediate (scriptableObjectSaved, true);
+//										
+//										
+//										
+//									}
+//								} else {
+//										
+//										//get saved object
+//										scriptableObjectSaved = (ScriptableObject)EditorUtility.InstanceIDToObject (memberInfoInstanceIDPair.Value [0]);
+//				
+//										//clone
+//										 scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectSaved);
 //
+//										//apply
+//										memberInfoInstanceIDPair.Key.SetValue (obj, scriptableObjectClone);
 //
-//						UnityVariable variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-//						variable.Value = value;
+//										// destroy object and its footprint in .asset
+//										UnityEngine.Object.DestroyImmediate (scriptableObjectSaved, true);
 //
-//						EditorUtility.SetDirty (variable);
-//						assetIDs.Add (variable.GetInstanceID ());
+//	
 //
-//						AssetDatabase.AddObjectToAsset (variable, this);
+//								}
+//
+//							
+//						}
 //
 //						AssetDatabase.SaveAssets ();
-//				} else {
-//					int assetID=assetIDs[itemIDs[id]];
-//					UnityVariable variable=(UnityVariable)EditorUtility.InstanceIDToObject(assetID);
-//			variable.Value=value;
-//					variable.OnBeforeSerialize();
-//			EditorUtility.SetDirty (variable);
-//			AssetDatabase.SaveAssets ();
 //
-//				}
-//
-//	}
+//						//reimport
+//						AssetDatabase.ImportAsset (AssetDatabase.GetAssetPath (this.GetInstanceID ()));
+
+						objInfo.membersInstanceIDs.Clear ();
+
+						__objectInstanceMembers.Remove (uid);
+
+
+						
+				}
+
+
+
+				
+		}
+
+
 }

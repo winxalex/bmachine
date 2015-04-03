@@ -401,7 +401,7 @@ namespace ws.winx.bmachine.extensions
 												BlendTree blendTree = animatorStateSelected.motion as BlendTree;
 
 
-
+						//TODO opmitize this to us Animator.StringToHash
 												if (!String.IsNullOrEmpty (blendTree.blendParameter)) {
 														animator.SetFloat (blendTree.blendParameter, (float)blendX.Value);
 

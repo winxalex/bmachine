@@ -104,7 +104,7 @@ namespace ws.winx.editor.bmachine.extensions
 				public new void DrawDefaultInspector ()
 				{
 
-						MecanimNode node = ((MecanimNode)target);
+
 
 						NodePropertyIterator iterator = this.serializedNode.GetIterator ();
 						
@@ -117,31 +117,31 @@ namespace ws.winx.editor.bmachine.extensions
 							
 								if (!current.hideInInspector) {
 								
-					if(current.path=="motionOverride" && node != null && node.animatorStateSelected != null && 
-					   node.animatorStateSelected.motion != null &&
-					 node.animatorStateSelected.motion is BlendTree)
+					if(current.path=="motionOverride" && mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+					   mecanimNode.animatorStateSelected.motion != null &&
+					 mecanimNode.animatorStateSelected.motion is BlendTree)
 						continue;
 										
 								
 										if (current.path == "blendX" && 
-												node != null && node.animatorStateSelected != null && 
-												(node.animatorStateSelected.motion == null ||
-					 !(node.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)node.animatorStateSelected.motion).blendParameter))
+												mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+												(mecanimNode.animatorStateSelected.motion == null ||
+					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameter))
 					 ))
 											
 
 												continue;
 										if (current.path == "blendY" 
-												&& node != null && node.animatorStateSelected != null && 
-												(node.animatorStateSelected.motion == null ||
-					 !(node.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)node.animatorStateSelected.motion).blendParameterY))
+												&& mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+												(mecanimNode.animatorStateSelected.motion == null ||
+					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameterY))
 					 ))
 												continue;
 
 										EditorGUI.indentLevel = indentLevel + iterator.depth;
 
 
-										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, this.target, null, true);
+										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, mecanimNode, null, true);
 										
 										
 								}
@@ -353,41 +353,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 						if (mecanimNode != null) {
 
-								if (EditorApplication.isPlaying || EditorApplication.isPaused) {
 								
-
-										if (GUILayout.Button ("Preserve")) {
-
-											
-												serializedNode.ApplyModifiedProperties ();
-												EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
-									
-										}
-								} else {
-										if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
-												EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
-												curvesSerialized = null;
-												NodePropertyIterator iterator = serializedNode.GetIterator ();
-
-												while (iterator.Next (true)) {
-														
-
-														iterator.current.ValueChanged ();
-														
-														this.serializedNode.Update ();
-
-														iterator.current.ApplyModifiedValue();
-												}
-
-												
-
-												
-												
-											
-												
-										}
-
-								}
 						
 								Motion motion = null;					
 
@@ -694,6 +660,66 @@ namespace ws.winx.editor.bmachine.extensions
 
 										
 								}
+
+
+
+				if (EditorApplication.isPlaying || EditorApplication.isPaused) {
+					
+					
+					if (GUILayout.Button ("Preserve")) {
+						
+						
+						serializedNode.ApplyModifiedProperties ();
+						EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
+						
+					}
+				} else {
+					if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
+						EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
+						curvesSerialized = null;
+						NodePropertyIterator iterator = serializedNode.GetIterator ();
+						
+						
+						
+						while (iterator.Next (true)) {
+							if(iterator.current.value is UnityVariable)
+							{
+								//try trigger EditorUtility.SetDirty(
+								((UnityVariable)iterator.current.value).OnAfterDeserialize();
+							}
+
+							
+							iterator.current.ValueChanged ();
+							
+							this.serializedNode.Update ();
+							
+							iterator.current.ApplyModifiedValue();
+
+
+
+							if(iterator.current.value is UnityVariable)
+							{
+								Debug.Log("After:"+mecanimNode.blendX.Value+" "+ iterator.current.value);
+								//continue;
+								
+								//((UnityVariable)iterator.current.value).OnAfterDeserialize();
+							}
+							
+							//if(iterator.current.value is ScriptableObject)
+							//EditorUtility.SetDirty((ScriptableObject)iterator.current.value);	
+						}
+						
+						
+						
+						//this.serializedNode.ApplyModifiedProperties();
+						
+						
+						
+					}
+					
+					
+					
+				}
 
 								
 

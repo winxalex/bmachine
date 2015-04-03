@@ -16,7 +16,10 @@ namespace ws.winx.unity
 		{
 				
 				public bool serializable = true;
+
 				private Type _valueType = typeof(System.Object);
+
+
 				[HideInInspector]
 				public byte[]
 						valueTypeSerialized;
@@ -31,14 +34,17 @@ namespace ws.winx.unity
 				}
 
 
-				/////////////////////////////////
-				// For reusing of Unity drawers		
-
+				//////////////////////////////////////////
+				// !!!! For reusing of Unity Drawers	//	
+				[NonSerialized]
 				private SerializedProperty
 						__seralizedProperty;
+
+				[NonSerialized]
 				private SerializedObject
 						__seralizedObject;
 
+				
 				public SerializedProperty serializedProperty {
 						get {
 
@@ -223,6 +229,8 @@ namespace ws.winx.unity
 
 				}
 
+	
+
 		#region ISerializationCallbackReceiver implementation
 
 				public void OnBeforeSerialize ()
@@ -253,9 +261,13 @@ namespace ws.winx.unity
 						if (serializable) {
 								if (memberInfoSerialized != null && memberInfoSerialized.Length > 0)
 										__memberInfo = (MemberInfo)Utility.Deserialize (memberInfoSerialized);
+								else
+									__memberInfo=null;
 
 								if (valueTypeSerialized != null && valueTypeSerialized.Length > 0)
 										_valueType = (Type)Utility.Deserialize (valueTypeSerialized);
+								else 
+									_valueType=typeof(System.Object);
 
 								if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
 
@@ -263,11 +275,16 @@ namespace ws.winx.unity
 			
 										__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
 
+										__seralizedProperty=null;
+										__seralizedObject=null;
+
 								} else {
 										if (__reflectedInstanceUnity != null)
 												__reflectedInstance = __reflectedInstanceUnity;
 										else if (__event != null && this.ValueType == typeof(UnityEvent))
 												__reflectedInstance = __event;
+										else 
+											__reflectedInstance=null;
 
 								}
 						}
@@ -278,6 +295,10 @@ namespace ws.winx.unity
 
 		#endregion
 
+
+				/// <summary>
+				/// Applies the modified properties. !!!! For reusing of Unity Drawers
+				/// </summary>
 				public void ApplyModifiedProperties ()
 				{
 						if (__seralizedObject != null) {

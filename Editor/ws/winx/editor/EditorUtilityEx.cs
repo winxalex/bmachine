@@ -108,19 +108,19 @@ namespace ws.winx.editor
 
 
 										if (attribute != null) {
-						FieldInfo m_TypeFieldInfo = attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
+												FieldInfo m_TypeFieldInfo = attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
 
-						if(m_TypeFieldInfo!=null){
-												Type typeProperty=(Type)m_TypeFieldInfo.GetValue (attribute);
+												if (m_TypeFieldInfo != null) {
+														Type typeProperty = (Type)m_TypeFieldInfo.GetValue (attribute);
 
 												
 
-												if (typeProperty!=null && !(typeProperty.IsAssignableFrom(typeof(Attribute))) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
-														EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
+														if (typeProperty != null && !(typeProperty.IsAssignableFrom (typeof(Attribute))) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
+																EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
 												
-														//Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name);
+																//Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name);
+														}
 												}
-						}
 										}
 								}
 						}
@@ -142,6 +142,18 @@ namespace ws.winx.editor
 
 
 						return __drawerDefault;
+				}
+
+				[MenuItem("Assets/Delete/Remove SubAsset")]
+				public static void RemoveSelectedSubAsset ()
+				{
+						if (Selection.activeObject is ScriptableObject && AssetDatabase.IsSubAsset (Selection.activeObject.GetInstanceID ())) {
+								String path = AssetDatabase.GetAssetPath (Selection.activeObject);			
+								UnityEngine.Object.DestroyImmediate (Selection.activeObject, true);
+
+								AssetDatabase.ImportAsset (path);
+						}
+
 				}
 
 				[MenuItem("Assets/Create/Asset From Selected")]
@@ -176,7 +188,7 @@ namespace ws.winx.editor
 										__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
 
 										if (__clipboard == null)
-												AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (Selection.activeObject.name), "Assets/Resources/UnityClipboard.asset");
+												AssetDatabase.CreateAsset (ScriptableObject.CreateInstance<UnityClipboard> (), "Assets/Resources/UnityClipboard.asset");
 
 										__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
 								}
