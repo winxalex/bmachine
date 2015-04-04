@@ -355,7 +355,85 @@ namespace ws.winx.editor.bmachine.extensions
 
 								
 						
-								Motion motion = null;					
+								Motion motion = null;
+
+
+
+				//////////////////////////////////////////////////////////////
+				/// 						PRESEVE RESTORE					//
+				if (EditorApplication.isPlaying || EditorApplication.isPaused) {
+					
+					
+					if (GUILayout.Button ("Preserve")) {
+						
+						
+						serializedNode.ApplyModifiedProperties ();
+						
+						mecanimNode.blendX.OnBeforeSerialize();
+						mecanimNode.blendY.OnBeforeSerialize();
+						
+						UnityVariable[] varArray=variablesBindedToCurves;
+						int varNumber=varArray.Length;
+						for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
+							varArray[varCurrent].OnBeforeSerialize();
+							
+						}
+						
+						
+						EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
+						
+					}
+				} else {
+					if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
+						EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
+						curvesSerialized = null;
+						NodePropertyIterator iterator = serializedNode.GetIterator ();
+						
+						
+						
+						while (iterator.Next (true)) {
+							if(iterator.current.value is UnityVariable)
+							{
+								//Debug.Log("OnBeforeDeserialize:"+((UnityVariable)iterator.current.value).Value);
+								((UnityVariable)iterator.current.value).OnAfterDeserialize();
+								
+								//Debug.Log("OnAfterDeserialize:"+((UnityVariable)iterator.current.value).Value);
+							}else if(iterator.current.value is UnityVariable[]){
+								
+								UnityVariable[] varArray=(UnityVariable[])iterator.current.value;
+								int varNumber=varArray.Length;
+								for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
+									varArray[varCurrent].OnAfterDeserialize();
+									
+								}
+								
+								
+							}
+							
+							
+							iterator.current.ValueChanged ();
+							
+							this.serializedNode.Update ();
+							
+							iterator.current.ApplyModifiedValue();
+							
+							
+							
+							
+						}
+						
+						
+						
+						
+						
+						
+						
+					}
+					
+					
+					
+				}
+				//////////////////////
 
 							
 								if (Event.current.type == EventType.Layout) {
@@ -664,78 +742,6 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-				if (EditorApplication.isPlaying || EditorApplication.isPaused) {
-					
-					
-					if (GUILayout.Button ("Preserve")) {
-						
-						
-						serializedNode.ApplyModifiedProperties ();
-
-						mecanimNode.blendX.OnBeforeSerialize();
-						mecanimNode.blendY.OnBeforeSerialize();
-
-						UnityVariable[] varArray=variablesBindedToCurves;
-						int varNumber=varArray.Length;
-						for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
-							varArray[varCurrent].OnBeforeSerialize();
-							
-						}
-
-
-						EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
-						
-					}
-				} else {
-					if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
-						EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
-						curvesSerialized = null;
-						NodePropertyIterator iterator = serializedNode.GetIterator ();
-						
-						
-						
-						while (iterator.Next (true)) {
-							if(iterator.current.value is UnityVariable)
-							{
-								//Debug.Log("OnBeforeDeserialize:"+((UnityVariable)iterator.current.value).Value);
-									((UnityVariable)iterator.current.value).OnAfterDeserialize();
-
-								//Debug.Log("OnAfterDeserialize:"+((UnityVariable)iterator.current.value).Value);
-							}else if(iterator.current.value is UnityVariable[]){
-
-								UnityVariable[] varArray=(UnityVariable[])iterator.current.value;
-								int varNumber=varArray.Length;
-								for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
-										varArray[varCurrent].OnAfterDeserialize();
-
-								}
-
-
-							}
-
-							
-							iterator.current.ValueChanged ();
-							
-							this.serializedNode.Update ();
-							
-							iterator.current.ApplyModifiedValue();
-
-
-
-
-						}
-						
-						
-						
-
-						
-						
-						
-					}
-					
-					
-					
-				}
 
 								
 

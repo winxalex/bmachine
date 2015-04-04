@@ -19,9 +19,7 @@ public class UnityClipboard : ScriptableObject
 
 
 
-		public List<int> itemIDs;
-		public List<int> assetIDs;
-		//public List<int,> properties;
+		
 
 		Dictionary<int,ObjectInfo> __objectInstanceMembers;
 
@@ -32,7 +30,7 @@ public class UnityClipboard : ScriptableObject
 				public MemberInfo[] members;
 				public object[] values;
 				public Dictionary<MemberInfo,int[]> membersInstanceIDs;
-				public Dictionary<MemberInfo,SerializedObject[]> memberInfoScriptableObject;
+				public Dictionary<MemberInfo,SerializedObject[]> memberInfoSerializedObject;
 
 
 				
@@ -40,15 +38,10 @@ public class UnityClipboard : ScriptableObject
 
 		public void OnReset ()
 		{
-				itemIDs = new List<int> ();
-				assetIDs = new List<int> ();
+			__objectInstanceMembers = new Dictionary<int, ObjectInfo> ();	
 		}
 
-		public void clear ()
-		{
 
-				//AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(
-		}
 
 		public bool HasBeenPreseved (int uid)
 		{
@@ -80,7 +73,7 @@ public class UnityClipboard : ScriptableObject
 
 						objInfo = new ObjectInfo ();
 						objInfo.membersInstanceIDs = new Dictionary<MemberInfo, int[]> ();
-						objInfo.memberInfoScriptableObject = new Dictionary<MemberInfo, SerializedObject[]> ();
+						objInfo.memberInfoSerializedObject = new Dictionary<MemberInfo, SerializedObject[]> ();
 				}
 
 				objInfo.uid = uid;
@@ -116,11 +109,11 @@ public class UnityClipboard : ScriptableObject
 												serializedObjects [scriptableObjectsInx] = new SerializedObject (scriptableObjects [scriptableObjectsInx]);
 										}
 
-										objInfo.memberInfoScriptableObject [memberInfoCurrent] = serializedObjects;
+										objInfo.memberInfoSerializedObject [memberInfoCurrent] = serializedObjects;
 
 								} else {
 										
-										objInfo.memberInfoScriptableObject [memberInfoCurrent] = new SerializedObject[]{ new SerializedObject ((ScriptableObject)memberInfoCurrent.GetValue (obj))};
+										objInfo.memberInfoSerializedObject [memberInfoCurrent] = new SerializedObject[]{ new SerializedObject ((ScriptableObject)memberInfoCurrent.GetValue (obj))};
 
 								}
 						}
@@ -204,7 +197,9 @@ public class UnityClipboard : ScriptableObject
 		public void remove (int id)
 		{
 
-
+			// destroy object and its footprint in .asset
+			UnityEngine.Object.DestroyImmediate (EditorUtility.InstanceIDToObject(id), true);
+	
 
 
 		}
@@ -242,7 +237,7 @@ public class UnityClipboard : ScriptableObject
 						SerializedObject serializedObjectCurrent;
 						SerializedObject serializedObjectSaved;
 						ScriptableObject scriptabledObjectCurrent;
-						foreach (var memberInfoInstanceIDPair in objInfo.memberInfoScriptableObject) {
+						foreach (var memberInfoInstanceIDPair in objInfo.memberInfoSerializedObject) {
 								
 								
 								if (memberInfoInstanceIDPair.Key.GetUnderlyingType ().IsArray) {
