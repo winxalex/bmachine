@@ -1063,8 +1063,6 @@ namespace ws.winx.editor.extensions
 						displayOptions.Insert (1, new GUIContent ("Bind"));
 
 
-						//values.Insert (0, null);// (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ());
-						//values.Insert (1, null);// (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ());
 							
 						int indexSelected;
 						int indexSelectedPrev;

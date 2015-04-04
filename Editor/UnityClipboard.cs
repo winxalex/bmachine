@@ -32,7 +32,7 @@ public class UnityClipboard : ScriptableObject
 				public MemberInfo[] members;
 				public object[] values;
 				public Dictionary<MemberInfo,int[]> membersInstanceIDs;
-				public Dictionary<MemberInfo,SerializedObject> memberInfoScriptableObject;
+				public Dictionary<MemberInfo,SerializedObject[]> memberInfoScriptableObject;
 
 
 				
@@ -80,7 +80,7 @@ public class UnityClipboard : ScriptableObject
 
 						objInfo = new ObjectInfo ();
 						objInfo.membersInstanceIDs = new Dictionary<MemberInfo, int[]> ();
-						objInfo.memberInfoScriptableObject = new Dictionary<MemberInfo, SerializedObject> ();
+						objInfo.memberInfoScriptableObject = new Dictionary<MemberInfo, SerializedObject[]> ();
 				}
 
 				objInfo.uid = uid;
@@ -103,14 +103,24 @@ public class UnityClipboard : ScriptableObject
 				if (scriptableObjectsMemberInfo.Length > 0) {
 						for (int i=0; i<scriptableObjectsMemberInfo.Length; i++) {
 								memberInfoCurrent = scriptableObjectsMemberInfo [i];
-								if (memberInfoCurrent.GetUnderlyingType ().IsArray) {
-								} else {
-										//SerializedObject clone=new SerializedObject(
-										//EditorUtility.CopySerialized(),clone);
 
-										//UnityVariable var = (UnityVariable)
-										//var.OnBeforeSerialize ();
-					objInfo.memberInfoScriptableObject [memberInfoCurrent] = new SerializedObject ((UnityEngine.Object)memberInfoCurrent.GetValue (obj));
+								//if memberInfoCurrent is info for array of scriptableObject
+								if (memberInfoCurrent.GetUnderlyingType ().IsArray) {
+
+										UnityEngine.ScriptableObject[] scriptableObjects = (UnityEngine.ScriptableObject[])memberInfoCurrent.GetValue (obj);
+
+										SerializedObject[] serializedObjects = new SerializedObject[scriptableObjects.Length];
+									
+										for (int scriptableObjectsInx=0; scriptableObjectsInx<scriptableObjects.Length; scriptableObjectsInx++) {	
+
+												serializedObjects [scriptableObjectsInx] = new SerializedObject (scriptableObjects [scriptableObjectsInx]);
+										}
+
+										objInfo.memberInfoScriptableObject [memberInfoCurrent] = serializedObjects;
+
+								} else {
+										
+										objInfo.memberInfoScriptableObject [memberInfoCurrent] = new SerializedObject[]{ new SerializedObject ((ScriptableObject)memberInfoCurrent.GetValue (obj))};
 
 								}
 						}
@@ -199,6 +209,24 @@ public class UnityClipboard : ScriptableObject
 
 		}
 
+		void copySerialized (SerializedObject source, SerializedObject dest)
+		{
+
+				SerializedProperty serializedPropertyCurrent;
+			
+				serializedPropertyCurrent = source.GetIterator ();
+			
+			
+			
+				while (serializedPropertyCurrent.Next(true)) {
+				
+						dest.CopyFromSerializedProperty (serializedPropertyCurrent);
+				}
+			
+				dest.ApplyModifiedProperties ();
+
+		}
+
 		public void restore (int uid, System.Object obj)
 		{
 				if (EditorApplication.isPlaying || EditorApplication.isPaused) {
@@ -211,24 +239,68 @@ public class UnityClipboard : ScriptableObject
 						//restore values of normal members(not ScriptableObjects)
 						FormatterServices.PopulateObjectMembers (obj, objInfo.members, objInfo.values);
 
+						SerializedObject serializedObjectCurrent;
+						SerializedObject serializedObjectSaved;
+						ScriptableObject scriptabledObjectCurrent;
 						foreach (var memberInfoInstanceIDPair in objInfo.memberInfoScriptableObject) {
-								SerializedObject serializedObject = memberInfoInstanceIDPair.Value;
 								
-								SerializedObject serializedObjectCurrent = new SerializedObject ((UnityEngine.Object)memberInfoInstanceIDPair.Key.GetValue (obj));
-								SerializedProperty serializedPropertyCurrent;
+								
+								if (memberInfoInstanceIDPair.Key.GetUnderlyingType ().IsArray) {
 
-								serializedPropertyCurrent = serializedObject.GetIterator ();
+										UnityEngine.ScriptableObject[] scriptableObjects = (UnityEngine.ScriptableObject[])memberInfoInstanceIDPair.Key.GetValue (obj);
+									
+										SerializedObject[] serializedObjects = memberInfoInstanceIDPair.Value;
+										
+										var listType = typeof(List<>);
+										var typeElement = scriptableObjects.GetType ().GetElementType ();
+										var concreteType = listType.MakeGenericType (typeElement);
+										IList scriptableObjectList = (IList)Activator.CreateInstance (concreteType);
+
+									
+										for (int serializedObjectsInx=0; serializedObjectsInx<serializedObjects.Length; serializedObjectsInx++) {	
+
+												serializedObjectSaved = serializedObjects [serializedObjectsInx];
+										
+												if (serializedObjectsInx < scriptableObjects.Length) {
+														scriptabledObjectCurrent = scriptableObjects [serializedObjectsInx];
+
+														
+												} else {//if new ScriptableObject is added during Preserve
+
+														//create
+														scriptabledObjectCurrent = ScriptableObject.CreateInstance (typeElement);
+														
+												}
+
+												//get current scriptable objecta and serialized it
+												serializedObjectCurrent = new SerializedObject (scriptabledObjectCurrent);
+													
+												//copy saved to current
+												copySerialized (serializedObjectSaved, serializedObjectCurrent);
+													
+												//keep current in list
+												scriptableObjectList.Add (scriptabledObjectCurrent);
+
+									
+					
+										}
 
 
+										//create and copy list into array
+										Array scriptableObjectArray = Array.CreateInstance (typeElement, scriptableObjectList.Count);
+										scriptableObjectList.CopyTo (scriptableObjectArray, 0);
 
-								while (serializedPropertyCurrent.Next(true)) {
-					;
-										serializedObjectCurrent.CopyFromSerializedProperty (serializedPropertyCurrent);
+										//set new array
+										memberInfoInstanceIDPair.Key.SetValue (obj, scriptableObjectArray);
+
+								} else {
+										serializedObjectSaved = memberInfoInstanceIDPair.Value [0];
+										serializedObjectCurrent = new SerializedObject ((UnityEngine.Object)memberInfoInstanceIDPair.Key.GetValue (obj));
+								
+										copySerialized (serializedObjectSaved, serializedObjectCurrent);
 								}
-
-								serializedObjectCurrent.ApplyModifiedProperties ();
 								
-				}
+						}
 
 
 //			ScriptableObject scriptableObjectSaved;

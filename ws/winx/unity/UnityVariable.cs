@@ -406,7 +406,7 @@ namespace ws.winx.unity
 
 				public override string ToString ()
 				{
-						return "Property[" + name + "] of type " + ValueType + (this.reflectedInstance == null ? " on Static instance" : " on instance of " + this.reflectedInstance);
+						return "Property[" + name + "] of type " + ValueType + (this.reflectedInstance == null ? " on Static instance" : (this.reflectedInstance.GetType().IsPrimitive || this.reflectedInstance.GetType()==typeof(string)) ? "value of " : " on instance of " + this.reflectedInstance);
 				}
 
 				void CreateSerializedProperty(){

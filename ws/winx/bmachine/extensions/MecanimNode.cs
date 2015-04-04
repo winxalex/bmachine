@@ -28,13 +28,13 @@ namespace ws.winx.bmachine.extensions
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
 
-				[HideInInspector]
+				//[HideInInspector]
 				public AnimationCurve[]
 						curves;
-				[HideInInspector]
+				//[HideInInspector]
 				public Color[]
 						curvesColors;
-				[HideInInspector]
+				//[HideInInspector]
 				public UnityVariable[]
 						variablesBindedToCurves;
 				[AnimatorStateAttribute("animator","layer")]

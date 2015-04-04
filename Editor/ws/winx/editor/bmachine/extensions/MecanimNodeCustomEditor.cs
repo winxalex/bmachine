@@ -531,7 +531,7 @@ namespace ws.winx.editor.bmachine.extensions
 												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
 												vList.Add (_variableSelected);
 												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
-												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
+												variablesBindedToCurvesSerialized.ValueChanged ();
 
 
 												
@@ -543,7 +543,7 @@ namespace ws.winx.editor.bmachine.extensions
 												_colorSelected.a = 1;
 												cList.Add (_colorSelected);
 												curvesColorsSerialized.value = curveColors = cList.ToArray ();
-												curvesColorsSerialized.ApplyModifiedValue ();	
+												curvesColorsSerialized.ValueChanged();	
 														
 												
 
@@ -566,7 +566,7 @@ namespace ws.winx.editor.bmachine.extensions
 												crList.Add (curveAnimationNew);
 							
 												curvesSerialized.value = curves = crList.ToArray ();
-												curvesSerialized.ApplyModifiedValue ();
+												curvesSerialized.ValueChanged();
 
 
 
@@ -586,10 +586,10 @@ namespace ws.winx.editor.bmachine.extensions
 						
 												
 
-												
+													this.serializedNode.ApplyModifiedProperties ();
 
 
-												
+											_variableSelected=null;
 
 										}
 
@@ -603,7 +603,7 @@ namespace ws.winx.editor.bmachine.extensions
 												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
 												vList.RemoveAt (_curveIndexSelected);
 												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
-												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
+												variablesBindedToCurvesSerialized.ValueChanged ();
 
 												
 
@@ -613,7 +613,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 												cList.RemoveAt (_curveIndexSelected);
 												curvesColorsSerialized.value = curveColors = cList.ToArray ();
-												curvesColorsSerialized.ApplyModifiedValue ();
+												curvesColorsSerialized.ValueChanged ();
 												
 
 
@@ -624,12 +624,13 @@ namespace ws.winx.editor.bmachine.extensions
 												crList.RemoveAt (_curveIndexSelected);
 						
 												curvesSerialized.value = curves = crList.ToArray ();
-												curvesSerialized.ApplyModifiedValue ();
+												curvesSerialized.ValueChanged ();
 												
 
 
 
 												_curveIndexSelected = -1;
+												_variableSelected=null;
 
 												this.serializedNode.ApplyModifiedProperties ();
 				
@@ -670,6 +671,18 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 						serializedNode.ApplyModifiedProperties ();
+
+						mecanimNode.blendX.OnBeforeSerialize();
+						mecanimNode.blendY.OnBeforeSerialize();
+
+						UnityVariable[] varArray=variablesBindedToCurves;
+						int varNumber=varArray.Length;
+						for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
+							varArray[varCurrent].OnBeforeSerialize();
+							
+						}
+
+
 						EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
 						
 					}
@@ -684,8 +697,20 @@ namespace ws.winx.editor.bmachine.extensions
 						while (iterator.Next (true)) {
 							if(iterator.current.value is UnityVariable)
 							{
-								//try trigger EditorUtility.SetDirty(
-								((UnityVariable)iterator.current.value).OnAfterDeserialize();
+								//Debug.Log("OnBeforeDeserialize:"+((UnityVariable)iterator.current.value).Value);
+									((UnityVariable)iterator.current.value).OnAfterDeserialize();
+
+								//Debug.Log("OnAfterDeserialize:"+((UnityVariable)iterator.current.value).Value);
+							}else if(iterator.current.value is UnityVariable[]){
+
+								UnityVariable[] varArray=(UnityVariable[])iterator.current.value;
+								int varNumber=varArray.Length;
+								for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
+										varArray[varCurrent].OnAfterDeserialize();
+
+								}
+
+
 							}
 
 							
@@ -697,21 +722,12 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-							if(iterator.current.value is UnityVariable)
-							{
-								Debug.Log("After:"+mecanimNode.blendX.Value+" "+ iterator.current.value);
-								//continue;
-								
-								//((UnityVariable)iterator.current.value).OnAfterDeserialize();
-							}
-							
-							//if(iterator.current.value is ScriptableObject)
-							//EditorUtility.SetDirty((ScriptableObject)iterator.current.value);	
+
 						}
 						
 						
 						
-						//this.serializedNode.ApplyModifiedProperties();
+
 						
 						
 						
