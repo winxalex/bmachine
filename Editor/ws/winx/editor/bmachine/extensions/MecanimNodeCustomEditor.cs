@@ -149,6 +149,9 @@ namespace ws.winx.editor.bmachine.extensions
 
 						EditorGUI.indentLevel = indentLevel;
 
+
+							this.serializedNode.ApplyModifiedProperties ();
+
 				}
 
 

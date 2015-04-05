@@ -3,7 +3,7 @@
 // Copyright © 2014 Anderson Campos Cardoso
 //----------------------------------------------
 //----------------------------------------------
-//           Mecanimnode
+//           MecanimNode
 // 			by Alex Winx
 //----------------------------------------------
 using UnityEngine;
