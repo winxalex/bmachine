@@ -44,7 +44,7 @@ namespace ws.winx.bmachine
 								if(!_deserialized)
 								return new List<UnityVariable> ();
 
-							return variablesList.Where ((item) => item.ValueType == type).ToList ();
+							return variablesList.Where ((item) => item.ValueType==type || item.ValueType.IsSubclassOf(type)).ToList ();
 
 				}
 

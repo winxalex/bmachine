@@ -1081,7 +1081,7 @@ namespace ws.winx.editor.extensions
 
 								//if memberInfo == null mean that UnityVariable aren't binded to some object's property
 								//but contain raw object value
-								if (_variableSelected.reflectedInstance == null || !(_variableSelected.reflectedInstance is UnityEngine.Object)) {
+								if (_variableSelected.instanceSystemObject == null || !(_variableSelected.instanceSystemObject is UnityEngine.Object)) {
 										indexSelected = 0;
 								} else {
 										indexSelected = 1;
@@ -1114,7 +1114,7 @@ namespace ws.winx.editor.extensions
 
 								}
 
-								if (_variableSelected.reflectedInstance == null)
+								if (_variableSelected.instanceSystemObject == null)
 										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
 
 								
@@ -1153,26 +1153,26 @@ namespace ws.winx.editor.extensions
 
 								if (indexSelectedPrev > 1) {
 										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-										_variableSelected.reflectedInstance = new UnityEngine.Object ();
+										_variableSelected.instanceSystemObject = new UnityEngine.Object ();
 					
 								} else
 					
 								if (indexSelectedPrev == 0) {
 										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-										_variableSelected.reflectedInstance = new UnityEngine.Object ();		
+										_variableSelected.instanceSystemObject = new UnityEngine.Object ();		
 								}
 				
 								UnityEngine.Object _objectSelected = null;
 				
 								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
-								if (_variableSelected.reflectedInstance != null && (_variableSelected.reflectedInstance is UnityEngine.Object)) {
+								if (_variableSelected.instanceSystemObject != null && (_variableSelected.instanceSystemObject is UnityEngine.Object)) {
 
 										 
 
-										if (_variableSelected.reflectedInstance is Component)
-												_objectSelected = ((Component)_variableSelected.reflectedInstance).gameObject;
+										if (_variableSelected.instanceSystemObject is Component)
+												_objectSelected = ((Component)_variableSelected.instanceSystemObject).gameObject;
 										else
-												_objectSelected = _variableSelected.reflectedInstance as UnityEngine.Object;
+												_objectSelected = _variableSelected.instanceSystemObject as UnityEngine.Object;
 								} 
 						
 								//select object which properties would be extracted
@@ -1195,7 +1195,7 @@ namespace ws.winx.editor.extensions
 							
 										if (_variableSelected.MemberInfo != null) {
 												int inxSelectd = Array.IndexOf (memberInfos, _variableSelected.MemberInfo);
-												_variableSelected.reflectedInstance = instances [inxSelectd];
+												_variableSelected.instanceSystemObject = instances [inxSelectd];
 										}
 							
 							

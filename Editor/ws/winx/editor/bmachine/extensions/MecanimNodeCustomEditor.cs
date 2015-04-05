@@ -374,12 +374,16 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						mecanimNode.blendX.OnBeforeSerialize();
 						mecanimNode.blendY.OnBeforeSerialize();
-						
-						UnityVariable[] varArray=variablesBindedToCurves;
-						int varNumber=varArray.Length;
-						for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
-							varArray[varCurrent].OnBeforeSerialize();
-							
+						mecanimNode.motionOverride.OnBeforeSerialize();
+
+						if(variablesBindedToCurves!=null){
+							UnityVariable[] varArray=variablesBindedToCurves;
+
+							int varNumber=varArray.Length;
+							for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
+								varArray[varCurrent].OnBeforeSerialize();
+								
+							}
 						}
 						
 						
@@ -760,7 +764,7 @@ namespace ws.winx.editor.bmachine.extensions
 										if (mecanimNode.motionOverride == null)
 												motion = mecanimNode.animatorStateSelected.motion;
 										else //
-												motion = mecanimNode.motionOverride;
+												motion =(Motion) mecanimNode.motionOverride.Value;
 									
 									
 									

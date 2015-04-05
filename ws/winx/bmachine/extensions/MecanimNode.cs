@@ -43,7 +43,12 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public int
 						layer;
-				public Motion motionOverride;
+
+				[UnityVariableProperty(typeof(Motion))]
+				public UnityVariable motionOverride;
+
+
+
 				public bool loop = false;
 				[UnityVariableProperty(typeof(float))]
 				public UnityVariable
@@ -271,12 +276,12 @@ namespace ws.winx.bmachine.extensions
 				
 								
 								if (motionOverride != null 
-										&& (animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride)) {
+										&& (animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value)) {
 					
 					
 										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
 					
-										animatorOverrideController [(AnimationClip)animatorStateSelected.motion] = (AnimationClip)motionOverride;
+										animatorOverrideController [(AnimationClip)animatorStateSelected.motion] = (AnimationClip)motionOverride.Value;
 					
 										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
 					

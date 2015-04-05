@@ -20,6 +20,10 @@ namespace ws.winx.unity
 				private Type _valueType = typeof(System.Object);
 
 
+				// this UnityVariable can reference other variable (ex in blackboard)
+				private int __unityVariableReferencedInstanceID=0;
+
+
 				[HideInInspector]
 				public byte[]
 						valueTypeSerialized;
@@ -74,20 +78,33 @@ namespace ws.winx.unity
 						reflectedInstanceSerialized;
 				[NonSerialized]
 				private object
-						__reflectedInstance;
+						__instanceSystemObject;
 
-				public System.Object reflectedInstance {
+				/// <summary>
+				/// Gets or sets 
+				/// </summary>
+				/// <value>The instance system object (event,UnityEngine.Object or other System.Object)
+				/// </value>
+				public System.Object instanceSystemObject {
 						get {
-								return __reflectedInstance;
+								return __instanceSystemObject;
 					
 						}
 						set {
-								__reflectedInstance = value;
+								__instanceSystemObject = value;
 
-						   
-								__reflectedInstanceUnity = __reflectedInstance as UnityEngine.Object;
+								__unityVariableReferencedInstanceID=0;
+								__instanceUnityObject=null;
+								__event=null;
+				
+								if(value is UnityVariable){//save instanceID so instance can be restored in
+									__unityVariableReferencedInstanceID=((UnityVariable)value).GetInstanceID();
+									return;
+								}
+								
+								__instanceUnityObject = __instanceSystemObject as UnityEngine.Object;
 
-								__event = __reflectedInstance as UnityEvent;
+								__event = __instanceSystemObject as UnityEvent;
 					
 //								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity + " Reflected instance:" + __reflectedInstance);
 						}
@@ -95,7 +112,7 @@ namespace ws.winx.unity
 
 				[SerializeField]
 				private UnityEngine.Object
-						__reflectedInstanceUnity;
+						__instanceUnityObject;
 				[SerializeField]
 				private UnityEvent
 						__event;//this filed would have event even is empty
@@ -156,13 +173,13 @@ namespace ws.winx.unity
 						get {
 								if (this.__memberInfo == null) {
 
-										return this.reflectedInstance;
+										return this.instanceSystemObject;
 								}
 								if (this.__memberInfo.MemberType == MemberTypes.Property) {
-										return ((PropertyInfo)this.__memberInfo).GetValue (this.reflectedInstance, null);
+										return ((PropertyInfo)this.__memberInfo).GetValue (this.instanceSystemObject, null);
 								}
 								if (this.__memberInfo.MemberType == MemberTypes.Field) {
-										return ((FieldInfo)this.__memberInfo).GetValue (this.reflectedInstance);
+										return ((FieldInfo)this.__memberInfo).GetValue (this.instanceSystemObject);
 								}
 								
 								
@@ -172,7 +189,7 @@ namespace ws.winx.unity
 						"No property with name '",
 						this.name,
 						"' in the component '",
-						this.reflectedInstance
+						this.instanceSystemObject
 						
 					}));
 
@@ -180,7 +197,7 @@ namespace ws.winx.unity
 						}
 						set {
 
-
+								
 								if(value==null){
 									__seralizedProperty=null;
 									__seralizedObject=null;
@@ -190,20 +207,19 @@ namespace ws.winx.unity
 
 								if (this.__memberInfo == null) {
 										
-										this.reflectedInstance = value;
+										this.instanceSystemObject = value;
 
-										
 					
 										if (value != null)
-												_valueType = this.reflectedInstance.GetType ();
+												_valueType = this.instanceSystemObject.GetType ();
 
 										return;
 								}
 								if (this.__memberInfo.MemberType == MemberTypes.Property) {
-										((PropertyInfo)this.__memberInfo).SetValue (this.reflectedInstance, value, null);
+										((PropertyInfo)this.__memberInfo).SetValue (this.instanceSystemObject, value, null);
 								} else {
 										if (this.__memberInfo.MemberType == MemberTypes.Field) {
-												((FieldInfo)this.__memberInfo).SetValue (this.reflectedInstance, value);
+												((FieldInfo)this.__memberInfo).SetValue (this.instanceSystemObject, value);
 										} else {
 
 												Debug.LogError (string.Concat (new object[]
@@ -211,7 +227,7 @@ namespace ws.winx.unity
 																"No property with name '",
 																this.name,
 																"' in the component '",
-																this.reflectedInstance
+																this.instanceSystemObject
 																
 															}));
 
@@ -241,14 +257,15 @@ namespace ws.winx.unity
 
 								valueTypeSerialized = Utility.Serialize (_valueType);
 
-								if ((__reflectedInstance != null) && (__reflectedInstanceUnity == null && __event == null) && __reflectedInstance.GetType () != typeof(UnityEngine.Object)) {
+								//if it is not reference to other UnityVariable isn't null and not reference to UnityObject
+								if (__unityVariableReferencedInstanceID!=0 && (__instanceSystemObject != null) && (__instanceUnityObject == null && __event == null) && __instanceSystemObject.GetType () != typeof(UnityEngine.Object)) {
 
 						
 										try {
-												reflectedInstanceSerialized = Utility.Serialize (__reflectedInstance);
+												reflectedInstanceSerialized = Utility.Serialize (__instanceSystemObject);
 										} catch (Exception ex) {
 
-												Debug.LogWarning (ex.Message + " name:" + this.name + " memInfo:" + __memberInfo + " " + __reflectedInstance + " " + __reflectedInstanceUnity);
+												Debug.LogWarning (ex.Message + " name:" + this.name + " memInfo:" + __memberInfo + " " + __instanceSystemObject + " " + __instanceUnityObject);
 										}
 								}
 						}
@@ -269,22 +286,28 @@ namespace ws.winx.unity
 								else 
 									_valueType=typeof(System.Object);
 
+
+								if(__unityVariableReferencedInstanceID!=0){
+									__instanceSystemObject=EditorUtility.InstanceIDToObject(__unityVariableReferencedInstanceID);
+									return;
+								}
+
 								if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
 
 						
 			
-										__reflectedInstance = Utility.Deserialize (reflectedInstanceSerialized);
+										__instanceSystemObject = Utility.Deserialize (reflectedInstanceSerialized);
 
 										__seralizedProperty=null;
 										__seralizedObject=null;
 
 								} else {
-										if (__reflectedInstanceUnity != null)
-												__reflectedInstance = __reflectedInstanceUnity;
+										if (__instanceUnityObject != null)
+												__instanceSystemObject = __instanceUnityObject;
 										else if (__event != null && this.ValueType == typeof(UnityEvent))
-												__reflectedInstance = __event;
+												__instanceSystemObject = __event;
 										else 
-											__reflectedInstance=null;
+											__instanceSystemObject=null;
 
 								}
 						}
@@ -359,7 +382,7 @@ namespace ws.winx.unity
 										this.Value = __seralizedProperty.animationCurveValue;
 								}
 								else
-									if (this.__reflectedInstance is UnityEngine.Object)
+									if (this.__instanceSystemObject is UnityEngine.Object)
 										  this.Value = __seralizedProperty.objectReferenceValue;
 
 
@@ -406,7 +429,7 @@ namespace ws.winx.unity
 
 				public override string ToString ()
 				{
-						return "Property[" + name + "] of type " + ValueType + (this.reflectedInstance == null ? " on Static instance" : (this.reflectedInstance.GetType().IsPrimitive || this.reflectedInstance.GetType()==typeof(string)) ? "value of " : " on instance of " + this.reflectedInstance);
+						return "Property[" + name + "] of type " + ValueType + (this.instanceSystemObject == null ? " on Static instance" : (this.instanceSystemObject.GetType().IsPrimitive || this.instanceSystemObject.GetType()==typeof(string)) ? "value of " : " on instance of " + this.instanceSystemObject);
 				}
 
 				void CreateSerializedProperty(){
