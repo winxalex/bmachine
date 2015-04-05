@@ -168,6 +168,20 @@ namespace ws.winx.csharp.utilities
 			return (T)((object)null);
 		}
 
+
+		public static T[] GetAttributes<T> (Type type, bool inherite) where T : Attribute
+		{
+			if (type != null)
+			{
+				T[] array = type.GetCustomAttributes (typeof(T), inherite) as T[];
+				if (array != null && array.Length > 0)
+				{
+					return array;
+				}
+			}
+			return (T[])((object)null);
+		}
+
 	}
 
 

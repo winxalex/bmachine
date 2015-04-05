@@ -100,29 +100,38 @@ namespace ws.winx.editor
 
 								EditorUtilityEx.__drawers = new Dictionary<Type, PropertyDrawer> ();
 								Type[] derivedTypes = ReflectionUtility.GetDerivedTypes (typeof(PropertyDrawer));
+								CustomPropertyDrawer[] attributes;
+								CustomPropertyDrawer attribute;
 								for (int i = 0; i < derivedTypes.Length; i++) {
 										typeDrawer = derivedTypes [i];
 
-										CustomPropertyDrawer attribute = AttributeUtility.GetAttribute<CustomPropertyDrawer> (typeDrawer, false);
+										attributes = AttributeUtility.GetAttributes<CustomPropertyDrawer> (typeDrawer, false);
 
+										if(attributes!=null)
+										for(int j=0;j<attributes.Length;j++){
 
+										attribute = attributes [j];
 
 										if (attribute != null) {
 												FieldInfo m_TypeFieldInfo = attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
+
+
+
 
 												if (m_TypeFieldInfo != null) {
 														Type typeProperty = (Type)m_TypeFieldInfo.GetValue (attribute);
 
 												
 
-														if (typeProperty != null && !(typeProperty.IsAssignableFrom (typeof(Attribute))) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
+														if (typeProperty != null && typeProperty.BaseType!= typeof(PropertyAttribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
 																EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
 												
-																//Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name);
+																Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name+" "+typeProperty.BaseType);
 														}
 												}
 										}
-								}
+									}//attributes
+								}//types in dll
 						}
 
 						EditorUtilityEx.__drawers.TryGetValue (type, out drawer);
