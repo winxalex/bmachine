@@ -21,6 +21,7 @@ namespace ws.winx.unity
 
 
 				// this UnityVariable can reference other variable (ex in blackboard)
+				[SerializeField]
 				private int __unityVariableReferencedInstanceID=0;
 
 
@@ -126,6 +127,14 @@ namespace ws.winx.unity
 								return __memberInfo;
 						}
 						set {
+								
+								
+								Type type;
+
+								if(__memberInfo!=null && value!=null &&   __memberInfo.GetUnderlyingType() !=value.GetUnderlyingType()){
+									Debug.LogError("MemberInfo should continue firstime established Type of :"+_valueType);
+								}
+
 								__memberInfo = value;
 
 								if (value != null) {
@@ -134,6 +143,8 @@ namespace ws.winx.unity
 
 
 										if (__memberInfo.MemberType == MemberTypes.Field) {
+												
+
 												_valueType = ((FieldInfo)__memberInfo).FieldType;
 
 										} else if (__memberInfo.MemberType == MemberTypes.Property)
@@ -201,7 +212,14 @@ namespace ws.winx.unity
 								if(value==null){
 									__seralizedProperty=null;
 									__seralizedObject=null;
+									__unityVariableReferencedInstanceID=0;
+									
+									//value=default(this.ValueType);
+									
+									//_valueType=typeof(System.Object);
+									//__memberInfo=null;
 
+									
 								}
 
 
@@ -209,12 +227,16 @@ namespace ws.winx.unity
 										
 										this.instanceSystemObject = value;
 
+				
 					
 										if (value != null)
-												_valueType = this.instanceSystemObject.GetType ();
+												_valueType = value.GetType ();
+
 
 										return;
 								}
+
+
 								if (this.__memberInfo.MemberType == MemberTypes.Property) {
 										((PropertyInfo)this.__memberInfo).SetValue (this.instanceSystemObject, value, null);
 								} else {
@@ -414,6 +436,15 @@ namespace ws.winx.unity
 				{
 						return base.GetHashCode ();
 				}
+
+//				public static bool operator ==(UnityVariable a, UnityVariable b)
+//				{
+//
+//					
+//					// Return true if the fields match:
+//					return a.x == b.x && a.y == b.y && a.z == b.z;
+//				}
+
 
 				public override bool Equals (object obj)
 				{

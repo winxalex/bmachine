@@ -761,7 +761,9 @@ namespace ws.winx.editor.bmachine.extensions
 									
 									
 										//if there are no override use motion of selected AnimationState
-										if (mecanimNode.motionOverride == null)
+										if (mecanimNode.motionOverride.Value == null 
+					    || (mecanimNode.motionOverride.ValueType!=typeof(Motion) && !mecanimNode.motionOverride.ValueType.IsSubclassOf(typeof(Motion)))
+					    )
 												motion = mecanimNode.animatorStateSelected.motion;
 										else //
 												motion =(Motion) mecanimNode.motionOverride.Value;

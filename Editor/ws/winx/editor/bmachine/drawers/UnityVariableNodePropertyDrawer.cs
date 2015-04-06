@@ -58,16 +58,16 @@ namespace ws.winx.editor.bmachine.drawers
 
 					BlackboardCustom blackboard=node.blackboard as BlackboardCustom;
 
-					List<UnityVariable> blackboardLocalList = blackboard.GetVariableBy (att.VariableType);
+					List<UnityVariable> blackboardLocalList = blackboard.GetVariableBy (att.variableType);
 
 							
 					List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
 								
 								
 			EditorGUILayout.BeginHorizontal ();
-			EditorGUILayout.LabelField (att.Name,new GUILayoutOption[]{GUILayout.MaxWidth(80)});
+			EditorGUILayout.LabelField (att.name,new GUILayoutOption[]{GUILayout.MaxWidth(80)});
 								
-					property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.VariableType,displayOptionsList,blackboardLocalList);
+					property.value=EditorGUILayoutEx.UnityVariablePopup(guiContent,property.value as UnityVariable,att.variableType,displayOptionsList,blackboardLocalList);
 					property.serializedNode.ApplyModifiedProperties ();
 			EditorGUILayout.EndHorizontal ();
 

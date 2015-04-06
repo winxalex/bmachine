@@ -1052,7 +1052,7 @@ namespace ws.winx.editor.extensions
 
 
 		#region UnityVariablePopup
-				public static UnityVariable UnityVariablePopup (GUIContent propertyPopupLabel, UnityVariable _variableSelected, Type _typeSelected, List<GUIContent> displayOptions, List<UnityVariable> values)
+				public static UnityVariable UnityVariablePopup (GUIContent propertyPopupLabel, UnityVariable variableSelected, Type typeSelected, List<GUIContent> displayOptions, List<UnityVariable> values)
 				{
 
 					
@@ -1069,19 +1069,21 @@ namespace ws.winx.editor.extensions
 
 
 						//if _variableSelected is NULL create new UnityVariable and add default type value
-						if (_variableSelected == null) {
+						if (variableSelected == null) {
 								indexSelected = 0;
-								_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-								_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);
+								variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+								variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
 						} else 
-								indexSelected = values.IndexOf (_variableSelected);
+								indexSelected = values.IndexOf (variableSelected);
 
 						//if UnityVariable is not in supplied list of values(most likely blackboard vars)
 						if (indexSelected < 0) {
 
 								//if memberInfo == null mean that UnityVariable aren't binded to some object's property
-								//but contain raw object value
-								if (_variableSelected.instanceSystemObject == null || !(_variableSelected.instanceSystemObject is UnityEngine.Object)) {
+								//but contain raw object value || !(_variableSelected.instanceSystemObject is UnityEngine.Object)
+								if (variableSelected.instanceSystemObject == null || (variableSelected.MemberInfo==null &&  
+				    			variableSelected.ValueType!=typeof(UnityEngine.Object))
+				    			) {
 										indexSelected = 0;
 								} else {
 										indexSelected = 1;
@@ -1102,40 +1104,39 @@ namespace ws.winx.editor.extensions
 						if (indexSelected == 0) {
 								//FROM ANY TO RAW
 								if (indexSelectedPrev > 1) {
-										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);
+								variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+										variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
 					
 								} else
 								//BIND TO RAW
 								if (indexSelectedPrev == 1) {
-										//_variableSelected.MemberInfo = null;//reset 
-										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
+										variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+										variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);//give raw value
 
 								}
 
-								if (_variableSelected.instanceSystemObject == null)
-										_variableSelected.Value = FormatterServices.GetUninitializedObject (_typeSelected);//give raw value
+								if (variableSelected.instanceSystemObject == null)
+										variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);//give raw value
 
 								
 								//////// CHOOSE DRAWER ///////
 
-								if (_variableSelected.ValueType == typeof(UnityEvent)) {
+								if (variableSelected.ValueType == typeof(UnityEvent)) {
 									
 										//list.elementHeight = 43f;//MAGIC NUMBER
 										
 
-										SerializedProperty elements = _variableSelected.serializedProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
+										SerializedProperty elements = variableSelected.serializedProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
 						
 										Rect rect = EditorGUILayout.GetControlRect (true, Math.Max (1, elements.arraySize) * 43 + 36f);
 
 										//!!! UNITY DEVS DECIDED ONE DRAWER PER UNITYEVENT (WICKED STUFF)
-										if (_variableSelected.unityEventDrawer == null)	
-												_variableSelected.unityEventDrawer = new UnityEditorInternal.UnityEventDrawer ();
+										if (variableSelected.unityEventDrawer == null)	
+												variableSelected.unityEventDrawer = new UnityEditorInternal.UnityEventDrawer ();
 						
 						
 						
-										_variableSelected.unityEventDrawer.OnGUI (rect, _variableSelected.serializedProperty, new GUIContent (_variableSelected.name));
+										variableSelected.unityEventDrawer.OnGUI (rect, variableSelected.serializedProperty, new GUIContent (variableSelected.name));
 						
 						
 
@@ -1144,35 +1145,35 @@ namespace ws.winx.editor.extensions
 
 								} else {
 
-										EditorGUILayout.PropertyField (_variableSelected.serializedProperty, new GUIContent (""));
-										_variableSelected.ApplyModifiedProperties ();
+										EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
+										variableSelected.ApplyModifiedProperties ();
 								}
 
 
 						} else if (indexSelected == 1) {
-
+								//FROM LOCALS/GLOBALS TO BIND
 								if (indexSelectedPrev > 1) {
-										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-										_variableSelected.instanceSystemObject = new UnityEngine.Object ();
+										variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+										variableSelected.Value = FormatterServices.GetUninitializedObject(typeof(UnityEngine.Object));
 					
 								} else
-					
+								//FROM RAW TO BIND
 								if (indexSelectedPrev == 0) {
-										_variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-										_variableSelected.instanceSystemObject = new UnityEngine.Object ();		
+										variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+										variableSelected.Value = FormatterServices.GetUninitializedObject(typeof(UnityEngine.Object));	
 								}
 				
 								UnityEngine.Object _objectSelected = null;
 				
 								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
-								if (_variableSelected.instanceSystemObject != null && (_variableSelected.instanceSystemObject is UnityEngine.Object)) {
+								if (variableSelected.instanceSystemObject != null && (variableSelected.instanceSystemObject is UnityEngine.Object)) {
 
 										 
 
-										if (_variableSelected.instanceSystemObject is Component)
-												_objectSelected = ((Component)_variableSelected.instanceSystemObject).gameObject;
+										if (variableSelected.instanceSystemObject is Component)
+												_objectSelected = ((Component)variableSelected.instanceSystemObject).gameObject;
 										else
-												_objectSelected = _variableSelected.instanceSystemObject as UnityEngine.Object;
+												_objectSelected = variableSelected.instanceSystemObject as UnityEngine.Object;
 								} 
 						
 								//select object which properties would be extracted
@@ -1187,21 +1188,29 @@ namespace ws.winx.editor.extensions
 										MemberInfo[] memberInfos;
 							
 										//get properties from object by object type
-										Utility.ObjectToDisplayOptionsValues (_objectSelected, _typeSelected, out displayOptionsProperties, out memberInfos, out instances);
+										Utility.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out memberInfos, out instances);
 							
-										_variableSelected.MemberInfo = EditorGUILayoutEx.CustomObjectPopup<MemberInfo> (new GUIContent ("Properties"), 
-							                                                                                _variableSelected.MemberInfo, displayOptionsProperties, memberInfos
+										variableSelected.MemberInfo = EditorGUILayoutEx.CustomObjectPopup<MemberInfo> (new GUIContent ("Properties"), 
+							                                                                                variableSelected.MemberInfo, displayOptionsProperties, memberInfos
 										);
 							
-										if (_variableSelected.MemberInfo != null) {
-												int inxSelectd = Array.IndexOf (memberInfos, _variableSelected.MemberInfo);
-												_variableSelected.instanceSystemObject = instances [inxSelectd];
+										if (variableSelected.MemberInfo != null) {
+												int inxSelectd = Array.IndexOf (memberInfos, variableSelected.MemberInfo);
+												variableSelected.instanceSystemObject = instances [inxSelectd];
+										}else{//not found Members of type typeSelected => (None) UnityEngine.Object
+
+											variableSelected.Value = FormatterServices.GetUninitializedObject(typeof(UnityEngine.Object));	
 										}
 							
 							
 							
 							
-								} 
+								} else {//if None is selected reset
+										variableSelected.MemberInfo=null;
+										variableSelected.Value = FormatterServices.GetUninitializedObject(typeof(UnityEngine.Object));	
+									
+
+								}
 										
 					
 					
@@ -1209,9 +1218,9 @@ namespace ws.winx.editor.extensions
 								
 
 
-						}//end if (selected inx==1)
+						}//end if (selected inx==1)//BIND
 						else if (values != null && values.Count > 0) {
-								_variableSelected = values [indexSelected - 2];
+								variableSelected = values [indexSelected - 2];
 						}
 			
 
@@ -1220,7 +1229,7 @@ namespace ws.winx.editor.extensions
 
 						
 					
-						return _variableSelected;
+						return variableSelected;
 				}
 		#endregion
 

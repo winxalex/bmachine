@@ -16,6 +16,7 @@ using Motion=UnityEngine.Motion;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
 using UnityEditor.Animations;
+using System.Runtime.Serialization;
 
 namespace ws.winx.bmachine.extensions
 {
@@ -44,7 +45,7 @@ namespace ws.winx.bmachine.extensions
 				public int
 						layer;
 
-				[UnityVariableProperty(typeof(Motion))]
+				[UnityVariableProperty(typeof(Motion),"Motion Override")]
 				public UnityVariable motionOverride;
 
 
@@ -166,6 +167,9 @@ namespace ws.winx.bmachine.extensions
 
 						blendY = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 						blendY.Value = 0f;//make it float type
+
+						motionOverride=(UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+						motionOverride.Value=FormatterServices.GetUninitializedObject(typeof(Motion));//give raw value
 			
 				}
 

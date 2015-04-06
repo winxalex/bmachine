@@ -65,7 +65,7 @@ namespace ws.winx.editor.bmachine
 
 								__variablesReordableList.onSelectCallback = onSelectCallback;
 
-								__variablesReordableList.elementHeight=32f;
+								__variablesReordableList.elementHeight = 32f;
 				
 
 								genericMenu = EditorGUILayoutEx.GeneraterGenericMenu<Type> (EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes, onTypeSelection);
@@ -94,7 +94,7 @@ namespace ws.winx.editor.bmachine
 
 
 
-			                     );
+						);
 
 
 						Type[] derivedTypes = TypeUtility.GetDerivedTypes (typeof(System.Object));
@@ -251,9 +251,13 @@ namespace ws.winx.editor.bmachine
 
 						
 						
-						if (currentVariable != null && currentVariable.serializedProperty != null) {
-
+						if (currentVariable != null) {
 								Type type = currentVariable.ValueType;
+
+								if (currentVariable.serializedProperty == null)
+										currentVariable.Value = FormatterServices.GetUninitializedObject (type);
+
+								
 
 								if (Array.IndexOf (EditorGUILayoutEx.unityTypes, type) < 0
 										|| type == typeof(UnityEvent)) {
@@ -264,10 +268,10 @@ namespace ws.winx.editor.bmachine
 										PropertyDrawer drawer;
 
 										
-										drawer=EditorUtilityEx.GetDrawer(type);
+										drawer = EditorUtilityEx.GetDrawer (type);
 										
-										if(drawer==null)
-										 drawer= EditorUtilityEx.GetDefaultDrawer ();
+										if (drawer == null)
+												drawer = EditorUtilityEx.GetDefaultDrawer ();
 			
 			
 										Rect pos = new Rect (32, position.y, 80, 16);
@@ -276,22 +280,22 @@ namespace ws.winx.editor.bmachine
 										position.x = 113f;
 										position.width -= 80f;
 
-					EditorGUI.BeginChangeCheck ();
+										EditorGUI.BeginChangeCheck ();
 				
 
 
 										drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent (""));
 			
-					if (EditorGUI.EndChangeCheck ()) {
+										if (EditorGUI.EndChangeCheck ()) {
 						
-						currentVariable.ApplyModifiedProperties ();
+												currentVariable.ApplyModifiedProperties ();
 
 						
-						EditorUtility.SetDirty (currentVariable);
+												EditorUtility.SetDirty (currentVariable);
 
 
 						
-					}
+										}
 										
 								}
 						}
@@ -336,7 +340,7 @@ namespace ws.winx.editor.bmachine
 
 						base.DrawDefaultInspector ();
 
-						serializedObject.Update ();
+						//serializedObject.Update ();
 
 						__variablesReordableList.DoLayoutList ();
 

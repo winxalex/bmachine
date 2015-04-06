@@ -126,7 +126,7 @@ namespace ws.winx.editor
 														if (typeProperty != null && typeProperty.BaseType!= typeof(PropertyAttribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
 																EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
 												
-																Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name+" "+typeProperty.BaseType);
+//																Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name+" "+typeProperty.BaseType);
 														}
 												}
 										}
