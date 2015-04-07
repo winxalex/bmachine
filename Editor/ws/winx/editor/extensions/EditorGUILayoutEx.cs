@@ -256,7 +256,11 @@ namespace ws.winx.editor.extensions
 						int i = 0;
 						int len;
 						int inxd;
-						Rect pos = position.Value;
+						
+						Rect pos = default(UnityEngine.Rect);
+
+						if(position.HasValue)
+						pos=position.Value;
 		
 						if (position == null)
 								EditorGUILayout.BeginHorizontal ();
@@ -1261,14 +1265,14 @@ namespace ws.winx.editor.extensions
 										//get properties from object by object type
 										Utility.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out memberInfos, out instances);
 										
-										Rect? popPos=default(UnityEngine.Rect);
+										Rect? popPos=null;
 										if (position.HasValue){
 											popPos= new Rect (pos.x, pos.y, pos.width, 16);
-											pos.xMin=popPos.Value.xMax+10;
+											//pos.xMin=popPos.xMax+10;
 										}
 
 										variableSelected.MemberInfo = EditorGUILayoutEx.CustomObjectPopup<MemberInfo> (new GUIContent ("Properties"), 
-							                                                                                variableSelected.MemberInfo, displayOptionsProperties, memberInfos,null,null,null,null,popPos.Value
+							                                                                                variableSelected.MemberInfo, displayOptionsProperties, memberInfos,null,null,null,null,popPos
 										);
 							
 										if (variableSelected.MemberInfo != null) {

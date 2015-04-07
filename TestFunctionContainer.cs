@@ -17,8 +17,10 @@ public class TestFunctionContainer : MonoBehaviour {
 
 
 	 void Reset(){
-		if(variable==null)
-		variable=(UnityVariable)ScriptableObject.CreateInstance<UnityVariable>();
+		if (variable == null) {
+						variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+						variable.Value=string.Empty;
+		}
 
 		if (curve == null)
 						curve = new AnimationCurve ();

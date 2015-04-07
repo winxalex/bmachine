@@ -32,7 +32,7 @@ namespace ws.winx.editor.drawers
 						//create types selection popup
 						//if ( selectedType == typeof(System.Object)) {
 			if (property.objectReferenceValue == null)
-								type = EditorGUILayoutEx.unityTypes [0];
+				type = EditorGUILayoutEx.unityTypes [0];
 			else
 				type = ((UnityVariable)property.objectReferenceValue).ValueType;
 
@@ -42,7 +42,7 @@ namespace ws.winx.editor.drawers
 			selectedType = EditorGUILayoutEx.CustomObjectPopup<Type> (null, selectedType,EditorGUILayoutEx.unityTypesDisplayOptions , EditorGUILayoutEx.unityTypes,null,null,null,null,typePos);
 			
 								//if change of type create new variable
-								if (selectedType != type && !selectedType.IsSubclassOf (type) & type!=typeof(UnityEngine.Object)) {
+								if (selectedType != type && !selectedType.IsSubclassOf (type) && type!=typeof(UnityEngine.Object)) {
 										
 										property.objectReferenceValue = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 
