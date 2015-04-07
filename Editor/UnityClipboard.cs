@@ -89,9 +89,9 @@ public class UnityClipboard : ScriptableObject
 
 				
 				MemberInfo[] scriptableObjectsMemberInfo = members.Select ((Item) => Item).Where ((item) => item.GetUnderlyingType ().IsSubclassOf (typeof(ScriptableObject)) || (item.GetUnderlyingType ().IsArray && (item.GetUnderlyingType ().GetElementType ().IsSubclassOf (typeof(ScriptableObject))))).ToArray ();
-				ScriptableObject scriptableObjectCurrent;
+				
 				MemberInfo memberInfoCurrent;
-				ScriptableObject scriptableObjectClone;
+				
 
 				if (scriptableObjectsMemberInfo.Length > 0) {
 						for (int i=0; i<scriptableObjectsMemberInfo.Length; i++) {

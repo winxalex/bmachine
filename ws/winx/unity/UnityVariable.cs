@@ -129,7 +129,7 @@ namespace ws.winx.unity
 						set {
 								
 								
-								Type type;
+								
 
 								if(__memberInfo!=null && value!=null &&   __memberInfo.GetUnderlyingType() !=value.GetUnderlyingType()){
 									Debug.LogError("MemberInfo should continue firstime established Type of :"+_valueType);
@@ -412,7 +412,7 @@ namespace ws.winx.unity
 				}
 
 		[NonSerialized]
-		public PropertyDrawer unityEventDrawer;
+		public PropertyDrawer drawer;
 
 			
 
@@ -460,7 +460,7 @@ namespace ws.winx.unity
 
 				public override string ToString ()
 				{
-						return "Property[" + name + "] of type " + ValueType + (this.instanceSystemObject == null ? " on Static instance" : (this.instanceSystemObject.GetType().IsPrimitive || this.instanceSystemObject.GetType()==typeof(string)) ? "value of " : " on instance of " + this.instanceSystemObject);
+						return "Property[" + name + "] of type " + ValueType + (this.instanceSystemObject == null ? " on Static instance" : (this.instanceSystemObject.GetType().IsPrimitive || this.instanceSystemObject.GetType()==typeof(string)) ? " value of " : " on instance of " + this.instanceSystemObject.ToString());
 				}
 
 				void CreateSerializedProperty(){

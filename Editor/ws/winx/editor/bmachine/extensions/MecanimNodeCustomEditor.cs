@@ -592,7 +592,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 												
 
-												_variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent ("Var:"), _variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
+												_variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent("Var:"),_variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
 
 
 

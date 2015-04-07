@@ -4,11 +4,14 @@ using UnityEditor;
 using ws.winx.unity;
 using ws.winx.editor.extensions;
 using ws.winx.editor;
+using ws.winx.unity.attributes;
 
 [CustomEditor(typeof(TestFunctionContainer))]
 public class TestFunctionContainerEditor : Editor {
 
 	public SerializedProperty prop;
+
+
 	UnityVariable vari;
 
 
@@ -17,7 +20,7 @@ public class TestFunctionContainerEditor : Editor {
 
 		//vari=(UnityVariable)ScriptableObject.CreateInstance<UnityVariable>();
 		//vari.Value = new AnimationCurve ();
-		Debug.Log ("Enable Editor"+this.GetInstanceID ());
+//		Debug.Log ("Enable Editor"+this.GetInstanceID ());
 
 		EditorApplicationEventDispatcher.PlayModeChanged += onModeChange;
 
@@ -51,11 +54,11 @@ public class TestFunctionContainerEditor : Editor {
 		EditorGUI.BeginChangeCheck ();
 		base.OnInspectorGUI ();
 
-		Debug.Log ("Target ID:"+ target.GetInstanceID ());
+//		Debug.Log ("Target ID:"+ target.GetInstanceID ());
 
 
 		if (EditorGUI.EndChangeCheck ()) {
-					Debug.Log("changed curver");
+//					Debug.Log("changed curver");
 					if(Application.isPlaying){
 //						//prop=this.serializedObject.FindProperty("curve").Copy();
 //				vari=(UnityVariable)this.serializedObject.FindProperty("variable").objectReferenceValue;

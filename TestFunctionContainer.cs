@@ -2,11 +2,13 @@
 using System.Collections;
 using ws.winx.unity;
 using UnityEditor.Animations;
+using ws.winx.unity.attributes;
 
 public class TestFunctionContainer : MonoBehaviour {
 
 	public AnimationCurve curve;
 
+	[UnityVariablePropertyAttribute(typeof(string))]
 	public UnityVariable variable;
 
 	public AnimatorState state;

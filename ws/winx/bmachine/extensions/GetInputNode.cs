@@ -53,7 +53,7 @@ namespace ws.winx.bmachine.extensions
 				
 				public bool fullAxis = true;
 
-				[UnityVariablePropertyAttribute(typeof(float))]
+				[UnityVariablePropertyAttribute(typeof(float),"Input Value")]
 				public UnityVariable
 						variable;
 				

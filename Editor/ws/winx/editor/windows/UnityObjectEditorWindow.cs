@@ -47,10 +47,10 @@ namespace ws.winx.editor.windows
 
 
 								if (__variable.ValueType == typeof(UnityEvent)) {
-										if (__variable.unityEventDrawer == null)
-												__variable.unityEventDrawer = new UnityEventDrawer ();
+										if (__variable.drawer == null)
+												__variable.drawer = new UnityEventDrawer ();
 										
-												drawer = __variable.unityEventDrawer;
+												drawer = __variable.drawer;
 								}
 								else
 									drawer = EditorUtilityEx.GetDrawer (__variable.ValueType);
