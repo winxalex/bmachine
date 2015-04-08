@@ -67,10 +67,10 @@ namespace ws.winx.editor.bmachine.drawers
 								
 						EditorGUILayout.BeginHorizontal ();
 						
-					//	property.serializedNode.ApplyModifiedProperties ();
+						//	property.serializedNode.ApplyModifiedProperties ();
 
 
-			EditorGUI.BeginChangeCheck ();
+						EditorGUI.BeginChangeCheck ();
 						property.value = EditorGUILayoutEx.UnityVariablePopup (new GUIContent (att.name), property.value as UnityVariable, att.variableType, displayOptionsList, blackboardLocalList);
 
 						

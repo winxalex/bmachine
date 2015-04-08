@@ -14,7 +14,7 @@ public class TestFunctionContainer : MonoBehaviour {
 
 	public AnimatorState state;
 
-	public Motion motion;
+	public AnimationClip motion;
 
 
 	 void Reset(){

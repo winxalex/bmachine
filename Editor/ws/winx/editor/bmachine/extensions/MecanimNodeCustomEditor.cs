@@ -102,58 +102,58 @@ namespace ws.winx.editor.bmachine.extensions
 
 			
 
-//				public new void DrawDefaultInspector ()
-//				{
-//
-//
-//
-//						NodePropertyIterator iterator = this.serializedNode.GetIterator ();
-//						
-//
-//						
-//						int indentLevel = EditorGUI.indentLevel;
-//						while (iterator.Next (iterator.current == null || (iterator.current.propertyType != NodePropertyType.Variable && !iterator.current.hideInInspector))) {
-//								SerializedNodeProperty current = iterator.current;
-//							
-//							
-//								if (!current.hideInInspector) {
-//								
-//					if(current.path=="motionOverride" && mecanimNode != null && mecanimNode.animatorStateSelected != null && 
-//					   mecanimNode.animatorStateSelected.motion != null &&
-//					 mecanimNode.animatorStateSelected.motion is BlendTree)
-//						continue;
-//										
-//								
-//										if (current.path == "blendX" && 
-//												mecanimNode != null && mecanimNode.animatorStateSelected != null && 
-//												(mecanimNode.animatorStateSelected.motion == null ||
-//					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameter))
-//					 ))
-//											
-//
-//												continue;
-//										if (current.path == "blendY" 
-//												&& mecanimNode != null && mecanimNode.animatorStateSelected != null && 
-//												(mecanimNode.animatorStateSelected.motion == null ||
-//					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameterY))
-//					 ))
-//												continue;
-//
-//										EditorGUI.indentLevel = indentLevel + iterator.depth;
-//
-//
-//										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, mecanimNode, null, true);
-//										
-//										
-//								}
-//						}
-//
-//						EditorGUI.indentLevel = indentLevel;
-//
-//
-//							this.serializedNode.ApplyModifiedProperties ();
-//
-//				}
+				public new void DrawDefaultInspector ()
+				{
+
+
+
+						NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+						
+
+						
+						int indentLevel = EditorGUI.indentLevel;
+						while (iterator.Next (iterator.current == null || (iterator.current.propertyType != NodePropertyType.Variable && !iterator.current.hideInInspector))) {
+								SerializedNodeProperty current = iterator.current;
+							
+							
+								if (!current.hideInInspector) {
+								
+					if(current.path=="motionOverride" && mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+					   mecanimNode.animatorStateSelected.motion != null &&
+					 mecanimNode.animatorStateSelected.motion is BlendTree)
+						continue;
+										
+								
+										if (current.path == "blendX" && 
+												mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+												(mecanimNode.animatorStateSelected.motion == null ||
+					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameter))
+					 ))
+											
+
+												continue;
+										if (current.path == "blendY" 
+												&& mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+												(mecanimNode.animatorStateSelected.motion == null ||
+					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameterY))
+					 ))
+												continue;
+
+										EditorGUI.indentLevel = indentLevel + iterator.depth;
+
+
+										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, mecanimNode, null, true);
+										
+										
+								}
+						}
+
+						EditorGUI.indentLevel = indentLevel;
+
+
+							this.serializedNode.ApplyModifiedProperties ();
+
+				}
 
 
 
@@ -770,7 +770,8 @@ namespace ws.winx.editor.bmachine.extensions
 									
 									
 										//if there are no override use motion of selected AnimationState
-								if ( mecanimNode.motionOverride.GetValue<AnimationClip>()==null || mecanimNode.motionOverride.ValueType!=typeof(AnimationClip))
+					//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
+						if (mecanimNode.motionOverride.Value==null || mecanimNode.motionOverride.ValueType!=typeof(AnimationClip))
 											motion =((AnimatorState) animatorStateSerialized.value).motion;
 										else //
 												motion =(Motion) mecanimNode.motionOverride.Value;

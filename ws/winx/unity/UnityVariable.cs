@@ -36,6 +36,8 @@ namespace ws.winx.unity
 				
 								
 						}
+
+
 				}
 
 
@@ -262,12 +264,18 @@ namespace ws.winx.unity
 				//
 				// Constructor
 				//
-				public UnityVariable ()
-				{
+//				public UnityVariable ()
+//				{
+//
+//				}
 
+
+				public static UnityVariable CreateInstanceOf(Type T) {
+
+					UnityVariable variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+			variable._valueType = T;
+						return variable;
 				}
-
-	
 
 		#region ISerializationCallbackReceiver implementation
 

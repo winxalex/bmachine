@@ -172,11 +172,9 @@ namespace ws.winx.bmachine.extensions
 						blendY = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 						blendY.Value = 0f;//make it float type
 					
-						motionOverride = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-						motionOverride.Value = FormatterServices.GetUninitializedObject (typeof(AnimationClip));//give raw value
-						
-
-						
+						motionOverride = UnityVariable.CreateInstanceOf (typeof(AnimationClip));
+	
+				
 						Array.ForEach (this.children, (itm) => {
 			
 								//remove localy from node parent
@@ -296,15 +294,7 @@ namespace ws.winx.bmachine.extensions
 						if (this.status != Status.Running) {
 				
 								
-								if (motionOverride.Value != null) { 
-										//move this to editor
-										if (animatorStateSelected.motion is BlendTree){
-												Debug.LogError ("BlendTree can't be overrided");
-												return Status.Error;
-										}
-										
-										//not override with the same
-										else if (animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value) {
+								if (motionOverride.Value != null && animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value) {
 					
 					
 												//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
@@ -321,7 +311,7 @@ namespace ws.winx.bmachine.extensions
 					
 												//rebind back												
 												animator.runtimeAnimatorController = animatorOverrideController;
-										}
+										
 					
 								}
 				
