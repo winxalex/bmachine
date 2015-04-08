@@ -17,9 +17,14 @@ using ws.winx.unity;
 using ws.winx.unity.attributes;
 using UnityEditor.Animations;
 using System.Runtime.Serialization;
+using UnityEditor;
 
 namespace ws.winx.bmachine.extensions
 {
+
+		/// <summary>
+		/// !!! MecaniNode goes KABOOM on new compilation if added not saved
+		/// </summary>
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "Animator", description ="Use Mecanima inside BTree")]
 		public class MecanimNode:CompositeNode
 		{
@@ -29,13 +34,13 @@ namespace ws.winx.bmachine.extensions
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
 
-				//[HideInInspector]
+				[HideInInspector]
 				public AnimationCurve[]
 						curves;
-				//[HideInInspector]
+				[HideInInspector]
 				public Color[]
 						curvesColors;
-				//[HideInInspector]
+				[HideInInspector]
 				public UnityVariable[]
 						variablesBindedToCurves;
 				[AnimatorStateAttribute("animator","layer")]
@@ -44,12 +49,9 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public int
 						layer;
-
-				[UnityVariableProperty(typeof(Motion),"Motion Override")]
-				public UnityVariable motionOverride;
-
-
-
+				[UnityVariablePropertyAttribute(typeof(AnimationClip),"Motion Override")]
+				public UnityVariable
+						motionOverride;
 				public bool loop = false;
 				[UnityVariableProperty(typeof(float))]
 				public UnityVariable
@@ -79,7 +81,6 @@ namespace ws.winx.bmachine.extensions
 						animationRunTimeControlEnabled = false;
 				public float speed = 1f;
 				public float weight = 1f;
-				
 				float normalizedTimeLast = 0f;
 				int numBlendParamters;
 				AnimatorStateInfo animatorStateInfoCurrent;
@@ -88,11 +89,9 @@ namespace ws.winx.bmachine.extensions
 				bool isSelectedAnimaInfoInTransition;
 				List<int> _treeInx;
 				int _LastTickedChildren = -1;
-		           
 				[HideInInspector]
-				public Animator animator;
-
-
+				public Animator
+						animator;
 				AnimatorOverrideController _animatorOverrideController;
 
 				public AnimatorOverrideController animatorOverrideController {
@@ -117,9 +116,9 @@ namespace ws.winx.bmachine.extensions
 
 				public override void OnEnable ()
 				{
-				//	Debug.Log ("OnEnable");
-					base.OnEnable ();
-				//	animator = self.GetComponent<Animator> ();
+						//	Debug.Log ("OnEnable");
+						base.OnEnable ();
+						//	animator = self.GetComponent<Animator> ();
 					
 				}
 
@@ -140,6 +139,8 @@ namespace ws.winx.bmachine.extensions
 						result = base.Add (child);
 
 						
+
+
 
 						return result;
 				}
@@ -162,17 +163,33 @@ namespace ws.winx.bmachine.extensions
 						curves = new AnimationCurve[0];
 						variablesBindedToCurves = new UnityVariable[0];
 
+
+						
 						blendX = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 						blendX.Value = 0f;//make it float type
+						
 
 						blendY = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 						blendY.Value = 0f;//make it float type
+					
+						motionOverride = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+						motionOverride.Value = FormatterServices.GetUninitializedObject (typeof(AnimationClip));//give raw value
+						
 
-						motionOverride=(UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-						motionOverride.Value=FormatterServices.GetUninitializedObject(typeof(Motion));//give raw value
+						
+						Array.ForEach (this.children, (itm) => {
+			
+								//remove localy from node parent
+								this.Remove (itm);
+								//remove from internal behaviour tree
+								this.tree.RemoveNode (itm, false);
+						});
+
+
+						//this.tree.SaveNodes ();
 			
 				}
-
+		
 				public override void Awake ()
 				{
 						//	Debug.Log ("Awake");
@@ -279,24 +296,32 @@ namespace ws.winx.bmachine.extensions
 						if (this.status != Status.Running) {
 				
 								
-								if (motionOverride != null 
-										&& (animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value)) {
-					
-					
-										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
-					
-										animatorOverrideController [(AnimationClip)animatorStateSelected.motion] = (AnimationClip)motionOverride.Value;
-					
-										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
-					
-					
-										//to avoid nesting 
-										if (animator.runtimeAnimatorController is AnimatorOverrideController) {
-												animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
+								if (motionOverride.Value != null) { 
+										//move this to editor
+										if (animatorStateSelected.motion is BlendTree){
+												Debug.LogError ("BlendTree can't be overrided");
+												return Status.Error;
 										}
+										
+										//not override with the same
+										else if (animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value) {
 					
-										//rebind back												
-										animator.runtimeAnimatorController = animatorOverrideController;
+					
+												//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
+					
+												animatorOverrideController [(AnimationClip)animatorStateSelected.motion] = (AnimationClip)motionOverride.Value;
+					
+												//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
+					
+					
+												//to avoid nesting 
+												if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+														animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
+												}
+					
+												//rebind back												
+												animator.runtimeAnimatorController = animatorOverrideController;
+										}
 					
 								}
 				
@@ -410,7 +435,7 @@ namespace ws.winx.bmachine.extensions
 												BlendTree blendTree = animatorStateSelected.motion as BlendTree;
 
 
-						//TODO opmitize this to us Animator.StringToHash
+												//TODO opmitize this to us Animator.StringToHash
 												if (!String.IsNullOrEmpty (blendTree.blendParameter)) {
 														animator.SetFloat (blendTree.blendParameter, (float)blendX.Value);
 

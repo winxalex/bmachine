@@ -280,7 +280,7 @@ namespace ws.winx.unity
 								valueTypeSerialized = Utility.Serialize (_valueType);
 
 								//if it is not reference to other UnityVariable isn't null and not reference to UnityObject
-								if (__unityVariableReferencedInstanceID!=0 && (__instanceSystemObject != null) && (__instanceUnityObject == null && __event == null) && __instanceSystemObject.GetType () != typeof(UnityEngine.Object)) {
+				if (__unityVariableReferencedInstanceID==0 && (__instanceSystemObject != null) && (__instanceUnityObject == null && __event == null) &&  !__instanceSystemObject.GetType().IsSubclassOf(typeof(UnityEngine.Object)) &&  __instanceSystemObject.GetType () != typeof(UnityEngine.Object)) {
 
 						
 										try {
@@ -460,7 +460,7 @@ namespace ws.winx.unity
 
 				public override string ToString ()
 				{
-						return "Property[" + name + "] of type " + ValueType + (this.instanceSystemObject == null ? " on Static instance" : (this.instanceSystemObject.GetType().IsPrimitive || this.instanceSystemObject.GetType()==typeof(string)) ? " value of " : " on instance of " + this.instanceSystemObject.ToString());
+			return "Property[" + name + "] of type " + ValueType + (this.instanceSystemObject == null  ? (this.MemberInfo!=null ? "Value="+this.Value.ToString()+" on Static instance"  : " Not initialized") : (this.instanceSystemObject.GetType().IsPrimitive || this.instanceSystemObject.GetType()==typeof(string)) ? " Value=" + this.Value.ToString() : " Value=" + this.Value.ToString()+" on instance of " + this.instanceSystemObject.ToString());
 				}
 
 				void CreateSerializedProperty(){

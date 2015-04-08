@@ -37,7 +37,7 @@ namespace ws.winx.editor.drawers
 				type = ((UnityVariable)property.objectReferenceValue).ValueType;
 
 			
-
+			String name = ((UnityVariable)property.objectReferenceValue).name;
 
 			selectedType = EditorGUILayoutEx.CustomObjectPopup<Type> (null, selectedType,EditorGUILayoutEx.unityTypesDisplayOptions , EditorGUILayoutEx.unityTypes,null,null,null,null,typePos);
 			
@@ -54,6 +54,8 @@ namespace ws.winx.editor.drawers
 					//	} 
 
 			property.objectReferenceValue=EditorGUILayoutEx.UnityVariablePopup(null,property.objectReferenceValue as UnityVariable,selectedType,new List<GUIContent>(),new List<UnityVariable>(),varPos);
+			((UnityVariable)property.objectReferenceValue).drawer = this;
+			((UnityVariable)property.objectReferenceValue).name = name;
 			property.serializedObject.ApplyModifiedProperties();
 
 		}	

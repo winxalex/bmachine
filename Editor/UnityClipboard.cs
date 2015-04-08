@@ -72,7 +72,7 @@ public class UnityClipboard : ScriptableObject
 				} else {
 
 						objInfo = new ObjectInfo ();
-						objInfo.membersInstanceIDs = new Dictionary<MemberInfo, int[]> ();
+						//objInfo.membersInstanceIDs = new Dictionary<MemberInfo, int[]> ();
 						objInfo.memberInfoSerializedObject = new Dictionary<MemberInfo, SerializedObject[]> ();
 				}
 
@@ -352,7 +352,8 @@ public class UnityClipboard : ScriptableObject
 //						//reimport
 //						AssetDatabase.ImportAsset (AssetDatabase.GetAssetPath (this.GetInstanceID ()));
 
-						objInfo.membersInstanceIDs.Clear ();
+//						objInfo.membersInstanceIDs.Clear ();
+						objInfo.memberInfoSerializedObject.Clear();
 
 						__objectInstanceMembers.Remove (uid);
 

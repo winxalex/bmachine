@@ -66,6 +66,7 @@ namespace ws.winx.editor.bmachine.extensions
 				SerializedNodeProperty curvesSerialized;
 				SerializedNodeProperty curvesColorsSerialized;
 				SerializedNodeProperty variablesBindedToCurvesSerialized;
+				SerializedNodeProperty animatorStateSerialized;
 				AnimationCurve[] curves;
 				Color[] curveColors;
 				UnityVariable[] variablesBindedToCurves;
@@ -101,58 +102,58 @@ namespace ws.winx.editor.bmachine.extensions
 
 			
 
-				public new void DrawDefaultInspector ()
-				{
-
-
-
-						NodePropertyIterator iterator = this.serializedNode.GetIterator ();
-						
-
-						
-						int indentLevel = EditorGUI.indentLevel;
-						while (iterator.Next (iterator.current == null || (iterator.current.propertyType != NodePropertyType.Variable && !iterator.current.hideInInspector))) {
-								SerializedNodeProperty current = iterator.current;
-							
-							
-								if (!current.hideInInspector) {
-								
-					if(current.path=="motionOverride" && mecanimNode != null && mecanimNode.animatorStateSelected != null && 
-					   mecanimNode.animatorStateSelected.motion != null &&
-					 mecanimNode.animatorStateSelected.motion is BlendTree)
-						continue;
-										
-								
-										if (current.path == "blendX" && 
-												mecanimNode != null && mecanimNode.animatorStateSelected != null && 
-												(mecanimNode.animatorStateSelected.motion == null ||
-					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameter))
-					 ))
-											
-
-												continue;
-										if (current.path == "blendY" 
-												&& mecanimNode != null && mecanimNode.animatorStateSelected != null && 
-												(mecanimNode.animatorStateSelected.motion == null ||
-					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameterY))
-					 ))
-												continue;
-
-										EditorGUI.indentLevel = indentLevel + iterator.depth;
-
-
-										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, mecanimNode, null, true);
-										
-										
-								}
-						}
-
-						EditorGUI.indentLevel = indentLevel;
-
-
-							this.serializedNode.ApplyModifiedProperties ();
-
-				}
+//				public new void DrawDefaultInspector ()
+//				{
+//
+//
+//
+//						NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+//						
+//
+//						
+//						int indentLevel = EditorGUI.indentLevel;
+//						while (iterator.Next (iterator.current == null || (iterator.current.propertyType != NodePropertyType.Variable && !iterator.current.hideInInspector))) {
+//								SerializedNodeProperty current = iterator.current;
+//							
+//							
+//								if (!current.hideInInspector) {
+//								
+//					if(current.path=="motionOverride" && mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+//					   mecanimNode.animatorStateSelected.motion != null &&
+//					 mecanimNode.animatorStateSelected.motion is BlendTree)
+//						continue;
+//										
+//								
+//										if (current.path == "blendX" && 
+//												mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+//												(mecanimNode.animatorStateSelected.motion == null ||
+//					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameter))
+//					 ))
+//											
+//
+//												continue;
+//										if (current.path == "blendY" 
+//												&& mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+//												(mecanimNode.animatorStateSelected.motion == null ||
+//					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameterY))
+//					 ))
+//												continue;
+//
+//										EditorGUI.indentLevel = indentLevel + iterator.depth;
+//
+//
+//										GUILayoutHelper.DrawNodeProperty (new GUIContent (current.label, current.tooltip), current, mecanimNode, null, true);
+//										
+//										
+//								}
+//						}
+//
+//						EditorGUI.indentLevel = indentLevel;
+//
+//
+//							this.serializedNode.ApplyModifiedProperties ();
+//
+//				}
 
 
 
@@ -177,7 +178,8 @@ namespace ws.winx.editor.bmachine.extensions
 		
 						//child.timeNormalized.Value = args.selectedValue;
 						child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
-						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						//child.timeNormalized.ApplyModifiedProperties ();
+						//SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 				}
 
@@ -194,7 +196,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// <param name="args">Arguments.</param>
 				void onMecanimEventClose (TimeLineArgs<float> args)
 				{
-						SendEventNormalizedEditor.Hide ();
+						//SendEventNormalizedEditor.Hide ();
 				}
 
 
@@ -226,7 +228,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 						//show popup
-						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						//SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 						Undo.RecordObject (target.self, "Add Node");
 				}
@@ -316,7 +318,7 @@ namespace ws.winx.editor.bmachine.extensions
 						StateUtility.SetDirty (mecanimNode.tree);
 
 						Undo.RecordObject (target.self, "Delete Node");
-						SendEventNormalizedEditor.Hide ();
+						//SendEventNormalizedEditor.Hide ();
 
 
 				}
@@ -754,17 +756,22 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 								////////////////////////////////////////////////////////////////////////////
-			
+
+				if(animatorStateSerialized==null){
+					NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+					if (iterator.Find ("animatorStateSelected"))
+						animatorStateSerialized = iterator.current;
+				}
+
+
 
 								//////////  MOTION OVERRIDE HANDLING  //////////
-								if (mecanimNode.animatorStateSelected != null) {
+								if (animatorStateSerialized.value != null) {
 									
 									
 										//if there are no override use motion of selected AnimationState
-										if (mecanimNode.motionOverride.Value == null 
-					    || (mecanimNode.motionOverride.ValueType!=typeof(Motion) && !mecanimNode.motionOverride.ValueType.IsSubclassOf(typeof(Motion)))
-					    )
-												motion = mecanimNode.animatorStateSelected.motion;
+								if ( mecanimNode.motionOverride.GetValue<AnimationClip>()==null || mecanimNode.motionOverride.ValueType!=typeof(AnimationClip))
+											motion =((AnimatorState) animatorStateSerialized.value).motion;
 										else //
 												motion =(Motion) mecanimNode.motionOverride.Value;
 									
@@ -882,8 +889,12 @@ namespace ws.winx.editor.bmachine.extensions
 												//TODO calculate PopupRect
 					
 												eventTimeLineValuePopUpRect = new Rect ((Screen.width - 250) * 0.5f, (Screen.height - 150) * 0.5f, 250, 150);
+
+
 												//select the time values from nodes
 												//eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.Value).ToArray ();
+
+							
 												eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.serializedProperty.floatValue).ToArray ();
 
 
@@ -935,7 +946,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 								
 										// Restore the indent level
-										EditorGUI.indentLevel = indentLevel;
+										//EditorGUI.indentLevel = indentLevel;
 								
 										// Apply modified properties
 										this.serializedNode.ApplyModifiedProperties ();

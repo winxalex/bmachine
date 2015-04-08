@@ -64,7 +64,7 @@ namespace ws.winx.bmachine.extensions
 
 								if (timeNormalizedCurrent > (float)timeNormalized.Value && _timeNormalizedLast < (float)timeNormalized.Value) {
 
-										//Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
+									//	Debug.Log ("Event [" + name + "] sent at:" + timeNormalized.Value);
 										((UnityEvent)this.unityEvent.Value).Invoke ();
 										_timeNormalizedLast = timeNormalizedCurrent;
 										return Status.Success;
@@ -80,12 +80,14 @@ namespace ws.winx.bmachine.extensions
 			
 				public override void Reset ()
 				{
-						//this.onAnimationEvent = new UnityEvent ();
+						//!!! if UnityVariables aren't Init here KABOOM when added to MecaniNode
 						this.timeNormalized = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
 						this.timeNormalized.Value = 0f;
-
+						
+			
 						this.unityEvent = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
 						this.unityEvent.Value = new UnityEvent ();
+						
 						
 						_timeNormalizedLast = 0f;
 				

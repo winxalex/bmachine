@@ -3,6 +3,7 @@ using System.Collections;
 using ws.winx.unity;
 using UnityEditor.Animations;
 using ws.winx.unity.attributes;
+using UnityEditor;
 
 public class TestFunctionContainer : MonoBehaviour {
 
@@ -17,13 +18,8 @@ public class TestFunctionContainer : MonoBehaviour {
 
 
 	 void Reset(){
-		if (variable == null) {
-						variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-						variable.Value=string.Empty;
-		}
 
-		if (curve == null)
-						curve = new AnimationCurve ();
+
 	}
 
    	public void Debug(string message){

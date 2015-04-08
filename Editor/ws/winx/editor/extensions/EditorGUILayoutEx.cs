@@ -259,8 +259,8 @@ namespace ws.winx.editor.extensions
 						
 						Rect pos = default(UnityEngine.Rect);
 
-						if(position.HasValue)
-						pos=position.Value;
+						if (position.HasValue)
+								pos = position.Value;
 		
 						if (position == null)
 								EditorGUILayout.BeginHorizontal ();
@@ -271,22 +271,20 @@ namespace ws.winx.editor.extensions
 						//add Label field
 						// Screen.width in insprector returns its width not Screen => so 35% for the lable and rest for the popup button
 						if (style != null && label != null) {
-								if (position.HasValue){
-										Rect labelPos=new Rect(pos.x,position.Value.y,80,position.Value.height);
-										pos.xMin=labelPos.xMax+10;
+								if (position.HasValue) {
+										Rect labelPos = new Rect (pos.x, position.Value.y, 80, position.Value.height);
+										pos.xMin = labelPos.xMax + 10;
 										EditorGUI.LabelField (position.Value, label, style);
-								}
-								else
+								} else
 										EditorGUILayout.LabelField (label, style, GUILayout.Width (style.CalcSize (label).x));
 										
 						} else 	if (label != null) {
 							
-								if (position.HasValue){
-										Rect labelPos=new Rect(pos.x,position.Value.y,80,position.Value.height);
-										pos.xMin=labelPos.xMax+10;
-										 EditorGUI.LabelField (labelPos, label);
-								}
-								else
+								if (position.HasValue) {
+										Rect labelPos = new Rect (pos.x, position.Value.y, 80, position.Value.height);
+										pos.xMin = labelPos.xMax + 10;
+										EditorGUI.LabelField (labelPos, label);
+								} else
 										EditorGUILayout.LabelField (label, GUILayout.Width (GUI.skin.label.CalcSize (label).x));
 										
 						}
@@ -368,11 +366,10 @@ namespace ws.winx.editor.extensions
 						if (position.HasValue) {
 							
 								
-								Rect buttonPos=new Rect(pos.x,pos.y,pos.width,position.Value.height);
+								Rect buttonPos = new Rect (pos.x, pos.y, pos.width, position.Value.height);
 								
-					                        clicked = GUI.Button (buttonPos, buttonLabel, EditorStyles.popup);
-						}
-						else
+								clicked = GUI.Button (buttonPos, buttonLabel, EditorStyles.popup);
+						} else
 								clicked = GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup);
 			
 						if (clicked) {
@@ -1079,10 +1076,10 @@ namespace ws.winx.editor.extensions
 						displayOptions.Insert (0, new GUIContent ("Raw"));
 						displayOptions.Insert (1, new GUIContent ("Bind"));
 
-						Rect pos=default(UnityEngine.Rect);
+						Rect pos = default(UnityEngine.Rect);
 						
-						if(position.HasValue)
-							pos= position.Value;
+						if (position.HasValue)
+								pos = position.Value;
 
 
 						if (label != null) {
@@ -1095,7 +1092,7 @@ namespace ws.winx.editor.extensions
 										labelPos.width = 80;
 										labelPos.height = position.Value.height;
 
-										pos.xMin=labelPos.xMax+10;
+										pos.xMin = labelPos.xMax + 10;
 										EditorGUI.LabelField (labelPos, label);
 								} else
 										EditorGUILayout.LabelField (label, new GUILayoutOption[]{GUILayout.MaxWidth (80)});
@@ -1124,9 +1121,7 @@ namespace ws.winx.editor.extensions
 
 								//if memberInfo == null mean that UnityVariable aren't binded to some object's property
 								//but contain raw object value || !(_variableSelected.instanceSystemObject is UnityEngine.Object)
-								if (variableSelected.instanceSystemObject == null || (variableSelected.MemberInfo == null && 
-										variableSelected.ValueType != typeof(UnityEngine.Object))
-				    			) {
+								if (variableSelected.instanceSystemObject == null || (variableSelected.MemberInfo == null && variableSelected.ValueType != typeof(UnityEngine.Object))) {
 										indexSelected = 0;
 								} else {
 										indexSelected = 1;
@@ -1141,7 +1136,7 @@ namespace ws.winx.editor.extensions
 
 						if (position.HasValue) {
 								Rect popupPos = new Rect (pos.x, pos.y, 80, position.Value.height);
-								pos.xMin=popupPos.xMax+10;
+								pos.xMin = popupPos.xMax + 10;
 								indexSelected = EditorGUI.Popup (popupPos, indexSelected, displayOptions.ToArray ());
 						} else
 								indexSelected = EditorGUILayout.Popup (indexSelected, displayOptions.ToArray ());
@@ -1160,19 +1155,10 @@ namespace ws.winx.editor.extensions
 												variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
 					
 								} 
-								//else
-//								//BIND TO RAW
-//								if (indexSelectedPrev == 1) {
-//										variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-//										variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);//give raw value
-//
-//								}
+							
 
-								if (variableSelected.instanceSystemObject == null)
-									if (typeSelected == typeof(string))
-										variableSelected.Value = String.Empty;
-									else
-										variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);//give raw value
+
+									
 
 												
 								//////// CHOOSE DRAWER ///////
@@ -1206,13 +1192,32 @@ namespace ws.winx.editor.extensions
 
 								} else {
 										//EditorGUILayout.PropertyField (position,variableSelected.serializedProperty, new GUIContent (""));
-										if (position.HasValue) {
-												Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
-												pos.xMin=propertyPos.xMax+10;
-												EditorGUI.PropertyField (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
-										} else
-												EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
 
+										if (!variableSelected.ValueType.IsSubclassOf (typeof(UnityEngine.Object))) {
+
+						//!!! Bellow code might prevent Kaboom on compiling not saved Node/GameObject with UnityVariables
+						//												if (variableSelected.Value == null)
+						//												if (typeSelected == typeof(string))
+						//														variableSelected.Value = String.Empty;
+						//												else
+						//														variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
+						
+						
+												if (position.HasValue) {
+														Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
+														pos.xMin = propertyPos.xMax + 10;
+														EditorGUI.PropertyField (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
+												} else
+														EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
+										} else {
+												if (position.HasValue) {
+														Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
+														pos.xMin = propertyPos.xMax + 10;
+														variableSelected.Value = EditorGUI.ObjectField (propertyPos, variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+												} else
+														variableSelected.Value = EditorGUILayout.ObjectField (variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+										}
+					
 										variableSelected.ApplyModifiedProperties ();
 								}
 
@@ -1225,12 +1230,7 @@ namespace ws.winx.editor.extensions
 
 									
 								}
-//								else
-//								//FROM RAW TO BIND
-//								if (indexSelectedPrev == 0) {
-//										variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-//										variableSelected.Value = FormatterServices.GetUninitializedObject(typeof(UnityEngine.Object));	
-//								}
+
 				
 								UnityEngine.Object _objectSelected = null;
 				
@@ -1246,12 +1246,11 @@ namespace ws.winx.editor.extensions
 								} 
 						
 								//select object which properties would be extracted
-								if (position.HasValue){
-									Rect objPos = new Rect (pos.x, pos.y, 80, 16);
-									pos.xMin=objPos.xMax+10;
-									_objectSelected = EditorGUI.ObjectField (objPos, _objectSelected, typeof(UnityEngine.Object), true);
-								}
-								else
+								if (position.HasValue) {
+										Rect objPos = new Rect (pos.x, pos.y, 80, 16);
+										pos.xMin = objPos.xMax + 10;
+										_objectSelected = EditorGUI.ObjectField (objPos, _objectSelected, typeof(UnityEngine.Object), true);
+								} else
 										_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
 						
 						
@@ -1265,14 +1264,14 @@ namespace ws.winx.editor.extensions
 										//get properties from object by object type
 										Utility.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out memberInfos, out instances);
 										
-										Rect? popPos=null;
-										if (position.HasValue){
-											popPos= new Rect (pos.x, pos.y, pos.width, 16);
-											//pos.xMin=popPos.xMax+10;
+										Rect? popPos = null;
+										if (position.HasValue) {
+												popPos = new Rect (pos.x, pos.y, pos.width, 16);
+												//pos.xMin=popPos.xMax+10;
 										}
 
 										variableSelected.MemberInfo = EditorGUILayoutEx.CustomObjectPopup<MemberInfo> (new GUIContent ("Properties"), 
-							                                                                                variableSelected.MemberInfo, displayOptionsProperties, memberInfos,null,null,null,null,popPos
+							                                                                                variableSelected.MemberInfo, displayOptionsProperties, memberInfos, null, null, null, null, popPos
 										);
 							
 										if (variableSelected.MemberInfo != null) {

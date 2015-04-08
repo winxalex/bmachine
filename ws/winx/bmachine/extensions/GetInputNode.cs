@@ -84,8 +84,8 @@ namespace ws.winx.bmachine.extensions
 				public override void Reset ()
 				{
 					
-						variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-						variable.Value = 0f;//make it float type
+						//variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+						//variable.Value = 0f;//make it float type
 
 						multiplier = 1f;
 

@@ -92,17 +92,13 @@ namespace ws.winx.editor.bmachine
 				void fillMenuCustomTypes ()
 				{
 						genericMenu.AddSeparator (string.Empty);
-						genericMenu.AddItem (new GUIContent ("Any UnityObject"), false, onTypeSelection, typeof(UnityEngine.Object)
+					
 
-
-
+						genericMenu.AddItem (new GUIContent ("Any UnityVariable"), false, onTypeSelection, typeof(UnityEngine.Object)
+			                     
+			                     
+			                     
 						);
-
-			genericMenu.AddItem (new GUIContent ("Any UnityVariable"), false, onTypeSelection, typeof(UnityEngine.Object)
-			                     
-			                     
-			                     
-			                     );
 
 
 						Type[] derivedTypes = TypeUtility.GetDerivedTypes (typeof(System.Object));
@@ -130,13 +126,9 @@ namespace ws.winx.editor.bmachine
 						});
 				}
 		
-				void AddVariableToList<T> (string name, T value, ReorderableList list)
+				void AddVariableToList<T> (string name, T value, ReorderableList list, PropertyDrawer drawer=null)
 				{
-						AddVariableToList1 (name, value, list);
-				}
-
-				void AddVariableToList1 (string name, object value, ReorderableList list)
-				{
+				
 
 
 						var index = list.serializedProperty.arraySize;
@@ -145,7 +137,7 @@ namespace ws.winx.editor.bmachine
 			
 						UnityVariable variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 						variable.name = name;
-						
+						variable.drawer = drawer;
 						variable.Value = value;
 			
 						var element = list.serializedProperty.GetArrayElementAtIndex (index);
@@ -171,10 +163,9 @@ namespace ws.winx.editor.bmachine
 								AddVariableToList ("New " + type.Name, new AnimationCurve (new Keyframe (0f, 0f, 0f, 0f), new Keyframe (1f, 1f, 0f, 0f)), __variablesReordableList);
 						else if (type == typeof(Texture3D))
 								AddVariableToList ("New " + type.Name, new Texture3D (2, 2, 2, TextureFormat.ARGB32, false), __variablesReordableList);
-//						else if (type == typeof(UnityVariable))
-//								AddVariableToList ("New " + type.Name, (UnityVariable)ScriptableObject.CreateInstance<UnityVariable>(), __variablesReordableList);
-//			
-			
+						else if (type == typeof(UnityEngine.Object)) 
+
+								AddVariableToList ("New " + type.Name, FormatterServices.GetUninitializedObject (type), __variablesReordableList, new UniUnityVariablePropertyDrawer ());
 						else
 						
 						
@@ -274,31 +265,35 @@ namespace ws.winx.editor.bmachine
 								
 
 								if (Array.IndexOf (EditorGUILayoutEx.unityTypes, type) < 0
-										|| type == typeof(UnityEvent)) {
+										|| type == typeof(UnityEvent) || (currentVariable.drawer != null)) {
 
 										
 
 
-											if(type==typeof(UnityEngine.Object)){
-												if(currentVariable.drawer==null)
-													currentVariable.drawer=new UniUnityVariablePropertyDrawer();
+										
+										if (currentVariable.drawer != null) {			
 
 												
-												variableNameTextFieldPos.y=position.y;
-												variableNameTextFieldPos.x=position.x;
+												variableNameTextFieldPos.y = position.y;
+												variableNameTextFieldPos.x = position.x;
 						
-
+												EditorGUI.BeginChangeCheck ();
 												currentVariable.name = EditorGUI.TextField (variableNameTextFieldPos, currentVariable.name);
-
-//												variableValuePos.y=position.y;
-//												variableValuePos.x=variableNameTextFieldPos.x+variableNameTextFieldPos.width+10;
-//												variableValuePos.height=position.height;
-//												variableValuePos.width=position.width-position.x-variableNameTextFieldPos.width-10;
-
-												position.xMin = variableNameTextFieldPos.xMax+10;
+												if (EditorGUI.EndChangeCheck ()) {
 							
-												currentVariable.drawer.OnGUI(position, currentVariable.serializedProperty, null);
-											}else
+
+														property.serializedObject.ApplyModifiedProperties ();
+							
+														//EditorUtility.SetDirty (currentVariable);
+							
+							
+							
+												}
+										
+												position.xMin = variableNameTextFieldPos.xMax + 10;
+							
+												currentVariable.drawer.OnGUI (position, property, null);
+										} else
 												currentVariable.name = EditorGUI.TextField (position, currentVariable.name);
 										
 
@@ -312,11 +307,11 @@ namespace ws.winx.editor.bmachine
 												drawer = EditorUtilityEx.GetDefaultDrawer ();
 			
 			
-					variableNameTextFieldPos.y=position.y;
-					variableNameTextFieldPos.x=position.x;
+										variableNameTextFieldPos.y = position.y;
+										variableNameTextFieldPos.x = position.x;
 						
-						currentVariable.name = EditorGUI.TextField (variableNameTextFieldPos, currentVariable.name);
-										position.xMin = variableNameTextFieldPos.xMax+10;
+										currentVariable.name = EditorGUI.TextField (variableNameTextFieldPos, currentVariable.name);
+										position.xMin = variableNameTextFieldPos.xMax + 10;
 										//position.width =position.width- variableNameTextFieldPos.width;
 
 										EditorGUI.BeginChangeCheck ();

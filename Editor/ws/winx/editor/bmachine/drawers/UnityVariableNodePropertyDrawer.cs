@@ -19,13 +19,14 @@ namespace ws.winx.editor.bmachine.drawers
 		{
 
 
-		//make Unity crash
+				//make Unity crash
 //				public new UnityVariablePropertyAttribute attribute { 
 //						get{ return (UnityVariablePropertyAttribute)attribute;}
 //				}
 
 
-				private void OnEnable() {
+				private void OnEnable ()
+				{
 
 						
 				}
@@ -54,22 +55,31 @@ namespace ws.winx.editor.bmachine.drawers
 
 
 
-					UnityVariablePropertyAttribute att=(UnityVariablePropertyAttribute)attribute;
+						UnityVariablePropertyAttribute att = (UnityVariablePropertyAttribute)attribute;
 
-					BlackboardCustom blackboard=node.blackboard as BlackboardCustom;
+						BlackboardCustom blackboard = node.blackboard as BlackboardCustom;
 
-					List<UnityVariable> blackboardLocalList = blackboard.GetVariableBy (att.variableType);
+						List<UnityVariable> blackboardLocalList = blackboard.GetVariableBy (att.variableType);
 
 							
-					List<GUIContent> displayOptionsList=blackboardLocalList.Select ((item) => new GUIContent ("Local/"+item.name)).ToList();
+						List<GUIContent> displayOptionsList = blackboardLocalList.Select ((item) => new GUIContent ("Local/" + item.name)).ToList ();
 								
 								
-			EditorGUILayout.BeginHorizontal ();
+						EditorGUILayout.BeginHorizontal ();
+						
+					//	property.serializedNode.ApplyModifiedProperties ();
 
-								
-					property.value=EditorGUILayoutEx.UnityVariablePopup(new GUIContent(att.name),property.value as UnityVariable,att.variableType,displayOptionsList,blackboardLocalList);
-					property.serializedNode.ApplyModifiedProperties ();
-			EditorGUILayout.EndHorizontal ();
+
+			EditorGUI.BeginChangeCheck ();
+						property.value = EditorGUILayoutEx.UnityVariablePopup (new GUIContent (att.name), property.value as UnityVariable, att.variableType, displayOptionsList, blackboardLocalList);
+
+						
+
+						if (EditorGUI.EndChangeCheck ()) {
+								property.serializedNode.ApplyModifiedProperties ();
+						}
+
+						EditorGUILayout.EndHorizontal ();
 
 				}
 		
