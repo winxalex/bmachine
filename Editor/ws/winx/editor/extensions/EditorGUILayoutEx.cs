@@ -1187,7 +1187,7 @@ namespace ws.winx.editor.extensions
 						
 						
 
-
+										variableSelected.ApplyModifiedProperties ();
 
 
 								} else {

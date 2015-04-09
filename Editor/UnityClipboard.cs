@@ -120,19 +120,20 @@ public class UnityClipboard : ScriptableObject
 				}
 
 
+		/// SOME IDEAS ABOUT SAVING THINGS ON DISK ALSO
 
 				//clean .asset from any left
-				foreach (var memberInfoInstanceIDPair in objInfo.membersInstanceIDs) {
-						memberInfoCurrent = memberInfoInstanceIDPair.Key;
-						//remove previous clones from .asset
-						
-						int[] IDs = objInfo.membersInstanceIDs [memberInfoCurrent];
-						
-						// destroy object and its footprint in .asset
-						for (int k=0; k<IDs.Length; k++)
-								UnityEngine.Object.DestroyImmediate (EditorUtility.InstanceIDToObject (IDs [k]), true);
-						
-				}
+//				foreach (var memberInfoInstanceIDPair in objInfo.membersInstanceIDs) {
+//						memberInfoCurrent = memberInfoInstanceIDPair.Key;
+//						//remove previous clones from .asset
+//						
+//						int[] IDs = objInfo.membersInstanceIDs [memberInfoCurrent];
+//						
+//						// destroy object and its footprint in .asset
+//						for (int k=0; k<IDs.Length; k++)
+//								UnityEngine.Object.DestroyImmediate (EditorUtility.InstanceIDToObject (IDs [k]), true);
+//						
+//				}
 		
 		
 //		if (scriptableObjectsMemberInfo.Length > 0) {

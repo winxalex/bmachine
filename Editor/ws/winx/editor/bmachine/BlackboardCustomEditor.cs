@@ -270,8 +270,8 @@ namespace ws.winx.editor.bmachine
 										
 
 
-										
-										if (currentVariable.drawer != null) {			
+										//!!! this part is for Any UnityVariable with UnityTypes wiht UniUnityVariablePropertyDrawer (experimental)
+										if (currentVariable.ValueType!=typeof(UnityEvent) && currentVariable.drawer != null) {			
 
 												
 												variableNameTextFieldPos.y = position.y;

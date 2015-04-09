@@ -47,7 +47,6 @@ namespace ws.winx.editor.bmachine.extensions
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
-				
 				AnimatorState selectedAnimaStateInfo;
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
@@ -118,16 +117,16 @@ namespace ws.winx.editor.bmachine.extensions
 							
 								if (!current.hideInInspector) {
 								
-					if(current.path=="motionOverride" && mecanimNode != null && mecanimNode.animatorStateSelected != null && 
-					   mecanimNode.animatorStateSelected.motion != null &&
-					 mecanimNode.animatorStateSelected.motion is BlendTree)
-						continue;
+										if (current.path == "motionOverride" && mecanimNode != null && mecanimNode.animatorStateSelected != null && 
+												mecanimNode.animatorStateSelected.motion != null &&
+												mecanimNode.animatorStateSelected.motion is BlendTree)
+												continue;
 										
 								
 										if (current.path == "blendX" && 
 												mecanimNode != null && mecanimNode.animatorStateSelected != null && 
 												(mecanimNode.animatorStateSelected.motion == null ||
-					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameter))
+												!(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty (((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameter))
 					 ))
 											
 
@@ -135,7 +134,7 @@ namespace ws.winx.editor.bmachine.extensions
 										if (current.path == "blendY" 
 												&& mecanimNode != null && mecanimNode.animatorStateSelected != null && 
 												(mecanimNode.animatorStateSelected.motion == null ||
-					 !(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty(((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameterY))
+												!(mecanimNode.animatorStateSelected.motion is BlendTree && !String.IsNullOrEmpty (((BlendTree)mecanimNode.animatorStateSelected.motion).blendParameterY))
 					 ))
 												continue;
 
@@ -151,7 +150,7 @@ namespace ws.winx.editor.bmachine.extensions
 						EditorGUI.indentLevel = indentLevel;
 
 
-							this.serializedNode.ApplyModifiedProperties ();
+						this.serializedNode.ApplyModifiedProperties ();
 
 				}
 
@@ -230,7 +229,13 @@ namespace ws.winx.editor.bmachine.extensions
 						//show popup
 						//SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
+						
+
 						Undo.RecordObject (target.self, "Add Node");
+
+						EditorApplication.SaveScene ();
+
+						
 				}
 
 
@@ -364,85 +369,85 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-				//////////////////////////////////////////////////////////////
-				/// 						PRESEVE RESTORE					//
-				if (EditorApplication.isPlaying || EditorApplication.isPaused) {
+								//////////////////////////////////////////////////////////////
+								/// 						PRESEVE RESTORE					//
+								if (EditorApplication.isPlaying || EditorApplication.isPaused) {
 					
 					
-					if (GUILayout.Button ("Preserve")) {
+										if (GUILayout.Button ("Preserve")) {
 						
 						
-						serializedNode.ApplyModifiedProperties ();
+												serializedNode.ApplyModifiedProperties ();
 						
-						mecanimNode.blendX.OnBeforeSerialize();
-						mecanimNode.blendY.OnBeforeSerialize();
-						mecanimNode.motionOverride.OnBeforeSerialize();
+												mecanimNode.blendX.OnBeforeSerialize ();
+												mecanimNode.blendY.OnBeforeSerialize ();
+												mecanimNode.motionOverride.OnBeforeSerialize ();
 
-						if(variablesBindedToCurves!=null){
-							UnityVariable[] varArray=variablesBindedToCurves;
+												if (variablesBindedToCurves != null) {
+														UnityVariable[] varArray = variablesBindedToCurves;
 
-							int varNumber=varArray.Length;
-							for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
-								varArray[varCurrent].OnBeforeSerialize();
+														int varNumber = varArray.Length;
+														for (int varCurrent=0; varCurrent<varNumber; varCurrent++) {
+																varArray [varCurrent].OnBeforeSerialize ();
 								
-							}
-						}
+														}
+												}
 						
 						
-						EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
+												EditorUtilityEx.Clipboard.preserve (mecanimNode.instanceID, mecanimNode, mecanimNode.GetType ().GetFields ());
 						
-					}
-				} else {
-					if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
-						EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
-						curvesSerialized = null;
-						NodePropertyIterator iterator = serializedNode.GetIterator ();
+										}
+								} else {
+										if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
+												EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
+												curvesSerialized = null;
+												animatorStateSerialized=null;
+												NodePropertyIterator iterator = serializedNode.GetIterator ();
 						
 						
 						
-						while (iterator.Next (true)) {
-							if(iterator.current.value is UnityVariable)
-							{
-								//Debug.Log("OnBeforeDeserialize:"+((UnityVariable)iterator.current.value).Value);
-								((UnityVariable)iterator.current.value).OnAfterDeserialize();
+												while (iterator.Next (true)) {
+														if (iterator.current.value is UnityVariable) {
+																//Debug.Log("OnBeforeDeserialize:"+((UnityVariable)iterator.current.value).Value);
+																((UnityVariable)iterator.current.value).OnAfterDeserialize ();
 								
-								//Debug.Log("OnAfterDeserialize:"+((UnityVariable)iterator.current.value).Value);
-							}else if(iterator.current.value is UnityVariable[]){
+																//Debug.Log("OnAfterDeserialize:"+((UnityVariable)iterator.current.value).Value);
+														} else if (iterator.current.value is UnityVariable[]) {
 								
-								UnityVariable[] varArray=(UnityVariable[])iterator.current.value;
-								int varNumber=varArray.Length;
-								for(int varCurrent=0;varCurrent<varNumber;varCurrent++){
-									varArray[varCurrent].OnAfterDeserialize();
+																UnityVariable[] varArray = (UnityVariable[])iterator.current.value;
+																int varNumber = varArray.Length;
+																for (int varCurrent=0; varCurrent<varNumber; varCurrent++) {
+																		varArray [varCurrent].OnAfterDeserialize ();
 									
+																}
+								
+								
+														}
+							
+							
+														iterator.current.ValueChanged ();
+							
+														this.serializedNode.Update ();
+							
+														iterator.current.ApplyModifiedValue ();
+							
+							
+							
+							
+												}
+						
+						
+						
+						
+						
+						
+						
+										}
+					
+					
+					
 								}
-								
-								
-							}
-							
-							
-							iterator.current.ValueChanged ();
-							
-							this.serializedNode.Update ();
-							
-							iterator.current.ApplyModifiedValue();
-							
-							
-							
-							
-						}
-						
-						
-						
-						
-						
-						
-						
-					}
-					
-					
-					
-				}
-				//////////////////////
+								//////////////////////
 
 							
 								if (Event.current.type == EventType.Layout) {
@@ -594,7 +599,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 												
 
-												_variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent("Var:"),_variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
+												_variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent ("Var:"), _variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
 
 
 
@@ -630,7 +635,7 @@ namespace ws.winx.editor.bmachine.extensions
 												_colorSelected.a = 1;
 												cList.Add (_colorSelected);
 												curvesColorsSerialized.value = curveColors = cList.ToArray ();
-												curvesColorsSerialized.ValueChanged();	
+												curvesColorsSerialized.ValueChanged ();	
 														
 												
 
@@ -653,7 +658,7 @@ namespace ws.winx.editor.bmachine.extensions
 												crList.Add (curveAnimationNew);
 							
 												curvesSerialized.value = curves = crList.ToArray ();
-												curvesSerialized.ValueChanged();
+												curvesSerialized.ValueChanged ();
 
 
 
@@ -673,10 +678,10 @@ namespace ws.winx.editor.bmachine.extensions
 						
 												
 
-													this.serializedNode.ApplyModifiedProperties ();
+												this.serializedNode.ApplyModifiedProperties ();
 
 
-											_variableSelected=null;
+												_variableSelected = null;
 
 										}
 
@@ -717,7 +722,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 												_curveIndexSelected = -1;
-												_variableSelected=null;
+												_variableSelected = null;
 
 												this.serializedNode.ApplyModifiedProperties ();
 				
@@ -757,11 +762,11 @@ namespace ws.winx.editor.bmachine.extensions
 
 								////////////////////////////////////////////////////////////////////////////
 
-				if(animatorStateSerialized==null){
-					NodePropertyIterator iterator = this.serializedNode.GetIterator ();
-					if (iterator.Find ("animatorStateSelected"))
-						animatorStateSerialized = iterator.current;
-				}
+								if (animatorStateSerialized == null) {
+										NodePropertyIterator iterator = this.serializedNode.GetIterator ();
+										if (iterator.Find ("animatorStateSelected"))
+												animatorStateSerialized = iterator.current;
+								}
 
 
 
@@ -770,13 +775,14 @@ namespace ws.winx.editor.bmachine.extensions
 									
 									
 										//if there are no override use motion of selected AnimationState
-					//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
-						if (mecanimNode.motionOverride.Value==null || mecanimNode.motionOverride.ValueType!=typeof(AnimationClip))
-											motion =((AnimatorState) animatorStateSerialized.value).motion;
+										//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
+										if (mecanimNode.motionOverride.Value == null || mecanimNode.motionOverride.ValueType != typeof(AnimationClip))
+												motion = ((AnimatorState)animatorStateSerialized.value).motion;
 										else //
-												motion =(Motion) mecanimNode.motionOverride.Value;
+												motion = (Motion)mecanimNode.motionOverride.Value;
 									
-									
+										((AnimatorState)animatorStateSerialized.value).motion= motion;
+										animatorStateSerialized.ApplyModifiedValue ();
 									
 										if (mecanimNode.motionOverride != null && mecanimNode.animatorStateSelected.motion == null) {
 												Debug.LogError ("Can't override state that doesn't contain motion");
