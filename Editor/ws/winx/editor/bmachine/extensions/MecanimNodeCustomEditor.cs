@@ -781,8 +781,7 @@ namespace ws.winx.editor.bmachine.extensions
 										else //
 												motion = (Motion)mecanimNode.motionOverride.Value;
 									
-										((AnimatorState)animatorStateSerialized.value).motion= motion;
-										animatorStateSerialized.ApplyModifiedValue ();
+									
 									
 										if (mecanimNode.motionOverride != null && mecanimNode.animatorStateSelected.motion == null) {
 												Debug.LogError ("Can't override state that doesn't contain motion");
@@ -865,7 +864,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 										avatarPreview.timeControl.playbackSpeed = mecanimNode.speed;
 
-
+										
 										
 
 

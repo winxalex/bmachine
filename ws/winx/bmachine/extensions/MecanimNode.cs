@@ -53,10 +53,10 @@ namespace ws.winx.bmachine.extensions
 				public UnityVariable
 						motionOverride;
 				public bool loop = false;
-				[UnityVariableProperty(typeof(float))]
+				[UnityVariableProperty(typeof(float),"blendX")]
 				public UnityVariable
 						blendX;
-				[UnityVariableProperty(typeof(float))]
+				[UnityVariableProperty(typeof(float),"blendY")]
 				public UnityVariable
 						blendY;
 				[RangeAttribute(0f,1f)]
@@ -79,6 +79,7 @@ namespace ws.winx.bmachine.extensions
 				//[HideInInspector]
 				public bool
 						animationRunTimeControlEnabled = false;
+				public bool mirror = false;
 				public float speed = 1f;
 				public float weight = 1f;
 				float normalizedTimeLast = 0f;
@@ -315,10 +316,12 @@ namespace ws.winx.bmachine.extensions
 					
 								}
 				
-				
-				
+								//TODO investigate AnimatorState access in U5.0
+								//animatorStateSelected.mirror=this.mirror;
+								//animatorStateSelected.speed=this.speed;
 				
 								animator.speed = this.speed;
+
 				
 								animator.SetLayerWeight (layer, this.weight);
 				
