@@ -58,19 +58,31 @@ namespace ws.winx.editor.bmachine.drawers
 					
 						animatorStateSelected = property.value as AnimatorState;
 
-						if (animatorSerialized == null) {
-								NodePropertyIterator iter= property.serializedNode.GetIterator();
-								iter.Find(attribute.animatorFieldName);
-								animatorSerialized=iter.current;
+						if (animatorSerialized == null || aniController == null) {
+
+								//!!! Serialization never serialized Animator cos its initialized in Reset after
+//								NodePropertyIterator iter= property.serializedNode.GetIterator();
+//								iter.Find(attribute.animatorFieldName);
+//								 animatorSerialized=iter.current;
+								//				//								if(animatorSerialized==null || animatorSerialized.value==null){
+								//										Debug.LogError("AnimatorStateNodePropertyDrawer> No Animator component set on node parent GameObject");
+								//									return;
+								//								}
+				
+								//runtimeContoller =( (Animator)animatorSerialized.value).runtimeAnimatorController;
+								Animator animator = node.GetType ().GetField (attribute.animatorFieldName).GetValue (node) as Animator;
+				                        
+				               
 
 								RuntimeAnimatorController runtimeContoller;
-								
-								runtimeContoller =( (Animator)animatorSerialized.value).runtimeAnimatorController;
+
+
+								runtimeContoller = animator.runtimeAnimatorController;
 								
 								if (runtimeContoller is AnimatorOverrideController)
-									aniController = ((AnimatorOverrideController)runtimeContoller).runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+										aniController = ((AnimatorOverrideController)runtimeContoller).runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
 								else
-									aniController = runtimeContoller as UnityEditor.Animations.AnimatorController;
+										aniController = runtimeContoller as UnityEditor.Animations.AnimatorController;
 				
 
 
@@ -100,12 +112,12 @@ namespace ws.winx.editor.bmachine.drawers
 						if (animatorStateSelectedPrev != animatorStateSelected) {
 								property.value = animatorStateSelected;
 
-								NodePropertyIterator iter= property.serializedNode.GetIterator();
-								iter.Find(attribute.layerIndexFieldName);
-								SerializedNodeProperty layerIndexSerialized=iter.current;
+								NodePropertyIterator iter = property.serializedNode.GetIterator ();
+								iter.Find (attribute.layerIndexFieldName);
+								SerializedNodeProperty layerIndexSerialized = iter.current;
 								
-								layerIndexSerialized.value= MecanimUtility.GetLayerIndex (aniController, animatorStateSelected);
-								layerIndexSerialized.ApplyModifiedValue();
+								layerIndexSerialized.value = MecanimUtility.GetLayerIndex (aniController, animatorStateSelected);
+								layerIndexSerialized.ApplyModifiedValue ();
 
 								property.ApplyModifiedValue ();
 

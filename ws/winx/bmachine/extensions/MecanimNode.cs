@@ -29,7 +29,7 @@ namespace ws.winx.bmachine.extensions
 		public class MecanimNode:CompositeNode
 		{
 				
-
+		
 				public new BlackboardCustom blackboard {
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
@@ -40,9 +40,13 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public Color[]
 						curvesColors;
-				[HideInInspector]
+				//[HideInInspector]
 				public UnityVariable[]
 						variablesBindedToCurves;
+
+				[HideInInspector]
+				public Animator animator;
+		
 				[AnimatorStateAttribute("animator","layer")]
 				public AnimatorState
 						animatorStateSelected;
@@ -90,9 +94,8 @@ namespace ws.winx.bmachine.extensions
 				bool isSelectedAnimaInfoInTransition;
 				List<int> _treeInx;
 				int _LastTickedChildren = -1;
-				[HideInInspector]
-				public Animator
-						animator;
+				
+				
 				AnimatorOverrideController _animatorOverrideController;
 
 				public AnimatorOverrideController animatorOverrideController {
@@ -115,9 +118,11 @@ namespace ws.winx.bmachine.extensions
 						}
 				}
 
+			
+
 				public override void OnEnable ()
 				{
-						//	Debug.Log ("OnEnable");
+							Debug.Log ("OnEnable");
 						base.OnEnable ();
 						//	animator = self.GetComponent<Animator> ();
 					
@@ -195,9 +200,10 @@ namespace ws.winx.bmachine.extensions
 						//animaStateInfoSelected1 = ((AnimatorController)animator.runtimeAnimatorController).
 						//layers [0].stateMachine.states [0].state;
 
-						if (animatorStateSelected != null) {
+						if(animator==null)
+							animator = self.GetComponent<Animator> ();
+
 						
-						}
 			
 				}
 
