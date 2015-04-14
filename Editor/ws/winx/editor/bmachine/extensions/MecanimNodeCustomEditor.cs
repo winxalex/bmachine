@@ -624,7 +624,7 @@ namespace ws.winx.editor.bmachine.extensions
 												vList.Add (_variableSelected);
 												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
 												variablesBindedToCurvesSerialized.ValueChanged ();
-												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
+												//variablesBindedToCurvesSerialized.ApplyModifiedValue ();
 
 												
 
@@ -636,7 +636,7 @@ namespace ws.winx.editor.bmachine.extensions
 												cList.Add (_colorSelected);
 												curvesColorsSerialized.value = curveColors = cList.ToArray ();
 												curvesColorsSerialized.ValueChanged ();	
-												curvesColorsSerialized.ApplyModifiedValue ();		
+												//curvesColorsSerialized.ApplyModifiedValue ();		
 												
 
 												
@@ -659,7 +659,7 @@ namespace ws.winx.editor.bmachine.extensions
 							
 												curvesSerialized.value = curves = crList.ToArray ();
 												curvesSerialized.ValueChanged ();
-												curvesColorsSerialized.ApplyModifiedValue ();
+												//curvesColorsSerialized.ApplyModifiedValue ();
 
 
 
@@ -676,9 +676,9 @@ namespace ws.winx.editor.bmachine.extensions
 							
 												
 						
-												//this.serializedNode.Update();
+												this.serializedNode.Update();
 
-												//this.serializedNode.ApplyModifiedProperties ();
+												this.serializedNode.ApplyModifiedProperties ();
 
 
 												_variableSelected = null;
