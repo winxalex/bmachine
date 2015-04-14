@@ -401,7 +401,7 @@ namespace ws.winx.editor.bmachine.extensions
 										if (EditorUtilityEx.Clipboard.HasBeenPreseved (mecanimNode.instanceID) && GUILayout.Button ("Apply Playmode Changes")) {
 												EditorUtilityEx.Clipboard.restore (mecanimNode.instanceID, mecanimNode);
 												curvesSerialized = null;
-												animatorStateSerialized=null;
+												animatorStateSerialized = null;
 												NodePropertyIterator iterator = serializedNode.GetIterator ();
 						
 						
@@ -624,7 +624,7 @@ namespace ws.winx.editor.bmachine.extensions
 												vList.Add (_variableSelected);
 												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
 												variablesBindedToCurvesSerialized.ValueChanged ();
-
+												variablesBindedToCurvesSerialized.ApplyModifiedValue ();
 
 												
 
@@ -636,7 +636,7 @@ namespace ws.winx.editor.bmachine.extensions
 												cList.Add (_colorSelected);
 												curvesColorsSerialized.value = curveColors = cList.ToArray ();
 												curvesColorsSerialized.ValueChanged ();	
-														
+												curvesColorsSerialized.ApplyModifiedValue ();		
 												
 
 												
@@ -659,7 +659,7 @@ namespace ws.winx.editor.bmachine.extensions
 							
 												curvesSerialized.value = curves = crList.ToArray ();
 												curvesSerialized.ValueChanged ();
-
+												curvesColorsSerialized.ApplyModifiedValue ();
 
 
 
@@ -676,9 +676,9 @@ namespace ws.winx.editor.bmachine.extensions
 							
 												
 						
-												
+												//this.serializedNode.Update();
 
-												this.serializedNode.ApplyModifiedProperties ();
+												//this.serializedNode.ApplyModifiedProperties ();
 
 
 												_variableSelected = null;
