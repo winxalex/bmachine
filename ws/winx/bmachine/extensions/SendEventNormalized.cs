@@ -81,12 +81,13 @@ namespace ws.winx.bmachine.extensions
 				public override void Reset ()
 				{
 						//!!! if UnityVariables aren't Init here KABOOM when added to MecaniNode
-						this.timeNormalized = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
-						this.timeNormalized.Value = 0f;
+						this.timeNormalized = UnityVariable.CreateInstanceOf (typeof(float));
 						
 			
-						this.unityEvent = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
-						this.unityEvent.Value = new UnityEvent ();
+						//this.unityEvent = (UnityVariable)ScriptableObject.CreateInstance< UnityVariable> ();
+						//this.unityEvent.Value = new UnityEvent ();
+						//this.unityEvent.OnBeforeSerialize ();
+						this.unityEvent = UnityVariable.CreateInstanceOf (typeof(UnityEngine.Events.UnityEvent));
 						
 						
 						_timeNormalizedLast = 0f;

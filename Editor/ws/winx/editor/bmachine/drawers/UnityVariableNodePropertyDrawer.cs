@@ -71,7 +71,9 @@ namespace ws.winx.editor.bmachine.drawers
 
 
 						EditorGUI.BeginChangeCheck ();
-						property.value = EditorGUILayoutEx.UnityVariablePopup (new GUIContent (att.name), property.value as UnityVariable, att.variableType, displayOptionsList, blackboardLocalList);
+
+						EditorGUILayout.LabelField (att.name,new GUILayoutOption[]{GUILayout.MaxWidth(80)});
+						property.value = EditorGUILayoutEx.UnityVariablePopup (null, property.value as UnityVariable, att.variableType, displayOptionsList, blackboardLocalList);
 
 						
 

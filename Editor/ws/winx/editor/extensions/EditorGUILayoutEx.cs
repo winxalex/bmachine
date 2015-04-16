@@ -1078,9 +1078,12 @@ namespace ws.winx.editor.extensions
 
 						Rect pos = default(UnityEngine.Rect);
 						
+			
 						if (position.HasValue)
 								pos = position.Value;
-
+					
+							
+					
 
 						if (label != null) {
 
@@ -1107,12 +1110,7 @@ namespace ws.winx.editor.extensions
 						//if _variableSelected is NULL create new UnityVariable and add default type value
 						if (variableSelected == null) {
 								indexSelected = 0;
-								variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-
-								if (typeSelected == typeof(string))
-										variableSelected.Value = String.Empty;
-								else
-										variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
+								variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
 						} else 
 								indexSelected = values.IndexOf (variableSelected);
 
@@ -1148,11 +1146,7 @@ namespace ws.winx.editor.extensions
 						if (indexSelected == 0) {
 								//FROM ANY TO RAW | BIND TO RAW
 								if (indexSelectedPrev >= 1) {
-										variableSelected = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-										if (typeSelected == typeof(string))
-												variableSelected.Value = String.Empty;
-										else
-												variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
+										variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
 					
 								} 
 							
@@ -1192,33 +1186,59 @@ namespace ws.winx.editor.extensions
 
 								} else {
 										//EditorGUILayout.PropertyField (position,variableSelected.serializedProperty, new GUIContent (""));
+					EditorGUI.BeginChangeCheck();
 
 										if (!variableSelected.ValueType.IsSubclassOf (typeof(UnityEngine.Object))) {
 
-						//!!! Bellow code might prevent Kaboom on compiling not saved Node/GameObject with UnityVariables
-						//												if (variableSelected.Value == null)
-						//												if (typeSelected == typeof(string))
-						//														variableSelected.Value = String.Empty;
-						//												else
-						//														variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
-						
+												//!!! Bellow code might prevent Kaboom on compiling not saved Node/GameObject with UnityVariables
+												//												if (variableSelected.Value == null)
+												//												if (typeSelected == typeof(string))
+												//														variableSelected.Value = String.Empty;
+												//												else
+												//														variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
+
+												PropertyDrawer drawer;
+												
+												
+												drawer = EditorUtilityEx.GetDrawer (variableSelected.ValueType);
+												
+												if (drawer == null)
+														drawer = EditorUtilityEx.GetDefaultDrawer ();
+
+												
 						
 												if (position.HasValue) {
 														Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
 														pos.xMin = propertyPos.xMax + 10;
-														EditorGUI.PropertyField (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
-												} else
-														EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
+														//EditorGUI.PropertyField (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
+														drawer.OnGUI (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
+												} else{
+														//EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
+			
+
+														drawer.OnGUI (GUILayoutUtility.GetRect(80,32), variableSelected.serializedProperty, new GUIContent (""));
+															
+												}
+												
+					
 										} else {
 												if (position.HasValue) {
 														Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
 														pos.xMin = propertyPos.xMax + 10;
 														variableSelected.Value = EditorGUI.ObjectField (propertyPos, variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
 												} else
-														variableSelected.Value = EditorGUILayout.ObjectField (variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+							variableSelected.Value = EditorGUI.ObjectField (GUILayoutUtility.GetRect(80,16), variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+													//if(Event.current.type==EventType.Layout)
+													//	variableSelected.Value = EditorGUILayout.ObjectField (variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+										}
+
+
+										if(EditorGUI.EndChangeCheck()){
+											variableSelected.ApplyModifiedProperties ();
+											//Debug.Log ("change happen");
 										}
 					
-										variableSelected.ApplyModifiedProperties ();
+										
 								}
 
 

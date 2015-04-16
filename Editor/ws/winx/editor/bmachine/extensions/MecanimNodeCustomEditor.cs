@@ -66,11 +66,14 @@ namespace ws.winx.editor.bmachine.extensions
 				SerializedNodeProperty curvesColorsSerialized;
 				SerializedNodeProperty variablesBindedToCurvesSerialized;
 				SerializedNodeProperty animatorStateSerialized;
+				SerializedNodeProperty animatorStateRuntimeControlEnabledSerialized;
+				SerializedNodeProperty animatorStateRunTimeControlSerialized;
+				SerializedNodeProperty motionOverrideSerialized;
 				AnimationCurve[] curves;
 				Color[] curveColors;
 				UnityVariable[] variablesBindedToCurves;
 				bool _changesPreserve;
-				
+				bool hasRigidbody;			
 				
 		        
 
@@ -178,7 +181,7 @@ namespace ws.winx.editor.bmachine.extensions
 						//child.timeNormalized.Value = args.selectedValue;
 						child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
 						//child.timeNormalized.ApplyModifiedProperties ();
-						//SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 				}
 
@@ -227,7 +230,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 						//show popup
-						//SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
 
 						
 
@@ -459,7 +462,7 @@ namespace ws.winx.editor.bmachine.extensions
 								
 								_curvesEditorShow = EditorGUILayout.Foldout (_curvesEditorShow, "Curves");
 								
-								int indentLevel = 0;
+								//int indentLevel = 0;
 
 								Rect curveEditorRect = new Rect (0, 0, 0, 0);
 
@@ -676,7 +679,7 @@ namespace ws.winx.editor.bmachine.extensions
 							
 												
 						
-												this.serializedNode.Update();
+												this.serializedNode.Update ();
 
 												this.serializedNode.ApplyModifiedProperties ();
 
@@ -766,6 +769,10 @@ namespace ws.winx.editor.bmachine.extensions
 										NodePropertyIterator iterator = this.serializedNode.GetIterator ();
 										if (iterator.Find ("animatorStateSelected"))
 												animatorStateSerialized = iterator.current;
+
+										
+										if (iterator.Find ("motionOverride"))
+												motionOverrideSerialized = iterator.current;
 								}
 
 
@@ -773,17 +780,18 @@ namespace ws.winx.editor.bmachine.extensions
 								//////////  MOTION OVERRIDE HANDLING  //////////
 								if (animatorStateSerialized.value != null) {
 									
+										UnityVariable motionOverridVariable = (UnityVariable)motionOverrideSerialized.value;
 									
 										//if there are no override use motion of selected AnimationState
 										//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
-										if (mecanimNode.motionOverride.Value == null || mecanimNode.motionOverride.ValueType != typeof(AnimationClip))
+										if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
 												motion = ((AnimatorState)animatorStateSerialized.value).motion;
 										else //
-												motion = (Motion)mecanimNode.motionOverride.Value;
+												motion = (Motion)motionOverridVariable.Value;
 									
 									
 									
-										if (mecanimNode.motionOverride != null && mecanimNode.animatorStateSelected.motion == null) {
+										if (motionOverridVariable != null && motionOverridVariable.Value!=null && ((AnimatorState)animatorStateSerialized.value).motion == null) {
 												Debug.LogError ("Can't override state that doesn't contain motion");
 										}
 									
@@ -794,17 +802,85 @@ namespace ws.winx.editor.bmachine.extensions
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
 								if (Application.isPlaying) {
 
-										NodePropertyIterator iterator = this.serializedNode.GetIterator ();
-										if (iterator.Find ("animationRunTimeControlEnabled")) {
-												//mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
+										if (animatorStateRuntimeControlEnabledSerialized == null) {
+												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
 
-												if ((bool)iterator.current.value) {
-														Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
-														timeControlRect.xMin += 38f;
-														timeControlRect.xMax -= 70f;
-														timeNormalized = mecanimNode.animationRunTimeControl = EditorGUILayoutEx.CustomHSlider (timeControlRect, mecanimNode.animationRunTimeControl, 0f, 1f, TimeControlW.style.timeScrubber);
+												if (iterator.Find ("animationRunTimeControlEnabled")) {
+														animatorStateRuntimeControlEnabledSerialized = iterator.current;
+												}
+
+												if (iterator.Find ("animatorStateRunTimeControl")) {
+														animatorStateRunTimeControlSerialized = iterator.current;
 												}
 										}
+					
+										
+										//mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
+										List<int> nAnimatorStateRuntimeControlHaveEnabled = MecanimNode.nAnimatorStateRuntimeControlHaveEnabled;
+										if (animatorStateRuntimeControlEnabledSerialized != null && animatorStateRunTimeControlSerialized != null && (bool)animatorStateRuntimeControlEnabledSerialized.value) {
+												Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
+												timeControlRect.xMin += 38f;
+												timeControlRect.xMax -= 70f;
+												animatorStateRunTimeControlSerialized.value = timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, (float)animatorStateRunTimeControlSerialized.value, 0f, 1f, TimeControlW.style.timeScrubber);
+												
+
+												
+												if (nAnimatorStateRuntimeControlHaveEnabled.IndexOf (mecanimNode.instanceID) < 0) {
+
+														nAnimatorStateRuntimeControlHaveEnabled.Add (mecanimNode.instanceID);
+						   								
+														//no other have copied and removed Rigidbody of "self" GameObject => go do it
+														if (nAnimatorStateRuntimeControlHaveEnabled.Count == 1) {
+																Rigidbody rigidBody = mecanimNode.self.GetComponent<Rigidbody> ();
+																if (rigidBody != null) {
+																		//copy
+																		//MecanimNode.rigidbodySerializedObject = new SerializedObject (rigidBody);
+																		
+																		//remove
+																		//GameObject.Destroy (rigidBody);					
+//									//remove
+																		//!!! Cannot disable rigidbody component in
+//									rigidBody.isKinematic=true;
+//									rigidBody.useGravity=false;
+//									rigidBody.detectCollisions=false;
+//									rigidBody.angularVelocity=Vector3.zero;
+//									rigidBody.velocity=Vector3.zero;
+//									rigidBody.Sleep();
+//									rigidBody.useGravity=false;
+//									rigidBody.drag=0f;
+//									rigidBody.freezeRotation=true;
+//									rigidBody.angularDrag=0f;
+//									rigidBody.constraints=RigidbodyConstraints.None;
+//									rigidBody.centerOfMass=Vector3.zero;
+//									//rigidBody.inertiaTensor=Vector3.zero;
+//									rigidBody.inertiaTensorRotation=Quaternion.identity;
+//
+//									rigidBody.solverIterationCount=0;
+//									rigidBody.rotation=Quaternion.identity;
+																		//RigidbodyConstraints.
+																	
+																		
+																	
+																}
+														}
+												}
+
+										} else {
+												int inx;
+												if ((inx = nAnimatorStateRuntimeControlHaveEnabled.IndexOf (mecanimNode.instanceID)) > -1) {
+														nAnimatorStateRuntimeControlHaveEnabled.RemoveAt (inx);
+														if (nAnimatorStateRuntimeControlHaveEnabled.Count == 0) {
+																//UnityEditorInternal.ComponentUtility.PasteComponentAsNew (mecanimNode.self);
+																Rigidbody rigidbody = mecanimNode.self.AddComponent<Rigidbody> ();
+																UnityClipboard.copySerialized (MecanimNode.rigidbodySerializedObject, new SerializedObject (rigidbody));
+
+																//typeof(UnityEngine.Object).GetField ("m_InstanceID", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (rigidbody, 16428);
+																//
+														}
+												}
+
+										}
+										
 
 								}
 								///////////////////////////////////////////////////////////////
@@ -946,11 +1022,13 @@ namespace ws.winx.editor.bmachine.extensions
 														eventDisplayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
 					
 					
-					
-					
+												ev.timeNormalized.ApplyModifiedProperties();
+							
 										}
 
-								
+										
+						
+						
 										// Restore the indent level
 										//EditorGUI.indentLevel = indentLevel;
 								

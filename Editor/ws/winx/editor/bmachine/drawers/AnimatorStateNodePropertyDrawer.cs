@@ -23,7 +23,7 @@ namespace ws.winx.editor.bmachine.drawers
 				AnimatorState animatorStateSelected;
 				AnimatorState animatorStateSelectedPrev;
 				UnityEngine.Motion motionSelected;
-				SerializedNodeProperty animatorSerialized;
+				//SerializedNodeProperty animatorSerialized;
 
 
 
@@ -58,7 +58,10 @@ namespace ws.winx.editor.bmachine.drawers
 					
 						animatorStateSelected = property.value as AnimatorState;
 
-						if (animatorSerialized == null || aniController == null) {
+						
+
+						//if (animatorSerialized == null || aniController == null) {
+						if(aniController == null) {
 
 								//!!! Serialization never serialized Animator cos its initialized in Reset after
 //								NodePropertyIterator iter= property.serializedNode.GetIterator();

@@ -205,7 +205,7 @@ public class UnityClipboard : ScriptableObject
 
 		}
 
-		void copySerialized (SerializedObject source, SerializedObject dest)
+		public static void copySerialized (SerializedObject source, SerializedObject dest)
 		{
 
 				SerializedProperty serializedPropertyCurrent;
@@ -272,6 +272,8 @@ public class UnityClipboard : ScriptableObject
 												serializedObjectCurrent = new SerializedObject (scriptabledObjectCurrent);
 													
 												//copy saved to current
+												//TODO try
+												//EditorUtility.CopySerialized(
 												copySerialized (serializedObjectSaved, serializedObjectCurrent);
 													
 												//keep current in list

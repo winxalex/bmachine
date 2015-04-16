@@ -163,6 +163,8 @@ namespace ws.winx.editor.bmachine
 								AddVariableToList ("New " + type.Name, new AnimationCurve (new Keyframe (0f, 0f, 0f, 0f), new Keyframe (1f, 1f, 0f, 0f)), __variablesReordableList);
 						else if (type == typeof(Texture3D))
 								AddVariableToList ("New " + type.Name, new Texture3D (2, 2, 2, TextureFormat.ARGB32, false), __variablesReordableList);
+						else if (type == typeof(UnityEngine.Events.UnityEvent))
+								AddVariableToList ("New " + type.Name, new UnityEvent (), __variablesReordableList);
 						else if (type == typeof(UnityEngine.Object)) 
 
 								AddVariableToList ("New " + type.Name, FormatterServices.GetUninitializedObject (type), __variablesReordableList, new UniUnityVariablePropertyDrawer ());
@@ -271,7 +273,7 @@ namespace ws.winx.editor.bmachine
 
 
 										//!!! this part is for Any UnityVariable with UnityTypes wiht UniUnityVariablePropertyDrawer (experimental)
-										if (currentVariable.ValueType!=typeof(UnityEvent) && currentVariable.drawer != null) {			
+										if (currentVariable.ValueType != typeof(UnityEvent) && currentVariable.drawer != null) {			
 
 												
 												variableNameTextFieldPos.y = position.y;

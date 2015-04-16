@@ -55,9 +55,11 @@ public class TestFunctionContainerEditor : Editor {
 		base.OnInspectorGUI ();
 
 //		Debug.Log ("Target ID:"+ target.GetInstanceID ());
-
+		Debug.Log(((UnityVariable)this.serializedObject.FindProperty("variable2").objectReferenceValue).Value);
 
 		if (EditorGUI.EndChangeCheck ()) {
+
+
 //					Debug.Log("changed curver");
 					if(Application.isPlaying){
 //						//prop=this.serializedObject.FindProperty("curve").Copy();

@@ -76,16 +76,33 @@ namespace ws.winx.bmachine.extensions
 						timeNormalizedCurrent = 0f;
 				[HideInInspector]
 				public float
-						animationRunTimeControl = 0.5f;
+						animatorStateRunTimeControl = 0.5f;
 
 
 
-				//[HideInInspector]
+				
 				public bool
 						animationRunTimeControlEnabled = false;
 				public bool mirror = false;
 				public float speed = 1f;
 				public float weight = 1f;
+
+				/// <summary>
+				/// Mecanim AnimatorStateRuntimeControl is in conflict with Rigidbody
+				/// number of MecanimNodes with set AnimatorStateRuntimeControl
+				/// </summary>
+				public static List<int> _nAnimatorStateRuntimeControlHaveEnabled;
+
+				public static List<int> nAnimatorStateRuntimeControlHaveEnabled {
+					get {
+				if(_nAnimatorStateRuntimeControlHaveEnabled==null) _nAnimatorStateRuntimeControlHaveEnabled=new List<int>();
+						return _nAnimatorStateRuntimeControlHaveEnabled;
+					}
+				}
+				
+				public static SerializedObject rigidbodySerializedObject;
+
+		
 				float normalizedTimeLast = 0f;
 				int numBlendParamters;
 				AnimatorStateInfo animatorStateInfoCurrent;
@@ -122,7 +139,7 @@ namespace ws.winx.bmachine.extensions
 
 				public override void OnEnable ()
 				{
-							Debug.Log ("OnEnable");
+							//Debug.Log ("OnEnable");
 						base.OnEnable ();
 						//	animator = self.GetComponent<Animator> ();
 					
@@ -171,12 +188,12 @@ namespace ws.winx.bmachine.extensions
 
 
 						
-						blendX = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-						blendX.Value = 0f;//make it float type
+						blendX = UnityVariable.CreateInstanceOf (typeof(float));
+						
 						
 
-						blendY = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-						blendY.Value = 0f;//make it float type
+						blendY = UnityVariable.CreateInstanceOf (typeof(float));
+						
 					
 						motionOverride = UnityVariable.CreateInstanceOf (typeof(AnimationClip));
 	
@@ -300,8 +317,8 @@ namespace ws.winx.bmachine.extensions
 						//The second check ins't nessery if I could reset Status when this node is switched
 						if (this.status != Status.Running) {
 				
-								
-								if (motionOverride.Value != null && animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value) {
+				// 
+				if (motionOverride!=null && this.motionOverride.Value != null && animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value) {
 					
 					
 												//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
@@ -456,7 +473,7 @@ namespace ws.winx.bmachine.extensions
 
 
 										if (animationRunTimeControlEnabled) {
-												animator.Update (animationRunTimeControl - animatorStateInfoCurrent.normalizedTime);
+												animator.Update (animatorStateRunTimeControl - animatorStateInfoCurrent.normalizedTime);
 
 										}
 
