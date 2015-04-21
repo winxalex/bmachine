@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ws.winx.unity
 {
-		public sealed class AnimatorState : ScriptableObject
+		public class AnimatorState : ScriptableObject
 		{
 				//
 				// Fields
@@ -14,52 +14,19 @@ namespace ws.winx.unity
 				//
 	
 	
-				public  bool iKOnFeet {
-		
-						get;
-		
-						set;
-				}
+				public  bool iKOnFeet ;
 	
-				public  bool mirror {
-		
-						get;
+				public  bool mirror ;
 	
-						set;
-				}
+				public Motion motion ;
 	
-				public Motion motion {
-		
-						get;
+				public  int nameHash;
 	
-						set;
-				}
+				public  float speed;
 	
-				public  int nameHash {
-						get;
-						set;
-				}
+				public string tag ;
 	
-				public  float speed {
-		
-						get;
-	
-						set;
-				}
-	
-				public string tag {
-		
-						get;
-		
-						set;
-				}
-	
-				public bool writeDefaultValues {
-
-						get;
-
-						set;
-				}
+				public bool writeDefaultValues ;
 
 				public int[] blendParamsHashes;
 

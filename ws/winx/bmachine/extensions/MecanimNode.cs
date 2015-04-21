@@ -17,7 +17,6 @@ using ws.winx.unity;
 using ws.winx.unity.attributes;
 using System.Runtime.Serialization;
 
-
 namespace ws.winx.bmachine.extensions
 {
 
@@ -33,10 +32,9 @@ namespace ws.winx.bmachine.extensions
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
 
-				public List<AnimationCurve>[] curvesPerVariable;
+				//public List<AnimationCurve>[] curvesPerVariable;
 
-				[UnityVariablePropertyAttribute(typeof(Vector3),"Test")]
-				public UnityVariable testVarable;
+			
 				
 
 				[HideInInspector]
@@ -45,12 +43,12 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public Color[]
 						curvesColors;
-				//[HideInInspector]
+				[HideInInspector]
 				public UnityVariable[]
 						variablesBindedToCurves;
-
 				[HideInInspector]
-				public Animator animator;
+				public Animator
+						animator;
 		
 				[AnimatorStateAttribute("animator","layer")]
 				public AnimatorState
@@ -82,10 +80,6 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public float
 						animatorStateRunTimeControl = 0.5f;
-
-
-
-				
 				public bool
 						animationRunTimeControlEnabled = false;
 				public bool mirror = false;
@@ -99,10 +93,11 @@ namespace ws.winx.bmachine.extensions
 				public static List<int> _nAnimatorStateRuntimeControlHaveEnabled;
 
 				public static List<int> nAnimatorStateRuntimeControlHaveEnabled {
-					get {
-				if(_nAnimatorStateRuntimeControlHaveEnabled==null) _nAnimatorStateRuntimeControlHaveEnabled=new List<int>();
-						return _nAnimatorStateRuntimeControlHaveEnabled;
-					}
+						get {
+								if (_nAnimatorStateRuntimeControlHaveEnabled == null)
+										_nAnimatorStateRuntimeControlHaveEnabled = new List<int> ();
+								return _nAnimatorStateRuntimeControlHaveEnabled;
+						}
 				}
 				
 				//public static SerializedObject rigidbodySerializedObject;
@@ -116,8 +111,6 @@ namespace ws.winx.bmachine.extensions
 				bool isSelectedAnimaInfoInTransition;
 				List<int> _treeInx;
 				int _LastTickedChildren = -1;
-				
-				
 				AnimatorOverrideController _animatorOverrideController;
 
 				public AnimatorOverrideController animatorOverrideController {
@@ -140,11 +133,9 @@ namespace ws.winx.bmachine.extensions
 						}
 				}
 
-			
-
 				public override void OnEnable ()
 				{
-							//Debug.Log ("OnEnable");
+						//Debug.Log ("OnEnable");
 						base.OnEnable ();
 						//	animator = self.GetComponent<Animator> ();
 					
@@ -191,7 +182,7 @@ namespace ws.winx.bmachine.extensions
 						curves = new AnimationCurve[0];
 						variablesBindedToCurves = new UnityVariable[0];
 
-
+						animatorStateSelected = (AnimatorState)ScriptableObject.CreateInstance<AnimatorState> ();
 						
 						blendX = UnityVariable.CreateInstanceOf (typeof(float));
 						
@@ -224,8 +215,8 @@ namespace ws.winx.bmachine.extensions
 						//animaStateInfoSelected1 = ((AnimatorController)animator.runtimeAnimatorController).
 						//layers [0].stateMachine.states [0].state;
 
-						if(animator==null)
-							animator = self.GetComponent<Animator> ();
+						if (animator == null)
+								animator = self.GetComponent<Animator> ();
 
 						
 			
@@ -324,24 +315,24 @@ namespace ws.winx.bmachine.extensions
 						//The second check ins't nessery if I could reset Status when this node is switched
 						if (this.status != Status.Running) {
 				
-				// 
-				if (motionOverride!=null && this.motionOverride.Value != null && animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value) {
+								// 
+								if (motionOverride != null && this.motionOverride.Value != null && animatorOverrideController [(AnimationClip)animatorStateSelected.motion] != (AnimationClip)motionOverride.Value) {
 					
 					
-												//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
+										//	Debug.Log (this.name + ">Selected state Motion " + animaStateInfoSelected.motion + "to be overrided with " + motionOverride);
 					
-												animatorOverrideController [(AnimationClip)animatorStateSelected.motion] = (AnimationClip)motionOverride.Value;
+										animatorOverrideController [(AnimationClip)animatorStateSelected.motion] = (AnimationClip)motionOverride.Value;
 					
-												//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
+										//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
 					
 					
-												//to avoid nesting 
-												if (animator.runtimeAnimatorController is AnimatorOverrideController) {
-														animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
-												}
+										//to avoid nesting 
+										if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+												animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
+										}
 					
-												//rebind back												
-												animator.runtimeAnimatorController = animatorOverrideController;
+										//rebind back												
+										animator.runtimeAnimatorController = animatorOverrideController;
 										
 					
 								}
@@ -452,20 +443,24 @@ namespace ws.winx.bmachine.extensions
 
 							
 										
-					int[] blendParamsHashes;
-					if (animatorStateSelected != null && animatorStateSelected.motion != null && (blendParamsHashes= animatorStateSelected.blendParamsHashes)!=null) {
+										int[] blendParamsHashes;
+
+										//Debug.Log("animatorStateSelected.blendParamsHashes="+animatorStateSelected.blendParamsHashes);
+
+										//!!! Blend Tree although is seraialized in Editor in StandAlonePlayer is NULL and condition animatorStateSelected.motion != null fail
+										if (animatorStateSelected != null &&  (blendParamsHashes = animatorStateSelected.blendParamsHashes) != null && blendParamsHashes.Length > 0) {
 
 												
 												
-												if (blendParamsHashes!=null) {
-														animator.SetFloat (blendParamsHashes[0], (float)blendX.Value);
+												
+												animator.SetFloat (blendParamsHashes [0], (float)blendX.Value);
 
-														if (blendParamsHashes.Length>1) {
-															animator.SetFloat (blendParamsHashes[1], (float)blendY.Value);
+												if (blendParamsHashes.Length > 1) {
+														animator.SetFloat (blendParamsHashes [1], (float)blendY.Value);
 
-														}
+												}
 							
-												} 
+												
 
 							
 						
