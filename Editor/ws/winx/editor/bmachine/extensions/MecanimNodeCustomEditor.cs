@@ -47,7 +47,7 @@ namespace ws.winx.editor.bmachine.extensions
 				bool _curvesEditorShow;
 				CurveEditorW curveEditor;
 				MecanimNode mecanimNode;
-				AnimatorState selectedAnimaStateInfo;
+				ws.winx.unity.AnimatorState selectedAnimaStateInfo;
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
 				bool eventTimeLineInitalized;
@@ -688,7 +688,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 										}
 
-										if (GUILayout.Button ("Remove") || Event.current.keyCode == KeyCode.Delete) {
+										if (GUILayout.Button ("Del") || Event.current.keyCode == KeyCode.Delete) {
 
 												
 												curveEditor.RemoveCurveAt (_curveIndexSelected);
@@ -785,13 +785,13 @@ namespace ws.winx.editor.bmachine.extensions
 										//if there are no override use motion of selected AnimationState
 										//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
 										if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
-												motion = ((AnimatorState)animatorStateSerialized.value).motion;
+												motion = ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion;
 										else //
 												motion = (Motion)motionOverridVariable.Value;
 									
 									
 									
-										if (motionOverridVariable != null && motionOverridVariable.Value!=null && ((AnimatorState)animatorStateSerialized.value).motion == null) {
+										if (motionOverridVariable != null && motionOverridVariable.Value!=null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
 												Debug.LogError ("Can't override state that doesn't contain motion");
 										}
 									
@@ -824,62 +824,8 @@ namespace ws.winx.editor.bmachine.extensions
 												animatorStateRunTimeControlSerialized.value = timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, (float)animatorStateRunTimeControlSerialized.value, 0f, 1f, TimeControlW.style.timeScrubber);
 												
 
-												
-												if (nAnimatorStateRuntimeControlHaveEnabled.IndexOf (mecanimNode.instanceID) < 0) {
-
-														nAnimatorStateRuntimeControlHaveEnabled.Add (mecanimNode.instanceID);
-						   								
-														//no other have copied and removed Rigidbody of "self" GameObject => go do it
-														if (nAnimatorStateRuntimeControlHaveEnabled.Count == 1) {
-																Rigidbody rigidBody = mecanimNode.self.GetComponent<Rigidbody> ();
-																if (rigidBody != null) {
-																		//copy
-																		//MecanimNode.rigidbodySerializedObject = new SerializedObject (rigidBody);
-																		
-																		//remove
-																		//GameObject.Destroy (rigidBody);					
-//									//remove
-																		//!!! Cannot disable rigidbody component in
-//									rigidBody.isKinematic=true;
-//									rigidBody.useGravity=false;
-//									rigidBody.detectCollisions=false;
-//									rigidBody.angularVelocity=Vector3.zero;
-//									rigidBody.velocity=Vector3.zero;
-//									rigidBody.Sleep();
-//									rigidBody.useGravity=false;
-//									rigidBody.drag=0f;
-//									rigidBody.freezeRotation=true;
-//									rigidBody.angularDrag=0f;
-//									rigidBody.constraints=RigidbodyConstraints.None;
-//									rigidBody.centerOfMass=Vector3.zero;
-//									//rigidBody.inertiaTensor=Vector3.zero;
-//									rigidBody.inertiaTensorRotation=Quaternion.identity;
-//
-//									rigidBody.solverIterationCount=0;
-//									rigidBody.rotation=Quaternion.identity;
-																		//RigidbodyConstraints.
-																	
-																		
-																	
-																}
-														}
-												}
-
-										} else {
-												int inx;
-												if ((inx = nAnimatorStateRuntimeControlHaveEnabled.IndexOf (mecanimNode.instanceID)) > -1) {
-														nAnimatorStateRuntimeControlHaveEnabled.RemoveAt (inx);
-														if (nAnimatorStateRuntimeControlHaveEnabled.Count == 0) {
-																//UnityEditorInternal.ComponentUtility.PasteComponentAsNew (mecanimNode.self);
-																Rigidbody rigidbody = mecanimNode.self.AddComponent<Rigidbody> ();
-																UnityClipboard.copySerialized (MecanimNode.rigidbodySerializedObject, new SerializedObject (rigidbody));
-
-																//typeof(UnityEngine.Object).GetField ("m_InstanceID", BindingFlags.Instance | BindingFlags.NonPublic).SetValue (rigidbody, 16428);
-																//
-														}
-												}
-
-										}
+										}	
+								
 										
 
 								}

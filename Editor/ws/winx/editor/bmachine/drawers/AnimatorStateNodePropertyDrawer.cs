@@ -18,10 +18,10 @@ namespace ws.winx.editor.bmachine.drawers
 		{
 
 				GUIContent[] animatorStateDisplayOptions;
-				AnimatorState[] animatorStateValues;
+				UnityEditor.Animations.AnimatorState[] animatorStateValues;
 				AnimatorController aniController;
-				AnimatorState animatorStateSelected;
-				AnimatorState animatorStateSelectedPrev;
+				UnityEditor.Animations.AnimatorState animatorStateSelected;
+				UnityEditor.Animations.AnimatorState animatorStateSelectedPrev;
 				UnityEngine.Motion motionSelected;
 				//SerializedNodeProperty animatorSerialized;
 
@@ -56,8 +56,7 @@ namespace ws.winx.editor.bmachine.drawers
 
 						
 					
-						animatorStateSelected = property.value as AnimatorState;
-
+		
 						
 
 						//if (animatorSerialized == null || aniController == null) {
@@ -104,6 +103,18 @@ namespace ws.winx.editor.bmachine.drawers
 						animatorStateValues = MecanimUtility.GetAnimatorStates (aniController);
 
 										
+
+			
+						if(property.value!=null){
+							
+							
+							if(animatorStateValues.Length>0){
+								animatorStateSelected=animatorStateValues.FirstOrDefault((itm)=>itm.nameHash==((ws.winx.unity.AnimatorState)property.value).nameHash);
+								
+								
+								
+							}
+						}
 						
 
 						animatorStateSelected = EditorGUILayoutEx.CustomObjectPopup (guiContent, animatorStateSelected, animatorStateDisplayOptions, animatorStateValues);//,compare);
@@ -111,9 +122,9 @@ namespace ws.winx.editor.bmachine.drawers
 						
 
 
-
+						//TODO try Begin/End Check
 						if (animatorStateSelectedPrev != animatorStateSelected) {
-								property.value = animatorStateSelected;
+								//property.value = animatorStateSelected;
 
 								NodePropertyIterator iter = property.serializedNode.GetIterator ();
 								iter.Find (attribute.layerIndexFieldName);
@@ -121,6 +132,31 @@ namespace ws.winx.editor.bmachine.drawers
 								
 								layerIndexSerialized.value = MecanimUtility.GetLayerIndex (aniController, animatorStateSelected);
 								layerIndexSerialized.ApplyModifiedValue ();
+
+
+
+								if(animatorStateSelected!=null){
+									
+									ws.winx.unity.AnimatorState state=property.value as ws.winx.unity.AnimatorState;
+									if(state==null) state=ScriptableObject.CreateInstance<ws.winx.unity.AnimatorState>();
+					
+									state.motion=animatorStateSelected.motion;
+									state.nameHash=animatorStateSelected.nameHash;
+									
+									if(state.motion is UnityEditor.Animations.BlendTree){
+										BlendTree tree =(BlendTree)state.motion;
+										int blendParamsNum= tree.GetRecursiveBlendParamCount();
+										
+										state.blendParamsHashes=new int[blendParamsNum];
+										
+										for(int i=0;i<blendParamsNum;i++)
+											state.blendParamsHashes[i]=Animator.StringToHash(tree.GetRecursiveBlendParam(i));
+										
+									}
+									
+									property.value=state;
+									property.ValueChanged();
+								}
 
 								property.ApplyModifiedValue ();
 

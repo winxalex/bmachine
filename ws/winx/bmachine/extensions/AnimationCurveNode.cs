@@ -4,7 +4,7 @@ using BehaviourMachine;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
 using ws.winx.editor.extensions;
-using UnityEditor.Animations;
+
 
 namespace ws.winx.bmachine.extensions
 {

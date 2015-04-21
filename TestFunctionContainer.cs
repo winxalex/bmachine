@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using ws.winx.unity;
-using UnityEditor.Animations;
+
 using ws.winx.unity.attributes;
-using UnityEditor;
+
 
 public class TestFunctionContainer : MonoBehaviour {
 
@@ -27,7 +27,7 @@ public class TestFunctionContainer : MonoBehaviour {
 	[UnityVariablePropertyAttribute(typeof(AnimationClip))]
 	public UnityVariable variable5;
 
-	public AnimatorState state;
+
 
 	public AnimationClip motion;
 

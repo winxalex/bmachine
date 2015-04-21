@@ -6,9 +6,12 @@ using ws.winx.unity;
 using System.Runtime.Serialization.Formatters.Binary;
 using ws.winx.csharp.extensions;
 using UnityEngine.Events;
-using UnityEditor;
 using System.CodeDom.Compiler;
 using System.Runtime.Serialization;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ws.winx.unity
 {
@@ -40,31 +43,7 @@ namespace ws.winx.unity
 				}
 
 
-				//////////////////////////////////////////
-				// !!!! For reusing of Unity Drawers	//	
-				[NonSerialized]
-				private SerializedProperty
-						__seralizedProperty;
-				[NonSerialized]
-				private SerializedObject
-						__seralizedObject;
 				
-				public SerializedProperty serializedProperty {
-						get {
-
-								if (__seralizedProperty == null && this.Value != null) {
-
-										CreateSerializedProperty ();
-
-								}
-
-
-								
-
-								return __seralizedProperty;
-					
-						}
-				}
 
 				[HideInInspector]
 				public byte[]
@@ -205,8 +184,12 @@ namespace ws.winx.unity
 
 								
 								if (value == null) {
+
+#if UNITY_EDITOR
 										__seralizedProperty = null;
 										__seralizedObject = null;
+
+#endif
 										__unityVariableReferencedInstanceID = 0;
 									
 										//value=default(this.ValueType);
@@ -257,10 +240,7 @@ namespace ws.winx.unity
 				//
 				// Constructor
 				//
-//				public UnityVariable ()
-//				{
-//
-//				}
+
 
 
 				public static UnityVariable CreateInstanceOf (Type T)
@@ -337,10 +317,12 @@ namespace ws.winx.unity
 										_valueType = typeof(System.Object);
 
 
+#if UNITY_EDITOR
 								if (__unityVariableReferencedInstanceID != 0) {
 										__instanceSystemObject = EditorUtility.InstanceIDToObject (__unityVariableReferencedInstanceID);
 										return;
 								}
+#endif
 
 								if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
 
@@ -348,8 +330,10 @@ namespace ws.winx.unity
 			
 										__instanceSystemObject = Utility.Deserialize (reflectedInstanceSerialized);
 
+#if UNITY_EDITOR
 										__seralizedProperty = null;
 										__seralizedObject = null;
+#endif
 
 								} else {
 										if (__instanceUnityObject != null)
@@ -369,87 +353,8 @@ namespace ws.winx.unity
 		#endregion
 
 
-				/// <summary>
-				/// Applies the modified properties. !!!! For reusing of Unity Drawers
-				/// </summary>
-				public void ApplyModifiedProperties ()
-				{
-						if (__seralizedObject != null) {
-
-							
-								__seralizedObject.ApplyModifiedProperties ();
-
-
-
-								if (this.ValueType == typeof(float) && (float)this.Value != __seralizedProperty.floatValue) {
-
-										this.Value = __seralizedProperty.floatValue;
-										this.OnBeforeSerialize ();//serialize primitive and objects that aren't subclass of UnityObject or are UnityEvents
-								} else
-								if (this.ValueType == typeof(bool) && (bool)this.Value != __seralizedProperty.boolValue) {
-					
-										this.Value = __seralizedProperty.boolValue;
-										this.OnBeforeSerialize ();
-								} else
-								if (this.ValueType == typeof(Bounds)) {
-										if (((Bounds)this.Value).center != __seralizedProperty.boundsValue.center || ((Bounds)this.Value).max != __seralizedProperty.boundsValue.max || ((Bounds)this.Value).min != __seralizedProperty.boundsValue.min || ((Bounds)this.Value).size != __seralizedProperty.boundsValue.size) {
-												this.Value = __seralizedProperty.boundsValue;
-												this.OnBeforeSerialize ();
-										}
-										
-								} else
-								if (this.ValueType == typeof(Color)) {
-										if (((Color)this.Value).r != __seralizedProperty.colorValue.r || ((Color)this.Value).g != __seralizedProperty.colorValue.g || ((Color)this.Value).b != __seralizedProperty.colorValue.b || ((Color)this.Value).a != __seralizedProperty.colorValue.a) {
-												this.Value = __seralizedProperty.colorValue;
-												this.OnBeforeSerialize ();
-										}
-			
-								} else
-								if (this.ValueType == typeof(Rect)) {
-										if (((Rect)this.Value).x != __seralizedProperty.rectValue.x || ((Rect)this.Value).y != __seralizedProperty.rectValue.y || ((Rect)this.Value).width != __seralizedProperty.rectValue.width || ((Rect)this.Value).height != __seralizedProperty.rectValue.height) {
-												this.Value = __seralizedProperty.rectValue;
-												this.OnBeforeSerialize ();
-										}
-										
-								} else
-								if (this.ValueType == typeof(int) && (int)this.Value != __seralizedProperty.intValue) {
-									
-										this.Value = __seralizedProperty.intValue;
-										this.OnBeforeSerialize ();
-								} else
-								if (this.ValueType == typeof(Vector3)) {
-										if (((Vector3)this.Value).x != __seralizedProperty.vector3Value.x || ((Vector3)this.Value).y != __seralizedProperty.vector3Value.y || ((Vector3)this.Value).z != __seralizedProperty.vector3Value.z) {
-												this.Value = __seralizedProperty.vector3Value;
-												this.OnBeforeSerialize ();
-										}
-								} else
-								if (this.ValueType == typeof(string) && (string)this.Value != __seralizedProperty.stringValue) {
-									
-										this.Value = __seralizedProperty.stringValue;
-										this.OnBeforeSerialize ();
-								} else
-								if (this.ValueType == typeof(Quaternion)) {
-										if (((Quaternion)this.Value).x != __seralizedProperty.quaternionValue.x || ((Quaternion)this.Value).y != __seralizedProperty.quaternionValue.y || ((Quaternion)this.Value).z != __seralizedProperty.quaternionValue.z || ((Quaternion)this.Value).w != __seralizedProperty.quaternionValue.w) {
-												this.Value = __seralizedProperty.quaternionValue;
-												this.OnBeforeSerialize ();
-										}
-								} else
-								if (this.ValueType == typeof(AnimationCurve)) {
-
-
-										this.OnBeforeSerialize ();
-
-								} else
-									if (this.__instanceSystemObject is UnityEngine.Object)
-										this.Value = __seralizedProperty.objectReferenceValue;
-
-
-						}
-				}
-
-				[NonSerialized]
-				public PropertyDrawer
-						drawer;
+				
+				
 
 			
 
@@ -500,7 +405,42 @@ namespace ws.winx.unity
 						return "Property[" + name + "] of type " + ValueType + (this.instanceSystemObject == null ? (this.MemberInfo != null ? "Value=" + this.Value.ToString () + " on Static instance" : " Not initialized") : (this.instanceSystemObject.GetType ().IsPrimitive || this.instanceSystemObject.GetType () == typeof(string)) ? " Value=" + this.Value.ToString () : " Value=" + this.Value.ToString () + " on instance of " + this.instanceSystemObject.ToString ());
 				}
 
-				void CreateSerializedProperty ()
+
+
+
+		////////////////////////////////////////////////////////////////////////////////////
+		//                            !!!! For reusing of Unity Drawers	                 //	
+
+#if UNITY_EDITOR
+		[NonSerialized]
+		public PropertyDrawer
+			drawer;
+		
+		[NonSerialized]
+		private SerializedProperty
+			__seralizedProperty;
+		[NonSerialized]
+		private SerializedObject
+			__seralizedObject;
+		
+		public SerializedProperty serializedProperty {
+			get {
+				
+				if (__seralizedProperty == null && this.Value != null) {
+					
+					CreateSerializedProperty ();
+					
+				}
+				
+				
+				
+				
+				return __seralizedProperty;
+				
+			}
+		}
+		
+		void CreateSerializedProperty ()
 				{
 
 						using (Microsoft.CSharp.CSharpCodeProvider foo = 
@@ -577,6 +517,90 @@ namespace ws.winx.unity
 
 
 				}
+
+
+
+
+
+		/// <summary>
+		/// Applies the modified properties. !!!! For reusing of Unity Drawers
+		/// </summary>
+		public void ApplyModifiedProperties ()
+		{
+			if (__seralizedObject != null) {
+				
+				
+				__seralizedObject.ApplyModifiedProperties ();
+				
+				
+				
+				if (this.ValueType == typeof(float) && (float)this.Value != __seralizedProperty.floatValue) {
+					
+					this.Value = __seralizedProperty.floatValue;
+					this.OnBeforeSerialize ();//serialize primitive and objects that aren't subclass of UnityObject or are UnityEvents
+				} else
+				if (this.ValueType == typeof(bool) && (bool)this.Value != __seralizedProperty.boolValue) {
+					
+					this.Value = __seralizedProperty.boolValue;
+					this.OnBeforeSerialize ();
+				} else
+				if (this.ValueType == typeof(Bounds)) {
+					if (((Bounds)this.Value).center != __seralizedProperty.boundsValue.center || ((Bounds)this.Value).max != __seralizedProperty.boundsValue.max || ((Bounds)this.Value).min != __seralizedProperty.boundsValue.min || ((Bounds)this.Value).size != __seralizedProperty.boundsValue.size) {
+						this.Value = __seralizedProperty.boundsValue;
+						this.OnBeforeSerialize ();
+					}
+					
+				} else
+				if (this.ValueType == typeof(Color)) {
+					if (((Color)this.Value).r != __seralizedProperty.colorValue.r || ((Color)this.Value).g != __seralizedProperty.colorValue.g || ((Color)this.Value).b != __seralizedProperty.colorValue.b || ((Color)this.Value).a != __seralizedProperty.colorValue.a) {
+						this.Value = __seralizedProperty.colorValue;
+						this.OnBeforeSerialize ();
+					}
+					
+				} else
+				if (this.ValueType == typeof(Rect)) {
+					if (((Rect)this.Value).x != __seralizedProperty.rectValue.x || ((Rect)this.Value).y != __seralizedProperty.rectValue.y || ((Rect)this.Value).width != __seralizedProperty.rectValue.width || ((Rect)this.Value).height != __seralizedProperty.rectValue.height) {
+						this.Value = __seralizedProperty.rectValue;
+						this.OnBeforeSerialize ();
+					}
+					
+				} else
+				if (this.ValueType == typeof(int) && (int)this.Value != __seralizedProperty.intValue) {
+					
+					this.Value = __seralizedProperty.intValue;
+					this.OnBeforeSerialize ();
+				} else
+				if (this.ValueType == typeof(Vector3)) {
+					if (((Vector3)this.Value).x != __seralizedProperty.vector3Value.x || ((Vector3)this.Value).y != __seralizedProperty.vector3Value.y || ((Vector3)this.Value).z != __seralizedProperty.vector3Value.z) {
+						this.Value = __seralizedProperty.vector3Value;
+						this.OnBeforeSerialize ();
+					}
+				} else
+				if (this.ValueType == typeof(string) && (string)this.Value != __seralizedProperty.stringValue) {
+					
+					this.Value = __seralizedProperty.stringValue;
+					this.OnBeforeSerialize ();
+				} else
+				if (this.ValueType == typeof(Quaternion)) {
+					if (((Quaternion)this.Value).x != __seralizedProperty.quaternionValue.x || ((Quaternion)this.Value).y != __seralizedProperty.quaternionValue.y || ((Quaternion)this.Value).z != __seralizedProperty.quaternionValue.z || ((Quaternion)this.Value).w != __seralizedProperty.quaternionValue.w) {
+						this.Value = __seralizedProperty.quaternionValue;
+						this.OnBeforeSerialize ();
+					}
+				} else
+				if (this.ValueType == typeof(AnimationCurve)) {
+					
+					
+					this.OnBeforeSerialize ();
+					
+				} else
+					if (this.__instanceSystemObject is UnityEngine.Object)
+						this.Value = __seralizedProperty.objectReferenceValue;
+				
+				
+			}
+		}
+
+#endif
 
 			
 

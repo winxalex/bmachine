@@ -2,12 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
-
 using ws.winx.unity;
 using ws.winx.bmachine.extensions;
 using ws.winx.unity.attributes;
-using UnityEditor.Animations;
 
 namespace ws.winx.editor.extensions
 {
@@ -18,9 +15,7 @@ namespace ws.winx.editor.extensions
 				[AnimatorStateAttribute("animator","layer")]
 				public AnimatorState
 						animaStateInfoSelected;
-
 				public int layer;
-
 				[RangeAttribute(0f,1f)]
 				public float
 						timeNormalized;
@@ -29,7 +24,6 @@ namespace ws.winx.editor.extensions
 				float stopTime;
 				float currentTime = float.NegativeInfinity;
 				float nextCurrentTime = 0f;
-
 				public Animator animator;
 				[RangeAttribute(0f,1f)]
 				//[HideInInspector]

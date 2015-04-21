@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Linq;
 
-namespace ws.winx.unity
+namespace ws.winx.editor
 {
 		public enum HighLevelEvent
 		{
@@ -86,7 +86,7 @@ namespace ws.winx.unity
 						startSelect = (float)arguments [8];
 						endSelect = (float)arguments [9];
 
-						return (ws.winx.unity.HighLevelEvent)HighLevelEventEnumInt;
+						return (HighLevelEvent)HighLevelEventEnumInt;
 		
 				}
 

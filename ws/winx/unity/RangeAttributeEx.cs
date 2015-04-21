@@ -9,7 +9,6 @@
 // ------------------------------------------------------------------------------
 using System;
 using UnityEngine;
-using UnityEditor;
 using System.Reflection;
 
 namespace ws.winx.unity

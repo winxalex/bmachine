@@ -15,9 +15,8 @@ using BehaviourMachine;
 using Motion=UnityEngine.Motion;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
-using UnityEditor.Animations;
 using System.Runtime.Serialization;
-using UnityEditor;
+
 
 namespace ws.winx.bmachine.extensions
 {
@@ -33,6 +32,12 @@ namespace ws.winx.bmachine.extensions
 				public new BlackboardCustom blackboard {
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
+
+				public List<AnimationCurve>[] curvesPerVariable;
+
+				[UnityVariablePropertyAttribute(typeof(Vector3),"Test")]
+				public UnityVariable testVarable;
+				
 
 				[HideInInspector]
 				public AnimationCurve[]
@@ -100,7 +105,7 @@ namespace ws.winx.bmachine.extensions
 					}
 				}
 				
-				public static SerializedObject rigidbodySerializedObject;
+				//public static SerializedObject rigidbodySerializedObject;
 
 		
 				float normalizedTimeLast = 0f;
@@ -196,6 +201,8 @@ namespace ws.winx.bmachine.extensions
 						
 					
 						motionOverride = UnityVariable.CreateInstanceOf (typeof(AnimationClip));
+
+						
 	
 				
 						Array.ForEach (this.children, (itm) => {
@@ -445,18 +452,16 @@ namespace ws.winx.bmachine.extensions
 
 							
 										
+					int[] blendParamsHashes;
+					if (animatorStateSelected != null && animatorStateSelected.motion != null && (blendParamsHashes= animatorStateSelected.blendParamsHashes)!=null) {
 
-										if (animatorStateSelected != null && animatorStateSelected.motion != null && animatorStateSelected.motion is BlendTree) {
+												
+												
+												if (blendParamsHashes!=null) {
+														animator.SetFloat (blendParamsHashes[0], (float)blendX.Value);
 
-												BlendTree blendTree = animatorStateSelected.motion as BlendTree;
-
-
-												//TODO opmitize this to us Animator.StringToHash
-												if (!String.IsNullOrEmpty (blendTree.blendParameter)) {
-														animator.SetFloat (blendTree.blendParameter, (float)blendX.Value);
-
-														if (!String.IsNullOrEmpty (blendTree.blendParameterY)) {
-																animator.SetFloat (blendTree.blendParameterY, (float)blendY.Value);
+														if (blendParamsHashes.Length>1) {
+															animator.SetFloat (blendParamsHashes[1], (float)blendY.Value);
 
 														}
 							

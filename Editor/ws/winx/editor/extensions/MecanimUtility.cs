@@ -14,6 +14,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEditor.Animations;
 using ws.winx.unity;
+using AnimatorState=UnityEditor.Animations.AnimatorState;
 
 namespace ws.winx.editor.extensions
 {
