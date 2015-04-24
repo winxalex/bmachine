@@ -42,7 +42,15 @@ namespace ws.winx.unity
 
 				}
 
+				/// <summary>
+				/// The path. GO1/GO2/..GO
+				/// </summary>
+				//public string path;
 
+				/// <summary>
+				/// The name of the property of GO in formate prop1.prop2.x
+				/// </summary>
+				//public string propertyName;
 				
 
 				[HideInInspector]
@@ -113,10 +121,12 @@ namespace ws.winx.unity
 
 								if (value != null) {
 									
-										this.name = __memberInfo.Name;
-
-
-										if (__memberInfo.MemberType == MemberTypes.Field) {
+										if(__instanceSystemObject is Component)
+											this.name =((Component)__instanceSystemObject).name+"."+ __instanceSystemObject.GetType().Name+"."+ __memberInfo.Name;
+										else if(__instanceSystemObject is GameObject)
+											this.name =((GameObject)__instanceSystemObject).name+"."+  __memberInfo.Name;
+					
+									if (__memberInfo.MemberType == MemberTypes.Field) {
 												
 
 												_valueType = ((FieldInfo)__memberInfo).FieldType;

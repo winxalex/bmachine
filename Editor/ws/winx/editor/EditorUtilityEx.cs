@@ -139,9 +139,10 @@ namespace ws.winx.editor
 								return  drawer;
 
 						}
-
-						EditorUtilityEx.__drawers.TryGetValue (type.BaseType, out drawer);
-						if (drawer != null) {
+						
+						if(type.BaseType!=null)
+						if(EditorUtilityEx.__drawers.TryGetValue (type.BaseType, out drawer))
+						{
 								return drawer;
 						
 						}

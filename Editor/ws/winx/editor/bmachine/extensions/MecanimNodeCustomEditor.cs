@@ -56,6 +56,7 @@ namespace ws.winx.editor.bmachine.extensions
 				EventComparer eventTimeComparer = new EventComparer ();
 				string[] eventDisplayNames;
 				float timeNormalizedStartPrev = -1;
+				float timeNormalizedEndPrev = 1;
 				GUIStyle playButtonStyle;
 				Vector2 playButtonSize;
 				AvatarPreviewW avatarPreview;
@@ -791,7 +792,7 @@ namespace ws.winx.editor.bmachine.extensions
 									
 									
 									
-										if (motionOverridVariable != null && motionOverridVariable.Value!=null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
+										if (motionOverridVariable != null && motionOverridVariable.Value != null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
 												Debug.LogError ("Can't override state that doesn't contain motion");
 										}
 									
@@ -869,11 +870,27 @@ namespace ws.winx.editor.bmachine.extensions
 												if (eventTimeValueSelectedIndex > -1) {
 														avatarPreview.SetTimeValue (eventTimeValues [eventTimeValueSelectedIndex]);
 												} else {
-														if (mecanimNode.timeNormalizedStart != timeNormalizedStartPrev) {
-																timeNormalizedStartPrev = mecanimNode.timeNormalizedStart;
+														//set AvatarPreview time depending of range drag
+//														if (mecanimNode.timeNormalizedStart != timeNormalizedStartPrev) {
+//																timeNormalizedStartPrev = mecanimNode.timeNormalizedStart;
+//																avatarPreview.SetTimeValue (timeNormalizedStartPrev);
+//																
+//														}
+														if (mecanimNode.range.rangeStart != timeNormalizedStartPrev) {
+																timeNormalizedStartPrev = mecanimNode.range.rangeStart;
 																avatarPreview.SetTimeValue (timeNormalizedStartPrev);
-																
+															
+														} else if (mecanimNode.range.rangeEnd != timeNormalizedEndPrev) {
+																timeNormalizedEndPrev = mecanimNode.range.rangeEnd;
+																avatarPreview.SetTimeValue (timeNormalizedEndPrev);
+								
 														}
+
+									
+
+
+
+
 
 												}
 	
@@ -968,7 +985,7 @@ namespace ws.winx.editor.bmachine.extensions
 														eventDisplayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
 					
 					
-												ev.timeNormalized.ApplyModifiedProperties();
+												ev.timeNormalized.ApplyModifiedProperties ();
 							
 										}
 

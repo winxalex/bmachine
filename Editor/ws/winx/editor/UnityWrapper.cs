@@ -96,6 +96,90 @@ namespace ws.winx.editor
 	#endregion
 
 
+
+	#region QuaternionCurveTangentCalculationW
+	public class QuaternionCurveTangentCalculationW
+	{
+		
+		private static Type __RealType;
+		private static ConstructorInfo method_ctor;
+		static MethodInfo _UpdateTangentsFromMode_MethodInfo;
+		
+		public static MethodInfo UpdateTangentsFromMode_MethodInfo {
+			get {
+				if(_UpdateTangentsFromMode_MethodInfo==null)
+					_UpdateTangentsFromMode_MethodInfo=GetWrappedType().GetMethod("UpdateTangentsFromMode",new Type[]{typeof(AnimationCurve),typeof(AnimationClip),typeof(EditorCurveBinding)});
+				
+				return _UpdateTangentsFromMode_MethodInfo;
+			}
+		}				
+		
+		
+		
+		
+		public static Type GetWrappedType ()
+		{
+			if (__RealType == null) {
+				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+				__RealType = assembly.GetType ("UnityEditor.QuaternionCurveTangentCalculation");
+			}
+			
+			return __RealType;
+		}
+		
+		
+		public static void UpdateTangentsFromMode (AnimationCurve curve, AnimationClip clip, EditorCurveBinding curveBinding)
+		{
+			
+			UpdateTangentsFromMode_MethodInfo.Invoke (null, new object[]{curve,clip,curveBinding});
+		}		
+		
+		
+	}
+	#endregion
+	
+	#region RotationCurveInterpolationW
+	public class RotationCurveInterpolationW
+	{
+		
+		private static Type __RealType;
+		private static ConstructorInfo method_ctor;
+		static MethodInfo _RemapAnimationBindingForAddKey_MethodInfo;
+		
+		public static MethodInfo RemapAnimationBindingForAddKey_MethodInfo {
+			get {
+				if(_RemapAnimationBindingForAddKey_MethodInfo==null)
+					_RemapAnimationBindingForAddKey_MethodInfo=GetWrappedType().GetMethod("RemapAnimationBindingForAddKey");
+				
+				return _RemapAnimationBindingForAddKey_MethodInfo;
+			}
+		}				
+		
+		
+		
+		
+		public static Type GetWrappedType ()
+		{
+			if (__RealType == null) {
+				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+				__RealType = assembly.GetType ("UnityEditor.RotationCurveInterpolation");
+			}
+			
+			return __RealType;
+		}
+		
+		
+		
+		public static EditorCurveBinding[] RemapAnimationBindingForAddKey (EditorCurveBinding binding, AnimationClip clip)
+		{
+			return (EditorCurveBinding[])RemapAnimationBindingForAddKey_MethodInfo.Invoke (null, new object[]{binding,clip});
+		}		
+		
+		
+	}
+	#endregion
+
+
 	#region AvatarPreviewW
 
 		public class AvatarPreviewW

@@ -1,11 +1,9 @@
-using BehaviourMachine;
 using System;
 using UnityEditor;
 using UnityEngine;
 using ws.winx.bmachine.extensions;
 using ws.winx.editor.extensions;
 using System.Collections.Generic;
-using BehaviourMachineEditor;
 using System.Linq;
 using ws.winx.unity;
 using System.Reflection;
@@ -68,7 +66,7 @@ namespace ws.winx.editor.drawers
 
 
 								//if already have been serialzied before
-								if(property.objectReferenceValue!=null && animatorStateSelected==null){
+								if(property.objectReferenceValue!=null){
 									
 
 									if(animatorStateValues.Length>0){
@@ -81,11 +79,11 @@ namespace ws.winx.editor.drawers
 
 								//EditorGUI.BeginProperty (position, label, property);
 								// Check if it was modified this frame, to avoid overwriting the property constantly
-								//EditorGUI.BeginChangeCheck ();
+								EditorGUI.BeginChangeCheck ();
 								animatorStateSelected = EditorGUILayoutEx.CustomObjectPopup (label, animatorStateSelected, displayOptions, animatorStateValues,null, null, null, null, position) as UnityEditor.Animations.AnimatorState;
 
 
-								if(animatorStateSelected!=null){
+								if(EditorGUI.EndChangeCheck() && animatorStateSelected!=null){
 			
 								 	ws.winx.unity.AnimatorState state=property.objectReferenceValue as ws.winx.unity.AnimatorState;
 									if(state==null) state=ScriptableObject.CreateInstance<ws.winx.unity.AnimatorState>();
@@ -102,6 +100,9 @@ namespace ws.winx.editor.drawers
 											for(int i=0;i<blendParamsNum;i++)
 												state.blendParamsHashes[i]=Animator.StringToHash(tree.GetRecursiveBlendParam(i));
 
+									}else{
+
+										state.blendParamsHashes=null;
 									}
 
 

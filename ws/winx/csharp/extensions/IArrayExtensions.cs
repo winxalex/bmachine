@@ -18,6 +18,19 @@ namespace ws.winx.csharp.extensions
 {
 	public static class IArrayExtensions
 	{
+//		public static T[] Concat<T>(this Array array,Array other){
+//			T[] arrNew=new T[array.Length+other.Length];
+//			array.CopyTo (arrNew, 0);
+//			other.CopyTo (arrNew, array.Length);
+//
+//			return arrNew;
+//			
+//		}
+
+		public static IEnumerable<T> Concat<T>(this IEnumerable<T> array,IEnumerable<T> other){
+			//T[] arrNew=new T[array.Count+other.Count
+			return array.Concat (other);
+		}
 
 		public static String JoinToString<T>(this IEnumerable<T> array)
 		{

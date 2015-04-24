@@ -69,12 +69,21 @@ namespace ws.winx.bmachine.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						transitionDuration = 0.1f;
-				[RangeAttribute(0f,1f)]
+
+		
+		
+				[MinMaxRangeSAttribute(0f,1f)]
+				public MinMaxRangeSO range;
+		
+		
+
+
+
+				//[RangeAttribute(0f,1f)]
 				//[HideInInspector]
-				public float
-						timeNormalizedStart = 0f;
+				//public float
+						//timeNormalizedStart = 0f;
 				[HideInInspector]
-				[RangeAttribute(0f,1f)]
 				public float
 						timeNormalizedCurrent = 0f;
 				[HideInInspector]
@@ -194,7 +203,7 @@ namespace ws.winx.bmachine.extensions
 						motionOverride = UnityVariable.CreateInstanceOf (typeof(AnimationClip));
 
 						
-	
+			range = (ws.winx.unity.attributes.MinMaxRangeSO)ScriptableObject.CreateInstance<ws.winx.unity.attributes.MinMaxRangeSO> ();
 				
 						Array.ForEach (this.children, (itm) => {
 			
@@ -286,7 +295,7 @@ namespace ws.winx.bmachine.extensions
 			
 			
 						//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
-						animator.CrossFade (animatorStateSelected.nameHash, transitionDuration, layer, timeNormalizedStart);
+						animator.CrossFade (animatorStateSelected.nameHash, transitionDuration, layer, range.rangeStart);
 			
 				}
 
@@ -308,6 +317,8 @@ namespace ws.winx.bmachine.extensions
 			
 						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.shortNameHash == animatorStateSelected.nameHash;
 
+						
+			//Debug.Log (this.name + " isTransition:" + isSelectedAnimaInfoInTransition+" isCurrent:"+isCurrentEqualToSelectedAnimaInfo+" t:"+animatorStateInfoCurrent.normalizedTime);
 
 
 						///////////////////////  START  //////////////////////////
@@ -358,6 +369,8 @@ namespace ws.winx.bmachine.extensions
 
 						//////////////////////////////////////////////////////////////////////
 					
+
+
 				
 
 						///////////////////  UPDATE  /////////////////////
@@ -392,8 +405,8 @@ namespace ws.winx.bmachine.extensions
 
 
 							
-							
-										if (timeNormalizedCurrent > 1f) {
+					//1f
+					if (timeNormalizedCurrent > range.rangeEnd) {
 												if (!loop) {
 														
 
@@ -417,7 +430,7 @@ namespace ws.winx.bmachine.extensions
 																return Status.Success;
 												
 														} else {
-																animator.Play (animatorStateSelected.nameHash, layer, timeNormalizedStart);
+																animator.Play (animatorStateSelected.nameHash, layer, range.rangeStart);
 																return Status.Running;
 														}
 

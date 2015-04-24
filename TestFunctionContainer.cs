@@ -9,13 +9,18 @@ public class TestFunctionContainer : MonoBehaviour {
 
 	public AnimationCurve curve;
 
+	[MinMaxRange(0f,1f)]
+	public MinMaxRange range;
+
 	[UnityVariablePropertyAttribute(typeof(string))]
 	public UnityVariable variable;
 
 	[UnityVariablePropertyAttribute(typeof(Color))]
 	public UnityVariable variable1;
 
-	[UnityVariablePropertyAttribute(typeof(Vector3))]
+
+
+	[UnityVariablePropertyAttribute(typeof(Bounds))]
 	public UnityVariable variable2;
 
 	[UnityVariablePropertyAttribute(typeof(Quaternion))]
@@ -24,8 +29,12 @@ public class TestFunctionContainer : MonoBehaviour {
 	[UnityVariablePropertyAttribute(typeof(AnimationCurve))]
 	public UnityVariable variable4;
 
-	[UnityVariablePropertyAttribute(typeof(AnimationClip))]
+	[UnityVariablePropertyAttribute(typeof(Light))]
 	public UnityVariable variable5;
+
+
+	[UnityVariablePropertyAttribute(typeof(float))]
+	public UnityVariable variable6;
 
 
 
@@ -35,7 +44,7 @@ public class TestFunctionContainer : MonoBehaviour {
 
 	void OnEnable(){
 
-
+		UnityEngine.Debug.Log("Enable");
 	}
 
 
@@ -43,10 +52,11 @@ public class TestFunctionContainer : MonoBehaviour {
 	 void Reset(){
 		variable = UnityVariable.CreateInstanceOf (typeof(string));
 		variable1 = UnityVariable.CreateInstanceOf (typeof(Color));
-		variable2 = UnityVariable.CreateInstanceOf (typeof(Vector3));
+		variable2 = UnityVariable.CreateInstanceOf (typeof(Bounds));
 		variable3 = UnityVariable.CreateInstanceOf (typeof(Quaternion));
 		variable4 = UnityVariable.CreateInstanceOf (typeof(AnimationCurve));
-		variable5 = UnityVariable.CreateInstanceOf (typeof(AnimationCurve));
+		variable5 = UnityVariable.CreateInstanceOf (typeof(Light));
+		variable6 = UnityVariable.CreateInstanceOf (typeof(float));
 	}
 
    	public void Debug(string message){

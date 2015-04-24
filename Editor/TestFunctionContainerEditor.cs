@@ -55,7 +55,7 @@ public class TestFunctionContainerEditor : Editor {
 		base.OnInspectorGUI ();
 
 //		Debug.Log ("Target ID:"+ target.GetInstanceID ());
-		Debug.Log(((UnityVariable)this.serializedObject.FindProperty("variable2").objectReferenceValue).Value);
+//		Debug.Log(((UnityVariable)this.serializedObject.FindProperty("variable2").objectReferenceValue).Value);
 
 		if (EditorGUI.EndChangeCheck ()) {
 

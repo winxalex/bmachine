@@ -36,6 +36,30 @@ namespace ws.winx.unity{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		public static void ObjectToDisplayOptionsValues (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out MemberInfo[] memeberInfoValues,out object[] instances)
 
 		{
@@ -253,6 +277,18 @@ namespace ws.winx.unity{
 				
 
 		}//end function
+
+
+
+
+
+
+
+
+
+
+
+
 
 		private static BinaryFormatter __binaryFormater;
 		private static SurrogateSelector __surrogateSelector;

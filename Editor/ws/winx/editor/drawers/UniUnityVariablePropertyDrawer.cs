@@ -15,8 +15,8 @@ namespace ws.winx.editor.drawers
 	{
 
 
+		Type typeSelected;
 
-		Type selectedType;
 
 		public override void OnGUI (Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -39,21 +39,21 @@ namespace ws.winx.editor.drawers
 			
 			String name = ((UnityVariable)property.objectReferenceValue).name;
 
-			selectedType = EditorGUILayoutEx.CustomObjectPopup<Type> (null, selectedType,EditorGUILayoutEx.unityTypesDisplayOptions , EditorGUILayoutEx.unityTypes,null,null,null,null,typePos);
+			typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, typeSelected,EditorGUILayoutEx.unityTypesDisplayOptions , EditorGUILayoutEx.unityTypes,null,null,null,null,typePos);
 			
 								//if change of type create new variable
-								if (selectedType != type && !selectedType.IsSubclassOf (type) && type!=typeof(UnityEngine.Object)) {
+								if (typeSelected != type && !typeSelected.IsSubclassOf (type) && type!=typeof(UnityEngine.Object)) {
 										
 										property.objectReferenceValue = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 
-										if(selectedType== typeof(string))
+										if(typeSelected== typeof(string))
 											((UnityVariable)property.objectReferenceValue).Value=String.Empty;
 										else
-											((UnityVariable)property.objectReferenceValue).Value=FormatterServices.GetUninitializedObject (selectedType);
+											((UnityVariable)property.objectReferenceValue).Value=FormatterServices.GetUninitializedObject (typeSelected);
 								}
 					//	} 
 
-			property.objectReferenceValue=EditorGUILayoutEx.UnityVariablePopup(null,property.objectReferenceValue as UnityVariable,selectedType,new List<GUIContent>(),new List<UnityVariable>(),varPos);
+			property.objectReferenceValue=EditorGUILayoutEx.UnityVariablePopup(null,property.objectReferenceValue as UnityVariable,typeSelected,new List<GUIContent>(),new List<UnityVariable>(),varPos);
 			((UnityVariable)property.objectReferenceValue).drawer = this;
 			((UnityVariable)property.objectReferenceValue).name = name;
 			property.serializedObject.ApplyModifiedProperties();

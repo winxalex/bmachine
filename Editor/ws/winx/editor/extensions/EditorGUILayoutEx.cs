@@ -1069,7 +1069,7 @@ namespace ws.winx.editor.extensions
 				public static UnityVariable UnityVariablePopup (GUIContent label, UnityVariable variableSelected, Type typeSelected, List<GUIContent> displayOptions, List<UnityVariable> values, Rect? position=null)
 				{
 
-					
+
 
 						//add first element as custom (selection of Object properties)
 						//others are selection from provided list of values
@@ -1137,6 +1137,7 @@ namespace ws.winx.editor.extensions
 								pos.xMin = popupPos.xMax + 10;
 								indexSelected = EditorGUI.Popup (popupPos, indexSelected, displayOptions.ToArray ());
 						} else
+
 								indexSelected = EditorGUILayout.Popup (indexSelected, displayOptions.ToArray ());
 
 						//Debug.Log (indexSelected);
@@ -1186,7 +1187,7 @@ namespace ws.winx.editor.extensions
 
 								} else {
 										//EditorGUILayout.PropertyField (position,variableSelected.serializedProperty, new GUIContent (""));
-					EditorGUI.BeginChangeCheck();
+										EditorGUI.BeginChangeCheck();
 
 										if (!variableSelected.ValueType.IsSubclassOf (typeof(UnityEngine.Object))) {
 
@@ -1206,7 +1207,7 @@ namespace ws.winx.editor.extensions
 														drawer = EditorUtilityEx.GetDefaultDrawer ();
 
 												
-						
+												if(variableSelected.serializedProperty!=null)
 												if (position.HasValue) {
 														Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
 														pos.xMin = propertyPos.xMax + 10;
@@ -1215,9 +1216,13 @@ namespace ws.winx.editor.extensions
 												} else{
 														//EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
 			
+														
+														//drawer.OnGUI (GUILayoutUtility.GetRect(80,32), variableSelected.serializedProperty, new GUIContent (""));
+						
 
-														drawer.OnGUI (GUILayoutUtility.GetRect(80,32), variableSelected.serializedProperty, new GUIContent (""));
-															
+														drawer.OnGUI (EditorGUILayout.GetControlRect(false,32), variableSelected.serializedProperty, new GUIContent (""));
+								
+																
 												}
 												
 					
@@ -1227,7 +1232,7 @@ namespace ws.winx.editor.extensions
 														pos.xMin = propertyPos.xMax + 10;
 														variableSelected.Value = EditorGUI.ObjectField (propertyPos, variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
 												} else
-							variableSelected.Value = EditorGUI.ObjectField (GUILayoutUtility.GetRect(80,16), variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+													variableSelected.Value = EditorGUI.ObjectField (GUILayoutUtility.GetRect(80,16), variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
 													//if(Event.current.type==EventType.Layout)
 													//	variableSelected.Value = EditorGUILayout.ObjectField (variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
 										}
@@ -1307,6 +1312,7 @@ namespace ws.winx.editor.extensions
 							
 								} else {//if None is selected reset
 										variableSelected.MemberInfo = null;
+										
 										variableSelected.Value = FormatterServices.GetUninitializedObject (typeof(UnityEngine.Object));	
 									
 
