@@ -106,6 +106,10 @@ namespace ws.winx.unity
 		
 				public MemberInfo MemberInfo {
 						get {
+
+								//get member info from path and property
+
+
 								return __memberInfo;
 						}
 						set {

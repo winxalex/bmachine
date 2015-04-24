@@ -258,6 +258,49 @@ public class AnimationModeUtility
 		}
 		return false;
 	}
+
+
+		public static void ResampleAnimation(GameObject[] animatedObjects,  AnimationClip[] animationClips,ref float time){
+			
+			
+			
+			
+			Undo.FlushUndoRecordObjects ();
+			
+			
+			AnimationMode.BeginSampling ();
+			
+			int len = animationClips.Length;
+			
+			if (len != animatedObjects.Length) {
+				len=0;
+				Debug.LogError("AnimaitonModeUtility.ResampleAnimation> Number of Animate Object should be same with Animation Clips");
+			}
+			
+			for(int i=0;i<len;i++)
+				AnimationMode.SampleAnimationClip (animatedObjects[i], animationClips[i], time);
+			
+			
+			
+			
+			
+			AnimationMode.EndSampling ();
+			SceneView.RepaintAll ();
+			
+			
+		}
+
+
+
+
+
+
+
+
+
+
+
+
 }
 }
 

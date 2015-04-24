@@ -92,7 +92,7 @@ namespace ws.winx.editor.bmachine.drawers
 
 
 			
-			String name = attributeUni.name;
+			//String name = attributeUni.name;
 
 			//create types selection popup
 			typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, type,displayOptionsTypes , types,null,null,null,null,typePos);
