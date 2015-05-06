@@ -7,6 +7,14 @@ using UnityEditor;
 namespace ws.winx.editor
 {
 
+
+
+
+
+
+
+
+	#region KeyframeExtension
 	public enum TangentMode
 	{
 		Editable = 0,
@@ -21,7 +29,7 @@ namespace ws.winx.editor
 		Right
 	}
 
-	#region KeyframeExtension
+
 	public static class KeyframeExtension
 	{
 		

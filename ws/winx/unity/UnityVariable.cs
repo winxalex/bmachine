@@ -50,9 +50,13 @@ namespace ws.winx.unity
 				/// <summary>
 				/// The name of the property of GO in formate prop1.prop2.x
 				/// </summary>
-				//public string propertyName;
-				
+				public string propertyName;
 
+
+				/// <summary>
+				/// The name of the sub property.
+				/// </summary>
+				public string subPropertyName;
 				[HideInInspector]
 				public byte[]
 						memberInfoSerialized;
@@ -103,6 +107,7 @@ namespace ws.winx.unity
 				[NonSerialized]
 				private MemberInfo
 						__memberInfo;
+				public MemberInfo __memberInfoSub;
 		
 				public MemberInfo MemberInfo {
 						get {
@@ -125,12 +130,12 @@ namespace ws.winx.unity
 
 								if (value != null) {
 									
-										if(__instanceSystemObject is Component)
-											this.name =((Component)__instanceSystemObject).name+"."+ __instanceSystemObject.GetType().Name+"."+ __memberInfo.Name;
-										else if(__instanceSystemObject is GameObject)
-											this.name =((GameObject)__instanceSystemObject).name+"."+  __memberInfo.Name;
-					
-									if (__memberInfo.MemberType == MemberTypes.Field) {
+//										if(__instanceSystemObject is Component)
+//											this.name =((Component)__instanceSystemObject).name+"."+ __instanceSystemObject.GetType().Name+"."+ __memberInfo.Name;
+//										else if(__instanceSystemObject is GameObject)
+//											this.name =((GameObject)__instanceSystemObject).name+"."+  __memberInfo.Name;
+//					
+										if (__memberInfo.MemberType == MemberTypes.Field) {
 												
 
 												_valueType = ((FieldInfo)__memberInfo).FieldType;
@@ -159,6 +164,19 @@ namespace ws.winx.unity
 				// Properties
 				//
 
+				// User-defined conversion from UnityVariable to Vector3 
+				public static implicit operator Vector3 (UnityVariable variable)
+				{
+						return (Vector3)variable.Value;
+				}
+
+//		//  User-defined conversion from double to Digit 
+//		public static implicit operator UnityVariable(float value)
+//		{
+//			UnityVariable variable = UnityVariable.CreateInstanceOf (typeof(float));
+//			variable.Value = value;
+//			return variable;
+//		}
 
 
 				/// <summary>
@@ -230,10 +248,20 @@ namespace ws.winx.unity
 
 
 								if (this.__memberInfo.MemberType == MemberTypes.Property) {
-										((PropertyInfo)this.__memberInfo).SetValue (this.instanceSystemObject, value, null);
+									
+
+
+										if (this.__memberInfoSub != null && this.__memberInfo.GetUnderlyingType ().IsValueType) {
+												object objectStruct = this.__memberInfo.GetValue (instanceSystemObject);
+												this.__memberInfoSub.SetValue (objectStruct, value);
+												this.__memberInfo.SetValue (instanceSystemObject, objectStruct);
+																
+										} else
+												((PropertyInfo)this.__memberInfo).SetValue (this.instanceSystemObject, value, null);
 								} else {
 										if (this.__memberInfo.MemberType == MemberTypes.Field) {
 												((FieldInfo)this.__memberInfo).SetValue (this.instanceSystemObject, value);
+												Debug.Log ("Try to set " + instanceSystemObject + " " + __memberInfo.Name + "=" + value);
 										} else {
 
 												Debug.LogError (string.Concat (new object[]
@@ -274,7 +302,7 @@ namespace ws.winx.unity
 								else if (T == typeof(Material))
 										variable.Value = new Material (Shader.Find ("Diffuse"));
 								else if (T == typeof(UnityEngine.Events.UnityEvent))
-										variable.Value = new UnityEvent();
+										variable.Value = new UnityEvent ();
 								else		
 										variable.Value = FormatterServices.GetUninitializedObject (T);
 						}
@@ -298,9 +326,9 @@ namespace ws.winx.unity
 
 								//if it is not reference to other UnityVariable isn't null and not reference to UnityObject
 								if (__unityVariableReferencedInstanceID == 0 && (__instanceSystemObject != null) && (__instanceUnityObject == null || (__instanceUnityObject != null && __instanceUnityObject.GetInstanceID () == 0) && __event == null) 
-				    && !__instanceSystemObject.GetType ().IsSubclassOf (typeof(UnityEngine.Object)) 
-				    && __instanceSystemObject.GetType () != typeof(UnityEngine.Object)
-				   &&  __instanceSystemObject.GetType () != typeof(UnityEngine.Events.UnityEvent)
+										&& !__instanceSystemObject.GetType ().IsSubclassOf (typeof(UnityEngine.Object)) 
+										&& __instanceSystemObject.GetType () != typeof(UnityEngine.Object)
+										&& __instanceSystemObject.GetType () != typeof(UnityEngine.Events.UnityEvent)
 
 				    ) {
 
@@ -422,8 +450,8 @@ namespace ws.winx.unity
 
 
 
-		////////////////////////////////////////////////////////////////////////////////////
-		//                            !!!! For reusing of Unity Drawers	                 //	
+				////////////////////////////////////////////////////////////////////////////////////
+				//                            !!!! For reusing of Unity Drawers	                 //	
 
 #if UNITY_EDITOR
 		[NonSerialized]
@@ -443,6 +471,8 @@ namespace ws.winx.unity
 				if (__seralizedProperty == null && this.Value != null) {
 					
 					CreateSerializedProperty ();
+
+				
 					
 				}
 				

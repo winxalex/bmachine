@@ -107,30 +107,30 @@ namespace ws.winx.editor
 
 										attributes = AttributeUtility.GetAttributes<CustomPropertyDrawer> (typeDrawer, false);
 
-										if(attributes!=null)
-										for(int j=0;j<attributes.Length;j++){
+										if (attributes != null)
+												for (int j=0; j<attributes.Length; j++) {
 
-										attribute = attributes [j];
+														attribute = attributes [j];
 
-										if (attribute != null) {
-												FieldInfo m_TypeFieldInfo = attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
-
-
+														if (attribute != null) {
+																FieldInfo m_TypeFieldInfo = attribute.GetType ().GetField ("m_Type", BindingFlags.Instance | BindingFlags.NonPublic);
 
 
-												if (m_TypeFieldInfo != null) {
-														Type typeProperty = (Type)m_TypeFieldInfo.GetValue (attribute);
+
+
+																if (m_TypeFieldInfo != null) {
+																		Type typeProperty = (Type)m_TypeFieldInfo.GetValue (attribute);
 
 												
 
-														if (typeProperty != null && typeProperty.BaseType!= typeof(PropertyAttribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
-																EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
+																		if (typeProperty != null && typeProperty.BaseType != typeof(PropertyAttribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
+																				EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
 												
 //																Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name+" "+typeProperty.BaseType);
+																		}
+																}
 														}
-												}
-										}
-									}//attributes
+												}//attributes
 								}//types in dll
 						}
 
@@ -140,9 +140,8 @@ namespace ws.winx.editor
 
 						}
 						
-						if(type.BaseType!=null)
-						if(EditorUtilityEx.__drawers.TryGetValue (type.BaseType, out drawer))
-						{
+						if (type.BaseType != null)
+						if (EditorUtilityEx.__drawers.TryGetValue (type.BaseType, out drawer)) {
 								return drawer;
 						
 						}
@@ -154,6 +153,101 @@ namespace ws.winx.editor
 						return __drawerDefault;
 				}
 
+
+
+
+		#region SerializedObject
+
+			
+				public static SerializedObject Serialize (object value)
+				{
+
+						using (Microsoft.CSharp.CSharpCodeProvider foo = 
+				      new Microsoft.CSharp.CSharpCodeProvider()) {
+				
+								System.CodeDom.Compiler.CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+
+								Type ValueType = value.GetType ();
+				
+								compilerParams.GenerateInMemory = true; 
+				
+								var assembyExcuting = Assembly.GetExecutingAssembly ();
+				
+								string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+				
+								string usingString = "using UnityEngine;";
+				
+								if (!(ValueType.IsPrimitive || ValueType == typeof(string))) {
+										string assemblyLocationVarable = Assembly.GetAssembly (ValueType).Location;
+										compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+					
+										if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+						
+												usingString += "using " + ValueType.Namespace + ";";
+										}
+								}
+				
+				
+				
+								compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+								compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+				
+				
+				
+				
+								var res = foo.CompileAssemblyFromSource (
+					compilerParams, String.Format (
+					
+					" {0}" +
+					
+										"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+					, usingString, ValueType.ToString ())
+								);
+				
+				
+				
+				
+								if (res.Errors.Count > 0) {
+					
+										foreach (System.CodeDom.Compiler.CompilerError CompErr in res.Errors) {
+												Debug.LogError (
+														"Line number " + CompErr.Line +
+														", Error Number: " + CompErr.ErrorNumber +
+														", '" + CompErr.ErrorText + ";" 
+												);
+										}
+
+
+										return null;
+
+
+								} else {
+					
+										var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+					
+										ScriptableObject st = ScriptableObject.CreateInstance (type);
+					
+										type.GetField ("value").SetValue (st, value);
+					
+					
+					
+										return new SerializedObject (st);
+					
+
+					
+								}
+				
+						}
+			
+			
+			
+				}
+		#endregion
+
+				
+				/// ////////////////////////////////   MENU EXTENSIONS /////////////////////////
+				
+		#region RemoveSubAsset
 				[MenuItem("Assets/Delete/Remove SubAsset")]
 				public static void RemoveSelectedSubAsset ()
 				{
@@ -165,7 +259,10 @@ namespace ws.winx.editor
 						}
 
 				}
+		#endregion
 
+
+		#region CreateAssetFromSelected
 				[MenuItem("Assets/Create/Asset From Selected")]
 				public static void CreateAssetFromSelected ()
 				{
@@ -188,6 +285,53 @@ namespace ws.winx.editor
 						}
 			
 				}
+		#endregion
+
+
+		#region CreatePrefab
+				// Creates a prefab from the selected GameObjects.
+				// if the prefab already exists it asks if you want to replace it
+		
+				[MenuItem("GameObject/Create/Prefab From Selected")]
+				static void CreatePrefab ()
+				{
+						var objs = Selection.gameObjects;
+
+						string pathBase = EditorUtility.SaveFolderPanel ("Choose save folder", "Assets", "");
+
+						if (!String.IsNullOrEmpty (pathBase)) {
+
+								pathBase = pathBase.Remove (0, pathBase.IndexOf ("Assets")) + Path.DirectorySeparatorChar;
+
+								foreach (var go in objs) {
+										String localPath = pathBase + go.name + ".prefab";
+
+										if (AssetDatabase.LoadAssetAtPath (localPath, typeof(GameObject))) {
+												if (EditorUtility.DisplayDialog ("Are you sure?", 
+						                                "The prefab already exists. Do you want to overwrite it?", 
+						                                "Yes", 
+						                                "No"))
+														CreateNew (go, localPath);
+										} else
+												CreateNew (go, localPath);
+								}
+						}
+				}
+
+				[MenuItem("GameObject/Create/ Prefab From Selected", true)]
+				static bool ValidateCreatePrefab ()
+				{
+						return Selection.activeGameObject != null;
+				}
+		
+				static void CreateNew (GameObject obj, string localPath)
+				{
+						var prefab = PrefabUtility.CreateEmptyPrefab (localPath);
+						PrefabUtility.ReplacePrefab (obj, prefab, ReplacePrefabOptions.ConnectToPrefab);
+				}
+
+
+		#endregion
 
 				private static UnityClipboard __clipboard;
 

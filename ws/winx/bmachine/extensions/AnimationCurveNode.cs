@@ -3,7 +3,7 @@ using System.Collections;
 using BehaviourMachine;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
-using ws.winx.editor.extensions;
+
 
 
 namespace ws.winx.bmachine.extensions

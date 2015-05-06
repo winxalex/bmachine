@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: d1edc5c37110d49669734300e80f8667
 ModelImporter:
-  serializedVersion: 16
+  serializedVersion: 18
   fileIDToRecycleName:
     100000: char_cyberKid_Badge
     100002: char_ethan_body
@@ -194,203 +194,7 @@ ModelImporter:
     animationScaleError: .5
     animationWrapMode: 0
     extraExposedTransformPaths: []
-    clipAnimations:
-    - serializedVersion: 16
-      name: Take 001
-      takeName: Take 001
-      firstFrame: 1
-      lastFrame: 24
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 0
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 1
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask:
-      - path: 
-        weight: 1
-      - path: char_ethan_body
-        weight: 0
-      - path: char_ethan_glasses
-        weight: 0
-      - path: char_ethan_skeleton
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_cyberKid_Badge
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_LeftUpLeg
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_LeftUpLeg/char_ethan_LeftLeg
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_LeftUpLeg/char_ethan_LeftLeg/char_ethan_LeftFoot
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_LeftUpLeg/char_ethan_LeftLeg/char_ethan_LeftFoot/char_ethan_LeftToe1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_LeftUpLeg/char_ethan_LeftLeg/char_ethan_LeftFoot/char_ethan_LeftToe1/char_ethan_LeftToe2
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_RightUpLeg
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_RightUpLeg/char_ethan_RightLeg
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_RightUpLeg/char_ethan_RightLeg/char_ethan_RightFoot
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_RightUpLeg/char_ethan_RightLeg/char_ethan_RightFoot/char_ethan_RightToe1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_RightUpLeg/char_ethan_RightLeg/char_ethan_RightFoot/char_ethan_RightToe1/char_ethan_RightToe2
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Head1
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Head1/char_ethan_LeftCorner
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Head1/char_ethan_LeftUpperLip
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Head1/char_ethan_RightCorner
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Head1/char_ethan_RightUpperLip
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Head1/char_ethan_UpperLip
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Jaw
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Jaw/char_ethan_LeftLowerLip
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Jaw/char_ethan_LowerLip
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_Jaw/char_ethan_RightLowerLip
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_LeftBlink
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_LeftBrow
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_LeftEye
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_RightBlink
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_RightBrow
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_Head/char_ethan_RightEye
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandIndex1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandIndex1/char_ethan_LeftHandIndex2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandIndex1/char_ethan_LeftHandIndex2/char_ethan_LeftHandIndex3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandIndex1/char_ethan_LeftHandIndex2/char_ethan_LeftHandIndex3/char_ethan_LeftHandIndex4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandMiddle1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandMiddle1/char_ethan_LeftHandMiddle2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandMiddle1/char_ethan_LeftHandMiddle2/char_ethan_LeftHandMiddle3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandMiddle1/char_ethan_LeftHandMiddle2/char_ethan_LeftHandMiddle3/char_ethan_LeftHandMiddle4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandPinky1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandPinky1/char_ethan_LeftHandPinky2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandPinky1/char_ethan_LeftHandPinky2/char_ethan_LeftHandPinky3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandPinky1/char_ethan_LeftHandPinky2/char_ethan_LeftHandPinky3/char_ethan_LeftHandPinky4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandRing1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandRing1/char_ethan_LeftHandRing2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandRing1/char_ethan_LeftHandRing2/char_ethan_LeftHandRing3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandRing1/char_ethan_LeftHandRing2/char_ethan_LeftHandRing3/char_ethan_LeftHandRing4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandThumb1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandThumb1/char_ethan_LeftHandThumb2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandThumb1/char_ethan_LeftHandThumb2/char_ethan_LeftHandThumb3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_LeftShoulder/char_ethan_LeftArm/char_ethan_LeftForeArm/char_ethan_LeftHand/char_ethan_LeftHandThumb1/char_ethan_LeftHandThumb2/char_ethan_LeftHandThumb3/char_ethan_LeftHandThumb4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandIndex1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandIndex1/char_ethan_RightHandIndex2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandIndex1/char_ethan_RightHandIndex2/char_ethan_RightHandIndex3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandIndex1/char_ethan_RightHandIndex2/char_ethan_RightHandIndex3/char_ethan_RightHandIndex4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandMiddle1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandMiddle1/char_ethan_RightHandMiddle2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandMiddle1/char_ethan_RightHandMiddle2/char_ethan_RightHandMiddle3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandMiddle1/char_ethan_RightHandMiddle2/char_ethan_RightHandMiddle3/char_ethan_RightHandMiddle4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandPinky1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandPinky1/char_ethan_RightHandPinky2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandPinky1/char_ethan_RightHandPinky2/char_ethan_RightHandPinky3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandPinky1/char_ethan_RightHandPinky2/char_ethan_RightHandPinky3/char_ethan_RightHandPinky4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandRing1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandRing1/char_ethan_RightHandRing2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandRing1/char_ethan_RightHandRing2/char_ethan_RightHandRing3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandRing1/char_ethan_RightHandRing2/char_ethan_RightHandRing3/char_ethan_RightHandRing4
-        weight: 0
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandThumb1
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandThumb1/char_ethan_RightHandThumb2
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandThumb1/char_ethan_RightHandThumb2/char_ethan_RightHandThumb3
-        weight: 1
-      - path: char_ethan_skeleton/char_ethan_Hips/char_ethan_Spine/char_ethan_Spine1/char_ethan_Spine2/char_ethan_Neck/char_ethan_RightShoulder/char_ethan_RightArm/char_ethan_RightForeArm/char_ethan_RightHand/char_ethan_RightHandThumb1/char_ethan_RightHandThumb2/char_ethan_RightHandThumb3/char_ethan_RightHandThumb4
-        weight: 0
-      maskType: 0
-      maskSource: {instanceID: 0}
+    clipAnimations: []
     isReadable: 1
   meshes:
     lODScreenPercentages: []
@@ -402,17 +206,19 @@ ModelImporter:
     generateSecondaryUV: 0
     useFileUnits: 1
     optimizeMeshForGPU: 1
+    keepQuads: 0
     weldVertices: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
+    useFileScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     splitTangentsAcrossUV: 1
     normalImportMode: 0
     tangentImportMode: 1
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
     human:
@@ -1278,3 +1084,5 @@ ModelImporter:
   animationType: 3
   additionalBone: 0
   userData: 
+  assetBundleName: 
+  assetBundleVariant: 

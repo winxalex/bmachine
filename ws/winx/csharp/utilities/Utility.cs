@@ -5,6 +5,9 @@ using System.Reflection;
 using System;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Linq.Expressions;
+using ws.winx.csharp.extensions;
+//using System.CodeDom.Compiler
 
 namespace ws.winx.csharp.utilities
 {
@@ -13,35 +16,11 @@ namespace ws.winx.csharp.utilities
 	/// </summary>
 	public class ReflectionUtility{
 
-		public static MemberInfo[] GetPublicMembers (Type type, Type propertyType, bool staticMembers, bool canWrite, bool canRead, bool isSubClass=false)
-		{
-			List<MemberInfo> list = new List<MemberInfo> ();
-			BindingFlags bindingAttr = (!staticMembers) ? (BindingFlags.Instance | BindingFlags.Public) : (BindingFlags.Static | BindingFlags.Public);
-			FieldInfo[] fields = type.GetFields (bindingAttr);
-			for (int i = 0; i < fields.Length; i++)
-			{
-				FieldInfo fieldInfo = fields [i];
-				if (propertyType == null || fieldInfo.FieldType == propertyType || (isSubClass && fieldInfo.FieldType.IsSubclassOf(propertyType)))
-				{
-					list.Add (fieldInfo);
-				}
-			}
-			PropertyInfo[] properties = type.GetProperties (bindingAttr);
-			for (int j = 0; j < properties.Length; j++)
-			{
-				PropertyInfo propertyInfo = properties [j];
-				if ((propertyType == null || propertyInfo.PropertyType == propertyType || (isSubClass && propertyInfo.PropertyType.IsSubclassOf(propertyType))) 
-				    && ((canRead && propertyInfo.CanRead && (!canWrite || propertyInfo.CanWrite)) || (canWrite && propertyInfo.CanWrite && (!canRead || propertyInfo.CanRead))))
-				{
-					list.Add (propertyInfo);
-				}
-			}
 
 
-			return list.ToArray ();
-		}
 
 
+	
 
 
 		private static Dictionary<string, Type> s_LoadedType = new Dictionary<string, Type> ();
@@ -128,9 +107,57 @@ namespace ws.winx.csharp.utilities
 			ReflectionUtility.s_LoadedType.Add (name, type);
 			return type;
 		}
+
+
+
+
+		/// <summary>
+		/// Converts Delegate boxed to Getter Func<K,T>
+		/// </summary>
+		/// <param name="del">Del.</param>
+		/// <param name="instance">Instance.</param>
+		/// <param name="memberInfoValue">Member info value returned.</param>
+		/// <typeparam name="K">type of instance </typeparam>
+		/// <typeparam name="T">type of value returned.</typeparam>
+		public static void ToGetter<K,T>(Delegate del,K instance,out T memberInfoValue){
+			
+			//!!! Engage type check if this is prone to errors
+			//		Type instanceType =	del.Method.GetParameters () [1].ParameterType;
+			//		if (!typeof(K).IsAssignableFrom(instanceType))
+			//						throw new Exception ("Type of parameter 'instance' should be " +instanceType);
+			//		Type memberInfoValueType = del.Method.ReturnType;
+			//		if(!typeof(T).IsAssignableFrom(memberInfoValueType))
+			//		   throw new Exception ("Type of parameter 'memberInfoValue' should be " +memberInfoValueType);
+			
+			memberInfoValue = ( del as Func<K,T>)(instance);
+			
+		}
+
+
+
+		/// <summary>
+		/// Converts Delegate boxed to Setter MemberInfoSetterDelegate(as Func,Action generics can't contain "ref")
+		/// </summary>
+		/// <param name="del">Del.</param>
+		/// <param name="instance">Instance.</param>
+		/// <param name="value">Value to be set.</param>
+		/// <typeparam name="K">type of instance</typeparam>
+		/// <typeparam name="T">type of value to be set</typeparam>
+		public static void ToSetter<K,T>(Delegate del,ref K instance,T value){
+			//!!! Engage type check if this is prone to errors
+			Type instanceType =	del.Method.GetParameters () [0].ParameterType;
+			if (!typeof(K).IsAssignableFrom(instanceType))
+				throw new Exception ("Type of parameter 'instance' should be " +instanceType);
+			Type valueType = del.Method.GetParameters () [1].ParameterType;
+			if(!typeof(T).IsAssignableFrom(valueType))
+				throw new Exception ("Type of parameter 'value' should be " +valueType);
+			
+			
+			( del as ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<K,T>)(ref instance,value);
+		}
 	
 
-
+	
 
 	}
 

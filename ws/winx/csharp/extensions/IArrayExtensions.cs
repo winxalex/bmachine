@@ -27,10 +27,10 @@ namespace ws.winx.csharp.extensions
 //			
 //		}
 
-		public static IEnumerable<T> Concat<T>(this IEnumerable<T> array,IEnumerable<T> other){
-			//T[] arrNew=new T[array.Count+other.Count
-			return array.Concat (other);
-		}
+//		public static IEnumerable<T> Concat<T>(this IEnumerable<T> array,IEnumerable<T> other){
+//			//T[] arrNew=new T[array.Count+other.Count
+//			return array.Concat (other);
+//		}
 
 		public static String JoinToString<T>(this IEnumerable<T> array)
 		{
