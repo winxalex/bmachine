@@ -187,6 +187,49 @@ public class AnimaTestEditor : EditorWindow
 		}
 
 
+
+	class MyClass
+	{
+		public static Type Foo<T>(T param)
+		{
+			return typeof(T);
+		}
+		
+		public static Type CallFoo(object param)
+		{
+			return (Type)typeof(MyClass).GetMethod("Foo").MakeGenericMethod(new[] { param.GetType() }).Invoke(null, new[] { param });
+
+
+		}
+		
+	}
+
+
+	public static T Foo3<T>(T param)
+	{
+		//Type t = typeof(T);
+		//Debug.Log (typeof(T));
+		return param;
+	}
+
+	private static Func<object,object> BuildAccessor1(Type valueType,MethodInfo genericMethod)
+	{
+		//MethodInfo genericMethod = GetType ().GetMethod ("Foo3"); // <-- fill this in
+		MethodInfo method = genericMethod.MakeGenericMethod(new Type[] { valueType });
+		ParameterExpression methodInfo = Expression.Parameter(typeof(MethodInfo), "methodInfo");
+		ParameterExpression obj = Expression.Parameter(typeof(object), "obj");
+		
+		Expression<Func<object,object>> expr =
+			Expression.Lambda<Func<object,object>>(
+				Expression.Call(method,  Expression.Convert(obj, valueType)),
+				obj);
+		
+		return expr.Compile();
+	}
+
+
+
+
 		public struct SomeType
 		{
 				public int member;
@@ -208,6 +251,9 @@ public class AnimaTestEditor : EditorWindow
 				public static int memberStatic;
 				public int member;
 				public int getter;
+				public static Vector3 memberStructStatic;
+
+		public Vector3 memberStruct;
 
 				public int Getter {
 						get {
@@ -219,152 +265,72 @@ public class AnimaTestEditor : EditorWindow
 				}
 		}
 
-		public delegate void ByRefStructAction (ref SomeType instance,object value);
-	
-		private static ByRefStructAction BuildSetter (FieldInfo field)
+
+	public delegate void SetterDelegate(ref object target, object value);
+	private static Type[] ParamTypes = new Type[]
+	{
+		typeof(object).MakeByRefType(), typeof(object)
+	};
+	private static SetterDelegate CreateSetMethod(MemberInfo memberInfo)
+	{
+		Type ParamType;
+		if (memberInfo is PropertyInfo)
+			ParamType = ((PropertyInfo)memberInfo).PropertyType;
+		else if (memberInfo is FieldInfo)
+			ParamType = ((FieldInfo)memberInfo).FieldType;
+		else
+			throw new Exception("Can only create set methods for properties and fields.");
+		
+		DynamicMethod setter = new DynamicMethod(
+			"",
+			typeof(void),
+			ParamTypes,
+			memberInfo.ReflectedType.Module,
+			true);
+		ILGenerator generator = setter.GetILGenerator();
+		generator.Emit(OpCodes.Ldarg_0);
+		generator.Emit(OpCodes.Ldind_Ref);
+		
+		if (memberInfo.DeclaringType.IsValueType)
 		{
-				ParameterExpression instance = Expression.Parameter (typeof(SomeType).MakeByRefType (), "instance");
-				ParameterExpression value = Expression.Parameter (typeof(object), "value");
-		
-				Expression<ByRefStructAction> expr =
-			Expression.Lambda<ByRefStructAction> (
-				ExpressionEx.Assign (
-				Expression.Field (instance, field),
-				Expression.Convert (value, field.FieldType)),
-				instance,
-				value);
-		
-				return expr.Compile ();
+			#if UNSAFE_IL
+			generator.Emit(OpCodes.Unbox, memberInfo.DeclaringType);
+			#else
+			generator.DeclareLocal(memberInfo.DeclaringType.MakeByRefType());
+			generator.Emit(OpCodes.Unbox, memberInfo.DeclaringType);
+			generator.Emit(OpCodes.Stloc_0);
+			generator.Emit(OpCodes.Ldloc_0);
+			#endif // UNSAFE_IL
 		}
-
-//	public delegate void SetterDelegate<T,K>(ref T target, K value);
-////	private static Type[] ParamTypes = new Type[]
-////	{
-////		typeof(T).MakeByRefType(), typeof(K)
-////	};
-////	
-//	private static SetterDelegate<T,K> CreateSetMethod<T,K>(MemberInfo memberInfo)
-//	{
-//		Type ParamType;
-//		if (memberInfo is PropertyInfo)
-//			ParamType = ((PropertyInfo)memberInfo).PropertyType;
-//		else if (memberInfo is FieldInfo)
-//			ParamType = ((FieldInfo)memberInfo).FieldType;
-//		else
-//			throw new Exception("Can only create set methods for properties and fields.");
-//		
-//		DynamicMethod setter = new DynamicMethod(
-//			"",
-//			typeof(void),
-//			new Type[]
-//			{
-//			typeof(T).MakeByRefType(), typeof(K)
-//		},
-//			memberInfo.ReflectedType.Module,
-//			true);
-//		ILGenerator generator = setter.GetILGenerator();
-//		generator.Emit(OpCodes.Ldarg_0);
-//		generator.Emit(OpCodes.Ldind_Ref);
-//		
-//		if (memberInfo.DeclaringType.IsValueType)
-//		{
-//			#if UNSAFE_IL
-//			generator.Emit(OpCodes.Unbox, memberInfo.DeclaringType);
-//			#else
-//			generator.DeclareLocal(memberInfo.DeclaringType.MakeByRefType());
-//			generator.Emit(OpCodes.Unbox, memberInfo.DeclaringType);
-//			generator.Emit(OpCodes.Stloc_0);
-//			generator.Emit(OpCodes.Ldloc_0);
-//			#endif // UNSAFE_IL
-//		}
-//		
-//		generator.Emit(OpCodes.Ldarg_1);
-//		if (ParamType.IsValueType)
-//			generator.Emit(OpCodes.Unbox_Any, ParamType);
-//		
-//		if (memberInfo is PropertyInfo)
-//			generator.Emit(OpCodes.Callvirt, ((PropertyInfo)memberInfo).GetSetMethod());
-//		else if (memberInfo is FieldInfo)
-//			generator.Emit(OpCodes.Stfld, (FieldInfo)memberInfo);
-//		
-//		if (memberInfo.DeclaringType.IsValueType)
-//		{
-//			#if !UNSAFE_IL
-//			generator.Emit(OpCodes.Ldarg_0);
-//			generator.Emit(OpCodes.Ldloc_0);
-//			generator.Emit(OpCodes.Ldobj, memberInfo.DeclaringType);
-//			generator.Emit(OpCodes.Box, memberInfo.DeclaringType);
-//			generator.Emit(OpCodes.Stind_Ref);
-//			#endif // UNSAFE_IL
-//		}
-//		generator.Emit(OpCodes.Ret);
-//		
-//		return (SetterDelegate<T,K>)setter.CreateDelegate(typeof(SetterDelegate<T,K>));
-//	}
-
-	public Delegate _setterGlobal;
-	public Delegate _getterGlobal;
-
-	Type _setterGenericType;
-
-
-
-  
-
 		
-
-//	
-//	Action<T> ConvertToUntyped<T>(Action<T> action){
-//		return o => action((T)o);
-//	}
-
-//	MemberInfoSetterDelegate<T,K> ConvertToUntyped<T,K>(MemberInfoSetterDelegate<T,K> action,Type a,Type b){
-//		//return o => action((T)o);
-//		return (ref T o,K b) => action(ref (T)o,(K)b);
-//	}
-
-//	T Action<T> ReturnType(T a){
-//
-//		return T;
-//	}
-
-
-
-
-
-
-
-
-//	public static unsafe IntPtr GetAddress(object obj)
-//	{
-//		var typedReference = __makeref(obj);
-//		//return *(IntPtr*)(&typedReference);
-//		return IntPtr.Zero;
-//	}
-
-
-	static Expression<Func<IEnumerable<T>, T>> CreateLambda<T>()
-	{
-		var source = Expression.Parameter(
-			typeof(IEnumerable<T>), "source");
+		generator.Emit(OpCodes.Ldarg_1);
+		if (ParamType.IsValueType)
+			generator.Emit(OpCodes.Unbox_Any, ParamType);
 		
-		var call = Expression.Call(
-			typeof(Enumerable), "Last", new Type[] { typeof(T) }, source);
+		if (memberInfo is PropertyInfo)
+			generator.Emit(OpCodes.Callvirt, ((PropertyInfo)memberInfo).GetSetMethod());
+		else if (memberInfo is FieldInfo)
+			generator.Emit(OpCodes.Stfld, (FieldInfo)memberInfo);
 		
-		return Expression.Lambda<Func<IEnumerable<T>, T>> (call, source);
+		if (memberInfo.DeclaringType.IsValueType)
+		{
+			#if !UNSAFE_IL
+			generator.Emit(OpCodes.Ldarg_0);
+			generator.Emit(OpCodes.Ldloc_0);
+			generator.Emit(OpCodes.Ldobj, memberInfo.DeclaringType);
+			generator.Emit(OpCodes.Box, memberInfo.DeclaringType);
+			generator.Emit(OpCodes.Stind_Ref);
+			#endif // UNSAFE_IL
+		}
+		generator.Emit(OpCodes.Ret);
+		
+		return (SetterDelegate)setter.CreateDelegate(typeof(SetterDelegate));
 	}
+				
 
-	static LambdaExpression CreateLambda(Type type)
-	{
-		var source = Expression.Parameter(
-			typeof(IEnumerable<>).MakeGenericType(type), "source");
+
+
 		
-		var call = Expression.Call(
-			typeof(Enumerable), "Last", new Type[] { type }, source);
-		
-		return Expression.Lambda (call, source);
-	}
-	
 	void OnGUI ()
 		{
 				//"transform.rotation.x" "directionLight.intesity"
@@ -379,71 +345,122 @@ public class AnimaTestEditor : EditorWindow
 
 				//
 
+
+
 				if (GUILayout.Button ("Test")) {
 
+//			Type newType=typeof(MemberDelegate<>).MakeGenericType (new Type[] {
+//				typeof(int)
+//			});
+//
+//			var dlgate = Delegate.CreateDelegate(newType,this.GetType().GetMethod("Foo"));
+
+						//Foo1(dlgate,123);
+
 						//object instance=animatedObject1.transform.rotation;
-						Quaternion instance = animatedObject1.transform.rotation;
+						Transform transformInstance = animatedObject1.transform;
+			object transformObject = animatedObject1.transform;
 		
 
 
-			MemberInfo infoX =  typeof(Transform).GetMemberFromPath ("rotation.x");
-						MemberInfo infoMember = typeof(SomeTypeClass).GetField ("member");
-						MemberInfo infoMemberStatic = typeof(SomeTypeClass).GetField ("memberStatic", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
-						MemberInfo infoProp = typeof(SomeTypeClass).GetProperty ("Getter");
+//						MemberInfo infoX =  typeof(Transform).GetMemberFromPath ("rotation.x");
+//						MemberInfo infoMember = typeof(SomeTypeClass).GetField ("member");
+//						MemberInfo infoMemberStatic = typeof(SomeTypeClass).GetField ("memberStatic", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+//						MemberInfo infoProp = typeof(SomeTypeClass).GetProperty ("Getter");
 						SomeTypeClass cls = new SomeTypeClass ();
 
+			var s1=cls.GetType().GetSetDelegate("memberStatic");
+			object clsObject=cls;
+			s1(ref clsObject,101);
+
+			var s2=cls.GetType().GetSetDelegate("memberStructStatic");
+			s2(ref clsObject,new Vector3(3f,33f,333f));
+
+
+			var s3=cls.GetType().GetSetDelegate("memberStruct");
+			s3(ref clsObject,new Vector3(3f,33f,333f));
+
+			Quaternion q=Quaternion.identity;//Quaternion.Euler(25f,170f,14f);
+			object qObject=Quaternion.identity;//Quaternion.Euler(25f,170f,14f);
+
+			//object transformObject;//=animatedObject1.GetType().GetMember("transform")[0].GetValue(animatedObject1);
+			//
+			UnityEngine.Object gameObject=animatedObject1;
+
+			//var so=CreateSetMethod(animatedObject1.GetType().GetMemberFromPath("transform.rotation"));
+			
+			//so(ref transformObject,new Quaternion(0f,1f,0f,0f));
+
+
+//			var so=CreateSetMethod(animatedObject1.GetType().GetMemberFromPath("transform.rotation.x"));
+//			
+//			so(ref qObject,0.16f);
 
 
 
 
+			//get component
+
+			var transformGetterDelegate=	animatedObject1.GetType().GetGetDelegate("transform");
+//
+//
+//
+//
+//			//get prop1
+			var quaternionGetDelegate=	animatedObject1.GetType().GetGetDelegate("transform.rotation");
+			var quaternionSetDelegate=	animatedObject1.GetType().GetSetDelegate("transform.rotation");
+
+
+
+
+//			var mdfdf=animatedObject1.GetType().GetMemberFromPath("transform.rotation").GetSetMemberInfoDelegate<Transform,Quaternion>();
+//			mdfdf(ref transformInstance,q);
+
+
+//			var mdfdf=animatedObject1.GetType().GetMemberFromPath("transform.rotation").GetSetMemberInfoDelegate<object,object>();
+//			mdfdf(ref transformObject,q);
+
+			var mdfdf=animatedObject1.GetType().GetMemberFromPath("transform.rotation.x").GetSetMemberInfoDelegate<object,object>();
+						mdfdf(ref qObject,0.5f);
+
+//			var mdfdf=animatedObject1.GetType().GetMemberFromPath("transform.rotation.x").GetSetMemberInfoDelegate<Quaternion,float>();
+//			mdfdf(ref q,0.3f);
+			
+			//			//get prop2
+			var xGetter =typeof(Transform).GetGetDelegate("rotation.x"); 
+
+			var xSetter =typeof(Transform).GetSetDelegate("rotation.x"); 
+
+			object transfromObject=transformGetterDelegate(gameObject);
+
+//			object xOut=xGetter(quaternionGetDelegate(transformGetterDelegate(gameObject)));
+//
+//			object quaternionObject=quaternionGetDelegate(transformGetterDelegate(gameObject));
+//
+//			xSetter(ref quaternionObject,1.5f);
+//
+//			quaternionSetDelegate(ref transfromObject,quaternionObject);
+
+			
 		
 
-			//Debug.Log("Get field:"+Getter(g1,cls,0));
-
-
-
-
-			var sAll= typeof(SomeTypeClass).GetSetDelegate("member");       //infoMember.GetSetMemberInfoDelegate();
-
-			int x=234;
-			ReflectionUtility.SetThruDelegate (sAll,ref cls,x);
-
-			var s2 = infoProp.GetSetMemberInfoDelegate<SomeTypeClass,int>();
-						s2 (ref cls, 101);
-
-			var s3 = infoMemberStatic.GetSetMemberInfoDelegate<SomeTypeClass,int> ();
-						s3 (ref cls, 111);
-
-	
-
-			var s =typeof(Transform).GetSetDelegate("rotation.x"); //infoX.GetSetMemberInfoDelegate<Quaternion,float> ();
-						//s (ref instance, 1.5f);
-
-			ReflectionUtility.SetThruDelegate (s,ref instance,5);
-
-			var g1=infoX.GetGetMemberInfoDelegate();
-			
-			float quat_x;
-			
-			ReflectionUtility.GetThruDelegate(g1,instance,out quat_x);
-
-
-						//var setter=	ReflectionUtility.GetSetMemberInfoDelegate<object,object>(info);
-
-						//var setter = ReflectionUtility.GetSetMemberInfoDelegate<object,object> (infoMember);
-
-						object a = cls;
+					
 						////setter(ref a,20);
 
 						//setter(instance,0.7f);
 						//Action a=CreateSetMethod(info)
 
 						//a(ref instance,34f);
-						Debug.Log("fieldValue:"+quat_x);
-						Debug.Log ("s1:" + cls.member);
-						Debug.Log ("s2:" + cls.Getter);
-						Debug.Log ("s3:" + SomeTypeClass.memberStatic);
-						Debug.Log ("Direct:" + ((Quaternion)instance).x);
+						Debug.Log("q: "+q);
+						Debug.Log("qObject: "+qObject);
+						Debug.Log("animatedObject "+animatedObject1.transform.rotation);
+//						Debug.Log ("Field 'member'" + cls.member);
+//						Debug.Log ("Property 'Getter'" + cls.Getter);
+						Debug.Log ("Property 'memberStruct'" + cls.memberStruct);
+						Debug.Log ("Static :" + SomeTypeClass.memberStructStatic);
+						Debug.Log ("Static :" + SomeTypeClass.memberStatic);
+//						Debug.Log ("rotation.x set:" + animatedObject1.transform.rotation.x);
+
 						//Debug.Log("result="+result+" "+q);
 				}
 
@@ -482,34 +499,18 @@ public class AnimaTestEditor : EditorWindow
 
 												variableCurrent = variables [num] = UnityVariable.CreateInstanceOf (curveBindingCurrent.type);
 
-
-												variableCurrent.instanceSystemObject = instance.GetType () == typeof(GameObject) ? ((GameObject)instance).GetComponent<Transform> () : instance;
+												//ex. Transform or Light component
+												variableCurrent.instanceBinded = instance.GetType () == typeof(GameObject) ? ((GameObject)instance).GetComponent<Transform> () : instance;
 									
 
 
 
 												propertyName = curveBindingCurrent.propertyName;
+												//remove "m_Rotation.x" "m_Intensity"
 												propertyName = char.ToLower (propertyName [2]) + propertyName.Remove (0, 3);
 
-												variableCurrent.propertyName = propertyName;
-												string[] propertyPath = propertyName.Split ('.');
-
-
-
-												//propertyName=propertyPath[0];
-
+												variableCurrent.memberName = propertyName;
 											
-
-												//variableCurrent.MemberInfo=GetMemberInfo(ref instance,propertyName);					
-												//variableCurrent.MemberInfo=instance.GetType ().GetField (propertyName) as MemberInfo ??
-												//	instance.GetType ().GetProperty (propertyName) as MemberInfo;
-
-												if (propertyPath.Length == 2) {
-														Type propertyType = variableCurrent.MemberInfo.GetUnderlyingType ();
-						
-														//variableCurrent.methodInfo=propertyType.GetMethod("set_"+propertyPath[1],BindingFlags.Static | BindingFlags.Public);
-				
-												}
 										} else {
 
 												Debug.LogWarning (curveBindingCurrent.propertyName + " not found in " + animatedObject);
@@ -549,7 +550,7 @@ public class AnimaTestEditor : EditorWindow
 
 				if (clip != null && animatedObject != null) {
 
-						if (GUILayout.Button ("CLone")) {
+						if (GUILayout.Button ("Reset Pose")) {
 
 
 

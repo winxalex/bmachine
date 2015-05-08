@@ -12,6 +12,27 @@ namespace ws.winx.csharp.extensions
 		public static class ReflectionExtension
 		{
 
+				static Dictionary<MemberInfo,Delegate> _settersCache;
+				static Dictionary<MemberInfo,Delegate> _getterCache;
+
+				//static Dictionary<MemberInfo,MemberInfoSetterDelegate<object,object>> _settersWeakCache;
+				//static Dictionary<MemberInfo,Func<object,object>> _getterWeakCache;
+
+				public static Dictionary<MemberInfo, Delegate> settersCache {
+						get {
+								if (_settersCache == null)
+										_settersCache = new Dictionary<MemberInfo, Delegate> ();
+								return _settersCache;
+						}
+				}
+
+				public static Dictionary<MemberInfo, Delegate> getterCache {
+						get {
+								if (_getterCache == null)
+										_getterCache = new Dictionary<MemberInfo, Delegate> ();
+								return _getterCache;
+						}
+				}
 
 
 				public delegate void MemberInfoSetterDelegate<T,in TValue> (ref T target,TValue value);
@@ -25,90 +46,180 @@ namespace ws.winx.csharp.extensions
 		
 		#region Field Access
 
+				/// <summary>
+				/// Gets the get delegate. Delegate will be strongly typed but boxed inside Delegate
+				/// !!! as in .NET 3.5 there is no "dynamic" use GetGetDelegate<object,object>
+				/// </summary>
+				/// <returns>The get delegate.</returns>
+				/// <param name="type">Type.</param>
+				/// <param name="name">Name.</param>
+				/// <param name="bindingFlags">Binding flags.</param>
+				public static Delegate GetGetDelegateDynamic (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+				{
+						if (name == null)
+								throw new ArgumentNullException ("name");
+			
+			
+						MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
 
-		/// <summary>
-		/// Gets  delegate to a generated method that allows you to get the field value, that is represented
-		/// by the given <paramref name="name"/>. The delegate is instance independend, means that you pass the source 
-		/// of the field as a parameter to the method and get back the value of it's field.
-		/// </summary>
-		/// <typeparam name="TSource">The reflecting type. This can be an interface that is implemented by the field's declaring type
-		/// or an derrived type of the field's declaring type.</typeparam>
-		/// <typeparam name="TValue">The type of the field value.</typeparam>
-		/// <param name="name">The name of the field.</param>
-		/// <param name="bindingFlags"></param>
-		/// <returns>A strong typed delegeate that can be cached to get the field's value with high performance.</returns>
-		public static Delegate GetGetDelegate (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
-		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
-			
-			
-			MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
-			
-			return memberInfo.GetGetMemberInfoDelegate();
-			
-		}
+						if (getterCache.ContainsKey (memberInfo))
+								return getterCache [memberInfo];
 
+						Delegate d = memberInfo.GetGetMemberInfoDelegate ();
+						getterCache [memberInfo] = d;
+			
+						return d;
+			
+				}
 
-		/// <summary>
-		/// Gets the get delegate strong typed.
-		/// </summary>
-		/// <returns>The get delegate.</returns>
-		/// <param name="type">Type.</param>
-		/// <param name="name">Name.</param>
-		/// <param name="bindingFlags">Binding flags.</param>
-		/// <typeparam name="TSource">The 1st type parameter.</typeparam>
-		/// <typeparam name="TValue">The 2nd type parameter.</typeparam>
-		public static Func<TSource,TValue>  GetGetDelegate<TSource,TValue>  (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
-		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
-			
-			
-			MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
-			
-			return memberInfo.GetGetMemberInfoDelegate<TSource,TValue> ();
-			
-		}
+				public static Func<object,object> GetGetDelegate (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+				{
+						if (name == null)
+								throw new ArgumentNullException ("name");
+					
+					
+						MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
+					
+						if (getterCache.ContainsKey (memberInfo))
+								return getterCache [memberInfo] as Func<object,object>;
+					
+						Func<object,object> d = memberInfo.GetGetMemberInfoDelegate ();
+						getterCache [memberInfo] = d;
+					
+						return d;
+					
+				}
 
 
+				/// <summary>
+				/// Gets the get delegate strong typed.
+				/// </summary>
+				/// <returns>The get delegate.</returns>
+				/// <param name="type">Type.</param>
+				/// <param name="name">Name.</param>
+				/// <param name="bindingFlags">Binding flags.</param>
+				/// <typeparam name="TSource">The 1st type parameter.</typeparam>
+				/// <typeparam name="TValue">The 2nd type parameter.</typeparam>
+				public static Func<TSource,TValue>  GetGetDelegate<TSource,TValue> (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+				{
+						if (name == null)
+								throw new ArgumentNullException ("name");
+			
+			
+						MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
 
-		/// <summary>
-		/// Gets the get member info delegate.
-		/// </summary>
-		/// <returns>The get member info delegate.</returns>
-		/// <param name="memberInfo">Member info.</param>
-		public static Delegate GetGetMemberInfoDelegate(this MemberInfo memberInfo)
-		{
+						if (getterCache.ContainsKey (memberInfo))
+								return getterCache [memberInfo] as Func<TSource,TValue>;
+
+						Func<TSource,TValue> d = memberInfo.GetGetMemberInfoDelegate<TSource,TValue> ();
+						getterCache [memberInfo] = d;
 			
-			if (memberInfo.MemberType == MemberTypes.Property) {
+						return d;
+			
+				}
+
+
+
+				/// <summary>
+				/// Gets the get member info delegate.
+				/// </summary>
+				/// <returns>The get member info delegate.</returns>
+				/// <param name="memberInfo">Member info.</param>
+				public static Func<object,object> GetGetMemberInfoDelegate (this MemberInfo memberInfo)
+				{
+						
+						if (memberInfo.MemberType == MemberTypes.Property) {
+							
+								return (memberInfo as PropertyInfo).GetGetMethod ().GetGetPropertyDelegate<object,object> ();
+
+
+// v1
+//				ParameterExpression sourceParameter =
+//					Expression.Parameter (memberInfo.ReflectedType, "source");
+//
+//				MethodCallExpression methodExpression = Expression.Call (sourceParameter, (memberInfo as PropertyInfo).GetGetMethod ());
+//
+//				ParameterExpression sourceExpression = Expression.Parameter(typeof(object), "instance");
+//				ParameterExpression value = Expression.Parameter(typeof(object), "value");
+//			
+//											Expression<Func<object,object>> expr =
+//												Expression.Lambda<Func<object,object>>(
+//						Expression.Call(methodExpression.Method,  Expression.Convert(sourceExpression, memberInfo.DeclaringType),Expression.Convert(value, memberInfo.ReflectedType)),
+//													sourceExpression,value);
+//
+//				return expr.Compile();
+
+// 							v2 call of type strong generic
+//							MethodInfo genericMethod=typeof(ReflectionExtension).GetMethod("GetGetPropertyDelegate");
+//							MethodInfo method = genericMethod.MakeGenericMethod(new Type[] { memberInfo.DeclaringType,memberInfo.ReflectedType });
+//							ParameterExpression source = Expression.Parameter(typeof(object), "source");
+//							ParameterExpression value = Expression.Parameter(typeof(object), "value");
+//
+//							Expression<Func<object,object>> expr =
+//								Expression.Lambda<Func<object,object>>(
+//								Expression.Call(method,  Expression.Convert(source, memberInfo.DeclaringType),Expression.Convert(value, memberInfo.ReflectedType)),
+//									source,value);
+//
+//								return expr.Compile();
+							
+							
+						} else if (memberInfo.MemberType == MemberTypes.Field) {
+							
+								//return GetGetFieldDelegate<object,object>(memberInfo as FieldInfo);
+								return   (memberInfo as FieldInfo).GetGetFieldDelegate<object,object> ();
+						} else if (memberInfo.MemberType == MemberTypes.Method) {
+							
+							
+						}
+						
+						
+						throw new Exception ("Not supported memberInfo of type " + memberInfo.MemberType);
+						
+				}
+
+
+
+
+
+
+
+
+				/// <summary>
+				/// Gets the get member info delegate.
+				/// </summary>
+				/// <returns>The get member info delegate.</returns>
+				/// <param name="memberInfo">Member info.</param>
+				public static Delegate GetGetMemberInfoDelegateDynamic (this MemberInfo memberInfo)
+				{
+			
+						if (memberInfo.MemberType == MemberTypes.Property) {
 				
-				return (memberInfo as PropertyInfo).GetGetMethod ().GetGetPropertyDelegate<object,object>();
+								return (memberInfo as PropertyInfo).GetGetMethod ().GetGetPropertyDelegate ();
 				
 				
-			} else if (memberInfo.MemberType == MemberTypes.Field) {
+						} else if (memberInfo.MemberType == MemberTypes.Field) {
 				
-				//return GetGetFieldDelegate<object,object>(memberInfo as FieldInfo);
-				return   (memberInfo as FieldInfo).GetGetFieldDelegate ();
-			} else if (memberInfo.MemberType == MemberTypes.Method) {
+								//return GetGetFieldDelegate<object,object>(memberInfo as FieldInfo);
+								return   (memberInfo as FieldInfo).GetGetFieldDelegate ();
+						} else if (memberInfo.MemberType == MemberTypes.Method) {
 				
 				
-			}
+						}
 			
 			
-			throw new Exception ("Not supported memberInfo of type " + memberInfo.MemberType);
+						throw new Exception ("Not supported memberInfo of type " + memberInfo.MemberType);
 			
-		}
+				}
 		
 		
 		
 				/// <summary>
-				/// Gets the member info delegate.
+				/// Gets the member info delegate strongly typed
 				/// </summary>
 				/// <returns>The member info delegate.</returns>
 				/// <param name="memberInfo">Member info.</param>
-				/// <typeparam name="TSource">The 1st type parameter.</typeparam>
-				/// <typeparam name="TValue">The 2nd type parameter.</typeparam>
+				/// <typeparam name="TSource">type of instance.</typeparam>
+				/// <typeparam name="TValue">type of value.</typeparam>
 				public static Func<TSource,TValue> GetGetMemberInfoDelegate<TSource,TValue> (this MemberInfo memberInfo)
 				{
 			
@@ -133,7 +244,42 @@ namespace ws.winx.csharp.extensions
 		
 		
 		
-		
+				//
+				public static Delegate GetGetPropertyDelegate (this MethodInfo methodInfo)
+				{
+			
+						if (methodInfo == null)
+								throw new ArgumentNullException ("methodInfo");
+			
+						Type propDeclaringType = methodInfo.DeclaringType;
+
+						Type typeDynamic = typeof(Func<,>).MakeGenericType (new Type[] {
+				methodInfo.DeclaringType,
+				methodInfo.ReturnType
+			});
+			
+						ParameterExpression sourceParameter =
+				Expression.Parameter (propDeclaringType, "source");
+			
+			
+						Expression sourceExpression = GetCastOrConvertExpression (
+				sourceParameter, propDeclaringType);
+			
+			
+			
+						MethodCallExpression methodExpression = Expression.Call (sourceExpression, methodInfo);
+			
+						Expression resultExpression = GetCastOrConvertExpression (
+				methodExpression, methodInfo.ReturnType);
+			
+						LambdaExpression lambda =
+				Expression.Lambda (typeDynamic, resultExpression, sourceParameter);
+			
+						return  lambda.Compile ();
+			
+			
+			
+				}
 		
 		
 		
@@ -152,6 +298,8 @@ namespace ws.winx.csharp.extensions
 								throw new ArgumentNullException ("methodInfo");
 			
 						Type propDeclaringType = methodInfo.DeclaringType;
+
+				
 			
 						ParameterExpression sourceParameter =
 				Expression.Parameter (typeof(TSource), "source");
@@ -179,7 +327,7 @@ namespace ws.winx.csharp.extensions
 		
 		
 		
-		//This is working but everything is handled with use of IL
+				//This is working but everything is handled with use of IL
 		
 		
 				/// <summary>
@@ -236,6 +384,7 @@ namespace ws.winx.csharp.extensions
 		
 				/// <summary>
 				/// Gets a  delegate to a generated method that allows you to get the field value, that is represented
+				/// !!! .NET 3.5 doesn't support "dynamic" for which is planned this function
 				/// by the given <paramref name="fieldInfo"/>. The delegate is instance independend, means that you pass the source 
 				/// of the field as a parameter to the method and get back the value of it's field.
 				/// </summary>
@@ -309,146 +458,276 @@ namespace ws.winx.csharp.extensions
 		
 		
 		
-		/// <summary>
-		/// Gets the set delegate.
-		/// </summary>
-		/// <returns>The set delegate.</returns>
-		/// <param name="type">Type.</param>
-		/// <param name="name">Name of field or property</param>
-		/// <param name="bindingFlags">Binding flags.</param>
-		public static Delegate GetSetDelegate (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
-		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
+				/// <summary>
+				/// Gets the set delegate strongly typed
+				/// !!! .NET 3.5 doesn't support "dynamic" for which is planned for
+				/// </summary>
+				/// <returns>The set delegate.</returns>
+				/// <param name="type">Type.</param>
+				/// <param name="name">Name of field or property</param>
+				/// <param name="bindingFlags">Binding flags.</param>
+				public static Delegate GetSetDelegateDynamic (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+				{
+						if (name == null)
+								throw new ArgumentNullException ("name");
 			
 			
-			MemberInfo memberInfo = type.GetMemberFromPath (name,bindingFlags);
+						MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
+
+						if (settersCache.ContainsKey (memberInfo))
+								return settersCache [memberInfo];
+						
+						Delegate d = memberInfo.GetSetMemberInfoDelegateDynamic ();
+						settersCache [memberInfo] = d;
+						
 			
-			return memberInfo.GetSetMemberInfoDelegate();
+						return d;
 			
-		}
+				}
+
+
+				/// <summary>
+				/// Gets the set delegate.
+				/// </summary>
+				/// <returns>The set delegate.</returns>
+				/// <param name="type">Type.</param>
+				/// <param name="name">Name.</param>
+				/// <param name="bindingFlags">Binding flags.</param>
+				/// <typeparam name="T">The 1st type parameter.</typeparam>
+				/// <typeparam name="K">The 2nd type parameter.</typeparam>
+				public static MemberInfoSetterDelegate<object,object> GetSetDelegate (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+				{
+						if (name == null)
+								throw new ArgumentNullException ("name");
+			
+			
+						MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
+			
+			
+			
+						if (settersCache.ContainsKey (memberInfo))
+								return settersCache [memberInfo] as MemberInfoSetterDelegate<object,object>;
+			
+						MemberInfoSetterDelegate<object,object> d = memberInfo.GetSetMemberInfoDelegate<object,object> ();
+						settersCache [memberInfo] = d;
+			
+						return d;
+			
+				}
+
+
+
+//		public static MemberInfoSetterDelegate<object,object> GetSetDelegate (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+//		{
+//			if (name == null)
+//				throw new ArgumentNullException ("name");
+//			
+//			
+//			MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
+//			
+//			
+//			
+//			if (settersCache.ContainsKey (memberInfo))
+//				return settersCache [memberInfo] as MemberInfoSetterDelegate<object,object>;
+//			
+//			MemberInfoSetterDelegate<object,object> d = memberInfo.GetSetMemberInfoDelegate<object,object> ();
+//			settersCache [memberInfo] = d;
+//			
+//			return d;
+//			
+//		}
 		
-		/// <summary>
-		/// Gets the set delegate strongly typed
-		/// </summary>
-		/// <returns>The set delegate.</returns>
-		/// <param name="type">Type.</param>
-		/// <param name="name">Name.</param>
-		/// <param name="bindingFlags">Binding flags.</param>
-		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		/// <typeparam name="K">The 2nd type parameter.</typeparam>
-		public static MemberInfoSetterDelegate<T,K> GetSetDelegate<T,K> (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
-		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
+				/// <summary>
+				/// Gets the set delegate strongly typed
+				/// </summary>
+				/// <returns>The set delegate.</returns>
+				/// <param name="type">Type.</param>
+				/// <param name="name">Name.</param>
+				/// <param name="bindingFlags">Binding flags.</param>
+				/// <typeparam name="T">The 1st type parameter.</typeparam>
+				/// <typeparam name="K">The 2nd type parameter.</typeparam>
+				public static MemberInfoSetterDelegate<T,K> GetSetDelegate<T,K> (this Type type, string name, BindingFlags bindingFlags=  BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public)
+				{
+						if (name == null)
+								throw new ArgumentNullException ("name");
 			
 			
-			MemberInfo memberInfo = type.GetMember (name,bindingFlags)[0];
+						MemberInfo memberInfo = type.GetMemberFromPath (name, bindingFlags);
+
+						
+						
+						if (settersCache.ContainsKey (memberInfo))
+								return settersCache [memberInfo] as MemberInfoSetterDelegate<T,K>;
+						
+						MemberInfoSetterDelegate<T,K> d = memberInfo.GetSetMemberInfoDelegate<T,K> ();
+						settersCache [memberInfo] = d;
 			
-			return memberInfo.GetSetMemberInfoDelegate<T,K>();
+						return d;
 			
-		}
+				}
+
+
+
+
 		
-		/// <summary>
-		/// Gets the set member info delegate.
-		/// </summary>
-		/// <returns>The set member info delegate.</returns>
-		/// <param name="memberInfo">Member info.</param>
-		public static Delegate GetSetMemberInfoDelegate (this MemberInfo memberInfo)
-		{
+				/// <summary>
+				/// Gets the set member info delegate.
+				/// </summary>
+				/// <returns>The set member info delegate.</returns>
+				/// <param name="memberInfo">Member info.</param>
+				public static Delegate GetSetMemberInfoDelegateDynamic (this MemberInfo memberInfo)
+				{
 			
-			Type typeDynamic = typeof(MemberInfoSetterDelegate<,>).MakeGenericType (new Type[] {
+						Type typeDynamic = typeof(MemberInfoSetterDelegate<,>).MakeGenericType (new Type[] {
 				memberInfo.DeclaringType,
 				memberInfo.GetUnderlyingType ()
 			});
 			
 			
 			
-			Type instanceType = memberInfo.DeclaringType;
-			Type valueType = memberInfo.GetUnderlyingType ();
+						Type instanceType = memberInfo.DeclaringType;
+						Type valueType = memberInfo.GetUnderlyingType ();
 			
-			var paramType = instanceType.MakeByRefType ();
+						var paramType = instanceType.MakeByRefType ();
 			
 			
-			var setter = new DynamicMethod ("", typeof(void),
+						var setter = new DynamicMethod ("", typeof(void),
 			                                new[] { paramType, valueType },
 			memberInfo.DeclaringType.Module, true);
 			
-			var generator = setter.GetILGenerator ();
+						var generator = setter.GetILGenerator ();
 			
 			
-			if (memberInfo.MemberType == MemberTypes.Field && ((FieldInfo)memberInfo).IsStatic) {
-				generator.Emit (OpCodes.Ldarg_1);
-				generator.Emit (OpCodes.Stsfld, (FieldInfo)memberInfo);
-			} else {
+						if (memberInfo.MemberType == MemberTypes.Field && ((FieldInfo)memberInfo).IsStatic) {
+								generator.Emit (OpCodes.Ldarg_1);
+								generator.Emit (OpCodes.Stsfld, (FieldInfo)memberInfo);
+						} else {
 				
-				generator.Emit (OpCodes.Ldarg_0);
-				if (!instanceType.IsValueType)//this line is so we can use one SetterDelegate with ref in case of cls
-					generator.Emit (OpCodes.Ldind_Ref);
-				generator.Emit (OpCodes.Ldarg_1);
-				if (memberInfo.MemberType == MemberTypes.Field)
-					generator.Emit (OpCodes.Stfld, (FieldInfo)memberInfo);
-				else
-					generator.Emit (OpCodes.Callvirt, ((PropertyInfo)memberInfo).GetSetMethod ());
-			}
+								generator.Emit (OpCodes.Ldarg_0);
+								if (!instanceType.IsValueType)//this line is so we can use one SetterDelegate with ref in case of cls
+										generator.Emit (OpCodes.Ldind_Ref);
+								generator.Emit (OpCodes.Ldarg_1);
+								if (memberInfo.MemberType == MemberTypes.Field)
+										generator.Emit (OpCodes.Stfld, (FieldInfo)memberInfo);
+								else
+										generator.Emit (OpCodes.Callvirt, ((PropertyInfo)memberInfo).GetSetMethod ());
+						}
 			
-			generator.Emit (OpCodes.Ret);
-			
-			
-			
-			return setter.CreateDelegate (typeDynamic);
+						generator.Emit (OpCodes.Ret);
 			
 			
-		}
+			
+						return setter.CreateDelegate (typeDynamic);
+			
+			
+				}
+
+
+//		public static MemberInfoSetterDelegate<object,object> GetSetMemberInfoDelegate(this MemberInfo memberInfo)
+//		{
+//			Type instanceType = memberInfo.DeclaringType;
+//			Type valueType = memberInfo.GetUnderlyingType ();
+//			
+//			var paramType = instanceType.MakeByRefType ();
+//			
+//			
+//			var setter = new DynamicMethod ("", typeof(void),
+//			                                new[] { paramType, valueType },
+//			memberInfo.DeclaringType.Module, true);
+//			
+//			var generator = setter.GetILGenerator ();
+//			
+//			
+//			if (memberInfo.MemberType == MemberTypes.Field && ((FieldInfo)memberInfo).IsStatic) {
+//				generator.Emit (OpCodes.Ldarg_1);
+//				generator.Emit (OpCodes.Stsfld, (FieldInfo)memberInfo);
+//			} else {
+//				
+//				generator.Emit (OpCodes.Ldarg_0);
+//				if (!instanceType.IsValueType)//this line is so we can use one SetterDelegate with ref in case of cls
+//					generator.Emit (OpCodes.Ldind_Ref);
+//				generator.Emit (OpCodes.Ldarg_1);
+//				if (memberInfo.MemberType == MemberTypes.Field)
+//					generator.Emit (OpCodes.Stfld, (FieldInfo)memberInfo);
+//				else
+//					generator.Emit (OpCodes.Callvirt, ((PropertyInfo)memberInfo).GetSetMethod ());
+//			}
+//			
+//			generator.Emit (OpCodes.Ret);
+//			
+//			
+//			
+//			
+//			return (MemberInfoSetterDelegate<object,object>)setter.CreateDelegate (typeof(MemberInfoSetterDelegate<object,object>));
+//		}
 		
 		
-		/// <summary>
-		/// Gets set memberinfo delegate strongly typed
-		/// </summary>
-		/// <returns>The set member info delegate.</returns>
-		/// <param name="memberInfo">Member info.</param>
-		/// <typeparam name="T">The 1st type parameter.</typeparam>
-		/// <typeparam name="K">The 2nd type parameter.</typeparam>
-		public static MemberInfoSetterDelegate<T,K> GetSetMemberInfoDelegate<T,K> (this MemberInfo memberInfo)
-		{
-			Type instanceType = memberInfo.DeclaringType;
-			Type valueType = memberInfo.GetUnderlyingType ();
+				/// <summary>
+				/// Gets set memberinfo delegate strongly typed
+				/// </summary>
+				/// <returns>The set member info delegate.</returns>
+				/// <param name="memberInfo">Member info.</param>
+				/// <typeparam name="T">The 1st type parameter.</typeparam>
+				/// <typeparam name="K">The 2nd type parameter.</typeparam>
+				public static MemberInfoSetterDelegate<T,K> GetSetMemberInfoDelegate<T,K> (this MemberInfo memberInfo)
+				{
+						Type instanceType = typeof(T);// 
+						Type valueType = typeof(K);//
 			
-			var paramType = instanceType.MakeByRefType ();
+						Type valueTypeRef = instanceType.MakeByRefType ();
+
+						Type reflectingType = memberInfo.GetUnderlyingType ();
+						Type declaringType = memberInfo.DeclaringType;
 			
 			
-			var setter = new DynamicMethod ("", typeof(void),
-			                                new[] { paramType, valueType },
+						var setter = new DynamicMethod ("", typeof(void),
+			                                new[] { valueTypeRef, valueType },
 			memberInfo.DeclaringType.Module, true);
 			
-			var generator = setter.GetILGenerator ();
+						var generator = setter.GetILGenerator ();
 			
 			
-			if (memberInfo.MemberType == MemberTypes.Field && ((FieldInfo)memberInfo).IsStatic) {
-				generator.Emit (OpCodes.Ldarg_1);
-				generator.Emit (OpCodes.Stsfld, (FieldInfo)memberInfo);
-			} else {
+						if (memberInfo.MemberType == MemberTypes.Field && ((FieldInfo)memberInfo).IsStatic) {
+								generator.Emit (OpCodes.Ldarg_1);
+
+								if ((valueType.IsInterface || valueType == typeof(object)) && reflectingType.IsValueType)//if value is boxed => unbox
+									generator.Emit(OpCodes.Unbox_Any,reflectingType);
+										
+								generator.Emit (OpCodes.Stsfld, (FieldInfo)memberInfo);
+						} else {
 				
-				generator.Emit (OpCodes.Ldarg_0);
-				if (!instanceType.IsValueType)//this line is so we can use one SetterDelegate with ref in case of cls
-					generator.Emit (OpCodes.Ldind_Ref);
-				generator.Emit (OpCodes.Ldarg_1);
-				if (memberInfo.MemberType == MemberTypes.Field)
-					generator.Emit (OpCodes.Stfld, (FieldInfo)memberInfo);
-				else
-					generator.Emit (OpCodes.Callvirt, ((PropertyInfo)memberInfo).GetSetMethod ());
-			}
+								generator.Emit (OpCodes.Ldarg_0);
+								if (!instanceType.IsValueType)//this line is so we can use one SetterDelegate with ref in case of cls
+										generator.Emit (OpCodes.Ldind_Ref);
+
+								if ((instanceType.IsInterface || instanceType == typeof(object)) && declaringType.IsValueType)//if instance of valuetype is boxed => unbox
+								{
+									generator.Emit(OpCodes.Unbox, declaringType);
+								}
+
+
+								generator.Emit (OpCodes.Ldarg_1);
+
+
+								if ((valueType.IsInterface || valueType == typeof(object)) && reflectingType.IsValueType)//if value is boxed => unbox
+									generator.Emit(OpCodes.Unbox_Any,reflectingType);
+				
+								if (memberInfo.MemberType == MemberTypes.Field)
+										generator.Emit (OpCodes.Stfld, (FieldInfo)memberInfo);
+								else
+										generator.Emit (OpCodes.Callvirt, ((PropertyInfo)memberInfo).GetSetMethod ());
+						}
 			
-			generator.Emit (OpCodes.Ret);
+						generator.Emit (OpCodes.Ret);
 			
 			
 			
 			
-			return (MemberInfoSetterDelegate<T,K>)setter.CreateDelegate (typeof(MemberInfoSetterDelegate<T,K>));
-		}
+						return (MemberInfoSetterDelegate<T,K>)setter.CreateDelegate (typeof(MemberInfoSetterDelegate<T,K>));
+				}
 	
 		
-		///!!! This wasn't working 
+				///!!! This wasn't working 
 		
 				/// <summary>
 				/// Gets a strong typed delegate to a generated method that allows you to get the field value, that is represented
@@ -671,7 +950,7 @@ namespace ws.winx.csharp.extensions
 				/// <param name="canWrite">If set to <c>true</c> can write.</param>
 				/// <param name="canRead">If set to <c>true</c> can read.</param>
 				/// <param name="isSubClass">If set to <c>true</c> is sub class.</param>
-				public static MemberInfo[] GetPublicMembersOfType(this Type type, Type propertyType, bool staticMembers, bool canWrite, bool canRead, bool isSubClass=false)
+				public static MemberInfo[] GetPublicMembersOfType (this Type type, Type propertyType, bool staticMembers, bool canWrite, bool canRead, bool isSubClass=false)
 				{
 						List<MemberInfo> list = new List<MemberInfo> ();
 						BindingFlags bindingAttr = (!staticMembers) ? (BindingFlags.Instance | BindingFlags.Public) : (BindingFlags.Static | BindingFlags.Public);
@@ -698,46 +977,44 @@ namespace ws.winx.csharp.extensions
 
 
 
-		/// <summary>
-		/// Gets the member info.
-		/// </summary>
-		/// <returns>The member info.</returns>
-		/// <param name="instance">Instance.</param>
-		/// <param name="propertiesPath">Properties path on 'Instance' like a.b.c.prop </param>
-		public static MemberInfo GetMemberFromPath(this Type type, string propertiesPath, BindingFlags flags=BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-		{
+				/// <summary>
+				/// Gets the member info.
+				/// </summary>
+				/// <returns>The member info.</returns>
+				/// <param name="instance">Instance.</param>
+				/// <param name="propertiesPath">Properties path on 'Instance' like a.b.c.prop </param>
+				public static MemberInfo GetMemberFromPath (this Type type, string propertiesPath, BindingFlags flags=BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+				{
 			
-			if (!propertiesPath.Contains ("."))
-				return type.GetField (propertiesPath,flags) as MemberInfo ??
-					type.GetProperty (propertiesPath,flags) as MemberInfo;
+						if (!propertiesPath.Contains ("."))
+								return type.GetField (propertiesPath, flags) as MemberInfo ??
+										type.GetProperty (propertiesPath, flags) as MemberInfo;
 			
 			
-			string[] properties = propertiesPath.Split ('.');
+						string[] properties = propertiesPath.Split ('.');
 			
 			
 			
 
 
-			MemberInfo memberInfo = type.GetField (properties [0]) as MemberInfo ??
-				type.GetProperty (properties [0]) as MemberInfo;
+						MemberInfo memberInfo = type.GetField (properties [0]) as MemberInfo ??
+								type.GetProperty (properties [0]) as MemberInfo;
 
-			var typeCurrent = memberInfo.GetUnderlyingType ();
+						var typeCurrent = memberInfo.GetUnderlyingType ();
 			
-			for (int propertyIndex = 1; propertyIndex < properties.Length; propertyIndex++) {
-				propertiesPath = properties [propertyIndex];
-				if (!string.IsNullOrEmpty (propertiesPath)) {
+						for (int propertyIndex = 1; propertyIndex < properties.Length; propertyIndex++) {
+								propertiesPath = properties [propertyIndex];
+								if (!string.IsNullOrEmpty (propertiesPath)) {
 
-					memberInfo = typeCurrent.GetField (propertiesPath,flags) as MemberInfo ??
-						typeCurrent.GetProperty (propertiesPath,flags) as MemberInfo;
-					typeCurrent=memberInfo.GetUnderlyingType();
+										memberInfo = typeCurrent.GetField (propertiesPath, flags) as MemberInfo ??
+												typeCurrent.GetProperty (propertiesPath, flags) as MemberInfo;
+										typeCurrent = memberInfo.GetUnderlyingType ();
+								}
+						}
+			
+			
+						return memberInfo;
 				}
-			}
-			
-			
-			return memberInfo;
-		}
-
-		  
 
 				public static void SetValue (this MemberInfo member, object instance, object value)
 				{

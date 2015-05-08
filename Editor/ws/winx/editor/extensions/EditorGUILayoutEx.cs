@@ -1118,8 +1118,8 @@ namespace ws.winx.editor.extensions
 						if (indexSelected < 0) {
 
 								//if memberInfo == null mean that UnityVariable aren't binded to some object's property
-								//but contain raw object value || !(_variableSelected.instanceSystemObject is UnityEngine.Object)
-								if (variableSelected.instanceSystemObject == null || (variableSelected.MemberInfo == null && variableSelected.ValueType != typeof(UnityEngine.Object))) {
+				//but contain raw object value || !(_variableSelected.instanceSystemObject is UnityEngine.Object)//
+						if (variableSelected.ValueType != typeof(UnityEngine.Object)) {
 										indexSelected = 0;
 								} else {
 										indexSelected = 1;
@@ -1240,6 +1240,7 @@ namespace ws.winx.editor.extensions
 
 										if(EditorGUI.EndChangeCheck()){
 											variableSelected.ApplyModifiedProperties ();
+											EditorUtility.SetDirty(variableSelected);
 											//Debug.Log ("change happen");
 										}
 					
@@ -1260,14 +1261,14 @@ namespace ws.winx.editor.extensions
 								UnityEngine.Object _objectSelected = null;
 				
 								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
-								if (variableSelected.instanceSystemObject != null && (variableSelected.instanceSystemObject is UnityEngine.Object)) {
+								if (variableSelected.instanceBinded != null && (variableSelected.instanceBinded is UnityEngine.Object)) {
 
 										 
 
-										if (variableSelected.instanceSystemObject is Component)
-												_objectSelected = ((Component)variableSelected.instanceSystemObject).gameObject;
+										if (variableSelected.instanceBinded is Component)
+												_objectSelected = ((Component)variableSelected.instanceBinded).gameObject;
 										else
-												_objectSelected = variableSelected.instanceSystemObject as UnityEngine.Object;
+												_objectSelected = variableSelected.instanceBinded as UnityEngine.Object;
 								} 
 						
 								//select object which properties would be extracted
@@ -1285,9 +1286,12 @@ namespace ws.winx.editor.extensions
 										GUIContent[] displayOptionsProperties;
 										object[] instances;
 										MemberInfo[] memberInfos;
+
 							
 										//get properties from object by object type
 										Utility.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out memberInfos, out instances);
+
+										String[] memberInfosString=memberInfos.Select(itm=>itm.Name).ToArray();
 										
 										Rect? popPos = null;
 										if (position.HasValue) {
@@ -1295,23 +1299,32 @@ namespace ws.winx.editor.extensions
 												//pos.xMin=popPos.xMax+10;
 										}
 
-										variableSelected.MemberInfo = EditorGUILayoutEx.CustomObjectPopup<MemberInfo> (new GUIContent ("Properties"), 
-							                                                                                variableSelected.MemberInfo, displayOptionsProperties, memberInfos, null, null, null, null, popPos
+					//EditorGUI.BeginChangeCheck();
+										string memberName= EditorGUILayoutEx.CustomObjectPopup<string> (new GUIContent ("Properties"), 
+							                                                                                variableSelected.memberName, displayOptionsProperties, memberInfosString, null, null, null, null, popPos
 										);
 							
-										if (variableSelected.MemberInfo != null) {
-												int inxSelectd = Array.IndexOf (memberInfos, variableSelected.MemberInfo);
-												variableSelected.instanceSystemObject = instances [inxSelectd];
+
+					//if(EditorGUI.EndChangeCheck())
+								if(variableSelected.memberName!=memberName)
+										if (!String.IsNullOrEmpty(memberName)) {
+												
+												variableSelected=UnityVariable.CreateInstanceOf(typeof(UnityEngine.Object));
+												variableSelected.memberName=memberName;
+												int inxSelectd = Array.IndexOf (memberInfosString, variableSelected.memberName);
+												variableSelected.instanceBinded = instances [inxSelectd];
+												
 										} else {//not found Members of type typeSelected => (None) UnityEngine.Object
 
-												variableSelected.Value = FormatterServices.GetUninitializedObject (typeof(UnityEngine.Object));	
+												//variableSelected.Value = FormatterServices.GetUninitializedObject (typeof(UnityEngine.Object));
+												variableSelected=UnityVariable.CreateInstanceOf(typeof(UnityEngine.Object));
 										}
 							
 							
 							
 							
 								} else {//if None is selected reset
-										variableSelected.MemberInfo = null;
+										variableSelected.memberName = null;
 										
 										variableSelected.Value = FormatterServices.GetUninitializedObject (typeof(UnityEngine.Object));	
 									

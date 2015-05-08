@@ -119,7 +119,7 @@ namespace ws.winx.csharp.utilities
 		/// <param name="memberInfoValue">Member info value returned.</param>
 		/// <typeparam name="K">type of instance </typeparam>
 		/// <typeparam name="T">type of value returned.</typeparam>
-		public static void ToGetter<K,T>(Delegate del,K instance,out T memberInfoValue){
+		public static void GetThruDelegate<K,T>(Delegate del,K instance,out T memberInfoValue){
 			
 			//!!! Engage type check if this is prone to errors
 			//		Type instanceType =	del.Method.GetParameters () [1].ParameterType;
@@ -128,10 +128,15 @@ namespace ws.winx.csharp.utilities
 			//		Type memberInfoValueType = del.Method.ReturnType;
 			//		if(!typeof(T).IsAssignableFrom(memberInfoValueType))
 			//		   throw new Exception ("Type of parameter 'memberInfoValue' should be " +memberInfoValueType);
-			
+
+		
 			memberInfoValue = ( del as Func<K,T>)(instance);
-			
+
 		}
+
+
+
+
 
 
 
@@ -143,7 +148,7 @@ namespace ws.winx.csharp.utilities
 		/// <param name="value">Value to be set.</param>
 		/// <typeparam name="K">type of instance</typeparam>
 		/// <typeparam name="T">type of value to be set</typeparam>
-		public static void ToSetter<K,T>(Delegate del,ref K instance,T value){
+		public static void SetThruDelegate<K,T>(Delegate del,ref K instance,T value){
 			//!!! Engage type check if this is prone to errors
 			Type instanceType =	del.Method.GetParameters () [0].ParameterType;
 			if (!typeof(K).IsAssignableFrom(instanceType))
@@ -152,7 +157,7 @@ namespace ws.winx.csharp.utilities
 			if(!typeof(T).IsAssignableFrom(valueType))
 				throw new Exception ("Type of parameter 'value' should be " +valueType);
 			
-			
+			//((ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<K,T>)del)(ref instance,value);
 			( del as ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<K,T>)(ref instance,value);
 		}
 	

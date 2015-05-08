@@ -200,7 +200,7 @@ namespace ws.winx.unity{
 				
 			}
 			
-			//GET COMPONENTS IF GAME OBJECT
+			//GET properties in COMPONENTS IF GAME OBJECT
 			GameObject gameObject = @object as GameObject;
 			if (gameObject != null)
 			{
@@ -294,7 +294,7 @@ namespace ws.winx.unity{
 						
 					guiContentList.Add(new GUIContent (text4 + memberInfo.Name));
 					propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-					propertyNew.MemberInfo=memberInfo;
+					propertyNew.memberName=memberInfo.Name;
 					memberInfos.Add (propertyNew);                   
 
 					}
@@ -310,8 +310,8 @@ namespace ws.winx.unity{
 
 			
 				propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-				propertyNew.MemberInfo=memberInfo;
-				propertyNew.instanceSystemObject=@object;
+				propertyNew.memberName=memberInfo.Name;
+				propertyNew.instanceBinded=@object;
 				memberInfos.Add (propertyNew);
 
 
@@ -343,7 +343,7 @@ namespace ws.winx.unity{
 							guiContentList.Add (new GUIContent (text4 + memberInfo.Name));
 
 							propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-							propertyNew.MemberInfo=memberInfo;
+							propertyNew.memberName=memberInfo.Name;
 							memberInfos.Add (propertyNew);
 
 							}
@@ -357,8 +357,8 @@ namespace ws.winx.unity{
 
 							guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
 						propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-						propertyNew.MemberInfo=memberInfo;
-						propertyNew.instanceSystemObject=currentComponent;
+						propertyNew.memberName=memberInfo.Name;
+						propertyNew.instanceBinded=currentComponent;
 							memberInfos.Add(propertyNew);
 						}
 					}
