@@ -155,8 +155,7 @@ namespace ws.winx.unity{
 
 
 
-		public static void ObjectToDisplayOptionsValues (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out MemberInfo[] memeberInfoValues,out object[] instances)
-
+		public static void ObjectToDisplayOptionsValues (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out string[] membersUniquePath)
 		{
 //			displayOptions = null;
 //			memeberInfoValues = null;
@@ -165,8 +164,8 @@ namespace ws.winx.unity{
 			
 			Type target = null;
 			List<GUIContent> guiContentList = new List<GUIContent> ();
-			List<MemberInfo> memberInfos = new List<MemberInfo> ();
-			List<object> instancesList = new List<object> ();
+			List<string> membersUniquePathList = new List<string> ();
+
 			MemberInfo memberInfo;
 
 			
@@ -185,17 +184,24 @@ namespace ws.winx.unity{
 			
 
 			MemberInfo[] publicMembers ;
+			int numMembers = 0;
+			int numSubMembers = 0;
+
+
 
 			
 			//GET OBJECT NON STATIC PROPERTIES
 			publicMembers = target.GetPublicMembersOfType (type,false, true, true);
-			for (int j = 0; j < publicMembers.Length; j++)
+
+			numMembers = publicMembers.Length;
+
+			for (int j = 0; j < numMembers; j++)
 			{
 				memberInfo=publicMembers [j];
 				
 				guiContentList.Add(new GUIContent (@object.GetType ().Name + "/" + memberInfo.Name));
-				instancesList.Add(@object);
-				memberInfos.Add (memberInfo);
+
+				membersUniquePathList.Add (memberInfo.Name+"@"+@object.GetInstanceID());
 				
 				
 			}
@@ -210,10 +216,10 @@ namespace ws.winx.unity{
 				{
 					currentComponent = components [k];
 					Type compType = currentComponent.GetType ();
-					string uniqueNameInList = StringUtility.GetUniqueNameInList (list, compType.Name);
+					string uniqueNameInList = StringUtility.GetIndexNameInList (list, compType.Name);
 					list.Add (uniqueNameInList);
 					
-					
+
 
 					
 					//NONSTATIC PROPERTIES
@@ -223,16 +229,46 @@ namespace ws.winx.unity{
 						memberInfo=publicMembers [m];
 						
 						guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
-						instancesList.Add(currentComponent);
-						memberInfos.Add(memberInfo);
+
+						membersUniquePathList.Add(memberInfo.Name+"@"+currentComponent.GetInstanceID());
 					}
+
+
+					publicMembers = compType.GetMembers(BindingFlags.Instance | BindingFlags.Public);
+
+					MemberInfo[] publicSubMembers=null;
+					MemberInfo memberSubCurrent=null;
+					numMembers=publicMembers.Length;
+
+					for (int m = 0; m < numMembers; m++)
+					{
+
+						memberInfo=publicMembers [m];
+						if(memberInfo.MemberType!=MemberTypes.Property && memberInfo.MemberType!=MemberTypes.Field)
+							continue;
+
+						publicSubMembers=memberInfo.GetUnderlyingType().GetPublicMembersOfType (type, false, true, true);
+						numSubMembers=publicSubMembers.Length;
+
+						for(int r=0; r<numSubMembers; r++){
+
+							memberSubCurrent=publicSubMembers[r];
+							guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name+"."+memberSubCurrent.Name));
+
+							membersUniquePathList.Add(memberInfo.Name+"."+memberSubCurrent.Name+"@"+currentComponent.GetInstanceID());
+
+						}
+						
+
+					}
+
 				}
 			}
 			
 			
 			displayOptions=guiContentList.ToArray();
-			memeberInfoValues=memberInfos.ToArray();
-			instances=instancesList.ToArray();
+			membersUniquePath=membersUniquePathList.ToArray();
+
 			
 			
 			
@@ -241,137 +277,137 @@ namespace ws.winx.unity{
 
 	
 
-		public static void ObjectToDisplayOptionsValues<T,K> (UnityEngine.Object @object,out GUIContent[] displayOptions,out K[] values)
-			where K:UnityVariable where T:Type
-		{
-			GUIContent[] tempDisplayOptions;
-			K[] tempValues;
-
-			ObjectToDisplayOptionsValues<K> (@object, typeof(T),out tempDisplayOptions,out tempValues);
-
-			displayOptions=tempDisplayOptions;
-			values=tempValues;
-
-		}
-
-
-		public static void ObjectToDisplayOptionsValues<K> (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out K[] values)
-				where K:UnityVariable
-		{
-			displayOptions = null;
-			values = null;
-
-		
-			if (@object == null) return;
-
-			Type target = null;
-			List<GUIContent> guiContentList = new List<GUIContent> ();
-			List<K> memberInfos = new List<K> ();
-			MemberInfo memberInfo;
-			K propertyNew;
-				
-					
-			 target = @object.GetType ();
-			
-			
-				
-
-
-				List<string> list = new List<string> ();
-
-				
-				
-			    
-				
-				//GET OBJECT STATIC PROPERTIES
-				string text4 = target.Name + "/Static Properties/";
-				MemberInfo[] publicMembers = target.GetPublicMembersOfType (type, true, true, true);
-				if (publicMembers.Length > 0)
-				{
-					for (int i = 0; i < publicMembers.Length; i++)
-					{
-						memberInfo=publicMembers [i];
-						
-					guiContentList.Add(new GUIContent (text4 + memberInfo.Name));
-					propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-					propertyNew.memberName=memberInfo.Name;
-					memberInfos.Add (propertyNew);                   
-
-					}
-				}
-				
-				//GET OBJECT NON STATIC PROPERTIES
-				publicMembers = target.GetPublicMembersOfType (type, false, true, true);
-				for (int j = 0; j < publicMembers.Length; j++)
-				{
-					memberInfo=publicMembers [j];
-
-				guiContentList.Add(new GUIContent (@object.GetType ().Name + "/" + memberInfo.Name));
-
-			
-				propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-				propertyNew.memberName=memberInfo.Name;
-				propertyNew.instanceBinded=@object;
-				memberInfos.Add (propertyNew);
-
-
-				}
-				
-				//GET COMPONENTS IF GAME OBJECT
-				GameObject gameObject = @object as GameObject;
-				if (gameObject != null)
-				{
-					Component currentComponent=null;
-					Component[] components = gameObject.GetComponents<Component> ();
-					for (int k = 0; k < components.Length; k++)
-					{
-						currentComponent = components [k];
-						Type compType = currentComponent.GetType ();
-						string uniqueNameInList = StringUtility.GetUniqueNameInList (list, compType.Name);
-						list.Add (uniqueNameInList);
-						
-						
-						//STATIC PROPERTIES
-						text4 = uniqueNameInList + "/Static Properties/";
-						publicMembers =compType.GetPublicMembersOfType (type, true, true, true);
-						if (publicMembers.Length > 0)
-						{
-							for (int l = 0; l < publicMembers.Length; l++)
-							{
-								memberInfo=publicMembers [l];
-
-							guiContentList.Add (new GUIContent (text4 + memberInfo.Name));
-
-							propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-							propertyNew.memberName=memberInfo.Name;
-							memberInfos.Add (propertyNew);
-
-							}
-						}
-						
-						//NONSTATIC PROPERTIES
-						publicMembers = compType.GetPublicMembersOfType (type, false, true, true);
-						for (int m = 0; m < publicMembers.Length; m++)
-						{
-							memberInfo=publicMembers [m];
-
-							guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
-						propertyNew = (K)ScriptableObject.CreateInstance<K> ();
-						propertyNew.memberName=memberInfo.Name;
-						propertyNew.instanceBinded=currentComponent;
-							memberInfos.Add(propertyNew);
-						}
-					}
-				}
-
-
-			displayOptions=guiContentList.ToArray();
-			values=memberInfos.ToArray();
-				
-				
-				
-
-		}//end function
+//		public static void ObjectToDisplayOptionsValues<T,K> (UnityEngine.Object @object,out GUIContent[] displayOptions,out K[] values)
+//			where K:UnityVariable where T:Type
+//		{
+//			GUIContent[] tempDisplayOptions;
+//			K[] tempValues;
+//
+//			ObjectToDisplayOptionsValues<K> (@object, typeof(T),out tempDisplayOptions,out tempValues);
+//
+//			displayOptions=tempDisplayOptions;
+//			values=tempValues;
+//
+//		}
+//
+//
+//		public static void ObjectToDisplayOptionsValues<K> (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out K[] values)
+//				where K:UnityVariable
+//		{
+//			displayOptions = null;
+//			values = null;
+//
+//		
+//			if (@object == null) return;
+//
+//			Type target = null;
+//			List<GUIContent> guiContentList = new List<GUIContent> ();
+//			List<K> memberInfos = new List<K> ();
+//			MemberInfo memberInfo;
+//			K propertyNew;
+//				
+//					
+//			 target = @object.GetType ();
+//			
+//			
+//				
+//
+//
+//				List<string> list = new List<string> ();
+//
+//				
+//				
+//			    
+//				
+//				//GET OBJECT STATIC PROPERTIES
+//				string text4 = target.Name + "/Static Properties/";
+//				MemberInfo[] publicMembers = target.GetPublicMembersOfType (type, true, true, true);
+//				if (publicMembers.Length > 0)
+//				{
+//					for (int i = 0; i < publicMembers.Length; i++)
+//					{
+//						memberInfo=publicMembers [i];
+//						
+//					guiContentList.Add(new GUIContent (text4 + memberInfo.Name));
+//					propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+//					propertyNew.memberPath=memberInfo.Name;
+//					memberInfos.Add (propertyNew);                   
+//
+//					}
+//				}
+//				
+//				//GET OBJECT NON STATIC PROPERTIES
+//				publicMembers = target.GetPublicMembersOfType (type, false, true, true);
+//				for (int j = 0; j < publicMembers.Length; j++)
+//				{
+//					memberInfo=publicMembers [j];
+//
+//				guiContentList.Add(new GUIContent (@object.GetType ().Name + "/" + memberInfo.Name));
+//
+//			
+//				propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+//				propertyNew.memberPath=memberInfo.Name;
+//				propertyNew.valueObject=@object;
+//				memberInfos.Add (propertyNew);
+//
+//
+//				}
+//				
+//				//GET COMPONENTS IF GAME OBJECT
+//				GameObject gameObject = @object as GameObject;
+//				if (gameObject != null)
+//				{
+//					Component currentComponent=null;
+//					Component[] components = gameObject.GetComponents<Component> ();
+//					for (int k = 0; k < components.Length; k++)
+//					{
+//						currentComponent = components [k];
+//						Type compType = currentComponent.GetType ();
+//						string uniqueNameInList = StringUtility.GetIndexNameInList (list, compType.Name);
+//						list.Add (uniqueNameInList);
+//						
+//						
+//						//STATIC PROPERTIES
+//						text4 = uniqueNameInList + "/Static Properties/";
+//						publicMembers =compType.GetPublicMembersOfType (type, true, true, true);
+//						if (publicMembers.Length > 0)
+//						{
+//							for (int l = 0; l < publicMembers.Length; l++)
+//							{
+//								memberInfo=publicMembers [l];
+//
+//							guiContentList.Add (new GUIContent (text4 + memberInfo.Name));
+//
+//							propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+//							propertyNew.memberPath=memberInfo.Name;
+//							memberInfos.Add (propertyNew);
+//
+//							}
+//						}
+//						
+//						//NONSTATIC PROPERTIES
+//						publicMembers = compType.GetPublicMembersOfType (type, false, true, true);
+//						for (int m = 0; m < publicMembers.Length; m++)
+//						{
+//							memberInfo=publicMembers [m];
+//
+//							guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
+//						propertyNew = (K)ScriptableObject.CreateInstance<K> ();
+//						propertyNew.memberPath=memberInfo.Name;
+//						propertyNew.valueObject=currentComponent;
+//							memberInfos.Add(propertyNew);
+//						}
+//					}
+//				}
+//
+//
+//			displayOptions=guiContentList.ToArray();
+//			values=memberInfos.ToArray();
+//				
+//				
+//				
+//
+//		}//end function
 
 
 
@@ -483,5 +519,8 @@ namespace ws.winx.unity{
 
 
 	}
+
+
+
 }
 

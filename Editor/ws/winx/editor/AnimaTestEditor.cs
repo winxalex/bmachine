@@ -188,44 +188,8 @@ public class AnimaTestEditor : EditorWindow
 
 
 
-	class MyClass
-	{
-		public static Type Foo<T>(T param)
-		{
-			return typeof(T);
-		}
-		
-		public static Type CallFoo(object param)
-		{
-			return (Type)typeof(MyClass).GetMethod("Foo").MakeGenericMethod(new[] { param.GetType() }).Invoke(null, new[] { param });
 
 
-		}
-		
-	}
-
-
-	public static T Foo3<T>(T param)
-	{
-		//Type t = typeof(T);
-		//Debug.Log (typeof(T));
-		return param;
-	}
-
-	private static Func<object,object> BuildAccessor1(Type valueType,MethodInfo genericMethod)
-	{
-		//MethodInfo genericMethod = GetType ().GetMethod ("Foo3"); // <-- fill this in
-		MethodInfo method = genericMethod.MakeGenericMethod(new Type[] { valueType });
-		ParameterExpression methodInfo = Expression.Parameter(typeof(MethodInfo), "methodInfo");
-		ParameterExpression obj = Expression.Parameter(typeof(object), "obj");
-		
-		Expression<Func<object,object>> expr =
-			Expression.Lambda<Func<object,object>>(
-				Expression.Call(method,  Expression.Convert(obj, valueType)),
-				obj);
-		
-		return expr.Compile();
-	}
 
 
 
@@ -500,7 +464,7 @@ public class AnimaTestEditor : EditorWindow
 												variableCurrent = variables [num] = UnityVariable.CreateInstanceOf (curveBindingCurrent.type);
 
 												//ex. Transform or Light component
-												variableCurrent.instanceBinded = instance.GetType () == typeof(GameObject) ? ((GameObject)instance).GetComponent<Transform> () : instance;
+												var instanceToBind = instance.GetType () == typeof(GameObject) ? ((GameObject)instance).GetComponent<Transform> () : instance;
 									
 
 
@@ -509,7 +473,7 @@ public class AnimaTestEditor : EditorWindow
 												//remove "m_Rotation.x" "m_Intensity"
 												propertyName = char.ToLower (propertyName [2]) + propertyName.Remove (0, 3);
 
-												variableCurrent.memberName = propertyName;
+												variableCurrent.Bind(instanceToBind,propertyName);
 											
 										} else {
 

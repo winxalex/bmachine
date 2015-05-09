@@ -59,6 +59,8 @@ public class TestFunctionContainerEditor : Editor {
 
 		if (EditorGUI.EndChangeCheck ()) {
 
+			UnityEngine.Debug.Log ("Value:" + ((TestFunctionContainer)target).variable6.Value);
+			((TestFunctionContainer)target).variable6.Value = ((TestFunctionContainer)target).changer;
 
 //					Debug.Log("changed curver");
 					if(Application.isPlaying){

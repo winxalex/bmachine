@@ -21,7 +21,7 @@ namespace ws.winx.unity
 		{
 				
 				public bool serializable = true;
-				private Type _valueType = typeof(System.Object);
+				private Type _valueType = typeof(object);
 
 
 				// this UnityVariable can reference other variable (ex in blackboard)
@@ -42,76 +42,109 @@ namespace ws.winx.unity
 
 
 				}
-
-				
-
 				
 				[SerializeField]
-				private string __memberName;
+				private string
+						__memberPath;
 
 				/// <summary>
 				/// The name of the property of UnityObject in format: ex. prop1 or prop1.prop2
 				/// rotation.x or intensity
 				/// to which variable is binded
 				/// </summary>
-				public string memberName { 
-					get{ return __memberName; }
-					set { 
-						__memberName = value; 
+				public string memberPath { 
+						get{ return __memberPath; }
+						protected	set { 
+								__memberPath = value; 
 
-					}
+						}
+				}
+
+
+				public enum DisplayMode
+				{
+						Raw=0,
+						Bind,
+						List
 				}
 
 				
 
-
-			
+				[HideInInspector]
+				public DisplayMode
+						displayMode = DisplayMode.Raw;
 				[HideInInspector]
 				public byte[]
-						reflectedInstanceSerialized;
-
-				
-
+						valueObjectSerialized;
 				[NonSerialized]
 				private object
-						__instanceBinded;
-
-				private Delegate __structSetterDelegate;
-
-				private Delegate __valueSetterDelegate;
-
-				public Delegate valueSetterDelegate {
-					get {
-						if(__valueSetterDelegate==null) __valueSetterDelegate=__instanceUnityObject.GetType().GetSetDelegate(memberName);
-						return __valueSetterDelegate;
-					}
+						__valueObject;
+				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object>  __structSetterDelegate;
+				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object> __valueSetterDelegate;
+		
+				ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object> valueSetterDelegate {
+						get {
+								if (__valueSetterDelegate == null)
+										__valueSetterDelegate = __instanceUnityObject.GetType ().GetSetDelegate (memberPath);
+								return __valueSetterDelegate;
+						}
 				}
 
+				private Func<object,object> __valueGetterDelegate;
 
-			
-
-				private Delegate __valueGetterDelegate;
-
-				public Delegate valueGetterDelegate {
-					get {
-						if(__valueGetterDelegate==null) __valueGetterDelegate=__instanceUnityObject.GetType().GetGetDelegate(memberName);
-						return __valueGetterDelegate;
-					}
+				Func<object,object> valueGetterDelegate {
+						get {
+								if (__valueGetterDelegate == null)
+										__valueGetterDelegate = __instanceUnityObject.GetType ().GetGetDelegate (memberPath);
+								return __valueGetterDelegate;
+						}
 				}
+
+				public void Bind (object instance, string memberPath)
+				{
+						if (instance == null)
+								throw new ArgumentException ("Instance");
+
+						if (String.IsNullOrEmpty (memberPath))
+								throw new ArgumentException ("memberPath");
+
+
+
+						MemberInfo memberInfo = instance.GetType ().GetMemberFromPath (memberPath);
+
+						if (memberInfo == null)
+								Debug.LogException (new Exception ("Binding failed! No property " + memberPath + " found on instance " + instance));
+
+						if (!memberInfo.GetUnderlyingType ().IsAssignableFrom (_valueType))
+								Debug.LogException (new Exception ("Member type " + memberInfo.GetUnderlyingType () + " isn't assignable from variable type " + _valueType));
+
+						__valueSetterDelegate = null;
+						__valueGetterDelegate = null;
+						__structSetterDelegate = null;
+						__instanceMember = null;
+						
 				
+						this.memberPath = memberPath;
+						this.valueObject = instance;
+
+					
+
+					
+
+				}
 
 				/// <summary>
 				/// Gets or sets 
 				/// </summary>
-				/// <value>The instance system object (event,UnityEngine.Object or other System.Object)
+				/// <value> valueObject conatiner, can be event,UnityEngine.Object or other System.Object
 				/// </value>
-				public System.Object instanceBinded {
+				object valueObject {
 						get {
-								return __instanceBinded;
+								return __valueObject;
 					
 						}
 						set {
-								__instanceBinded = value;
+								__valueObject = value;
 
 								__unityVariableReferencedInstanceID = 0;
 								__instanceUnityObject = null;
@@ -122,9 +155,9 @@ namespace ws.winx.unity
 										return;
 								}
 								
-								__instanceUnityObject = __instanceBinded as UnityEngine.Object;
+								__instanceUnityObject = __valueObject as UnityEngine.Object;
 
-								__event = __instanceBinded as UnityEvent;
+								__event = __valueObject as UnityEvent;
 					
 //								Debug.Log (" UnityInstance:" + __reflectedInstanceUnity + " Reflected instance:" + __reflectedInstance);
 						}
@@ -134,13 +167,20 @@ namespace ws.winx.unity
 				private UnityEngine.Object
 						__instanceUnityObject;
 
+				public UnityEngine.Object instanceBinded {
+						get {
+								return __instanceUnityObject;
+						}
+				}
 
+
+				/// <summary>
+				/// The __instance on which member defined in "memberPath" is set or get
+				/// can be Component from memberPath "Light.intensity" or some object instance in memberPath "Transform.rotaton.x"
+				/// </summary>
 				[NonSerialized]
-				private object __instanceMember;
-					
-
- 
-
+				private object
+						__instanceMember;
 				[SerializeField]
 				private UnityEvent
 						__event;//this filed would have event even is empty
@@ -157,19 +197,38 @@ namespace ws.winx.unity
 				// Properties
 				//
 
-		//TODO
+				//TODO
 
 				// User-defined conversion from UnityVariable to Vector3 
 				public static implicit operator Vector3 (UnityVariable variable)
 				{
-						Vector3 val;
-						variable.GetValue(out val);
-						return val;
+						
+						return	(Vector3)variable.Value;
+						
+				}
+
+				public static implicit operator Quaternion (UnityVariable variable)
+				{
+					
+					return	(Quaternion)variable.Value;
+					
+				}
+
+				public static implicit operator float (UnityVariable variable)
+				{
+					
+						return (float)variable.Value;
+				}
+
+				public static implicit operator int (UnityVariable variable)
+				{
+					
+						return (int)variable.Value;
 				}
 
 
 				
-
+				///////////////  VALUE ////////////////
 
 				/// <summary>
 				/// Gets or sets the value.
@@ -182,18 +241,19 @@ namespace ws.winx.unity
 						get {
 
 								//if UnityVariable isn't binded to some memeber thru delegate
-							if (String.IsNullOrEmpty(this.memberName)) {
+								if (String.IsNullOrEmpty (this.memberPath)) {
 
-										return this.instanceBinded;
+										return this.valueObject;
 								}
 
 
-								if(__instanceMember==null) initInstanceMember();
+								if (__instanceMember == null)
+										initInstanceMember ();
 
-								 object val;
-								 ReflectionUtility.GetThruDelegate(valueGetterDelegate,__instanceMember,out val);
-								 return val;
-
+								
+									
+								return valueGetterDelegate (__instanceMember);
+				
 						}
 						set {
 
@@ -216,27 +276,37 @@ namespace ws.winx.unity
 								}
 
 
-								if (String.IsNullOrEmpty(this.memberName)) {
+								if (!value.GetType ().IsAssignableFrom (_valueType))
+									Debug.LogException (new Exception ("Value type " + value.GetType () + " isn't assignable from variable type " + _valueType));
+
+
+								if (String.IsNullOrEmpty (this.memberPath)) {
+						
+
+										this.valueObject = value;
+
 										
-										this.instanceBinded = value;
-
-				
-					
-										if (value != null)
-												_valueType = value.GetType ();
+								}else{
 
 
-										return;
+										if (__instanceMember == null)
+												initInstanceMember ();
+
+											
+										valueSetterDelegate (ref __instanceMember, value);
+
+										if (__structSetterDelegate != null) {
+												
+												__structSetterDelegate (ref __valueObject, __instanceMember);
+										}
+
 								}
 
 
-								if(__instanceMember==null) initInstanceMember();
 
-								//ReflectionUtility.SetThruDelegate(valueSetterDelegate,ref __instanceMember,value);
-				ReflectionUtility.SetThruDelegate(valueSetterDelegate,ref __instanceMember,value);
-
-								if(__structSetterDelegate!=null)
-									ReflectionUtility.SetThruDelegate(__structSetterDelegate,ref __instanceUnityObject,__instanceMember);
+#if UNITY_EDITOR
+				UpdateSerializedProperty(value);
+#endif
 								
 						}
 				}
@@ -288,19 +358,19 @@ namespace ws.winx.unity
 								valueTypeSerialized = Utility.Serialize (_valueType);
 
 								//if it is not reference to other UnityVariable isn't null and not reference to UnityObject
-								if (__unityVariableReferencedInstanceID == 0 && (__instanceBinded != null) && (__instanceUnityObject == null || (__instanceUnityObject != null && __instanceUnityObject.GetInstanceID () == 0) && __event == null) 
-										&& !__instanceBinded.GetType ().IsSubclassOf (typeof(UnityEngine.Object)) 
-										&& __instanceBinded.GetType () != typeof(UnityEngine.Object)
-										&& __instanceBinded.GetType () != typeof(UnityEngine.Events.UnityEvent)
+								if (__unityVariableReferencedInstanceID == 0 && (__valueObject != null) && (__instanceUnityObject == null || (__instanceUnityObject != null && __instanceUnityObject.GetInstanceID () == 0) && __event == null) 
+										&& !__valueObject.GetType ().IsSubclassOf (typeof(UnityEngine.Object)) 
+										&& __valueObject.GetType () != typeof(UnityEngine.Object)
+										&& __valueObject.GetType () != typeof(UnityEngine.Events.UnityEvent)
 
 				    ) {
 
 						
 										try {
-												reflectedInstanceSerialized = Utility.Serialize (__instanceBinded);
+												valueObjectSerialized = Utility.Serialize (__valueObject);
 										} catch (Exception ex) {
 
-												Debug.LogWarning (ex.Message + " name:" + this.name  + __instanceBinded + " " + __instanceUnityObject);
+												Debug.LogWarning (ex.Message + " name:" + this.name + __valueObject + " " + __instanceUnityObject);
 										}
 								}
 						}
@@ -317,9 +387,9 @@ namespace ws.winx.unity
 //										__memberInfo = null;
 
 								//check if something was binded to this variable
-								if(!String.IsNullOrEmpty(__memberName)){
+								if (!String.IsNullOrEmpty (__memberPath)) {
 
-									this.memberName=__memberName;
+										this.memberPath = __memberPath;
 								}
 
 								if (valueTypeSerialized != null && valueTypeSerialized.Length > 0)
@@ -330,16 +400,16 @@ namespace ws.winx.unity
 
 #if UNITY_EDITOR
 								if (__unityVariableReferencedInstanceID != 0) {
-										__instanceBinded = EditorUtility.InstanceIDToObject (__unityVariableReferencedInstanceID);
+										__valueObject = EditorUtility.InstanceIDToObject (__unityVariableReferencedInstanceID);
 										return;
 								}
 #endif
 
-								if (reflectedInstanceSerialized != null && reflectedInstanceSerialized.Length > 0) { 
+								if (valueObjectSerialized != null && valueObjectSerialized.Length > 0) { 
 
 						
 			
-										__instanceBinded = Utility.Deserialize (reflectedInstanceSerialized);
+										__valueObject = Utility.Deserialize (valueObjectSerialized);
 
 #if UNITY_EDITOR
 										__seralizedProperty = null;
@@ -348,11 +418,11 @@ namespace ws.winx.unity
 
 								} else {
 										if (__instanceUnityObject != null)
-												__instanceBinded = __instanceUnityObject;
+												__valueObject = __instanceUnityObject;
 										else if (__event != null && this.ValueType == typeof(UnityEvent))
-												__instanceBinded = __event;
+												__valueObject = __event;
 										else 
-												__instanceBinded = null;
+												__valueObject = null;
 
 								}
 						}
@@ -372,24 +442,26 @@ namespace ws.winx.unity
 				//
 				// Methods
 				//
-				public virtual void GetValue<T> (out T result)
+				public virtual T GetValue<T> ()
 				{
-						//if UnityVariable isn't binded to some memeber thru delegate
-						if (String.IsNullOrEmpty(this.memberName)) {
-							
-							result=(T)this.instanceBinded;
-							return;
-						}
-						
-						
-						if(__instanceMember==null) initInstanceMember();
-						
-						
-						ReflectionUtility.GetThruDelegate(valueGetterDelegate,__instanceMember,out result);
+						return (T)this.Value;
 						
 				}
 
-				
+				public virtual void SetValue<T> (T value)
+				{
+					
+						 this.Value = value;
+					
+				}
+
+				public bool IsBinded(){
+					if (this.instanceBinded != null && !String.IsNullOrEmpty(__memberPath))
+								return true;
+
+					return false;
+
+				}
 		
 				public void OnEnable ()
 				{
@@ -426,29 +498,29 @@ namespace ws.winx.unity
 
 				public override string ToString ()
 				{
-						return "Property[" + name + "] of type " + ValueType + (this.instanceBinded == null ? (!String.IsNullOrEmpty(this.memberName) ? "Value=" + this.Value.ToString () + " on Static instance" : " Not initialized") : (this.instanceBinded.GetType ().IsPrimitive || this.instanceBinded.GetType () == typeof(string)) ? " Value=" + this.Value.ToString () : " Value=" + this.Value.ToString () + " on instance of " + this.instanceBinded.ToString ());
+						return "Property[" + name + "] of type " + ValueType + (this.valueObject == null ? (!String.IsNullOrEmpty (this.memberPath) ? "Value=" + this.Value.ToString () + " on Static instance" : " Not initialized") : (this.valueObject.GetType ().IsPrimitive || this.valueObject.GetType () == typeof(string)) ? " Value=" + this.Value.ToString () : " Value=" + this.Value.ToString () + " on instance of " + this.valueObject.ToString ());
 				}
 
-
-				private object initInstanceMember(){
+				private object initInstanceMember ()
+				{
 
 
 					
-					if(__instanceMember==null){
+						if (__instanceMember == null) {
 						
-						string[] propertyPath = memberName.Split ('.');
+								string[] memberPathSegments = memberPath.Split ('.');
 						
-						if(propertyPath.Length>2){
-							__instanceMember=__instanceUnityObject.GetType().GetMember(propertyPath[0])[0].GetValue(__instanceUnityObject);
+								if (memberPathSegments.Length > 1) {
+										__instanceMember = __instanceUnityObject.GetType ().GetMember (memberPathSegments [0]) [0].GetValue (__instanceUnityObject);
 							
-							//if it is property is of type struct => create additional setter
-							if(__instanceMember.GetType().IsValueType) __structSetterDelegate=__instanceUnityObject.GetType().GetSetDelegate(propertyPath[0]);
+										//if it is property is of type struct => create additional setter (ex. transform.rotation.x where memberName is "rotation.x" __instanceUnityObject is "Transform"
+										if (__instanceMember.GetType ().IsValueType)
+												__structSetterDelegate = __instanceUnityObject.GetType ().GetSetDelegate (memberPathSegments [0]);
+								} else
+										__instanceMember = __instanceUnityObject;
 						}
-						else
-							__instanceMember=__instanceUnityObject;
-					}
 					
-					return __instanceMember;
+						return __instanceMember;
 				
 				}
 
@@ -486,6 +558,10 @@ namespace ws.winx.unity
 				
 			}
 		}
+
+
+
+
 		
 		void CreateSerializedProperty ()
 				{
@@ -568,6 +644,45 @@ namespace ws.winx.unity
 
 
 
+		public void UpdateSerializedProperty(object value){
+
+
+			if (this.ValueType == typeof(float)) {
+
+				this.serializedProperty.floatValue = (float)value;
+			}else
+			if (this.ValueType == typeof(bool)) {
+				
+				this.serializedProperty.boolValue=(bool)value;
+			} else
+			if (this.ValueType == typeof(Bounds)) {
+				this.serializedProperty.boundsValue=(Bounds)value;
+				
+			} else
+			if (this.ValueType == typeof(Color)) {
+				this.serializedProperty.colorValue=(Color)value;
+				
+			} else
+			if (this.ValueType == typeof(Rect)) {
+				this.serializedProperty.floatValue=(float)value;
+				
+			} else
+			if (this.ValueType == typeof(int)) {
+				this.serializedProperty.intValue=(int)value;
+			} else
+			if (this.ValueType == typeof(Vector3)) {
+				this.serializedProperty.vector3Value=(Vector3)value;
+			} else
+			if (this.ValueType == typeof(string)) {
+				this.serializedProperty.stringValue=(string)value;
+			} else
+			if (this.ValueType == typeof(Quaternion)) {
+				this.serializedProperty.quaternionValue=(Quaternion)value;
+			} 
+
+
+		}
+
 
 		/// <summary>
 		/// Applies the modified properties. !!!! For reusing of Unity Drawers
@@ -640,7 +755,7 @@ namespace ws.winx.unity
 					this.OnBeforeSerialize ();
 					
 				} else
-					if (this.__instanceBinded is UnityEngine.Object)
+					if (this.__valueObject is UnityEngine.Object)
 						this.Value = __seralizedProperty.objectReferenceValue;
 				
 				

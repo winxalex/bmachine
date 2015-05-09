@@ -29,8 +29,8 @@ public class TestFunctionContainer : MonoBehaviour {
 //	[UnityVariablePropertyAttribute(typeof(AnimationCurve))]
 //	public UnityVariable variable4;
 
-	[UnityVariablePropertyAttribute(typeof(Light))]
-	public UnityVariable variable5;
+//	[UnityVariablePropertyAttribute(typeof(Light))]
+//	public UnityVariable variable5;
 
 
 	[UnityVariablePropertyAttribute(typeof(float))]
@@ -48,11 +48,10 @@ public class TestFunctionContainer : MonoBehaviour {
 		UnityEngine.Debug.Log("Enable");
 	}
 
-	void Update(){
-		UnityEngine.Debug.Log ("Value:" + variable6.Value);
-		variable6.Value = changer;
-
-	}
+//	void Update(){
+//
+//
+//	}
 
 	 void Reset(){
 //		variable = UnityVariable.CreateInstanceOf (typeof(string));
@@ -60,7 +59,7 @@ public class TestFunctionContainer : MonoBehaviour {
 //		variable2 = UnityVariable.CreateInstanceOf (typeof(Bounds));
 //		variable3 = UnityVariable.CreateInstanceOf (typeof(Quaternion));
 //		variable4 = UnityVariable.CreateInstanceOf (typeof(AnimationCurve));
-		variable5 = UnityVariable.CreateInstanceOf (typeof(Light));
+//		variable5 = UnityVariable.CreateInstanceOf (typeof(Light));
 		variable6 = UnityVariable.CreateInstanceOf (typeof(float));
 	}
 
