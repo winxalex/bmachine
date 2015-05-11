@@ -210,7 +210,7 @@ namespace ws.winx.unity
 				public static implicit operator Quaternion (UnityVariable variable)
 				{
 					
-					return	(Quaternion)variable.Value;
+						return	(Quaternion)variable.Value;
 					
 				}
 
@@ -272,12 +272,17 @@ namespace ws.winx.unity
 										//_valueType=typeof(System.Object);
 										//__memberInfo=null;
 
+										this.valueObject = null;
+										__structSetterDelegate = null;
+										__valueGetterDelegate = null;
+										__valueSetterDelegate = null;
+										return;
 									
 								}
 
 
 								if (!value.GetType ().IsAssignableFrom (_valueType))
-									Debug.LogException (new Exception ("Value type " + value.GetType () + " isn't assignable from variable type " + _valueType));
+										Debug.LogException (new Exception ("Value type " + value.GetType () + " isn't assignable from variable type " + _valueType));
 
 
 								if (String.IsNullOrEmpty (this.memberPath)) {
@@ -286,7 +291,7 @@ namespace ws.winx.unity
 										this.valueObject = value;
 
 										
-								}else{
+								} else {
 
 
 										if (__instanceMember == null)
@@ -323,22 +328,7 @@ namespace ws.winx.unity
 
 						UnityVariable variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
 						variable._valueType = T;
-						if (T != typeof(UnityEngine.Object)) {
-								if (T == typeof(string))
-										variable.Value = String.Empty;
-								else if (T == typeof(AnimationCurve))
-										variable.Value = new AnimationCurve ();
-								else if (T == typeof(Texture2D))
-										variable.Value = new Texture2D (2, 2);
-								else if (T == typeof(Texture3D))
-										variable.Value = new Texture3D (2, 2, 2, TextureFormat.ARGB32, true);
-								else if (T == typeof(Material))
-										variable.Value = new Material (Shader.Find ("Diffuse"));
-								else if (T == typeof(UnityEngine.Events.UnityEvent))
-										variable.Value = new UnityEvent ();
-								else		
-										variable.Value = FormatterServices.GetUninitializedObject (T);
-						}
+						variable.Value = UnityVariable.Default (T);
 							
 						
 						variable.OnBeforeSerialize ();
@@ -451,16 +441,38 @@ namespace ws.winx.unity
 				public virtual void SetValue<T> (T value)
 				{
 					
-						 this.Value = value;
+						this.Value = value;
 					
 				}
 
-				public bool IsBinded(){
-					if (this.instanceBinded != null && !String.IsNullOrEmpty(__memberPath))
+				public bool IsBinded ()
+				{
+						if (this.instanceBinded != null && !String.IsNullOrEmpty (__memberPath))
 								return true;
 
-					return false;
+						return false;
 
+				}
+
+				public static object Default (Type T)
+				{
+						
+						if (T == typeof(string))
+								return String.Empty;
+						else if (T == typeof(AnimationCurve))
+								return new AnimationCurve ();
+						else if (T == typeof(Texture2D))
+								return new Texture2D (2, 2);
+						else if (T == typeof(Texture3D))
+								return new Texture3D (2, 2, 2, TextureFormat.ARGB32, true);
+						else if (T == typeof(Material))
+								return new Material (Shader.Find ("Diffuse"));
+						else if (T == typeof(UnityEngine.Events.UnityEvent))
+								return new UnityEvent ();
+						else		
+								return FormatterServices.GetUninitializedObject (T);
+						
+				
 				}
 		
 				public void OnEnable ()
@@ -664,7 +676,7 @@ namespace ws.winx.unity
 				
 			} else
 			if (this.ValueType == typeof(Rect)) {
-				this.serializedProperty.floatValue=(float)value;
+				this.serializedProperty.rectValue=(Rect)value;
 				
 			} else
 			if (this.ValueType == typeof(int)) {

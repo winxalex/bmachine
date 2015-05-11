@@ -42,14 +42,14 @@ namespace ws.winx.editor.drawers
 			typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, typeSelected,EditorGUILayoutEx.unityTypesDisplayOptions , EditorGUILayoutEx.unityTypes,null,null,null,null,typePos);
 			
 								//if change of type create new variable
-								if (typeSelected != type && !typeSelected.IsSubclassOf (type) && type!=typeof(UnityEngine.Object)) {
+								if (typeSelected != type && !typeSelected.IsSubclassOf (type) /*&& type!=typeof(UnityEngine.Object)*/) {
 										
-										property.objectReferenceValue = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+										property.objectReferenceValue = UnityVariable.CreateInstanceOf(typeSelected);
 
-										if(typeSelected== typeof(string))
-											((UnityVariable)property.objectReferenceValue).Value=String.Empty;
-										else
-											((UnityVariable)property.objectReferenceValue).Value=FormatterServices.GetUninitializedObject (typeSelected);
+//										if(typeSelected== typeof(string))
+//											((UnityVariable)property.objectReferenceValue).Value=String.Empty;
+//										else
+//											((UnityVariable)property.objectReferenceValue).Value=UnityVariable.Default(type);
 								}
 					//	} 
 

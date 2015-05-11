@@ -55,8 +55,8 @@ namespace ws.winx.editor.bmachine.extensions
 				bool[] eventTimeValuesSelected;
 				EventComparer eventTimeComparer = new EventComparer ();
 				string[] eventDisplayNames;
-				float timeNormalizedStartPrev = -1;
-				float timeNormalizedEndPrev = 1;
+				float timeNormalizedStartPrev = -1f;
+				float timeNormalizedEndPrev = 1.1f;
 				GUIStyle playButtonStyle;
 				Vector2 playButtonSize;
 				AvatarPreviewW avatarPreview;
@@ -865,36 +865,52 @@ namespace ws.winx.editor.bmachine.extensions
 												int eventTimeValueSelectedIndex = Array.IndexOf (eventTimeValuesSelected, true);
 
 
-												
+							
 					
 												if (eventTimeValueSelectedIndex > -1) {
-														avatarPreview.SetTimeValue (eventTimeValues [eventTimeValueSelectedIndex]);
+														avatarPreview.SetTimeAt (eventTimeValues [eventTimeValueSelectedIndex]);
 												} else {
-														//set AvatarPreview time depending of range drag
-//														if (mecanimNode.timeNormalizedStart != timeNormalizedStartPrev) {
-//																timeNormalizedStartPrev = mecanimNode.timeNormalizedStart;
-//																avatarPreview.SetTimeValue (timeNormalizedStartPrev);
-//																
-//														}
-														if (mecanimNode.range.rangeStart != timeNormalizedStartPrev) {
-																timeNormalizedStartPrev = mecanimNode.range.rangeStart;
-																avatarPreview.SetTimeValue (timeNormalizedStartPrev);
+														
+													
+														//!!! changing 
+														//avatarPreview.timeControl.startTime
+														// start/stop makes AvatarPreview to play from start to stop
+														// but its not offer good usability of resized animation
+
+													
+														if (avatarPreview.timeControl.playing) {
+																if (avatarPreview.timeControl.normalizedTime < mecanimNode.range.rangeStart ||
+																		avatarPreview.timeControl.normalizedTime > mecanimNode.range.rangeEnd)
 															
-														} else if (mecanimNode.range.rangeEnd != timeNormalizedEndPrev) {
-																timeNormalizedEndPrev = mecanimNode.range.rangeEnd;
-																avatarPreview.SetTimeValue (timeNormalizedEndPrev);
+																		avatarPreview.timeControl.normalizedTime=mecanimNode.range.rangeStart;
+														
+
+														} else {
+
+																//set AvatarPreview animation time range depending of drag of range control handles
+																if (Math.Abs(mecanimNode.range.rangeStart - timeNormalizedStartPrev)>0.01f) {
+																		timeNormalizedStartPrev = mecanimNode.range.rangeStart;
+									
+																		avatarPreview.SetTimeAt (timeNormalizedStartPrev);
+									
+																}else
+																if (Math.Abs(mecanimNode.range.rangeEnd - timeNormalizedEndPrev)> 0.01f) {
+																		timeNormalizedEndPrev = mecanimNode.range.rangeEnd;
+																		avatarPreview.SetTimeAt (timeNormalizedEndPrev);
+									
+																}
+								
 								
 														}
-
-									
-
-
-
-
-
+							
+							
+							
+							
+							
+							
 												}
-	
-													
+						
+						
 
 										}				
 

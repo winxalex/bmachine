@@ -203,7 +203,7 @@ namespace ws.winx.bmachine.extensions
 						motionOverride = UnityVariable.CreateInstanceOf (typeof(AnimationClip));
 
 						
-			range = (ws.winx.unity.attributes.MinMaxRangeSO)ScriptableObject.CreateInstance<ws.winx.unity.attributes.MinMaxRangeSO> ();
+						range = (ws.winx.unity.attributes.MinMaxRangeSO)ScriptableObject.CreateInstance<ws.winx.unity.attributes.MinMaxRangeSO> ();
 				
 						Array.ForEach (this.children, (itm) => {
 			

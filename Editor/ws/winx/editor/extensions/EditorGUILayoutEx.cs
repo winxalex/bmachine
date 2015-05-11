@@ -1275,8 +1275,9 @@ namespace ws.winx.editor.extensions
 										_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
 						
 						
-								if (_objectSelected != null) {//extract properties
-							
+								if (_objectSelected != null) {
+										
+									
 							
 										GUIContent[] displayOptionsProperties;
 										
@@ -1320,26 +1321,20 @@ namespace ws.winx.editor.extensions
 												
 											} 
 							
-							
+									
 							
 								} 
-//					else {//if None is selected reset
-//										//variableSelected.memberPath = null;
-//										
-//									
-//										variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
-//										variableSelected.displayMode = UnityVariable.DisplayMode.Raw;
-//								}
+
 										
 					
 					
 					
 								
-
+				
 
 						}//end if (selected inx==1)//BIND
 						else if (values != null && values.Count > 0) {
-								//variableSelected = values [indexSelected - 2];
+								variableSelected = values [indexSelected - 2];
 						}
 			
 

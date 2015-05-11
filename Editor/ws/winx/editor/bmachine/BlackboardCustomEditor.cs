@@ -94,7 +94,10 @@ namespace ws.winx.editor.bmachine
 						genericMenu.AddSeparator (string.Empty);
 					
 
-						genericMenu.AddItem (new GUIContent ("Any UnityVariable"), false, onTypeSelection, typeof(UnityEngine.Object)
+						genericMenu.AddItem (new GUIContent ("Any UnityVariable"), false,(userData)=>{
+
+				AddUnityVariableOfTypeToList("UniUnityVar",(Type)userData,__variablesReordableList,new UniUnityVariablePropertyDrawer());
+			}, typeof(float)
 			                     
 			                     
 			                     
@@ -126,7 +129,7 @@ namespace ws.winx.editor.bmachine
 						});
 				}
 		
-				void AddVariableToList<T> (string name, T value, ReorderableList list, PropertyDrawer drawer=null)
+				void AddUnityVariableOfTypeToList (String name,Type type, ReorderableList list, PropertyDrawer drawer=null)
 				{
 				
 
@@ -134,11 +137,16 @@ namespace ws.winx.editor.bmachine
 						var index = list.serializedProperty.arraySize;
 						list.serializedProperty.arraySize++;
 						list.index = index;
+
+						UnityVariable variable = UnityVariable.CreateInstanceOf (type);
+									variable.name = name;
+									variable.drawer = drawer;
+
 			
-						UnityVariable variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
-						variable.name = name;
-						variable.drawer = drawer;
-						variable.Value = value;
+//						UnityVariable variable = (UnityVariable)ScriptableObject.CreateInstance<UnityVariable> ();
+//						variable.name = name;
+//						variable.drawer = drawer;
+//						variable.Value = value;
 			
 						var element = list.serializedProperty.GetArrayElementAtIndex (index);
 						element.objectReferenceValue = variable;
@@ -150,29 +158,9 @@ namespace ws.winx.editor.bmachine
 
 				void onTypeSelection (object userData)
 				{
-
-						
 						Type type = (Type)userData;
-						if (type == typeof(Texture2D))
-								AddVariableToList ("New " + type.Name, new Texture2D (2, 2), __variablesReordableList);
-						else if (type == typeof(string))
-								AddVariableToList ("New " + type.Name, String.Empty, __variablesReordableList);
-						else if (type == typeof(Material))
-								AddVariableToList ("New " + type.Name, new Material (Shader.Find ("Diffuse")), __variablesReordableList);
-						else if (type == typeof(AnimationCurve))
-								AddVariableToList ("New " + type.Name, new AnimationCurve (new Keyframe (0f, 0f, 0f, 0f), new Keyframe (1f, 1f, 0f, 0f)), __variablesReordableList);
-						else if (type == typeof(Texture3D))
-								AddVariableToList ("New " + type.Name, new Texture3D (2, 2, 2, TextureFormat.ARGB32, false), __variablesReordableList);
-						else if (type == typeof(UnityEngine.Events.UnityEvent))
-								AddVariableToList ("New " + type.Name, new UnityEvent (), __variablesReordableList);
-						else if (type == typeof(UnityEngine.Object)) 
-
-								AddVariableToList ("New " + type.Name, FormatterServices.GetUninitializedObject (type), __variablesReordableList, new UniUnityVariablePropertyDrawer ());
-						else
-						
-						
-								AddVariableToList ("New " + type.Name, FormatterServices.GetUninitializedObject (type), __variablesReordableList);
-
+						AddUnityVariableOfTypeToList ("New "+type.Name,type, __variablesReordableList);	
+			
 					
 				}
 
@@ -262,10 +250,10 @@ namespace ws.winx.editor.bmachine
 								Type type = currentVariable.ValueType;
 
 								if (currentVariable.serializedProperty == null)
-										currentVariable.Value = FormatterServices.GetUninitializedObject (type);
+										currentVariable.Value =UnityVariable.Default(type);
 
 								
-
+								//if UnityVariable isn't of type of known unityTypes or it is UnityEvent or have custom Drawer
 								if (Array.IndexOf (EditorGUILayoutEx.unityTypes, type) < 0
 										|| type == typeof(UnityEvent) || (currentVariable.drawer != null)) {
 
@@ -366,7 +354,7 @@ namespace ws.winx.editor.bmachine
 						}
 
 				
-						AddVariableToList ("New " + type.Name, FormatterServices.GetUninitializedObject (type), __variablesReordableList);
+						AddUnityVariableOfTypeToList ("New "+type.Name,type, __variablesReordableList);
 
 
 				}

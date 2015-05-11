@@ -243,7 +243,11 @@ namespace ws.winx.editor
 	
 	
 				private object __instance;
+
+
 				protected TimeControlW _timeControl;
+				float _timeStartNormailized=0f;
+				float _timeStopNormalized=1f;
 
 	
 				public delegate void OnAvatarChange ();
@@ -404,11 +408,11 @@ namespace ws.winx.editor
 //									this.Animator.rootRotation = rootRotation;
 //								}
 				
-								this.timeControl.loop = true;
-								float timeAnimationLength = 1f;
+//								this.timeControl.loop = true;
+								float timeAnimationLength = 1f;//1s
 								float timeNormalized = 0f;
-
-
+//
+//
 								if (this.Animator.layerCount > 0) {
 					
 										AnimatorStateInfo currentAnimatorStateInfo = this.Animator.GetCurrentAnimatorStateInfo (0);
@@ -418,8 +422,15 @@ namespace ws.winx.editor
 										timeNormalized = currentAnimatorStateInfo.normalizedTime;
 								}
 				
-								this.timeControl.startTime = 0f;
-								this.timeControl.stopTime = timeAnimationLength;
+								//this.timeControl.startTime = timeAnimationLength * _timeStartNormailized;
+								//this.timeControl.stopTime = timeAnimationLength * _timeStopNormalized;
+
+
+								//float timeAnimationLength=((AnimationClip)motion).length;
+
+				this.timeControl.startTime = timeAnimationLength * _timeStartNormailized;
+				this.timeControl.stopTime = timeAnimationLength * _timeStopNormalized;
+								
 								this.timeControl.Update ();
 
 
@@ -428,17 +439,27 @@ namespace ws.winx.editor
 
 								//deltaTime is nextCurrentTime-currentTime
 								//is set my drag of red Timeline handle or manually thru SetTimeValue
-								float timeDelta = this.timeControl.deltaTime;
+
+				float timeNext = this.timeControl.startTime * (1f - timeNormalized) + this.timeControl.stopTime * timeNormalized;	
+
+				//if(this.timeControl.playing)
+				//this.timeControl.nextCurrentTime=timeNext;
+				float timeDelta = this.timeControl.deltaTime;
 
 
+				if(this.timeControl.playing){
+				Debug.Log(timeDelta+" current="+this.timeControl.currentTime+" next="+timeNext+" n: "+this.timeControl.normalizedTime);
+					Debug.Log(this.timeControl.startTime+" "+this.timeControl.stopTime);
+				}
+								
 
 								if (this.timeControl.playing) {
 										if (!motion.isLooping) {
 												if (timeNormalized >= 1f) {
-														timeDelta -= timeAnimationLength;
+							timeDelta -= this.timeControl.stopTime-this.timeControl.startTime;//timeAnimationLength;
 												} else {
 														if (timeNormalized < 0f) {
-																timeDelta += timeAnimationLength;
+								timeDelta +=this.timeControl.stopTime-this.timeControl.startTime;// timeAnimationLength;
 														}
 												}
 										}
@@ -449,8 +470,22 @@ namespace ws.winx.editor
 								this.Animator.Update (timeDelta);
 						}
 				}
+
+
+				public void SetStartTime(float timeNormalized){
+
+						_timeStartNormailized=timeNormalized;
+
+				}
+
+
+				public void SetStopTime(float timeNormalized){
+					
+					_timeStopNormalized=timeNormalized;
+					
+				}
 	
-				public void SetTimeValue (float timeNormalized)
+				public void SetTimeAt (float timeNormalized)
 				{
 
 						if (this.timeControl.playing)

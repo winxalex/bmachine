@@ -98,7 +98,7 @@ namespace ws.winx.editor.bmachine.drawers
 			typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, type,displayOptionsTypes , types,null,null,null,null,typePos);
 			
 								//if change of type create new variable
-								if (typeSelected != type && !typeSelected.IsSubclassOf (type) && type!=typeof(UnityEngine.Object)) {
+								if (typeSelected != type && !typeSelected.IsSubclassOf (type) /*&& type!=typeof(UnityEngine.Object)*/) {
 										
 									property.value = UnityVariable.CreateInstanceOf(typeSelected);
 								}
