@@ -18,9 +18,11 @@ public class AnimaTestEditor : EditorWindow
 		bool m_AutoRecord;
 		float timeCurrent;
 		bool bSave;
+	public AnimationCurve xCurve;
 		public AnimationCurve[] curves;
 		public UnityVariable[] variables;
 		public Quaternion qGlobal;
+		float timeLast=Time.realtimeSinceStartup;
 
 		void OnEnable ()
 		{
@@ -55,6 +57,7 @@ public class AnimaTestEditor : EditorWindow
 		public GameObject animatedObject1;
 		public float timeTotal = 10;
 
+	int frameCount;
 
 
 		// Add menu named "My Window" to the Window menu
@@ -96,100 +99,6 @@ public class AnimaTestEditor : EditorWindow
 
 				return AnimationModeUtility.Process (animatedObject, clip, modifications, timeCurrent).Concat (AnimationModeUtility.Process (animatedObject1, clip1, modifications, timeCurrent)).ToArray ();
 		}
-
-
-
-		public static class ExpressionEx
-		{
-				public static Expression Assign (Expression left, Expression right)
-				{
-						var assign = typeof(Assigner<>).MakeGenericType (left.Type).GetMethod ("Assign");
-
-						var assignExpr = Expression.Call (assign, left, right);
-						//var assignExpr = Expression.Add(left, right, assign);
-			
-						return assignExpr;
-				}
-		
-				private static class Assigner<T>
-				{
-						public static void Assign (ref T left, T right)
-						{
-								left = right;
-								//return left;
-						}
-				}
-		}
-
-		public delegate void RefAction<T,T1> (ref T obj,T1 t);
-
-		static Func<S, T> CreateGetter<S, T> (FieldInfo field)
-		{
-				string methodName = field.ReflectedType.FullName + ".get_" + field.Name;
-				DynamicMethod setterMethod = new DynamicMethod (methodName, typeof(T), new Type[1] { typeof(S) }, true);
-				ILGenerator gen = setterMethod.GetILGenerator ();
-				if (field.IsStatic) {
-						gen.Emit (OpCodes.Ldsfld, field);
-				} else {
-						gen.Emit (OpCodes.Ldarg_0);
-						gen.Emit (OpCodes.Ldfld, field);
-				}
-				gen.Emit (OpCodes.Ret);
-				return (Func<S, T>)setterMethod.CreateDelegate (typeof(Func<S, T>));
-		}
-
-
-//	static Action<S, T> CreateSetter<S,T>(FieldInfo field)
-//	{
-//		string methodName = field.ReflectedType.FullName+".set_"+field.Name;
-//		DynamicMethod setterMethod = new DynamicMethod(methodName, null, new Type[2]{typeof(S),typeof(T)},true);
-//
-//	
-//		ILGenerator gen = setterMethod.GetILGenerator();
-//		if (field.IsStatic)
-//		{
-//			gen.Emit(OpCodes.Ldarg_1);
-//			gen.Emit(OpCodes.Stsfld, field);
-//		}
-//		else
-//		{
-//			gen.Emit(OpCodes.Ldarg_0);
-//			gen.Emit(OpCodes.Ldarg_1);
-//			gen.Emit(OpCodes.Stfld, field);
-//		}
-//		gen.Emit(OpCodes.Ret);
-//		return (Action<S, T>)setterMethod.CreateDelegate(typeof(Action<S, T>));
-//	}
-
-
-
-
-		static RefAction<T,T1> MakeSetter<T,T1> (FieldInfo info)
-		{
-				var objectParameter = Expression.Parameter (typeof(T).MakeByRefType (), "source");
-				var valueParameter = Expression.Parameter (typeof(T1), "value");
-				var setterExpression = Expression.Lambda<RefAction<T,T1>> (
-			ExpressionEx.Assign (
-			objectParameter,
-			//Expression.Convert(objectParameter, typeof(T)),
-
-			Expression.Convert (valueParameter, typeof(T1))),
-//			Expression.Field(
-//			Expression.Convert(objectParameter, info.DeclaringType),
-//			info),
-//			Expression.Convert(valueParameter, info.FieldType)),
-			objectParameter,
-			valueParameter);
-		
-				var comp = setterExpression.Compile ();
-
-				return comp;
-		}
-
-
-
-
-
 
 
 
@@ -434,13 +343,6 @@ public class AnimaTestEditor : EditorWindow
 						if (GUILayout.Button ("Save Curves")) {
 
 
-
-
-
-
-
-
-
 								EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
 								int curveBindingLen = curveBindings.Length;
 								curves = new AnimationCurve[curveBindingLen];
@@ -461,17 +363,17 @@ public class AnimaTestEditor : EditorWindow
 												curves [num] = AnimationUtility.GetEditorCurve (clip, curveBindingCurrent);
 
 
-												variableCurrent = variables [num] = UnityVariable.CreateInstanceOf (curveBindingCurrent.type);
+												propertyName = curveBindingCurrent.propertyName;
+												//process "m_Rotation.x" "m_Intensity" into "rotation.x", "intensity"
+												propertyName = char.ToLower (propertyName [2]) + propertyName.Remove (0, 3);
+
+												Type type=curveBindingCurrent.type.GetMemberFromPath(propertyName).GetUnderlyingType();
+
+												variableCurrent = variables [num] = UnityVariable.CreateInstanceOf (type);
 
 												//ex. Transform or Light component
-												var instanceToBind = instance.GetType () == typeof(GameObject) ? ((GameObject)instance).GetComponent<Transform> () : instance;
-									
-
-
-
-												propertyName = curveBindingCurrent.propertyName;
-												//remove "m_Rotation.x" "m_Intensity"
-												propertyName = char.ToLower (propertyName [2]) + propertyName.Remove (0, 3);
+												var instanceToBind = instance.GetType () == typeof(GameObject) ? ((GameObject)instance).transform : instance;
+			
 
 												variableCurrent.Bind(instanceToBind,propertyName);
 											
@@ -491,22 +393,64 @@ public class AnimaTestEditor : EditorWindow
 
 				}
 				EditorGUI.BeginChangeCheck ();
-				EditorGUILayout.BeginHorizontal ();
+				
 				timeCurrent = GUILayout.HorizontalSlider (timeCurrent, 0, timeTotal);
-
-				//	
-				if (curves != null && variables != null)
-						for (int i = 0; i < curves.Length; i++) {
-								if (curves [i] != null) {
-
-
-
+		EditorGUILayout.BeginHorizontal ();
+		int i;
+		if (curves != null && variables != null) {
+			EditorGUILayout.BeginVertical();
+						for (i = 0; i < curves.Length; i++) 
+								EditorGUILayout.CurveField (variables[i].memberPath,curves [i]);
 
 
-										variables [i].Value = curves [i].Evaluate (timeCurrent);
-										Debug.Log (variables [i]);
-								}
-						}
+			EditorGUILayout.EndVertical();
+				}
+		
+
+
+		//Debug.Log (Time.renderedFrameCount+" "+Application.targetFrameRate);
+
+
+			if(Time.realtimeSinceStartup-timeLast>0.016)
+			{
+			frameCount++;
+			timeLast=Time.realtimeSinceStartup;
+			if (curves != null && variables != null && curves.Length>0){
+//						for (i = 0; i < curves.Length; i++) {
+//								if (curves [i] != null) {
+
+
+				Quaternion quatNew=new Quaternion(curves[0].Evaluate(timeCurrent),curves[1].Evaluate(timeCurrent),curves[2].Evaluate(timeCurrent),curves[3].Evaluate(timeCurrent));
+
+				//animatedObject.transform.GetChild(0).GetChild(0).transform.localRotation=quatNew;
+
+				Debug.Log("quatNew "+quatNew);
+
+				variables [0].Value = curves [0].Evaluate (timeCurrent);
+				variables [1].Value = curves [1].Evaluate (timeCurrent);
+				variables [2].Value = curves [2].Evaluate (timeCurrent);
+				variables [3].Value = curves [3].Evaluate (timeCurrent);
+
+				Debug.LogFormat("{0} {1} {2} {3}",variables [0].Value,variables [1].Value,variables [2].Value,variables [3].Value);
+				Debug.Log ("status:"+animatedObject.transform.GetChild(0).GetChild(0).transform.localRotation);
+
+					Debug.Log ("======== end ----------");
+
+
+					//animatedObject.transform.GetChild(0).GetChild(0).transform.localRotation=
+										
+
+										//variables [i].Value = curves [i].Evaluate (timeCurrent);
+										//if(i>0){
+											//variables[i].Value=curves [i].Evaluate (timeCurrent);
+								
+						//Debug.Log (variables [i]+" FRM:"+frameCount);
+										//}
+								//}
+						//}
+
+				}
+			}
 
 
 				EditorGUILayout.LabelField ("", timeCurrent.ToString () + " s");

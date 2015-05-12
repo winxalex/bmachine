@@ -79,7 +79,9 @@ namespace ws.winx.unity
 				[NonSerialized]
 				private object
 						__valueObject;
+
 				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object>  __structSetterDelegate;
+				private Func<object,object> __structGetterDelegate;
 				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object> __valueSetterDelegate;
 		
 				ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object> valueSetterDelegate {
@@ -175,8 +177,8 @@ namespace ws.winx.unity
 
 
 				/// <summary>
-				/// The __instance on which member defined in "memberPath" is set or get
-				/// can be Component from memberPath "Light.intensity" or some object instance in memberPath "Transform.rotaton.x"
+				/// The __instance on which member in "memberPath" is set or get
+				/// ex. __instanceMember is Light in "Light.intensity" or is Quaternion(rotation) in  "Transform.rotaton.x"
 				/// </summary>
 				[NonSerialized]
 				private object
@@ -284,7 +286,7 @@ namespace ws.winx.unity
 								if (!value.GetType ().IsAssignableFrom (_valueType))
 										Debug.LogException (new Exception ("Value type " + value.GetType () + " isn't assignable from variable type " + _valueType));
 
-
+								//if nothings is binded => just assign new value
 								if (String.IsNullOrEmpty (this.memberPath)) {
 						
 
@@ -297,12 +299,18 @@ namespace ws.winx.unity
 										if (__instanceMember == null)
 												initInstanceMember ();
 
-											
+										
+										if(__structGetterDelegate!=null){
+											__instanceMember=__structGetterDelegate(__valueObject);
+										}
+										
 										valueSetterDelegate (ref __instanceMember, value);
 
 										if (__structSetterDelegate != null) {
-												
+												Debug.Log (memberPath +" Before"+__instanceMember+" "+__valueObject);
 												__structSetterDelegate (ref __valueObject, __instanceMember);
+												Debug.Log (memberPath +" After"+__instanceMember+" "+__valueObject);
+										
 										}
 
 								}
@@ -510,7 +518,24 @@ namespace ws.winx.unity
 
 				public override string ToString ()
 				{
-						return "Property[" + name + "] of type " + ValueType + (this.valueObject == null ? (!String.IsNullOrEmpty (this.memberPath) ? "Value=" + this.Value.ToString () + " on Static instance" : " Not initialized") : (this.valueObject.GetType ().IsPrimitive || this.valueObject.GetType () == typeof(string)) ? " Value=" + this.Value.ToString () : " Value=" + this.Value.ToString () + " on instance of " + this.valueObject.ToString ());
+						string n = String.IsNullOrEmpty (name) ? "no name" : name;
+						string print="UnityVariable[" + n + "] of type " + ValueType;
+
+						if (IsBinded()) {
+							print += "Value=" + this.Value.ToString ()+" binded "+memberPath+" on instance of "+ instanceBinded.GetType();
+
+						} else {
+							if(valueObject==null)
+								print +=" Not initialized";
+							else
+								print +="Value=" +this.Value.ToString ();
+						}
+						
+						
+
+			   
+			
+						return print;
 				}
 
 				private object initInstanceMember ()
@@ -520,15 +545,20 @@ namespace ws.winx.unity
 					
 						if (__instanceMember == null) {
 						
+								//ex. path1=rotation.x and path2=intensity
 								string[] memberPathSegments = memberPath.Split ('.');
 						
+								// ex. path1 => __instanceMember points to "rotation" on __instanceUnityObject of Transform
 								if (memberPathSegments.Length > 1) {
 										__instanceMember = __instanceUnityObject.GetType ().GetMember (memberPathSegments [0]) [0].GetValue (__instanceUnityObject);
 							
-										//if it is property is of type struct => create additional setter (ex. transform.rotation.x where memberName is "rotation.x" __instanceUnityObject is "Transform"
-										if (__instanceMember.GetType ().IsValueType)
+										//if it is property is of type struct => create additional setter (ex. transform.rotation.x where memberPath is "rotation.x" and __instanceUnityObject is "Transform"
+										// so 
+										if (__instanceMember.GetType ().IsValueType){
 												__structSetterDelegate = __instanceUnityObject.GetType ().GetSetDelegate (memberPathSegments [0]);
-								} else
+												__structGetterDelegate=__instanceUnityObject.GetType().GetGetDelegate(memberPathSegments [0]);
+										}
+								} else //ex.path2 => _instanceMember = "Light" component
 										__instanceMember = __instanceUnityObject;
 						}
 					

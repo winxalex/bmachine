@@ -1615,6 +1615,22 @@ Prefab:
       propertyPath: m_Name
       value: GameObject3
       objectReference: {fileID: 0}
+    - target: {fileID: 475884, guid: 9a20c0ff67fde4cd78296daa348db2fd, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: -.139718592
+      objectReference: {fileID: 0}
+    - target: {fileID: 475884, guid: 9a20c0ff67fde4cd78296daa348db2fd, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: .180714786
+      objectReference: {fileID: 0}
+    - target: {fileID: 475884, guid: 9a20c0ff67fde4cd78296daa348db2fd, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: .149216831
+      objectReference: {fileID: 0}
+    - target: {fileID: 475884, guid: 9a20c0ff67fde4cd78296daa348db2fd, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: .962057769
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9a20c0ff67fde4cd78296daa348db2fd, type: 2}
   m_IsPrefabParent: 0
@@ -1966,7 +1982,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 40, y: 60}
   m_Transitions: []
-  m_CachedInstanceID: 25598
+  m_CachedInstanceID: 25610
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -2044,7 +2060,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25600
+  m_CachedInstanceID: 25612
   m_Description: 
   m_EnabledState: {fileID: 0}
   m_LastEnabledState: {fileID: 0}
@@ -8435,7 +8451,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25790
+  m_CachedInstanceID: 25802
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -9004,7 +9020,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25800
+  m_CachedInstanceID: 25812
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -9494,7 +9510,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25818
+  m_CachedInstanceID: 25830
   m_NodeSerialization:
     m_NodeTypes:
     - BehaviourMachine.EveryFrame
