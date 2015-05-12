@@ -879,18 +879,22 @@ namespace ws.winx.editor.bmachine.extensions
 
 													
 														if (avatarPreview.timeControl.playing) {
-																if (avatarPreview.timeControl.normalizedTime < mecanimNode.range.rangeStart ||
-																		avatarPreview.timeControl.normalizedTime > mecanimNode.range.rangeEnd)
-															
-																		avatarPreview.timeControl.normalizedTime=mecanimNode.range.rangeStart;
-														
 
+								//restrict animation into this range
+								if (avatarPreview.timeControl.normalizedTime < mecanimNode.range.rangeStart || avatarPreview.timeControl.normalizedTime > mecanimNode.range.rangeEnd)
+								{
+
+								
+																		
+									avatarPreview.timeControl.nextCurrentTime = avatarPreview.timeControl.startTime * (1f -mecanimNode.range.rangeStart ) + avatarPreview.timeControl.stopTime * mecanimNode.range.rangeStart;	
+
+								}
 														} else {
 
 																//set AvatarPreview animation time range depending of drag of range control handles
 																if (Math.Abs(mecanimNode.range.rangeStart - timeNormalizedStartPrev)>0.01f) {
 																		timeNormalizedStartPrev = mecanimNode.range.rangeStart;
-									
+																		
 																		avatarPreview.SetTimeAt (timeNormalizedStartPrev);
 									
 																}else

@@ -98,85 +98,87 @@ namespace ws.winx.editor
 
 
 	#region QuaternionCurveTangentCalculationW
-	public class QuaternionCurveTangentCalculationW
-	{
+		public class QuaternionCurveTangentCalculationW
+		{
 		
-		private static Type __RealType;
-		private static ConstructorInfo method_ctor;
-		static MethodInfo _UpdateTangentsFromMode_MethodInfo;
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				static MethodInfo _UpdateTangentsFromMode_MethodInfo;
 		
-		public static MethodInfo UpdateTangentsFromMode_MethodInfo {
-			get {
-				if(_UpdateTangentsFromMode_MethodInfo==null)
-					_UpdateTangentsFromMode_MethodInfo=GetWrappedType().GetMethod("UpdateTangentsFromMode",new Type[]{typeof(AnimationCurve),typeof(AnimationClip),typeof(EditorCurveBinding)});
+				public static MethodInfo UpdateTangentsFromMode_MethodInfo {
+						get {
+								if (_UpdateTangentsFromMode_MethodInfo == null)
+										_UpdateTangentsFromMode_MethodInfo = GetWrappedType ().GetMethod ("UpdateTangentsFromMode", new Type[] {
+												typeof(AnimationCurve),
+												typeof(AnimationClip),
+												typeof(EditorCurveBinding)
+										});
 				
-				return _UpdateTangentsFromMode_MethodInfo;
-			}
-		}				
+								return _UpdateTangentsFromMode_MethodInfo;
+						}
+				}
 		
-		
-		
-		
-		public static Type GetWrappedType ()
-		{
-			if (__RealType == null) {
-				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-				__RealType = assembly.GetType ("UnityEditor.QuaternionCurveTangentCalculation");
-			}
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.QuaternionCurveTangentCalculation");
+						}
 			
-			return __RealType;
+						return __RealType;
+				}
+		
+				public static void UpdateTangentsFromMode (AnimationCurve curve, AnimationClip clip, EditorCurveBinding curveBinding)
+				{
+			
+						UpdateTangentsFromMode_MethodInfo.Invoke (null, new object[] {
+								curve,
+								clip,
+								curveBinding
+						});
+				}		
+		
+		
 		}
-		
-		
-		public static void UpdateTangentsFromMode (AnimationCurve curve, AnimationClip clip, EditorCurveBinding curveBinding)
-		{
-			
-			UpdateTangentsFromMode_MethodInfo.Invoke (null, new object[]{curve,clip,curveBinding});
-		}		
-		
-		
-	}
 	#endregion
 	
 	#region RotationCurveInterpolationW
-	public class RotationCurveInterpolationW
-	{
+		public class RotationCurveInterpolationW
+		{
 		
-		private static Type __RealType;
-		private static ConstructorInfo method_ctor;
-		static MethodInfo _RemapAnimationBindingForAddKey_MethodInfo;
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				static MethodInfo _RemapAnimationBindingForAddKey_MethodInfo;
 		
-		public static MethodInfo RemapAnimationBindingForAddKey_MethodInfo {
-			get {
-				if(_RemapAnimationBindingForAddKey_MethodInfo==null)
-					_RemapAnimationBindingForAddKey_MethodInfo=GetWrappedType().GetMethod("RemapAnimationBindingForAddKey");
+				public static MethodInfo RemapAnimationBindingForAddKey_MethodInfo {
+						get {
+								if (_RemapAnimationBindingForAddKey_MethodInfo == null)
+										_RemapAnimationBindingForAddKey_MethodInfo = GetWrappedType ().GetMethod ("RemapAnimationBindingForAddKey");
 				
-				return _RemapAnimationBindingForAddKey_MethodInfo;
-			}
-		}				
+								return _RemapAnimationBindingForAddKey_MethodInfo;
+						}
+				}
 		
-		
-		
-		
-		public static Type GetWrappedType ()
-		{
-			if (__RealType == null) {
-				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-				__RealType = assembly.GetType ("UnityEditor.RotationCurveInterpolation");
-			}
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.RotationCurveInterpolation");
+						}
 			
-			return __RealType;
+						return __RealType;
+				}
+		
+				public static EditorCurveBinding[] RemapAnimationBindingForAddKey (EditorCurveBinding binding, AnimationClip clip)
+				{
+						return (EditorCurveBinding[])RemapAnimationBindingForAddKey_MethodInfo.Invoke (null, new object[] {
+								binding,
+								clip
+						});
+				}		
+		
+		
 		}
-		
-		
-		
-		public static EditorCurveBinding[] RemapAnimationBindingForAddKey (EditorCurveBinding binding, AnimationClip clip)
-		{
-			return (EditorCurveBinding[])RemapAnimationBindingForAddKey_MethodInfo.Invoke (null, new object[]{binding,clip});
-		}		
-		
-		
-	}
 	#endregion
 
 
@@ -243,11 +245,9 @@ namespace ws.winx.editor
 	
 	
 				private object __instance;
-
-
 				protected TimeControlW _timeControl;
-				float _timeStartNormailized=0f;
-				float _timeStopNormalized=1f;
+				float _timeStartNormailized = 0f;
+				float _timeStopNormalized = 1f;
 
 	
 				public delegate void OnAvatarChange ();
@@ -289,7 +289,7 @@ namespace ws.winx.editor
 
 						_previewedMotion = motion;
 
-						_previewState.motion =motion;
+						_previewState.motion = motion;
 						CreateParameters (motion);
 						this.timeControl.currentTime = 0f;
 
@@ -319,7 +319,7 @@ namespace ws.winx.editor
 				
 								_previewState = _previewStateMachine.AddState ("previewState");
 				
-								_previewState.motion =motion;
+								_previewState.motion = motion;
 								_previewState.iKOnFeet = this.IKOnFeet;
 								_previewState.hideFlags = HideFlags.DontSave;
 				
@@ -428,8 +428,8 @@ namespace ws.winx.editor
 
 								//float timeAnimationLength=((AnimationClip)motion).length;
 
-				this.timeControl.startTime = timeAnimationLength * _timeStartNormailized;
-				this.timeControl.stopTime = timeAnimationLength * _timeStopNormalized;
+								this.timeControl.startTime = timeAnimationLength * _timeStartNormailized;
+								this.timeControl.stopTime = timeAnimationLength * _timeStopNormalized;
 								
 								this.timeControl.Update ();
 
@@ -440,26 +440,19 @@ namespace ws.winx.editor
 								//deltaTime is nextCurrentTime-currentTime
 								//is set my drag of red Timeline handle or manually thru SetTimeValue
 
-				float timeNext = this.timeControl.startTime * (1f - timeNormalized) + this.timeControl.stopTime * timeNormalized;	
-
-				//if(this.timeControl.playing)
-				//this.timeControl.nextCurrentTime=timeNext;
-				float timeDelta = this.timeControl.deltaTime;
+								float timeDelta = this.timeControl.deltaTime;
 
 
-				if(this.timeControl.playing){
-				Debug.Log(timeDelta+" current="+this.timeControl.currentTime+" next="+timeNext+" n: "+this.timeControl.normalizedTime);
-					Debug.Log(this.timeControl.startTime+" "+this.timeControl.stopTime);
-				}
+
 								
 
 								if (this.timeControl.playing) {
 										if (!motion.isLooping) {
 												if (timeNormalized >= 1f) {
-							timeDelta -= this.timeControl.stopTime-this.timeControl.startTime;//timeAnimationLength;
+														timeDelta -= this.timeControl.stopTime - this.timeControl.startTime;//timeAnimationLength;
 												} else {
 														if (timeNormalized < 0f) {
-								timeDelta +=this.timeControl.stopTime-this.timeControl.startTime;// timeAnimationLength;
+																timeDelta += this.timeControl.stopTime - this.timeControl.startTime;// timeAnimationLength;
 														}
 												}
 										}
@@ -471,17 +464,17 @@ namespace ws.winx.editor
 						}
 				}
 
+				public void SetStartTime (float timeNormalized)
+				{
 
-				public void SetStartTime(float timeNormalized){
-
-						_timeStartNormailized=timeNormalized;
+						_timeStartNormailized = timeNormalized;
 
 				}
 
-
-				public void SetStopTime(float timeNormalized){
+				public void SetStopTime (float timeNormalized)
+				{
 					
-					_timeStopNormalized=timeNormalized;
+						_timeStopNormalized = timeNormalized;
 					
 				}
 	
@@ -699,10 +692,11 @@ namespace ws.winx.editor
 				static Styles s_Styles;
 
 				public static Styles style {
-					get {
-						if(s_Styles==null) s_Styles=new TimeControlW.Styles();
-						return s_Styles;
-					}
+						get {
+								if (s_Styles == null)
+										s_Styles = new TimeControlW.Styles ();
+								return s_Styles;
+						}
 				}
 
 				float m_MouseDrag;
@@ -1867,7 +1861,7 @@ namespace ws.winx.editor
 										}
 
 
-											onSelect (_indexSelected);
+										onSelect (_indexSelected);
 								}
 
 						}
