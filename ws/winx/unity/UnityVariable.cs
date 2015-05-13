@@ -738,7 +738,12 @@ namespace ws.winx.unity
 		{
 			if (__seralizedObject != null) {
 				
-				
+					if (__seralizedObject.targetObject == null) { //has been destroyed by Unity ????
+					__seralizedObject=null;
+					__seralizedProperty=null;
+										CreateSerializedProperty ();
+						}
+
 				__seralizedObject.ApplyModifiedProperties ();
 				
 				

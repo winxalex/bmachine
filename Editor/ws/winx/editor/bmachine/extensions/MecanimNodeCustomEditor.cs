@@ -657,7 +657,7 @@ namespace ws.winx.editor.bmachine.extensions
 												List<AnimationCurve> crList = curves.ToList ();
 
 												curveAnimationNew = new AnimationCurve (new Keyframe[] {
-							new Keyframe (0f, 0f),
+							new Keyframe (0f, (float)_variableSelected.Value),
 							new Keyframe (1f, 1f)
 						});
 
@@ -883,25 +883,24 @@ namespace ws.winx.editor.bmachine.extensions
 													
 														if (avatarPreview.timeControl.playing) {
 
-								//restrict animation into this range
-								if (avatarPreview.timeControl.normalizedTime < mecanimNode.range.rangeStart || avatarPreview.timeControl.normalizedTime > mecanimNode.range.rangeEnd)
-								{
+																//restrict animation into this range
+																if (avatarPreview.timeControl.normalizedTime < mecanimNode.range.rangeStart || avatarPreview.timeControl.normalizedTime > mecanimNode.range.rangeEnd) {
 
 								
 																		
-									avatarPreview.timeControl.nextCurrentTime = avatarPreview.timeControl.startTime * (1f -mecanimNode.range.rangeStart ) + avatarPreview.timeControl.stopTime * mecanimNode.range.rangeStart;	
+																		avatarPreview.timeControl.nextCurrentTime = avatarPreview.timeControl.startTime * (1f - mecanimNode.range.rangeStart) + avatarPreview.timeControl.stopTime * mecanimNode.range.rangeStart;	
 
-								}
+																}
 														} else {
 
 																//set AvatarPreview animation time range depending of drag of range control handles
-																if (Math.Abs(mecanimNode.range.rangeStart - timeNormalizedStartPrev)>0.01f) {
+																if (Math.Abs (mecanimNode.range.rangeStart - timeNormalizedStartPrev) > 0.01f) {
 																		timeNormalizedStartPrev = mecanimNode.range.rangeStart;
 																		
 																		avatarPreview.SetTimeAt (timeNormalizedStartPrev);
 									
-																}else
-																if (Math.Abs(mecanimNode.range.rangeEnd - timeNormalizedEndPrev)> 0.01f) {
+																} else
+																if (Math.Abs (mecanimNode.range.rangeEnd - timeNormalizedEndPrev) > 0.01f) {
 																		timeNormalizedEndPrev = mecanimNode.range.rangeEnd;
 																		avatarPreview.SetTimeAt (timeNormalizedEndPrev);
 									
@@ -1051,6 +1050,12 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 										////////// EVALUTE //////////
+										int variablesNum = variablesBindedToCurves.Length;
+										for (int varriableCurrentinx=0; varriableCurrentinx<variablesNum; varriableCurrentinx++) {
+
+
+												variablesBindedToCurves [varriableCurrentinx].Value = curves [varriableCurrentinx].Evaluate (timeNormalized);
+										}
 										 
 		
 					
