@@ -165,6 +165,10 @@ namespace ws.winx.unity
 						}
 				}
 
+
+				/// <summary>
+				/// The __instance unity object (GameObject, Transform, Light...) on which raw value or bind is based
+				/// </summary>
 				[SerializeField]
 				private UnityEngine.Object
 						__instanceUnityObject;
@@ -301,15 +305,16 @@ namespace ws.winx.unity
 
 										
 										if(__structGetterDelegate!=null){
-											__instanceMember=__structGetterDelegate(__valueObject);
+											__instanceMember=__structGetterDelegate(__instanceUnityObject);
 										}
 										
 										valueSetterDelegate (ref __instanceMember, value);
 
 										if (__structSetterDelegate != null) {
-												Debug.Log (memberPath +" Before"+__instanceMember+" "+__valueObject);
-												__structSetterDelegate (ref __valueObject, __instanceMember);
-												Debug.Log (memberPath +" After"+__instanceMember+" "+__valueObject);
+												
+												object unityObject=__instanceUnityObject;
+												__structSetterDelegate (ref unityObject, __instanceMember);
+												
 										
 										}
 

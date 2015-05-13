@@ -23,7 +23,7 @@ namespace ws.winx.bmachine
 				[HideInInspector]
 				public byte[]
 						typesSerialized;
-				//[HideInInspector]
+				[HideInInspector]
 				//Comment for debug
 				public List<UnityVariable>
 						variablesList;

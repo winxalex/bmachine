@@ -34,6 +34,7 @@ namespace ws.winx.editor.bmachine.extensions
 		/// <seealso cref="BehaviourMachine.RandomChild" />
 		/// </summary>
 		[CustomNodeEditor(typeof(MecanimNode), true)]
+		[CanEditMultipleObjects()]
 		public class MecanimNodeCustomEditor : NodeEditor
 		{
 
@@ -475,10 +476,9 @@ namespace ws.winx.editor.bmachine.extensions
 								if (_curvesEditorShow) {
 										
 
-										//This makes layout to work (Reserving space)
-										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
+										
 
-										/////// INIT SERIALIZED NODE PROPERTIES //////
+										/////// INIT SERIALIZED NODE PROPERTIES - CURVES, COLORS, VARIABLES //////
 										if (curvesSerialized == null) {
 												NodePropertyIterator iterator = this.serializedNode.GetIterator ();
 												if (iterator.Find ("curves"))
@@ -503,8 +503,11 @@ namespace ws.winx.editor.bmachine.extensions
 												variablesBindedToCurves = (UnityVariable[])variablesBindedToCurvesSerialized.value;
 										}
 
+										
+										
 
-
+										//This makes layout to work (Reserving space)
+										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
 
 										/////// CURVE EDITOR ////////
 										curveEditorRect.width = curveEditorRect.width - 16f;
@@ -759,12 +762,12 @@ namespace ws.winx.editor.bmachine.extensions
 								}
 
 
-
+								
 
 								
 
 
-								////////////////////////////////////////////////////////////////////////////
+								/////////////////////////////// ANIMATOR STATE /////////////////////////////////
 
 								if (animatorStateSerialized == null) {
 										NodePropertyIterator iterator = this.serializedNode.GetIterator ();
@@ -1042,6 +1045,14 @@ namespace ws.winx.editor.bmachine.extensions
 										float timeLineX = curveEditorRect.xMin + leftrightMargin + effectiveWidth * timeNormalized;
 					
 										Handles.DrawLine (new Vector2 (timeLineX, curveEditorRect.y), new Vector2 (timeLineX, curveEditorRect.y + curveEditorRect.height));
+
+
+
+
+
+										////////// EVALUTE //////////
+										 
+		
 					
 								}
 

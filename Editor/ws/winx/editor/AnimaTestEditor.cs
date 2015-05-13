@@ -462,7 +462,9 @@ public class AnimaTestEditor : EditorWindow
 
 
 
-
+								//Vector3 positionSaved=animatedObject1.transform.position;
+				UnityEditorInternal.ComponentUtility.CopyComponent(animatedObject1.transform);
+								
 
 								PropertyModification[] modifications = PrefabUtility.GetPropertyModifications (animatedObject1).Select ((itm) => itm).Where ((itm) => itm.target.GetType () != typeof(UnityEngine.Transform)).ToArray ();
 
@@ -470,7 +472,8 @@ public class AnimaTestEditor : EditorWindow
 
 								PrefabUtility.SetPropertyModifications (animatedObject1, modifications);
 			
-
+								//animatedObject1.transform.position=positionSaved;
+				UnityEditorInternal.ComponentUtility.PasteComponentValues(animatedObject1.transform);
 
 
 						}

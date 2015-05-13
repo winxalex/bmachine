@@ -1107,11 +1107,13 @@ namespace ws.winx.editor.extensions
 						int indexSelectedPrev;
 
 
-						//if _variableSelected is NULL create new UnityVariable and add default type value
-						if (variableSelected == null) {
+						//if _variableSelected is NULL 
+						// or NOT INITIALIZED 
+						// => create new UnityVariable and add default type value
+						if (variableSelected == null || (!variableSelected.IsBinded() && variableSelected.ValueType.IsValueType && variableSelected.Value==null)) {
 								indexSelected = 0;
 								variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
-								//variableSelected.displayMode=UnityVariable.DisplayMode.Raw;
+								variableSelected.displayMode=UnityVariable.DisplayMode.Raw;
 						} else 
 								indexSelected = values.IndexOf (variableSelected);
 
@@ -1301,7 +1303,7 @@ namespace ws.winx.editor.extensions
 										if(variableSelected.instanceBinded!=null)
 											currentSelectedPath+="@"+variableSelected.instanceBinded.GetInstanceID();
 
-										Debug.Log("currentSelectedPath:"+currentSelectedPath+" "+Time.frameCount);
+										//Debug.Log("currentSelectedPath:"+currentSelectedPath+" "+Time.frameCount);
 
 										EditorGUI.BeginChangeCheck ();
 										string memberPath = EditorGUILayoutEx.CustomObjectPopup<string> (new GUIContent ("Properties"), 
@@ -1312,7 +1314,7 @@ namespace ws.winx.editor.extensions
 
 										
 											if (!String.IsNullOrEmpty (memberPath) && memberPath!=currentSelectedPath) {
-												Debug.Log("CHANGE memberPath:"+memberPath+" "+Time.frameCount);
+											//	Debug.Log("CHANGE memberPath:"+memberPath+" "+Time.frameCount);
 												
 
 												String[] memberPathAndID=memberPath.Split('@');
