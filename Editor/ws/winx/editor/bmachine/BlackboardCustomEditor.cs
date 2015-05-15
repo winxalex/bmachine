@@ -53,7 +53,8 @@ namespace ws.winx.editor.bmachine
 								if (typesCustom == null)
 										typesCustom = ((BlackboardCustom)serializedObject.targetObject).typesCustom = new List<Type> ();
 								
-				
+
+								
 				
 								__variablesReordableList = new ReorderableList (serializedObject, variableListSerialized, 
 				                                       true, true, true, true);

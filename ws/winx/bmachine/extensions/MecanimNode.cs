@@ -17,6 +17,7 @@ using ws.winx.unity;
 using ws.winx.unity.attributes;
 using System.Runtime.Serialization;
 
+
 namespace ws.winx.bmachine.extensions
 {
 
@@ -34,8 +35,11 @@ namespace ws.winx.bmachine.extensions
 
 				//public List<AnimationCurve>[] curvesPerVariable;
 
-			
-				
+				[HideInInspector]
+				public AnimationClip[] clips;
+
+				[HideInInspector]
+				public GameObject[] gameObjects;
 
 				[HideInInspector]
 				public AnimationCurve[]
@@ -74,9 +78,15 @@ namespace ws.winx.bmachine.extensions
 		
 				[MinMaxRangeSAttribute(0f,1f)]
 				public MinMaxRangeSO range;
-		
-		
 
+				
+				
+				//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
+				
+			
+
+				
+			
 
 
 				//[RangeAttribute(0f,1f)]
@@ -159,7 +169,7 @@ namespace ws.winx.bmachine.extensions
 				{
 						bool result = false;
 
-						if (!(child is SendEventNormalized)) {
+						if (!(child is SendEventNormalizedNode)) {
 								Debug.LogWarning ("You can add only SendEventNormailized type of ActionCode");
 								return false;
 						}
@@ -186,6 +196,9 @@ namespace ws.winx.bmachine.extensions
 
 						
 						transitionDuration = 0f;
+
+						gameObjects = new GameObject[0];
+						clips = new AnimationClip[0];
 
 						curvesColors = new Color[0];
 						curves = new AnimationCurve[0];
@@ -263,7 +276,7 @@ namespace ws.winx.bmachine.extensions
 
 
 				/// <summary>
-				/// Plaies the state of the mecanima.
+				/// Plays the state of the mecanima.
 				/// </summary>
 				void PlayAnimaState ()
 				{
@@ -296,6 +309,18 @@ namespace ws.winx.bmachine.extensions
 			
 						//		animator.Play (selectedAnimaStateInfo.hash, selectedAnimaStateInfo.layer, normalizedTimeStart);
 						animator.CrossFade (animatorStateSelected.nameHash, transitionDuration, layer, range.rangeStart);
+
+						//loop thru binded animation and play them
+//						EditorClipBinding editorClipBinding;
+//						Animator animatorComponent;
+//
+//						if (editorClipBinding.gameObject != null && (animatorComponent = editorClipBinding.gameObject.GetComponent<Animator> ()) != null) {
+//							
+//								//animatorComponent.Play(
+//								
+//
+//						}
+						
 			
 				}
 

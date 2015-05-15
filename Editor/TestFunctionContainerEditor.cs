@@ -51,6 +51,21 @@ public class TestFunctionContainerEditor : Editor {
 
 	public override void OnInspectorGUI ()
 	{
+
+		if (GUILayout.Button ("Test Play")) {
+			GameObject g=serializedObject.FindProperty("g").objectReferenceValue as GameObject;
+			AnimationClip motion=serializedObject.FindProperty("motion").objectReferenceValue as AnimationClip;
+			if(g.GetComponent<Animator>()==null)
+				g.AddComponent<Animator>();
+
+			g.GetComponent<Animator>().Play(motion);
+			if(g.GetComponent<Animator>().avatar==null) 
+
+				//simple object's(ex cubes's) animation doesn't need Root motion
+				g.GetComponent<Animator>().applyRootMotion=false;
+
+				}
+
 		EditorGUI.BeginChangeCheck ();
 		base.OnInspectorGUI ();
 

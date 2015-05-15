@@ -18,7 +18,7 @@ using ws.winx.unity.attributes;
 namespace ws.winx.bmachine.extensions
 {
 		[NodeInfo ( category = "Extensions/Mecanim/", icon = "StateMachine",  description ="To be used in conjuction with MecanimNode for sending events in animation points in time")]
-		public class SendEventNormalized:ActionNode
+		public class SendEventNormalizedNode:ActionNode
 		{
 				//
 				// Fields

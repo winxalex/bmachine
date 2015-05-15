@@ -86,8 +86,8 @@ namespace ws.winx.editor.bmachine.extensions
 				{
 						int IComparer.Compare (object objX, object objY)
 						{
-								SendEventNormalized animationEvent = (SendEventNormalized)objX;
-								SendEventNormalized animationEvent2 = (SendEventNormalized)objY;
+								SendEventNormalizedNode animationEvent = (SendEventNormalizedNode)objX;
+								SendEventNormalizedNode animationEvent2 = (SendEventNormalizedNode)objY;
 								//float time = (float)animationEvent.timeNormalized.Value;
 								//float time2 = (float)animationEvent2.timeNormalized.Value;
 
@@ -177,13 +177,13 @@ namespace ws.winx.editor.bmachine.extensions
 				void onMecanimEventEdit (TimeLineArgs<float> args)
 				{
 
-						SendEventNormalized child = mecanimNode.children [args.selectedIndex] as SendEventNormalized;
+						SendEventNormalizedNode child = mecanimNode.children [args.selectedIndex] as SendEventNormalizedNode;
 					
 		
 						//child.timeNormalized.Value = args.selectedValue;
 						child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
 						//child.timeNormalized.ApplyModifiedProperties ();
-						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						SendEventNormalizedNodeEditorWindow.Show (child, eventTimeLineValuePopUpRect);
 
 				}
 
@@ -213,7 +213,7 @@ namespace ws.winx.editor.bmachine.extensions
 				
 
 						//create and add node to internal bhv tree
-						SendEventNormalized child = mecanimNode.tree.AddNode (typeof(SendEventNormalized)) as SendEventNormalized;
+						SendEventNormalizedNode child = mecanimNode.tree.AddNode (typeof(SendEventNormalizedNode)) as SendEventNormalizedNode;
 				
 						//add node to its parent list
 						mecanimNode.Insert (args.selectedIndex, child);
@@ -225,14 +225,14 @@ namespace ws.winx.editor.bmachine.extensions
 						eventTimeValues = (float[])args.values;
 
 						//recreate (not to optimal but doesn't have
-						eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+						eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalizedNode)val).name).ToArray ();
 
 					
 
 						
 						
 						//show popup
-						SendEventNormalizedEditor.Show (child, eventTimeLineValuePopUpRect);
+						SendEventNormalizedNodeEditorWindow.Show (child, eventTimeLineValuePopUpRect);
 
 						
 
@@ -259,11 +259,11 @@ namespace ws.winx.editor.bmachine.extensions
 			
 						bool[] cloneOfSelected = (bool[])eventTimeValuesSelected.Clone ();
 						int inx = -1;
-						SendEventNormalized ev;
+						SendEventNormalizedNode ev;
 						for (int m = 0; m < indexArray.Length; m++) {
 				
 								inx = indexArray [m];
-								ev = ((SendEventNormalized)mecanimNode.children [m]);	
+								ev = ((SendEventNormalizedNode)mecanimNode.children [m]);	
 								this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
 								//this.eventTimeValues [m] = (float)ev.timeNormalized.Value; 
 								this.eventTimeValues [m] = (float)ev.timeNormalized.serializedProperty.floatValue; 
@@ -290,9 +290,9 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-						SendEventNormalized child;
+						SendEventNormalizedNode child;
 						for (int i=0; i<mecanimNode.children.Length;) {
-								child = mecanimNode.children [i] as SendEventNormalized;
+								child = mecanimNode.children [i] as SendEventNormalizedNode;
 
 								if (i < timeValuesNumber) {
 
@@ -320,7 +320,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 
 						//recreate 
-						eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+						eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalizedNode)val).name).ToArray ();
 
 	
 						
@@ -460,7 +460,11 @@ namespace ws.winx.editor.bmachine.extensions
 
 								}
 
+								
+								if(GUILayout.Button("BindEditor")){
 
+									MecanimNodeEditorWindow.Show(mecanimNode,this.serializedNode,null);
+								}
 								
 								_curvesEditorShow = EditorGUILayout.Foldout (_curvesEditorShow, "Curves");
 								
@@ -962,10 +966,10 @@ namespace ws.winx.editor.bmachine.extensions
 												//eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.Value).ToArray ();
 
 							
-												eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.serializedProperty.floatValue).ToArray ();
+												eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalizedNode)val).timeNormalized.serializedProperty.floatValue).ToArray ();
 
 
-												eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalized)val).name).ToArray ();
+												eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalizedNode)val).name).ToArray ();
 												eventTimeValuesSelected = new bool[eventTimeValues.Length];
 					
 												playButtonStyle = "TimeScrubberButton";
@@ -991,20 +995,20 @@ namespace ws.winx.editor.bmachine.extensions
 				
 										EditorGUILayout.LabelField ("Events Timeline");
 				
-										SendEventNormalized ev;
+										SendEventNormalizedNode ev;
 				
 				
 				
 										//update time values 
 										int eventTimeValuesNumber = mecanimNode.children.Length;
 										for (i=0; i<eventTimeValuesNumber; i++) {
-												ev = ((SendEventNormalized)mecanimNode.children [i]);	
+												ev = ((SendEventNormalizedNode)mecanimNode.children [i]);	
 												//ev.timeNormalized.Value = eventTimeValues [i];
 												ev.timeNormalized.serializedProperty.floatValue = eventTimeValues [i];
 					
 												//if changes have been made in pop editor or SendEventNormailized inspector
 												if (ev.name != eventDisplayNames [i])
-														eventDisplayNames [i] = ((SendEventNormalized)mecanimNode.children [i]).name;
+														eventDisplayNames [i] = ((SendEventNormalizedNode)mecanimNode.children [i]).name;
 					
 					
 												ev.timeNormalized.ApplyModifiedProperties ();

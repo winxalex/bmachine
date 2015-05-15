@@ -1,0 +1,898 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1498974663, guid: 58c29b2d5b83b41ee91b5f4625656382, type: 3}
+  m_Name: DeviceProfiles
+  m_EditorClassIdentifier: 
+  vidpidProfileNameKeys:
+  - 044F#B653
+  - 045E#0202
+  - 045E#0289
+  - 045E#0285
+  - 045E#0287
+  - 045E#028E
+  - 045E#029
+  - 045E#02D1
+  - C12#8809
+  - 045E#02A1
+  - 045E#0291
+  - 045E#0719
+  - 0C12#8809
+  - 044F#0F07
+  - 046D#C242
+  - 046D#CA84
+  - 0738#4540
+  - 0738#4556
+  - 0738#4716
+  - 0738#4728
+  - 0738#4738
+  - 0738#4A01
+  - 0738#6040
+  - 0738#CB03
+  - 0738#4718
+  - 0738#4726
+  - 0738#4736
+  - 0738#4740
+  - 0738#B726
+  - 0738#B738
+  - 0738#BEEF
+  - 0738#F738
+  - 06A3#F51A
+  - 0738#CB02
+  - 0C12#8802
+  - 0C12#880A
+  - 0C12#8810
+  - 0C12#9902
+  - 0E6F#0003
+  - 0E6F#0005
+  - 0E6F#0006
+  - 0E6F#0105
+  - 0E6F#0201
+  - 0E6F#0213
+  - 0E6F#0113
+  - 12AB#0301
+  - 1BAD#F900
+  - 0E8F#0201
+  - 0F0D#000D
+  - 0F0D#0016
+  - 0F30#0202
+  - 0F30#8888
+  - 102C#FF0C
+  - 146B#0601
+  - 0F0D#000A
+  - 0F0D#000C
+  - 24C6#5503
+  - 24C6#5300
+  - 1689#FD00
+  - 1689#FE00
+  - 1689#FD01
+  - 1BAD#F028
+  - 1BAD#F901
+  - 1BAD#F903
+  - 1BAD#FD00
+  - 1BAD#5500
+  - 1BAD#F016
+  - 1BAD#F501
+  - 1BAD#F502
+  - 15E4#3F0A
+  - 15E4#3F00
+  - 162E#BEEF
+  - 046D#C216
+  - 046D#C218
+  - 046D#C219
+  - 046D#C21A
+  - 046D#C21D
+  - 046D#C21E
+  - 046D#C21F
+  - 054C#05C4
+  - 0F0D#0055
+  - 054C#042F
+  - 054C#0268
+  - 0F0D#0022
+  - 0810#1E01
+  - Microsoft Wireless 360 Controller
+  - Thrustmaster Thrustmaster force feedback wheel
+  - Controller (Xbox 360 Wireless Receiver for Windows)
+  - Thrustmaster force feedback wheel
+  vidpidProfileNameValues:
+  - tm_rgtffpro
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - xbox360
+  - log_dualact
+  - log_rumble2
+  - log_rumble2
+  - log_precision
+  - log_f310
+  - log_f510
+  - log_f710
+  - ps4
+  - ps4
+  - ps3
+  - ps3
+  - ps3
+  - pcs_gamepad
+  - xbox360
+  - tm_rgtffpro
+  - xbox360
+  - tm_rgtffpro
+  runtimePlatformDeviceProfileKeys:
+  - tm_rgtffpro
+  - xbox360
+  - log_dualact
+  - log_rumble2
+  - log_precision
+  - log_f310
+  - log_f510
+  - log_f710
+  - ps4
+  - ps3
+  - pcs_gamepad
+  runtimePlatfromKeys:
+  - list: 0100000002000000
+  - list: 0100000002000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  - list: 0200000001000000
+  deviceProfileValues:
+  - list:
+    - Name: tm_rgtffpro
+      axisNaming:
+      - WheelX
+      - Left Trigger Y
+      - Right Trigger Z
+      - 
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - LeftShifter
+      - RightShifter
+      - Y
+      - X
+      - B
+      - A
+      - Left Bumper
+      - Right Bumper
+      - ClouchBack
+      - ClouchForward
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: tm_rgtffpro
+      axisNaming:
+      - WheelX
+      - Left Trigger Y
+      - Right Trigger Z
+      - 
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - LeftShifter
+      - RightShifter
+      - Y
+      - X
+      - B
+      - A
+      - Left Bumper
+      - Right Bumper
+      - ClouchBack
+      - ClouchForward
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: xbox360
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - Left Trigger
+      - Right Trigger
+      - Right Trigger
+      buttonNaming:
+      - 
+      - 
+      - 
+      - 
+      - 
+      - DPAD_Forward
+      - DPAD_Backward
+      - DPAD_Left
+      - DPAD_Right
+      - Start
+      - Back
+      - 
+      - 
+      - Left Bumper
+      - Right Bumper
+      - xbox
+      - A
+      - B
+      - X
+      - Y
+      - 
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: xbox360
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Left Trigger
+      - Right Stick Y
+      - Right Stick X
+      - Right Trigger
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - A
+      - B
+      - X
+      - Y
+      - Left Bumper
+      - Right Bumper
+      - Back
+      - Start
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: log_dualact
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: log_dualact
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: log_rumble2
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - L5
+      - R6
+      - L7
+      - R8
+      - 9
+      - 10
+      - 
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: log_rumble2
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - L5
+      - R6
+      - L7
+      - R8
+      - 
+      - 9
+      - 10
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: log_precision
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: log_precision
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - 
+      - 
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: log_f310
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - LT
+      - RT
+      - Right Stick X
+      - Right Stick Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - A
+      - B
+      - X
+      - Y
+      - LB
+      - RB
+      - Back
+      - Start
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: log_f310
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - LT
+      - RT
+      - Right Stick X
+      - Right Stick Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - A
+      - B
+      - X
+      - Y
+      - LB
+      - RB
+      - Back
+      - Start
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: log_f510
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - LT
+      - RT
+      - Right Stick X
+      - Right Stick Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - A
+      - B
+      - X
+      - Y
+      - LB
+      - RB
+      - Back
+      - Start
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: log_f510
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - LT
+      - RT
+      - Right Stick X
+      - Right Stick Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - A
+      - B
+      - X
+      - Y
+      - LB
+      - RB
+      - Back
+      - Start
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: log_f710
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - LT
+      - RT
+      - Right Stick X
+      - Right Stick Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - A
+      - B
+      - X
+      - Y
+      - LB
+      - RB
+      - Back
+      - Start
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: log_f710
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - LT
+      - RT
+      - Right Stick X
+      - Right Stick Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - A
+      - B
+      - X
+      - Y
+      - LB
+      - RB
+      - Back
+      - Start
+      - Mode
+      - Vibration
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: ps4
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - L2
+      - R2
+      - Right Stick Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - Square
+      - Cross
+      - Circle
+      - Triangle
+      - L1
+      - R1
+      - 
+      - 
+      - Share
+      - Options
+      - 
+      - 
+      - System
+      - TouchPad
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: ps4
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - L2
+      - R2
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - Square
+      - Cross
+      - Circle
+      - Triangle
+      - L1
+      - R1
+      - 
+      - 
+      - Share
+      - Options
+      - 
+      - 
+      - System
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: ps3
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      - Tilt X
+      - Tilt Y
+      - DPAD_
+      - DPAD_
+      buttonNaming:
+      - Triangle
+      - Circle
+      - Cross
+      - Square
+      - L1
+      - R1
+      - L2
+      - R2
+      - Select
+      - 
+      - 
+      - Start
+      - System
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: ps3
+      axisNaming:
+      - Left Stick X
+      - Left Stick Y
+      - Right Stick X
+      - Right Stick Y
+      buttonNaming:
+      - Select
+      - 
+      - 
+      - Start
+      - DPAD_Forward
+      - DPAD_Right
+      - DPAD_Back
+      - DPAD_Left
+      - L2
+      - R2
+      - L1
+      - R1
+      - Triangle
+      - Circle
+      - Cross
+      - Square
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  - list:
+    - Name: pcs_gamepad
+      axisNaming:
+      - DPAD_
+      - DPAD_
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - L1
+      - R1
+      - L2
+      - R2
+      - 9
+      - 10
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+    - Name: pcs_gamepad
+      axisNaming:
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      buttonNaming:
+      - 1
+      - 2
+      - 3
+      - 4
+      - L1
+      - R1
+      - L2
+      - R2
+      - 9
+      - 10
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      - 
+      sensitivity: 0
+      dreadZoneUpper: 0
+      deradZoneLower: 0
+  currentProfile:
+    Name: 
+    axisNaming:
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    buttonNaming:
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    sensitivity: 0
+    dreadZoneUpper: 0
+    deradZoneLower: 0

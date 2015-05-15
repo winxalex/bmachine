@@ -17,27 +17,27 @@ using ws.winx.bmachine.extensions;
 namespace ws.winx.editor.bmachine.extensions
 {
 		
-		public class SendEventNormalizedEditor:EditorWindow
+		public class SendEventNormalizedNodeEditorWindow:EditorWindow
 		{
-				private static SendEventNormalizedEditor window;
-				private static SendEventNormalized node;
+				private static SendEventNormalizedNodeEditorWindow window;
+				private static SendEventNormalizedNode node;
 				NodeEditor editor;
 
 				
 
-				public static void Show(SendEventNormalized node, Rect position)
+				public static void Show(SendEventNormalizedNode node, Rect position)
 				{
-								SendEventNormalizedEditor.node = node;
+								SendEventNormalizedNodeEditorWindow.node = node;
 //
-			if (SendEventNormalizedEditor.window != null)//restore last 
+			if (SendEventNormalizedNodeEditorWindow.window != null)//restore last 
 							position = window.position;
 
 		
-			SendEventNormalizedEditor.window =(SendEventNormalizedEditor)EditorWindow.GetWindow(typeof(SendEventNormalizedEditor));
+			SendEventNormalizedNodeEditorWindow.window =(SendEventNormalizedNodeEditorWindow)EditorWindow.GetWindow(typeof(SendEventNormalizedNodeEditorWindow));
 			//EditorWindow.CreateInstance (typeof (SendEventNormalizedEditor));
 					//(SendEventNormalizedEditor) 
-						SendEventNormalizedEditor.window.position = position;
-						SendEventNormalizedEditor.window.Show ();
+						SendEventNormalizedNodeEditorWindow.window.position = position;
+						SendEventNormalizedNodeEditorWindow.window.Show ();
 				}
 
 				public static void Hide ()
@@ -51,11 +51,11 @@ namespace ws.winx.editor.bmachine.extensions
 				void OnGUI ()
 				{
 						// The actual window code goes here
-						if (SendEventNormalizedEditor.node != null) {
+						if (SendEventNormalizedNodeEditorWindow.node != null) {
 								if (editor == null)
-									editor = NodeEditor.CreateEditor(SendEventNormalizedEditor.node.GetType());
-								if (editor.target != SendEventNormalizedEditor.node)//How to add target to editor??? or subclass the Node Editor
-										editor.DrawNode (SendEventNormalizedEditor.node);
+									editor = NodeEditor.CreateEditor(SendEventNormalizedNodeEditorWindow.node.GetType());
+								if (editor.target != SendEventNormalizedNodeEditorWindow.node)//How to add target to editor??? or subclass the Node Editor
+										editor.DrawNode (SendEventNormalizedNodeEditorWindow.node);
 								else
 										editor.OnInspectorGUI ();
 						}

@@ -11,6 +11,57 @@ namespace ws.winx.unity
 	public static class ExtensionsTransform
 	{
 
+
+		#region AnimatorExtension
+			public static void Play(this Animator animator,AnimationClip clip,float normalizedTime=0f){
+
+					
+
+					AnimatorOverrideController animatorOverrideController;
+					AnimationClip clipOverride = null;
+
+
+					if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+						
+						//animator.runtimeAnimatorController is already overrided just take reference
+						animatorOverrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
+						clipOverride=animatorOverrideController.clips[0].originalClip;
+					} else {
+						//AS RuntimeAnimatorController can't be created at runtime
+						RuntimeAnimatorController dummyController = AnimationUtilityEx.DUMMY_CONTROLLER;
+				
+						clipOverride=dummyController.animationClips[0];
+
+
+						animatorOverrideController = new AnimatorOverrideController ();
+						
+						//bind all clips from animator.runtimeAnimatorController to overrider
+						animatorOverrideController.runtimeAnimatorController = dummyController;
+					}	
+					
+				   
+
+					
+					animatorOverrideController[clipOverride]=clip;
+					
+					
+					//to avoid nesting 
+					if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+						animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
+					}
+					
+					//rebind back												
+					animator.runtimeAnimatorController = animatorOverrideController;
+
+					animator.Play ("Override", 0, normalizedTime);
+
+
+			}
+
+
+
+		#endregion
+
 		public static void ResetTransformation(this Transform trans)
 		{
 			trans.position = Vector3.zero;
@@ -184,6 +235,34 @@ namespace ws.winx.unity
 	#region GameObjectExtensions
 	public static class GameObjectExtensions
 	{
+
+		public static Transform GetRootBone(this GameObject go){
+
+			SkinnedMeshRenderer skinmeshRenderer=go.GetComponentInChildren<SkinnedMeshRenderer>();
+
+			Transform boneRoot=null;
+			
+			if(skinmeshRenderer!=null){
+				
+				Transform[] bones=skinmeshRenderer.bones;
+
+				int bonesNum=bones.Length;
+
+				if(bonesNum>0){
+				boneRoot = bones [0];
+				
+				for(int j= 1; j < bonesNum; j++)
+					if (boneRoot.IsChildOf(bones[j]))
+						boneRoot = bones[j];
+				
+				}
+				
+			}
+
+			return boneRoot;
+		}
+
+
 		public static string GetPath(this GameObject obj)
 		{
 			string path = "/" + obj.name;

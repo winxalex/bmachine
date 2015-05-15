@@ -30,7 +30,7 @@ namespace ws.winx.unity
 
 				public int[] blendParamsHashes;
 
-
+				public int layer;
 				
 	
 				//

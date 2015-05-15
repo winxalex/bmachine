@@ -138,6 +138,7 @@ namespace ws.winx.editor.bmachine.drawers
 					
 									state.motion=animatorStateSelected.motion;
 									state.nameHash=animatorStateSelected.nameHash;
+									state.layer=(int)layerIndexSerialized.value;
 									
 									if(state.motion is UnityEditor.Animations.BlendTree){
 										BlendTree tree =(BlendTree)state.motion;
