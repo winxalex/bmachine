@@ -15,6 +15,10 @@ using UnityEngine;
 using ws.winx.bmachine.extensions;
 using ws.winx.unity;
 using UnityEditorInternal;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using ws.winx.editor.extensions;
 
 namespace ws.winx.editor.bmachine.extensions
 {
@@ -22,12 +26,8 @@ namespace ws.winx.editor.bmachine.extensions
 		{
 				private static MecanimNodeEditorWindow window;
 				private static MecanimNode __mecanimNode;
-				private static ReorderableList __gameObjectList;
-
-
-
-
-
+				private static SerializedNode __serializedNode;
+				private static ReorderableList __gameObjectClipList;
 				private static AvatarPreviewW avatarPreview;
 				private static  SerializedNodeProperty curvesSerialized;
 				private static	SerializedNodeProperty curvesColorsSerialized;
@@ -36,16 +36,27 @@ namespace ws.winx.editor.bmachine.extensions
 				private static	SerializedNodeProperty animatorStateRuntimeControlEnabledSerialized;
 				private static	SerializedNodeProperty animatorStateRunTimeControlSerialized;
 				private static	SerializedNodeProperty motionOverrideSerialized;
-				private static float timeNormalizedStartPrev = -1f;
-				private static float timeNormalizedEndPrev = 1.1f;
-
+				private static	SerializedNodeProperty clipBindingsSerialized;
 				private static float timeNormalized;
+				private static AnimationCurve[] curves;
+				private		static Color[] curveColors;
+				private		static UnityVariable[] variablesBindedToCurves;
+				private		static string[] curvePropertyDisplayOptions;
+				private		static int _curveIndexSelected;
+				private		static Color _colorSelected;
+				private		static bool _curvesEditorShow;
+				private		static CurveEditorW curveEditor;
+				private		static GUIContent propertyPopupLabel = new GUIContent (String.Empty);
+				private		static Vector2 curvePropertiesScroller;
+				private		static UnityVariable _variableSelected;
+				private static bool __isPlaying;
+				private static bool __isRecording;
 
-				NodeEditor editor;
-
-				public static void Show (MecanimNode target,SerializedNode node, Rect? position)
+				public static void Show (MecanimNode target, SerializedNode node, Rect? position)
 				{
 						MecanimNodeEditorWindow.__mecanimNode = target;
+
+						MecanimNodeEditorWindow.__serializedNode = node;
 						
 
 						///////   ACCESS SERIALIZED DATA /////////
@@ -61,13 +72,51 @@ namespace ws.winx.editor.bmachine.extensions
 						if (iterator.Find ("motionOverride"))
 								motionOverrideSerialized = iterator.current;
 
+						if (iterator.Find ("clipBindings"))
+								clipBindingsSerialized = iterator.current;
 
 
+						/////// INIT SERIALIZED NODE PROPERTIES - CURVES, COLORS, VARIABLES //////
+						
+							
+						if (iterator.Find ("curves"))
+								curvesSerialized = iterator.current;
+						else
+								Debug.LogError ("MecananimNode should have public field 'curves'");
+							
+						if (iterator.Find ("curvesColors"))
+								curvesColorsSerialized = iterator.current;
+						else
+								Debug.LogError ("MecananimNode should have public field 'curvesColors'");
+							
+						if (iterator.Find ("variablesBindedToCurves")) 
+								variablesBindedToCurvesSerialized = iterator.current;
+						else
+								Debug.LogError ("MecananimNode should have public field 'variablesBindedToCurves'");
+							
+							
+							
+						curves = (AnimationCurve[])curvesSerialized.value;
+						curveColors = (Color[])curvesColorsSerialized.value;
+						variablesBindedToCurves = (UnityVariable[])variablesBindedToCurvesSerialized.value;
+						
+					
+			//List<EditorClipBinding> listBind=((EditorClipBinding[])clipBindingsSerialized.value).ToList();
 
-						//MecanimNodeEditorWindow.__gameObjectList= new ReorderableList(
-
-
-
+			__gameObjectClipList = new ReorderableList ( clipBindingsSerialized.value as IList, typeof(EditorClipBinding),true,true,true,true);
+						__gameObjectClipList.drawElementCallback = onDrawElement;
+									
+						
+									
+						__gameObjectClipList.drawHeaderCallback = onDrawHeaderElement;
+									
+						__gameObjectClipList.onRemoveCallback = onRemoveCallback;
+						__gameObjectClipList.onAddCallback = onAddCallback;
+						
+									
+						__gameObjectClipList.elementHeight = 32f;                                    
+			                                                              
+			                                                              
 						if (MecanimNodeEditorWindow.window != null)//restore last 
 								position = window.position;
 
@@ -87,18 +136,478 @@ namespace ws.winx.editor.bmachine.extensions
 								window.Close ();
 				}
 
+
+				/// <summary>
+				/// Ons the curve select.
+				/// </summary>
+				/// <param name="index">Index.</param>
+				void onCurveSelect (int index)
+				{
+						Debug.Log ("Curve " + index + " selected");
+					
+						_curveIndexSelected = index;
+					
+					
+					
+				}
+
+
+			
+				////////////////// GAMEOBJECT - CLIP LIST EVENTS //////////////////
+				
+		
+				static void onRemoveCallback (ReorderableList list)
+				{
+						if (UnityEditor.EditorUtility.DisplayDialog ("Warning!", 
+			                                             "Are you sure you want to delete the Unity Variable?", "Yes", "No")) {
+								ReorderableList.defaultBehaviours.DoRemoveButton (list);
+				
+								list.serializedProperty.DeleteArrayElementAtIndex (list.index);
+				
+				
+
+				
+						}
+				}
+
+					static void onAddCallback (ReorderableList list)
+					{
+						List<EditorClipBinding> bindingList=((EditorClipBinding[])list.list).ToList ();
+
+
+						bindingList.Add (ScriptableObject.CreateInstance<EditorClipBinding> ());
+						list.list = bindingList.ToArray ();
+						
+					}
+		
+				static void onDrawElement (Rect rect, int index, bool isActive, bool isFocused)
+				{
+			
+//						SerializedProperty property = __gameObjectClipList.serializedProperty.GetArrayElementAtIndex (index); 
+//			
+//						if (property == null || property.objectReferenceValue == null) {
+//								return;
+//						}
+
+
+			EditorClipBinding clipBindingCurrent = __gameObjectClipList.list [index] as EditorClipBinding;
+			
+			if (clipBindingCurrent==null) {
+				return;
+			}
+
+						
+
+						Rect gameObjectRect = rect;
+						Rect clipRect = rect; 
+
+						gameObjectRect.xMax = 40f;
+
+						clipBindingCurrent.gameObject = EditorGUI.ObjectField (gameObjectRect, "Bind", clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
+
+						clipBindingCurrent.clip = EditorGUI.ObjectField (clipRect, "To", clipBindingCurrent.clip, typeof(AnimationClip), true) as AnimationClip;
+
+						if (clipBindingCurrent.clip != null) {
+
+								if (GUILayout.Button ("Create")) {
+										clipBindingCurrent.clip = UnityEditor.Animations.AnimatorController.AllocateAnimatorClip ("New Animation");
+								}
+						}
+			
+				}
+		
+				static void onDrawHeaderElement (Rect rect)
+				{
+						EditorGUI.LabelField (rect, "GameObject - AnimationClips:");
+				}
+
+
+
+				/// /////////////////////////////////////////////////////////////////////
+
+				
+
 				void OnGUI ()
 				{
 
 
+			
+						if (!Application.isPlaying && __mecanimNode != null && animatorStateSerialized.value != null) {
+
+
+
+								_curvesEditorShow = EditorGUILayout.Foldout (_curvesEditorShow, "Curves");
+				
+								//int indentLevel = 0;
+				
+								Rect curveEditorRect = new Rect (0, 0, 0, 0);
+								int i = 0;
+
+				
+								if (_curvesEditorShow) {
+					
+
+					
+										//This makes layout to work (Reserving space)
+										curveEditorRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
+					
+										/////// CURVE EDITOR ////////
+										curveEditorRect.width = curveEditorRect.width - 32f;
+										curveEditorRect.x = 16f;
+					
+					
+										if (curveEditor == null) {
 						
+												CurveWrapperW[] curveWrappers;
+						
+												int numCurves = curves.Length;
+						
+												curveWrappers = new CurveWrapperW[numCurves];
+						
+												CurveWrapperW curveWrapperNew;
+						
+												for (i=0; i<numCurves; i++) {
+														curveWrapperNew = new CurveWrapperW ();
+														curveWrapperNew.curve = curves [i];
+														curveWrapperNew.color = curveColors [i];
+														curveWrappers [i] = curveWrapperNew;
+												}
+						
+						
+						
+												curveEditor = new CurveEditorW (curveEditorRect, curveWrappers, false);
+						
+												curveEditor.FrameSelected (true, true);
+												curveEditor.scaleWithWindow = true;
+												curveEditor.hSlider = false;
+												curveEditor.hRangeMin = 0f;
+												curveEditor.hRangeMax = 1f;
+												curveEditor.hRangeLocked = true;
+						
+												curveEditor.onSelect += onCurveSelect;
+						
+						
+						
+						
+										} else {
+						
+												curveEditor.rect = curveEditorRect;
+												curveEditor.FrameSelected (false, false);
+						
+										}
+					
+					
+					
+										curveEditor.DoEditor ();
+					
+					
+					
+										///////////////////////////////////////////////////////////////////////////////
+					
+					
+					
+					
+					
+										/////////////   ADD/REMOVE CURVE BINDED TO OBJECT PROP OR GLOBAL VARIABLE /////////////
+										EditorGUILayout.BeginHorizontal ();
+					
+					
+					
+					
+										//if curve is selected display curve properties
+										if (_curveIndexSelected > -1 && _curveIndexSelected < variablesBindedToCurves.Length) {
+						
+												UnityVariable variableSelected = variablesBindedToCurves [_curveIndexSelected];
+						
+						
+												EditorGUILayout.LabelField (variableSelected.name, new GUILayoutOption[]{});
+						
+												EditorGUI.BeginChangeCheck ();
+												Color colorNew = EditorGUILayout.ColorField (curveColors [_curveIndexSelected]);
+						
+						
+												if (EditorGUI.EndChangeCheck ()) {
+														curveEditor.animationCurves [_curveIndexSelected].color = colorNew;
+														curveColors [_curveIndexSelected] = colorNew;
+														curvesColorsSerialized.ValueChanged ();
+														curvesColorsSerialized.ApplyModifiedValue ();
+							
+							
+												}
+						
+										} else {
+						
+						
+						
+												propertyPopupLabel.text = "Select blackboard var";
+						
+						
+												List<UnityVariable> blackboardLocalList = __mecanimNode.blackboard.GetVariableBy (typeof(float));
+						
+												List<GUIContent> displayOptionsList = blackboardLocalList.Select ((item) => new GUIContent ("Local/" + item.name)).ToList ();
+						
+						
+						
+						
+												_variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent ("Var:"), _variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
+						
+						
+						
+						
+						
+						
+												_colorSelected = EditorGUILayout.ColorField (_colorSelected);
+						
+										}
+					
+					
+					
+					
+					
+										/////////////// ADD CURVE(+) /////////
+										if (GUILayout.Button ("Add") && _variableSelected != null) {
+						
+						
+						
+						
+												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
+												vList.Add (_variableSelected);
+												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
+												variablesBindedToCurvesSerialized.ValueChanged ();
+												//variablesBindedToCurvesSerialized.ApplyModifiedValue ();
+						
+						
+						
+						
+						
+						
+												List<Color> cList = curveColors.ToList ();
+												_colorSelected.a = 1;
+												cList.Add (_colorSelected);
+												curvesColorsSerialized.value = curveColors = cList.ToArray ();
+												curvesColorsSerialized.ValueChanged ();	
+												//curvesColorsSerialized.ApplyModifiedValue ();		
+						
+						
+						
+						
+						
+						
+												AnimationCurve curveAnimationNew;
+						
+						
+						
+												List<AnimationCurve> crList = curves.ToList ();
+						
+												curveAnimationNew = new AnimationCurve (new Keyframe[] {
+							new Keyframe (0f, (float)_variableSelected.Value),
+							new Keyframe (1f, 1f)
+						});
+						
+												//TODO add from preset
+												crList.Add (curveAnimationNew);
+						
+												curvesSerialized.value = curves = crList.ToArray ();
+												curvesSerialized.ValueChanged ();
+												//curvesColorsSerialized.ApplyModifiedValue ();
+						
+						
+						
+												///add curve wrapped to CurveEditor
+												CurveWrapperW curveWrapperW = new CurveWrapperW ();
+						
+												curveWrapperW.color = _colorSelected;
+						
+												curveWrapperW.curve = curveAnimationNew;
+						
+												curveEditor.AddCurve (curveWrapperW);
+						
+												curveEditor.FrameSelected (true, true);
+						
+						
+						
+												__serializedNode.Update ();
+						
+												__serializedNode.ApplyModifiedProperties ();
+						
+						
+												_variableSelected = null;
+						
+										}
 
 
-						/////////// AVATAR Preview GUI ////////////
 
-			
-			
-						if (!Application.isPlaying && __mecanimNode!=null && animatorStateSerialized.value != null) {
+										/// DELETE CURVE ///
+										if (GUILayout.Button ("Del") || Event.current.keyCode == KeyCode.Delete) {
+						
+						
+												curveEditor.RemoveCurveAt (_curveIndexSelected);
+						
+						
+						
+												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
+												vList.RemoveAt (_curveIndexSelected);
+												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
+												variablesBindedToCurvesSerialized.ValueChanged ();
+						
+						
+						
+						
+						
+												List<Color> cList = curveColors.ToList ();
+						
+												cList.RemoveAt (_curveIndexSelected);
+												curvesColorsSerialized.value = curveColors = cList.ToArray ();
+												curvesColorsSerialized.ValueChanged ();
+						
+						
+						
+						
+						
+												List<AnimationCurve> crList = curves.ToList ();
+						
+												crList.RemoveAt (_curveIndexSelected);
+						
+												curvesSerialized.value = curves = crList.ToArray ();
+												curvesSerialized.ValueChanged ();
+						
+						
+						
+						
+												_curveIndexSelected = -1;
+												_variableSelected = null;
+						
+												__serializedNode.ApplyModifiedProperties ();
+						
+						
+										}
+					
+					
+					
+				
+					
+					
+										EditorGUILayout.EndHorizontal ();
+
+
+
+				
+
+
+								} else {//NOT CURVE EDITOR
+
+
+
+										///////////// GAMEOBJECT - CLIP BINDINGS //////////
+								
+										__gameObjectClipList.DoLayoutList ();
+
+
+										//////////////////////////////////////////////
+
+								}
+
+
+
+				EditorGUILayout.Space();
+
+
+								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
+					
+								Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width, 26f);
+
+								
+							
+
+								timeControlRect.xMax = 32f;
+
+							
+
+
+								__isPlaying = GUI.Toggle (timeControlRect, __isPlaying, !__isPlaying ? TimeControlW.style.playIcon : TimeControlW.style.pauseIcon, TimeControlW.style.playButton);
+
+
+				if (__isPlaying) {
+					
+					
+					
+				} else {
+					
+					
+					
+				}		
+
+
+								timeControlRect.xMin = timeControlRect.xMax + 1f;
+								timeControlRect.xMax =timeControlRect.xMin+ 21f;
+								timeControlRect.yMin+=2f;
+				
+								__isRecording = GUI.Toggle (timeControlRect, !__isRecording, TimeControlW.style.recordIcon, EditorStyles.toolbarButton);
+
+
+				if (__isRecording) {
+					
+					
+					
+				} else {
+					
+					
+					
+				}
+
+								timeControlRect.xMin = 40f + 16f;
+								timeControlRect.xMax = Screen.width - 68f;
+								timeControlRect.yMin-=2f;
+
+								timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, timeNormalized, 0f, 1f, TimeControlW.style.timeScrubber);
+
+								
+									
+
+
+
+
+
+
+
+
+
+								///////////////////////////////////////////////////////////////
+
+
+
+								//////////////////////////////////////////////////////////////
+								/// 
+								///			 Draw red time scrubber line on top of Curve Editor 
+								///
+								//////////////////////////////////////////////////////////////
+				
+								if (_curvesEditorShow) {
+										Handles.color = Color.red;
+				
+				
+				
+										float leftrightMargin = 39f;// 40f;
+										float effectiveWidth = curveEditorRect.width - 2 * leftrightMargin - curveEditorRect.xMin;
+										float timeLineX = curveEditorRect.xMin + leftrightMargin + effectiveWidth * timeNormalized;
+				
+										Handles.DrawLine (new Vector2 (timeLineX, curveEditorRect.y), new Vector2 (timeLineX, curveEditorRect.y + curveEditorRect.height));
+								}
+
+					
+					
+					
+								////////// EVALUTE CURVES //////////
+								int variablesNum = variablesBindedToCurves.Length;
+								for (int varriableCurrentinx=0; varriableCurrentinx<variablesNum; varriableCurrentinx++) {
+						
+						
+										variablesBindedToCurves [varriableCurrentinx].Value = curves [varriableCurrentinx].Evaluate (timeNormalized);
+								}
+					
+					
+					
+
 				
 								//////////  MOTION OVERRIDE HANDLING  //////////
 
@@ -121,88 +630,7 @@ namespace ws.winx.editor.bmachine.extensions
 					
 					
 
-
-
-				
-				
-								//This makes layout to work (Reserving space)
-								Rect avatarRect = GUILayoutUtility.GetRect (Screen.width - 16f, 200);
-								avatarRect.width -= 70f;
-								avatarRect.xMin += 6f;
-				
-				
-								if (avatarPreview == null)
-										avatarPreview = new AvatarPreviewW (null, motion);
-								else
-										avatarPreview.SetPreviewMotion (motion);
-				
-				
-				
-								EditorGUILayout.BeginHorizontal ();
-				
-				
-				
-								if (Event.current.type == EventType.Repaint) {
-					
-
-						
-						
-										//!!! changing 
-										//avatarPreview.timeControl.startTime
-										// start/stop makes AvatarPreview to play from start to stop
-										// but its not offer good usability of resized animation
-						
-						
-										if (avatarPreview.timeControl.playing) {
-							
-												//restrict animation into this range
-												if (avatarPreview.timeControl.normalizedTime < __mecanimNode.range.rangeStart || avatarPreview.timeControl.normalizedTime > __mecanimNode.range.rangeEnd) {
-								
-								
-								
-														avatarPreview.timeControl.nextCurrentTime = avatarPreview.timeControl.startTime * (1f - __mecanimNode.range.rangeStart) + avatarPreview.timeControl.stopTime * __mecanimNode.range.rangeStart;	
-								
-												}
-										} else {
-							
-												//set AvatarPreview animation time range depending of drag of range control handles
-												if (Math.Abs (__mecanimNode.range.rangeStart - timeNormalizedStartPrev) > 0.01f) {
-														timeNormalizedStartPrev = __mecanimNode.range.rangeStart;
-								
-														avatarPreview.SetTimeAt (timeNormalizedStartPrev);
-								
-												} else
-												if (Math.Abs (__mecanimNode.range.rangeEnd - timeNormalizedEndPrev) > 0.01f) {
-														timeNormalizedEndPrev = __mecanimNode.range.rangeEnd;
-														avatarPreview.SetTimeAt (timeNormalizedEndPrev);
-								
-												}
-							
-							
-										}
-						
-						
-						
-						
-						
-						
-								}
-
-
-
-								avatarPreview.timeControl.playbackSpeed = __mecanimNode.speed;
-						
-						
-						
-						
-						
-								avatarPreview.DoAvatarPreview (avatarRect, GUIStyle.none);
-						
-						
-								//timeNormalized = avatarPreview.timeControl.normalizedTime;
-						
-								
-								EditorGUILayout.EndHorizontal ();		
+		
 
 					
 					
@@ -215,15 +643,7 @@ namespace ws.winx.editor.bmachine.extensions
 				
 
 						
-//						// The actual window code goes here
-//						if (MecanimNodeEditorWindow.node != null) {
-//								if (editor == null)
-//										editor = NodeEditor.CreateEditor (MecanimNodeEditorWindow.node.GetType ());
-//								if (editor.target != MecanimNodeEditorWindow.node)//How to add target to editor??? or subclass the Node Editor
-//										editor.DrawNode (MecanimNodeEditorWindow.node);
-//								else
-//										editor.OnInspectorGUI ();
-//						}
+
 				
 				}
 

@@ -164,7 +164,24 @@ public class AnimaTestEditor : EditorWindow
 
 		//CREATE NEW MOVIE CLIP
 
-//		public static AnimationClip AllocateAnimatorClip (string name)
+
+
+//		private static AnimationClip GenerateTriggerableTransition(string name, AnimatorController controller)
+//		{
+//			AnimationClip animationClip = AnimatorController.AllocateAnimatorClip(name);
+//			AssetDatabase.AddObjectToAsset(animationClip, controller);
+//			State dst = AnimatorController.AddAnimationClipToController(controller, animationClip);
+//			controller.AddParameter(name, AnimatorControllerParameterType.Trigger);
+//			StateMachine stateMachine = controller.GetLayer(0).stateMachine;
+//			Transition transition = stateMachine.AddAnyStateTransition(dst);
+//			AnimatorCondition condition = transition.GetCondition(0);
+//			condition.mode = TransitionConditionMode.If;
+//			condition.parameter = name;
+//			
+//			return animationClip;
+//		}
+		
+		//		public static AnimationClip AllocateAnimatorClip (string name)
 //		{
 //			AnimationClip animationClip = AnimationSelection.AllocateAndSetupClip (true);
 //			animationClip.name = name;

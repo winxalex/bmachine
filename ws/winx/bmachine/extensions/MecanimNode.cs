@@ -17,7 +17,6 @@ using ws.winx.unity;
 using ws.winx.unity.attributes;
 using System.Runtime.Serialization;
 
-
 namespace ws.winx.bmachine.extensions
 {
 
@@ -33,14 +32,9 @@ namespace ws.winx.bmachine.extensions
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
 
-				//public List<AnimationCurve>[] curvesPerVariable;
-
-				[HideInInspector]
-				public AnimationClip[] clips;
-
-				[HideInInspector]
-				public GameObject[] gameObjects;
-
+				//[HideInInspector]
+				public EditorClipBinding[]
+						clipBindings;
 				[HideInInspector]
 				public AnimationCurve[]
 						curves;
@@ -53,7 +47,6 @@ namespace ws.winx.bmachine.extensions
 				[HideInInspector]
 				public Animator
 						animator;
-		
 				[AnimatorStateAttribute("animator","layer")]
 				public AnimatorState
 						animatorStateSelected;
@@ -73,26 +66,15 @@ namespace ws.winx.bmachine.extensions
 				[RangeAttribute(0f,1f)]
 				public float
 						transitionDuration = 0.1f;
-
-		
-		
 				[MinMaxRangeSAttribute(0f,1f)]
-				public MinMaxRangeSO range;
+				public MinMaxRangeSO
+						range;
 
-				
-				
-				//	Debug.Log (this.name + ">Override result:" + animatorOverrideController [(AnimationClip)animaStateInfoSelected.motion] );
-				
 			
-
-				
-			
-
-
 				//[RangeAttribute(0f,1f)]
 				//[HideInInspector]
 				//public float
-						//timeNormalizedStart = 0f;
+				//timeNormalizedStart = 0f;
 				[HideInInspector]
 				public float
 						timeNormalizedCurrent = 0f;
@@ -197,8 +179,8 @@ namespace ws.winx.bmachine.extensions
 						
 						transitionDuration = 0f;
 
-						gameObjects = new GameObject[0];
-						clips = new AnimationClip[0];
+						
+						clipBindings = new EditorClipBinding[0];
 
 						curvesColors = new Color[0];
 						curves = new AnimationCurve[0];
@@ -214,7 +196,6 @@ namespace ws.winx.bmachine.extensions
 						
 					
 						motionOverride = UnityVariable.CreateInstanceOf (typeof(AnimationClip));
-
 						
 						range = (ws.winx.unity.attributes.MinMaxRangeSO)ScriptableObject.CreateInstance<ws.winx.unity.attributes.MinMaxRangeSO> ();
 				
@@ -227,7 +208,7 @@ namespace ws.winx.bmachine.extensions
 						});
 
 
-						//this.tree.SaveNodes ();
+						
 			
 				}
 		
@@ -343,7 +324,7 @@ namespace ws.winx.bmachine.extensions
 						isCurrentEqualToSelectedAnimaInfo = animatorStateInfoCurrent.shortNameHash == animatorStateSelected.nameHash;
 
 						
-			//Debug.Log (this.name + " isTransition:" + isSelectedAnimaInfoInTransition+" isCurrent:"+isCurrentEqualToSelectedAnimaInfo+" t:"+animatorStateInfoCurrent.normalizedTime);
+						//Debug.Log (this.name + " isTransition:" + isSelectedAnimaInfoInTransition+" isCurrent:"+isCurrentEqualToSelectedAnimaInfo+" t:"+animatorStateInfoCurrent.normalizedTime);
 
 
 						///////////////////////  START  //////////////////////////
@@ -430,8 +411,8 @@ namespace ws.winx.bmachine.extensions
 
 
 							
-					//1f
-					if (timeNormalizedCurrent > range.rangeEnd) {
+										//1f
+										if (timeNormalizedCurrent > range.rangeEnd) {
 												if (!loop) {
 														
 
@@ -486,7 +467,7 @@ namespace ws.winx.bmachine.extensions
 										//Debug.Log("animatorStateSelected.blendParamsHashes="+animatorStateSelected.blendParamsHashes);
 
 										//!!! Blend Tree although is seraialized in Editor in StandAlonePlayer is NULL and condition animatorStateSelected.motion != null fail
-										if (animatorStateSelected != null &&  (blendParamsHashes = animatorStateSelected.blendParamsHashes) != null && blendParamsHashes.Length > 0) {
+										if (animatorStateSelected != null && (blendParamsHashes = animatorStateSelected.blendParamsHashes) != null && blendParamsHashes.Length > 0) {
 
 												
 												

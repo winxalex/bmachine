@@ -685,6 +685,7 @@ namespace ws.winx.editor
 				{
 						public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
 						public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
+						public GUIContent recordIcon = EditorGUIUtility.IconContent ("Animation.Record");
 						public GUIStyle playButton = "TimeScrubberButton";
 						public GUIStyle timeScrubber = "TimeScrubber";
 				}

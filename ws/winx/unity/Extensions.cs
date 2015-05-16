@@ -8,59 +8,144 @@ using System.Linq.Expressions;
 namespace ws.winx.unity
 {
 
-	public static class ExtensionsTransform
-	{
 
-
-		#region AnimatorExtension
-			public static void Play(this Animator animator,AnimationClip clip,float normalizedTime=0f){
-
-					
-
-					AnimatorOverrideController animatorOverrideController;
-					AnimationClip clipOverride = null;
-
-
-					if (animator.runtimeAnimatorController is AnimatorOverrideController) {
-						
-						//animator.runtimeAnimatorController is already overrided just take reference
-						animatorOverrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
-						clipOverride=animatorOverrideController.clips[0].originalClip;
-					} else {
-						//AS RuntimeAnimatorController can't be created at runtime
-						RuntimeAnimatorController dummyController = AnimationUtilityEx.DUMMY_CONTROLLER;
-				
-						clipOverride=dummyController.animationClips[0];
-
-
-						animatorOverrideController = new AnimatorOverrideController ();
-						
-						//bind all clips from animator.runtimeAnimatorController to overrider
-						animatorOverrideController.runtimeAnimatorController = dummyController;
-					}	
-					
-				   
-
-					
-					animatorOverrideController[clipOverride]=clip;
-					
-					
-					//to avoid nesting 
-					if (animator.runtimeAnimatorController is AnimatorOverrideController) {
-						animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
-					}
-					
-					//rebind back												
-					animator.runtimeAnimatorController = animatorOverrideController;
-
-					animator.Play ("Override", 0, normalizedTime);
-
-
+	#region Rect Extensions
+		public static class RectExtensions
+		{
+			public static bool Intersect(this Rect rectA, Rect rectB)
+			{
+				return (Mathf.Abs(rectA.x - rectB.x) < (Mathf.Abs(rectA.width + rectB.width) / 2)) &&
+					(Mathf.Abs(rectA.y - rectB.y) < (Mathf.Abs(rectA.height + rectB.height) / 2));
 			}
 
+			
+		}
+	
+	
+	#endregion
+	
+	#region RectTransformExtensions
+	
+	public static class RectTransformExtensions
+	{
+		public static void SetDefaultScale(this RectTransform trans) {
+			trans.localScale = new Vector3(1, 1, 1);
+		}
+		public static void SetPivotAndAnchors(this RectTransform trans, Vector2 aVec) {
+			trans.pivot = aVec;
+			trans.anchorMin = aVec;
+			trans.anchorMax = aVec;
+		}
+		
+		public static Vector2 GetSize(this RectTransform trans) {
+			return trans.rect.size;
+		}
+		public static float GetWidth(this RectTransform trans) {
+			return trans.rect.width;
+		}
+		public static float GetHeight(this RectTransform trans) {
+			return trans.rect.height;
+		}
+		
+		public static void SetPositionOfPivot(this RectTransform trans, Vector2 newPos) {
+			trans.localPosition = new Vector3(newPos.x, newPos.y, trans.localPosition.z);
+		}
+		
+		public static void SetLeftBottomPosition(this RectTransform trans, Vector2 newPos) {
+			trans.localPosition = new Vector3(newPos.x + (trans.pivot.x * trans.rect.width), newPos.y + (trans.pivot.y * trans.rect.height), trans.localPosition.z);
+		}
+		public static void SetLeftTopPosition(this RectTransform trans, Vector2 newPos) {
+			trans.localPosition = new Vector3(newPos.x + (trans.pivot.x * trans.rect.width), newPos.y - ((1f - trans.pivot.y) * trans.rect.height), trans.localPosition.z);
+		}
+		public static void SetRightBottomPosition(this RectTransform trans, Vector2 newPos) {
+			trans.localPosition = new Vector3(newPos.x - ((1f - trans.pivot.x) * trans.rect.width), newPos.y + (trans.pivot.y * trans.rect.height), trans.localPosition.z);
+		}
+		public static void SetRightTopPosition(this RectTransform trans, Vector2 newPos) {
+			trans.localPosition = new Vector3(newPos.x - ((1f - trans.pivot.x) * trans.rect.width), newPos.y - ((1f - trans.pivot.y) * trans.rect.height), trans.localPosition.z);
+		}
+		
+		public static void SetSize(this RectTransform trans, Vector2 newSize) {
+			Vector2 oldSize = trans.rect.size;
+			Vector2 deltaSize = newSize - oldSize;
+			trans.offsetMin = trans.offsetMin - new Vector2(deltaSize.x * trans.pivot.x, deltaSize.y * trans.pivot.y);
+			trans.offsetMax = trans.offsetMax + new Vector2(deltaSize.x * (1f - trans.pivot.x), deltaSize.y * (1f - trans.pivot.y));
+		}
+		public static void SetWidth(this RectTransform trans, float newSize) {
+			SetSize(trans, new Vector2(newSize, trans.rect.size.y));
+		}
+		public static void SetHeight(this RectTransform trans, float newSize) {
+			SetSize(trans, new Vector2(trans.rect.size.x, newSize));
+		}
+		
+	}
+	
+	
+	#endregion
 
 
-		#endregion
+
+	#region AnimatorExtension
+		public static class AnimatorExtension
+		{
+
+		public static void Play(this Animator animator,AnimationClip clip,float normalizedTime=0f){
+			
+			
+			
+			AnimatorOverrideController animatorOverrideController;
+			AnimationClip clipOverride = null;
+			
+			
+			if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+				
+				//animator.runtimeAnimatorController is already overrided just take reference
+				animatorOverrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
+				clipOverride=animatorOverrideController.clips[0].originalClip;
+			} else {
+				//AS RuntimeAnimatorController can't be created at runtime
+				RuntimeAnimatorController dummyController = AnimationUtilityEx.DUMMY_CONTROLLER;
+				
+				clipOverride=dummyController.animationClips[0];
+				
+				
+				animatorOverrideController = new AnimatorOverrideController ();
+				
+				//bind all clips from animator.runtimeAnimatorController to overrider
+				animatorOverrideController.runtimeAnimatorController = dummyController;
+			}	
+			
+			
+			
+			
+			animatorOverrideController[clipOverride]=clip;
+			
+			
+			//to avoid nesting 
+			if (animator.runtimeAnimatorController is AnimatorOverrideController) {
+				animator.runtimeAnimatorController = animatorOverrideController.runtimeAnimatorController;
+			}
+			
+			//rebind back												
+			animator.runtimeAnimatorController = animatorOverrideController;
+			
+			animator.Play ("Override", 0, normalizedTime);
+			
+			
+		}
+		
+	}
+	
+	#endregion
+	
+	#region Transform Extensions
+	public static class TransformExtension
+	{
+		
+
+
+
+
+
 
 		public static void ResetTransformation(this Transform trans)
 		{
@@ -108,6 +193,12 @@ namespace ws.winx.unity
 		public static void LocalScaleMulY( this Transform t, float s ) { Vector3 v = t.localScale; v.y *= s; t.localScale = v; }
 		public static void LocalScaleMulZ( this Transform t, float s ) { Vector3 v = t.localScale; v.z *= s; t.localScale = v; }
 	}
+
+
+	#endregion
+
+
+	#region Quaternion Extensions
 	
 	public static class QuaternionExtensions
 	{
@@ -210,7 +301,10 @@ namespace ws.winx.unity
 			return to * Quaternion.Inverse(from);
 		}
 	}
+	#endregion
 
+
+	#region Vector Extensions
 	public static class VectorExtensions {
 		public static Vector3 ToGuiCoordinateSystem(this Vector3 a) {
 			var copy = a;
@@ -230,6 +324,8 @@ namespace ws.winx.unity
 			return new Vector3(1/a.x, 1/a.y, 1/a.z);
 		}
 	}
+	#endregion
+
 
 
 	#region GameObjectExtensions

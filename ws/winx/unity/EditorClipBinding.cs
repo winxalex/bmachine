@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace ws.winx.unity
 {
-
+	[Serializable]
 	public class EditorClipBinding:ScriptableObject{
 
 

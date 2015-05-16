@@ -1284,7 +1284,7 @@ namespace ws.winx.editor.extensions
 										GUIContent[] displayOptionsProperties;
 										
 										String[] membersUniquePath;//ex. position.x@314124144
-										MemberInfo[] memberInfos;
+										
 
 							
 										//get properties from object by object type
