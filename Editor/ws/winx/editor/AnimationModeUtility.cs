@@ -4,6 +4,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using ws.winx.unity;
 
 namespace ws.winx.editor
 {
@@ -196,7 +197,7 @@ namespace ws.winx.editor
 						return null;
 				}
 	
-				public static UndoPropertyModification[] Process (GameObject rootGameObject, AnimationClip activeAnimationClip, UndoPropertyModification[] modifications, float time)
+				public static List<UndoPropertyModification> Process (GameObject rootGameObject, AnimationClip activeAnimationClip, UndoPropertyModification[] modifications, float time)
 				{
 		
 						Animator component = rootGameObject.GetComponent<Animator> ();
@@ -227,7 +228,7 @@ namespace ws.winx.editor
 										list.Add (modifications [i]);
 								}
 						}
-						return list.ToArray ();
+						return list;
 				}
 	
 				private static bool HasAnyRecordableModifications (GameObject root, UndoPropertyModification[] modifications)
@@ -240,6 +241,43 @@ namespace ws.winx.editor
 						}
 						return false;
 				}
+
+
+
+					
+
+
+
+
+					public static void ResampleAnimation (EditorClipBinding[] clipBindings, ref float time)
+					{
+						
+						
+						
+						
+						Undo.FlushUndoRecordObjects ();
+						
+						
+						AnimationMode.BeginSampling ();
+						
+						int len = clipBindings.Length;
+						
+						EditorClipBinding clipBindingCurrent;
+						
+						for (int i=0; i<len; i++) {
+								clipBindingCurrent=clipBindings[i];
+								AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, time);
+						}
+						
+						
+						
+						
+						
+						AnimationMode.EndSampling ();
+						SceneView.RepaintAll ();
+						
+						
+					}
 
 				public static void ResampleAnimation (GameObject[] animatedObjects, AnimationClip[] animationClips, ref float time)
 				{

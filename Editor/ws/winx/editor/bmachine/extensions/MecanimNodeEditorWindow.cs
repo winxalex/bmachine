@@ -19,6 +19,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ws.winx.editor.extensions;
+using System.IO;
 
 namespace ws.winx.editor.bmachine.extensions
 {
@@ -51,6 +52,8 @@ namespace ws.winx.editor.bmachine.extensions
 				private		static UnityVariable _variableSelected;
 				private static bool __isPlaying;
 				private static bool __isRecording;
+
+				private static float __timeCurrent;//in [seconds]
 
 				public static void Show (MecanimNode target, SerializedNode node, Rect? position)
 				{
@@ -101,9 +104,9 @@ namespace ws.winx.editor.bmachine.extensions
 						variablesBindedToCurves = (UnityVariable[])variablesBindedToCurvesSerialized.value;
 						
 					
-			//List<EditorClipBinding> listBind=((EditorClipBinding[])clipBindingsSerialized.value).ToList();
+						
 
-			__gameObjectClipList = new ReorderableList ( clipBindingsSerialized.value as IList, typeof(EditorClipBinding),true,true,true,true);
+						__gameObjectClipList = new ReorderableList (clipBindingsSerialized.value as IList, typeof(EditorClipBinding), true, true, true, true);
 						__gameObjectClipList.drawElementCallback = onDrawElement;
 									
 						
@@ -114,7 +117,7 @@ namespace ws.winx.editor.bmachine.extensions
 						__gameObjectClipList.onAddCallback = onAddCallback;
 						
 									
-						__gameObjectClipList.elementHeight = 32f;                                    
+						//__gameObjectClipList.elementHeight = 32f;                                    
 			                                                              
 			                                                              
 						if (MecanimNodeEditorWindow.window != null)//restore last 
@@ -152,65 +155,125 @@ namespace ws.winx.editor.bmachine.extensions
 				}
 
 
+
+
+		///////// ANIMATION MODE ////////////////
+	
+		private static void SetAutoRecordMode (bool record)
+		{
+			if (this.m_AutoRecord != record) {
+				if (record) {
+					//Undo.postprocessModifications+=this.PostprocessAnimationRecordingModifications;
+					
+					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Combine (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
+				} else {
+					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Remove (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
+				}
+				this.m_AutoRecord = record;
+				//			if (this.m_AutoRecord)
+				//			{
+				//				this.EnsureAnimationMode ();
+				//			}
+			}
+		}
+		
+		private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
+		{
+			List<UndoPropertyModification> propertyModificationList = new List<UndoPropertyModification> ();
+			EditorClipBinding[] clipBindings=clipBindingsSerialized.value as EditorClipBinding[];
+
+			Array.ForEach (clipBindings, (itm) => {
+
+				propertyModificationList.Concat(AnimationModeUtility.Process (itm.gameObject, itm.clip, modifications, __timeCurrent));
+
+
+			});
+
+
+			return propertyModificationList.ToArray ();
+		}
+
+
 			
 				////////////////// GAMEOBJECT - CLIP LIST EVENTS //////////////////
 				
 		
-				static void onRemoveCallback (ReorderableList list)
+				private static void onRemoveCallback (ReorderableList list)
 				{
 						if (UnityEditor.EditorUtility.DisplayDialog ("Warning!", 
 			                                             "Are you sure you want to delete the Unity Variable?", "Yes", "No")) {
-								ReorderableList.defaultBehaviours.DoRemoveButton (list);
+								List<EditorClipBinding> bindingList = ((EditorClipBinding[])clipBindingsSerialized.value).ToList ();
+								bindingList.RemoveAt(list.index);
+
+				clipBindingsSerialized.value=bindingList.ToArray ();
+				clipBindingsSerialized.ApplyModifiedValue ();
 				
-								list.serializedProperty.DeleteArrayElementAtIndex (list.index);
-				
+				list.list = clipBindingsSerialized.value as IList;
 				
 
 				
 						}
 				}
 
-					static void onAddCallback (ReorderableList list)
-					{
-						List<EditorClipBinding> bindingList=((EditorClipBinding[])list.list).ToList ();
+				private static void onAddCallback (ReorderableList list)
+				{
+						List<EditorClipBinding> bindingList = ((EditorClipBinding[])clipBindingsSerialized.value).ToList ();
 
 
 						bindingList.Add (ScriptableObject.CreateInstance<EditorClipBinding> ());
-						list.list = bindingList.ToArray ();
+
+						clipBindingsSerialized.value=bindingList.ToArray ();
+						clipBindingsSerialized.ApplyModifiedValue ();
+
+						list.list = clipBindingsSerialized.value as IList;
 						
-					}
+				}
 		
-				static void onDrawElement (Rect rect, int index, bool isActive, bool isFocused)
+				private static void onDrawElement (Rect rect, int index, bool isActive, bool isFocused)
 				{
 			
-//						SerializedProperty property = __gameObjectClipList.serializedProperty.GetArrayElementAtIndex (index); 
-//			
-//						if (property == null || property.objectReferenceValue == null) {
-//								return;
-//						}
 
 
-			EditorClipBinding clipBindingCurrent = __gameObjectClipList.list [index] as EditorClipBinding;
+
+						EditorClipBinding clipBindingCurrent = __gameObjectClipList.list [index] as EditorClipBinding;
 			
-			if (clipBindingCurrent==null) {
-				return;
-			}
+						if (clipBindingCurrent == null) {
+								return;
+						}
 
 						
 
-						Rect gameObjectRect = rect;
-						Rect clipRect = rect; 
+						float width = rect.xMax;
+						
+						rect.xMax = 200f;
 
-						gameObjectRect.xMax = 40f;
+						clipBindingCurrent.gameObject = EditorGUI.ObjectField (rect,clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
 
-						clipBindingCurrent.gameObject = EditorGUI.ObjectField (gameObjectRect, "Bind", clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
+						rect.xMin = rect.xMax + 2;
+						rect.xMax = width-60f;
 
-						clipBindingCurrent.clip = EditorGUI.ObjectField (clipRect, "To", clipBindingCurrent.clip, typeof(AnimationClip), true) as AnimationClip;
 
-						if (clipBindingCurrent.clip != null) {
+						clipBindingCurrent.clip = EditorGUI.ObjectField (rect, clipBindingCurrent.clip, typeof(AnimationClip), true) as AnimationClip;
 
-								if (GUILayout.Button ("Create")) {
-										clipBindingCurrent.clip = UnityEditor.Animations.AnimatorController.AllocateAnimatorClip ("New Animation");
+						if (clipBindingCurrent.clip == null) {
+
+							rect.xMin=rect.xMax+2;
+							rect.xMax=width;
+
+								if (GUI.Button (rect,"New Clip")) {
+
+									string path=EditorUtility.SaveFilePanel(
+										"Create New Clip",
+										"Assets",
+										"",
+										"anim");
+										
+										if(!String.IsNullOrEmpty(path)){
+											
+											clipBindingCurrent.clip = UnityEditor.Animations.AnimatorController.AllocateAnimatorClip (Path.GetFileNameWithoutExtension(path));
+
+
+										}
 								}
 						}
 			
@@ -509,7 +572,29 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-				EditorGUILayout.Space();
+								EditorGUILayout.Space ();
+
+
+
+
+				//////////  MOTION OVERRIDE HANDLING  //////////
+				
+				UnityEngine.Motion motion = null;
+				
+				UnityVariable motionOverridVariable = (UnityVariable)motionOverrideSerialized.value;
+				
+				//if there are no override use motion of selected AnimationState
+				//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
+				if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
+					motion = ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion;
+				else //
+					motion = (UnityEngine.Motion)motionOverridVariable.Value;
+				
+				
+				
+				if (motionOverridVariable != null && motionOverridVariable.Value != null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
+					Debug.LogError ("Can't override state that doesn't contain motion");
+				}
 
 
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
@@ -527,42 +612,69 @@ namespace ws.winx.editor.bmachine.extensions
 								__isPlaying = GUI.Toggle (timeControlRect, __isPlaying, !__isPlaying ? TimeControlW.style.playIcon : TimeControlW.style.pauseIcon, TimeControlW.style.playButton);
 
 
-				if (__isPlaying) {
+								if (__isPlaying) {
 					
 					
 					
-				} else {
+								} else {
 					
 					
 					
-				}		
+								}		
 
 
 								timeControlRect.xMin = timeControlRect.xMax + 1f;
-								timeControlRect.xMax =timeControlRect.xMin+ 21f;
-								timeControlRect.yMin+=2f;
+								timeControlRect.xMax = timeControlRect.xMin + 21f;
+								timeControlRect.yMin += 2f;
 				
 								__isRecording = GUI.Toggle (timeControlRect, !__isRecording, TimeControlW.style.recordIcon, EditorStyles.toolbarButton);
 
 
-				if (__isRecording) {
+								if (__isRecording) {
 					
 					
 					
-				} else {
+								} else {
 					
 					
 					
-				}
+								}
 
 								timeControlRect.xMin = 40f + 16f;
 								timeControlRect.xMax = Screen.width - 68f;
-								timeControlRect.yMin-=2f;
+								timeControlRect.yMin -= 2f;
+
+
+
+				EditorGUI.BeginChangeCheck();
 
 								timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, timeNormalized, 0f, 1f, TimeControlW.style.timeScrubber);
 
+							
+
 								
+								if(EditorGUI.EndChangeCheck()){
+
+									__timeCurrent=timeNormalized * ((AnimationClip)motion).length;
+
+									if(!AnimationMode.InAnimationMode ()) {
+										AnimationMode.StartAnimationMode ();
+									}
+
+									__isRecording=true;
+
 									
+
+									
+
+										AnimationModeUtility.ResampleAnimation (clipBindingsSerialized.value as EditorClipBinding[]
+					, ref __timeCurrent);
+
+
+									Start
+
+
+								}
 
 
 
@@ -609,24 +721,7 @@ namespace ws.winx.editor.bmachine.extensions
 					
 
 				
-								//////////  MOTION OVERRIDE HANDLING  //////////
-
-								UnityEngine.Motion motion = null;
-					
-								UnityVariable motionOverridVariable = (UnityVariable)motionOverrideSerialized.value;
-					
-								//if there are no override use motion of selected AnimationState
-								//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
-								if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
-										motion = ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion;
-								else //
-										motion = (UnityEngine.Motion)motionOverridVariable.Value;
-					
-					
-					
-								if (motionOverridVariable != null && motionOverridVariable.Value != null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
-										Debug.LogError ("Can't override state that doesn't contain motion");
-								}
+							
 					
 					
 
