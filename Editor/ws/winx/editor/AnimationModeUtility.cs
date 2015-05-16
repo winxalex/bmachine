@@ -75,6 +75,16 @@ namespace ws.winx.editor
 		
 				}
 	
+
+				/// <summary>
+				/// Adds the keyframe to object reference curve.
+				/// </summary>
+				/// <param name="keyframes">Keyframes.</param>
+				/// <param name="animatedClip">Animated clip.</param>
+				/// <param name="binding">Binding.</param>
+				/// <param name="value">Value.</param>
+				/// <param name="type">Type.</param>
+				/// <param name="time">Time.</param>
 				public static void AddKeyframeToObjectReferenceCurve (ObjectReferenceKeyframe[] keyframes, AnimationClip animatedClip, EditorCurveBinding binding, object value, Type type, float time)
 				{
 						int keyframeIndex = Array.FindIndex (keyframes, (itm) => (int)itm.time * animatedClip.frameRate == (int)time * animatedClip.frameRate);
@@ -103,6 +113,16 @@ namespace ws.winx.editor
 						AnimationUtility.SetObjectReferenceCurve (animatedClip, binding, keyframes);
 				}
 	
+
+				/// <summary>
+				/// Adds the keyframe to curve.
+				/// </summary>
+				/// <param name="animationCurve">Animation curve.</param>
+				/// <param name="animatedClip">Animated clip.</param>
+				/// <param name="binding">Binding.</param>
+				/// <param name="value">Value.</param>
+				/// <param name="type">Type.</param>
+				/// <param name="time">Time.</param>
 				public static void AddKeyframeToCurve (AnimationCurve animationCurve, AnimationClip animatedClip, EditorCurveBinding binding, float value, Type type, float time)
 				{
 		
@@ -156,6 +176,12 @@ namespace ws.winx.editor
 		
 				}
 	
+				/// <summary>
+				/// Saves the curve.
+				/// </summary>
+				/// <param name="animationCurve">Animation curve.</param>
+				/// <param name="animatedClip">Animated clip.</param>
+				/// <param name="binding">Binding.</param>
 				public static void SaveCurve (AnimationCurve animationCurve, AnimationClip animatedClip, EditorCurveBinding binding)
 				{
 						Undo.RegisterCompleteObjectUndo (animatedClip, "Edit Curve");
@@ -166,6 +192,14 @@ namespace ws.winx.editor
 						AnimationUtility.SetEditorCurve (animatedClip, binding, animationCurve);
 				}
 	
+
+				/// <summary>
+				/// Values from property modification.
+				/// </summary>
+				/// <returns><c>true</c>, if from property modification was valued, <c>false</c> otherwise.</returns>
+				/// <param name="modification">Modification.</param>
+				/// <param name="binding">Binding.</param>
+				/// <param name="outObject">Out object.</param>
 				private static bool ValueFromPropertyModification (PropertyModification modification, EditorCurveBinding binding, out object outObject)
 				{
 						if (modification == null) {
@@ -185,6 +219,14 @@ namespace ws.winx.editor
 						return false;
 				}
 	
+
+				/// <summary>
+				/// Finds the property modification.
+				/// </summary>
+				/// <returns>The property modification.</returns>
+				/// <param name="root">Root.</param>
+				/// <param name="modifications">Modifications.</param>
+				/// <param name="binding">Binding.</param>
 				private static PropertyModification FindPropertyModification (GameObject root, UndoPropertyModification[] modifications, EditorCurveBinding binding)
 				{
 						for (int i = 0; i < modifications.Length; i++) {
@@ -197,7 +239,15 @@ namespace ws.winx.editor
 						return null;
 				}
 	
-				public static List<UndoPropertyModification> Process (GameObject rootGameObject, AnimationClip activeAnimationClip, UndoPropertyModification[] modifications, float time)
+
+				/// <summary>
+				/// Process the specified rootGameObject, activeAnimationClip, modifications and time.
+				/// </summary>
+				/// <param name="rootGameObject">Root game object.</param>
+				/// <param name="activeAnimationClip">Active animation clip.</param>
+				/// <param name="modifications">Modifications.</param>
+				/// <param name="time">Time.</param>
+				public static UndoPropertyModification[] Process (GameObject rootGameObject, AnimationClip activeAnimationClip, UndoPropertyModification[] modifications, float time)
 				{
 		
 						Animator component = rootGameObject.GetComponent<Animator> ();
@@ -228,9 +278,16 @@ namespace ws.winx.editor
 										list.Add (modifications [i]);
 								}
 						}
-						return list;
+						return list.ToArray ();
 				}
 	
+
+				/// <summary>
+				/// Determines if has any recordable modifications the specified root modifications.
+				/// </summary>
+				/// <returns><c>true</c> if has any recordable modifications the specified root modifications; otherwise, <c>false</c>.</returns>
+				/// <param name="root">Root.</param>
+				/// <param name="modifications">Modifications.</param>
 				private static bool HasAnyRecordableModifications (GameObject root, UndoPropertyModification[] modifications)
 				{
 						for (int i = 0; i < modifications.Length; i++) {
@@ -248,9 +305,13 @@ namespace ws.winx.editor
 
 
 
-
-					public static void ResampleAnimation (EditorClipBinding[] clipBindings, ref float time)
-					{
+				/// <summary>
+				/// Resamples the animation.
+				/// </summary>
+				/// <param name="clipBindings">Clip bindings.</param>
+				/// <param name="time">Time.</param>
+				public static void ResampleAnimation (EditorClipBinding[] clipBindings, ref float time)
+				{
 						
 						
 						
@@ -264,9 +325,14 @@ namespace ws.winx.editor
 						
 						EditorClipBinding clipBindingCurrent;
 						
+						
 						for (int i=0; i<len; i++) {
-								clipBindingCurrent=clipBindings[i];
-								AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, time);
+								clipBindingCurrent = clipBindings [i];
+
+
+								ResampleAnimation (clipBindingCurrent,time);
+							
+								
 						}
 						
 						
@@ -277,13 +343,34 @@ namespace ws.winx.editor
 						SceneView.RepaintAll ();
 						
 						
-					}
+				}
 
+				public static void ResampleAnimation (EditorClipBinding clipBindingCurrent, float time)
+				{
+						AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, time);
+			
+						//Correction is needed for root bones as animation doesn't respect current GameObject transform position,rotation
+						//=> shifting current boneTransform position as result of clip animaiton to offset of orginal position before animation
+						if (clipBindingCurrent.boneTransform != null) {
+				
+				
+								clipBindingCurrent.boneTransform.transform.position = clipBindingCurrent.boneOrginalPositionOffset + clipBindingCurrent.boneTransform.transform.position;
+				
+				
+				
+						}
+				}
+
+
+				/// <summary>
+				/// Resamples the animation. !!! Doesn't apply position,rotation correction
+				/// </summary>
+				/// <param name="animatedObjects">Animated objects.</param>
+				/// <param name="animationClips">Animation clips.</param>
+				/// <param name="time">Time.</param>
 				public static void ResampleAnimation (GameObject[] animatedObjects, AnimationClip[] animationClips, ref float time)
 				{
-			
-			
-			
+
 			
 						Undo.FlushUndoRecordObjects ();
 			
@@ -297,12 +384,13 @@ namespace ws.winx.editor
 								Debug.LogError ("AnimaitonModeUtility.ResampleAnimation> Number of Animate Object should be same with Animation Clips");
 						}
 			
-						for (int i=0; i<len; i++)
+						for (int i=0; i<len; i++) {
 								AnimationMode.SampleAnimationClip (animatedObjects [i], animationClips [i], time);
+
+								
+						}
 			
-			
-			
-			
+
 			
 						AnimationMode.EndSampling ();
 						SceneView.RepaintAll ();
@@ -311,8 +399,26 @@ namespace ws.winx.editor
 				}
 
 
-
-
+				/// <summary>
+				/// Resets the transform property modification.
+				/// </summary>
+				/// <param name="gameObjectRootAnimated">Game object root animated.</param>
+				public static void ResetTransformPropertyModification (GameObject gameObjectRootAnimated)
+				{
+					
+						UnityEditorInternal.ComponentUtility.CopyComponent (gameObjectRootAnimated.transform);
+					
+						//Get all modification except of type Transform
+						PropertyModification[] modifications = PrefabUtility.GetPropertyModifications (gameObjectRootAnimated).Select ((itm) => itm).Where ((itm) => itm.target.GetType () != typeof(UnityEngine.Transform)).ToArray ();
+					
+					
+					
+						PrefabUtility.SetPropertyModifications (gameObjectRootAnimated, modifications);
+					
+					
+						UnityEditorInternal.ComponentUtility.PasteComponentValues (gameObjectRootAnimated.transform);
+					
+				}
 
 
 

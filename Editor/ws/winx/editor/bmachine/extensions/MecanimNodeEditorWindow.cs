@@ -52,7 +52,6 @@ namespace ws.winx.editor.bmachine.extensions
 				private		static UnityVariable _variableSelected;
 				private static bool __isPlaying;
 				private static bool __isRecording;
-
 				private static float __timeCurrent;//in [seconds]
 
 				public static void Show (MecanimNode target, SerializedNode node, Rect? position)
@@ -65,7 +64,10 @@ namespace ws.winx.editor.bmachine.extensions
 						///////   ACCESS SERIALIZED DATA /////////
 						NodePropertyIterator iterator = node.GetIterator ();
 
-
+						__isPlaying = false;
+						__isRecording = false;
+						_variableSelected = null;
+						timeNormalized = 0f;
 
 
 						if (iterator.Find ("animatorStateSelected"))
@@ -157,41 +159,41 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-		///////// ANIMATION MODE ////////////////
+				///////// ANIMATION MODE ////////////////
 	
-		private static void SetAutoRecordMode (bool record)
-		{
-			if (this.m_AutoRecord != record) {
-				if (record) {
-					//Undo.postprocessModifications+=this.PostprocessAnimationRecordingModifications;
-					
-					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Combine (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
-				} else {
-					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Remove (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
-				}
-				this.m_AutoRecord = record;
-				//			if (this.m_AutoRecord)
-				//			{
-				//				this.EnsureAnimationMode ();
-				//			}
-			}
-		}
+//		private static void SetAutoRecordMode (bool record)
+//		{
+//			if ( != record) {
+//				if (record) {
+//					//Undo.postprocessModifications+=this.PostprocessAnimationRecordingModifications;
+//					
+//					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Combine (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
+//				} else {
+//					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Remove (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
+//				}
+//				this.m_AutoRecord = record;
+//				//			if (this.m_AutoRecord)
+//				//			{
+//				//				this.EnsureAnimationMode ();
+//				//			}
+//			}
+//		}
 		
-		private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
-		{
-			List<UndoPropertyModification> propertyModificationList = new List<UndoPropertyModification> ();
-			EditorClipBinding[] clipBindings=clipBindingsSerialized.value as EditorClipBinding[];
+				private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
+				{
+						List<UndoPropertyModification> propertyModificationList = new List<UndoPropertyModification> ();
+						EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
 
-			Array.ForEach (clipBindings, (itm) => {
+						Array.ForEach (clipBindings, (itm) => {
 
-				propertyModificationList.Concat(AnimationModeUtility.Process (itm.gameObject, itm.clip, modifications, __timeCurrent));
-
-
-			});
+								propertyModificationList.Concat (AnimationModeUtility.Process (itm.gameObject, itm.clip, modifications, __timeCurrent));
 
 
-			return propertyModificationList.ToArray ();
-		}
+						});
+
+
+						return propertyModificationList.ToArray ();
+				}
 
 
 			
@@ -203,12 +205,12 @@ namespace ws.winx.editor.bmachine.extensions
 						if (UnityEditor.EditorUtility.DisplayDialog ("Warning!", 
 			                                             "Are you sure you want to delete the Unity Variable?", "Yes", "No")) {
 								List<EditorClipBinding> bindingList = ((EditorClipBinding[])clipBindingsSerialized.value).ToList ();
-								bindingList.RemoveAt(list.index);
+								bindingList.RemoveAt (list.index);
 
-				clipBindingsSerialized.value=bindingList.ToArray ();
-				clipBindingsSerialized.ApplyModifiedValue ();
+								clipBindingsSerialized.value = bindingList.ToArray ();
+								clipBindingsSerialized.ApplyModifiedValue ();
 				
-				list.list = clipBindingsSerialized.value as IList;
+								list.list = clipBindingsSerialized.value as IList;
 				
 
 				
@@ -222,7 +224,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 						bindingList.Add (ScriptableObject.CreateInstance<EditorClipBinding> ());
 
-						clipBindingsSerialized.value=bindingList.ToArray ();
+						clipBindingsSerialized.value = bindingList.ToArray ();
 						clipBindingsSerialized.ApplyModifiedValue ();
 
 						list.list = clipBindingsSerialized.value as IList;
@@ -247,30 +249,43 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						rect.xMax = 200f;
 
-						clipBindingCurrent.gameObject = EditorGUI.ObjectField (rect,clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
+						EditorGUI.BeginChangeCheck ();
+
+						clipBindingCurrent.gameObject = EditorGUI.ObjectField (rect, clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
+
+						if (EditorGUI.EndChangeCheck () && clipBindingCurrent.gameObject != null) {	
+								clipBindingCurrent.boneTransform = clipBindingCurrent.gameObject.GetRootBone ();
+								
+								
+								
+						}
+
+
 
 						rect.xMin = rect.xMax + 2;
-						rect.xMax = width-60f;
+						rect.xMax = width - 60f;
 
+
+						EditorGUI.BeginChangeCheck ();
 
 						clipBindingCurrent.clip = EditorGUI.ObjectField (rect, clipBindingCurrent.clip, typeof(AnimationClip), true) as AnimationClip;
 
-						if (clipBindingCurrent.clip == null) {
+						if (EditorGUI.EndChangeCheck () && clipBindingCurrent.clip == null) {
 
-							rect.xMin=rect.xMax+2;
-							rect.xMax=width;
+								rect.xMin = rect.xMax + 2;
+								rect.xMax = width;
 
-								if (GUI.Button (rect,"New Clip")) {
+								if (GUI.Button (rect, "New Clip")) {
 
-									string path=EditorUtility.SaveFilePanel(
+										string path = EditorUtility.SaveFilePanel (
 										"Create New Clip",
 										"Assets",
 										"",
 										"anim");
 										
-										if(!String.IsNullOrEmpty(path)){
+										if (!String.IsNullOrEmpty (path)) {
 											
-											clipBindingCurrent.clip = UnityEditor.Animations.AnimatorController.AllocateAnimatorClip (Path.GetFileNameWithoutExtension(path));
+												clipBindingCurrent.clip = UnityEditor.Animations.AnimatorController.AllocateAnimatorClip (Path.GetFileNameWithoutExtension (path));
 
 
 										}
@@ -577,24 +592,24 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-				//////////  MOTION OVERRIDE HANDLING  //////////
+								//////////  MOTION OVERRIDE HANDLING  //////////
 				
-				UnityEngine.Motion motion = null;
+								UnityEngine.Motion motion = null;
 				
-				UnityVariable motionOverridVariable = (UnityVariable)motionOverrideSerialized.value;
+								UnityVariable motionOverridVariable = (UnityVariable)motionOverrideSerialized.value;
 				
-				//if there are no override use motion of selected AnimationState
-				//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
-				if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
-					motion = ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion;
-				else //
-					motion = (UnityEngine.Motion)motionOverridVariable.Value;
+								//if there are no override use motion of selected AnimationState
+								//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
+								if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
+										motion = ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion;
+								else //
+										motion = (UnityEngine.Motion)motionOverridVariable.Value;
 				
 				
 				
-				if (motionOverridVariable != null && motionOverridVariable.Value != null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
-					Debug.LogError ("Can't override state that doesn't contain motion");
-				}
+								if (motionOverridVariable != null && motionOverridVariable.Value != null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
+										Debug.LogError ("Can't override state that doesn't contain motion");
+								}
 
 
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
@@ -626,18 +641,65 @@ namespace ws.winx.editor.bmachine.extensions
 								timeControlRect.xMin = timeControlRect.xMax + 1f;
 								timeControlRect.xMax = timeControlRect.xMin + 21f;
 								timeControlRect.yMin += 2f;
+
+
+								EditorGUI.BeginChangeCheck ();
 				
 								__isRecording = GUI.Toggle (timeControlRect, !__isRecording, TimeControlW.style.recordIcon, EditorStyles.toolbarButton);
 
-
+								if (EditorGUI.EndChangeCheck ())
 								if (__isRecording) {
-					
-					
-					
+						
+										if (!AnimationMode.InAnimationMode ()) {
+												AnimationMode.StartAnimationMode ();
+												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+
+												//reset gameobject with bones to state before animation
+												Array.ForEach ((clipBindingsSerialized.value as EditorClipBinding[]), (itm) => {
+
+														if (itm.gameObject != null && itm.boneTransform != null) {
+
+																//save bone position
+																Vector3 positionPrev = itm.boneTransform.transform.position;
+
+																//make sample at 0f (sample would probably change bone position according to ani clip)
+																//AnimationMode.SampleAnimationClip (itm.gameObject, itm.clip, 0f);
+
+																//calculate difference of bone position orginal - bone postion after clip effect
+																itm.boneOrginalPositionOffset = positionPrev - itm.boneTransform.transform.position;
+
+																//calculate time in seconds from the current postion of time scrubber
+																__timeCurrent = timeNormalized * ((AnimationClip)motion).length;
+
+																
+														}
+							
+												});
+
+
+												//apply clip animaiton at __timeCurrent
+												AnimationModeUtility.ResampleAnimation (clipBindingsSerialized.value as EditorClipBinding[]
+						                                        , ref __timeCurrent);
+
+										}
+									
+										
+						
 								} else {
-					
-					
-					
+										//Remove Undo property modificaiton handlers
+										Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+
+										AnimationMode.StopAnimationMode ();
+
+										//reset gameobject with bones to state before animation
+										Array.ForEach ((clipBindingsSerialized.value as EditorClipBinding[]), (itm) => {
+												if (itm.gameObject != null && itm.boneTransform != null)
+														AnimationModeUtility.ResetTransformPropertyModification (itm.gameObject);
+
+										
+										});
+										
+						
 								}
 
 								timeControlRect.xMin = 40f + 16f;
@@ -646,32 +708,39 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-				EditorGUI.BeginChangeCheck();
+								EditorGUI.BeginChangeCheck ();
 
 								timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, timeNormalized, 0f, 1f, TimeControlW.style.timeScrubber);
 
-							
+								
 
 								
-								if(EditorGUI.EndChangeCheck()){
-
-									__timeCurrent=timeNormalized * ((AnimationClip)motion).length;
-
-									if(!AnimationMode.InAnimationMode ()) {
-										AnimationMode.StartAnimationMode ();
-									}
-
-									__isRecording=true;
-
+								if (EditorGUI.EndChangeCheck ()) {
+						
+										__timeCurrent = timeNormalized * ((AnimationClip)motion).length;
 									
 
+										if (!AnimationMode.InAnimationMode ()) {
+												AnimationMode.StartAnimationMode ();
+
+											
+
+										}
+
+										if (!__isRecording) {
+												__isRecording = true;	
+												//add recording Undo events handlers
+												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+										}
 									
+
+								
 
 										AnimationModeUtility.ResampleAnimation (clipBindingsSerialized.value as EditorClipBinding[]
 					, ref __timeCurrent);
 
 
-									Start
+									
 
 
 								}
@@ -718,14 +787,6 @@ namespace ws.winx.editor.bmachine.extensions
 								}
 					
 					
-					
-
-				
-							
-					
-					
-
-		
 
 					
 					
@@ -741,6 +802,10 @@ namespace ws.winx.editor.bmachine.extensions
 
 				
 				}
+
+
+
+				
 
 		}
 }

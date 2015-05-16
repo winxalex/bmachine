@@ -11,12 +11,21 @@ namespace ws.winx.unity
 	public class EditorClipBinding:ScriptableObject{
 
 
+
+
 		public AnimationClip clip;
 
 		/// <summary>
 		/// GameObject root container of all (need to have Animator Component with RuntimeContoller and one state)
 		/// </summary>
 		public GameObject gameObject;
+
+
+
+		public Transform boneTransform;
+
+
+		public Vector3 boneOrginalPositionOffset=Vector3.zero;
 
 	}
 }

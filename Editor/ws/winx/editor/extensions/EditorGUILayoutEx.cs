@@ -162,6 +162,8 @@ namespace ws.winx.editor.extensions
 				
 										interact = true;
 										current.Use ();
+
+										GUI.changed=true;
 								}
 								break;
 						case EventType.MouseUp:
@@ -177,6 +179,8 @@ namespace ws.winx.editor.extensions
 										value = Mathf.Clamp (m_MouseDrag, 0f, rect3.width) * (max - min) / rect3.width + min;
 										interact = true;
 										current.Use ();
+
+										GUI.changed=true;
 								}
 								break;
 						case EventType.KeyDown:
