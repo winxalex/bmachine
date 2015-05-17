@@ -456,7 +456,7 @@ public class AnimaTestEditor : EditorWindow
 
 						if (EditorGUI.EndChangeCheck () && AnimationMode.InAnimationMode ()) {
 
-								AnimationModeUtility.ResampleAnimation (new GameObject[] {
+								AnimationModeUtility.SampleClipBindingAt (new GameObject[] {
 										animatedObject,
 										animatedObject1
 								}, new AnimationClip[] {
@@ -488,7 +488,7 @@ public class AnimaTestEditor : EditorWindow
 
 				var bonePositionPrev=boneRoot.transform.position;
 				//animatedObjectPosition=-boneRoot.transform.position;
-								AnimationModeUtility.ResampleAnimation (new GameObject[] {
+								AnimationModeUtility.SampleClipBindingAt (new GameObject[] {
 										animatedObject,
 										animatedObject1
 								}, new AnimationClip[] {

@@ -140,8 +140,8 @@ namespace ws.winx.editor
 				/// <param name="time">Time.</param>
 				public static void AddKeyframeToCurve (AnimationCurve animationCurve, AnimationClip animatedClip, EditorCurveBinding binding, float value, Type type, float time)
 				{
-		
-						int keyframeIndex = Array.FindIndex (animationCurve.keys, (itm) => (int)itm.time * animatedClip.frameRate == (int)time * animatedClip.frameRate);
+						//frame comparing (frame=(int)(time*animatedClip.frameRate)
+						int keyframeIndex = Array.FindIndex (animationCurve.keys, (itm) => (int)(itm.time * animatedClip.frameRate) == (int)(time * animatedClip.frameRate));
 						Keyframe key = default(Keyframe);
 						if (keyframeIndex < 0) {
 								if (type == typeof(bool) || type == typeof(float)) {
@@ -325,7 +325,7 @@ namespace ws.winx.editor
 				/// </summary>
 				/// <param name="clipBindings">Clip bindings.</param>
 				/// <param name="time">Time.</param>
-				public static void ResampleAnimation (EditorClipBinding[] clipBindings, float time)
+				public static void SampleClipBindingAt (EditorClipBinding[] clipBindings, float time)
 				{
 						
 						
@@ -344,8 +344,21 @@ namespace ws.winx.editor
 						for (int i=0; i<len; i++) {
 								clipBindingCurrent = clipBindings [i];
 
+								if (clipBindingCurrent.clip != null) {
+										AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, time);
 
-								ResampleAnimation (clipBindingCurrent, time);
+										//Correction is needed for root bones as animation doesn't respect current GameObject transform position,rotation
+										//=> shifting current boneTransform position as result of clip animaiton to offset of orginal position before animation
+										if (clipBindingCurrent.boneTransform != null) {
+									
+									
+												clipBindingCurrent.boneTransform.transform.position = clipBindingCurrent.boneOrginalPositionOffset + clipBindingCurrent.boneTransform.transform.position;
+									
+									
+									
+										}
+								}
+
 							
 								
 						}
@@ -360,26 +373,7 @@ namespace ws.winx.editor
 						
 				}
 
-				/// <summary>
-				/// Resamples the animation.
-				/// </summary>
-				/// <param name="clipBindingCurrent">Clip binding current.</param>
-				/// <param name="time">Time.</param>
-				public static void ResampleAnimation (EditorClipBinding clipBindingCurrent, float time)
-				{
-						AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, time);
 			
-						//Correction is needed for root bones as animation doesn't respect current GameObject transform position,rotation
-						//=> shifting current boneTransform position as result of clip animaiton to offset of orginal position before animation
-						if (clipBindingCurrent.boneTransform != null) {
-				
-				
-								clipBindingCurrent.boneTransform.transform.position = clipBindingCurrent.boneOrginalPositionOffset + clipBindingCurrent.boneTransform.transform.position;
-				
-				
-				
-						}
-				}
 
 
 				/// <summary>
@@ -388,7 +382,7 @@ namespace ws.winx.editor
 				/// <param name="animatedObjects">Animated objects.</param>
 				/// <param name="animationClips">Animation clips.</param>
 				/// <param name="time">Time.</param>
-				public static void ResampleAnimation (GameObject[] animatedObjects, AnimationClip[] animationClips, ref float time)
+				public static void SampleClipBindingAt (GameObject[] animatedObjects, AnimationClip[] animationClips, ref float time)
 				{
 
 			
@@ -480,14 +474,19 @@ namespace ws.winx.editor
 						int len = clipBindings.Length;
 						
 						EditorClipBinding clipBindingCurrent;
-						
+						PrefabType prefabType = PrefabType.None;
 						
 						for (int i=0; i<len; i++) {
 								clipBindingCurrent = clipBindings [i];
 							
+
 							
-								if(clipBindingCurrent.gameObject!=null && clipBindingCurrent.boneTransform)
-								clipBindingCurrent.gameObject.ResetPropertyModification<Transform>();
+								if (clipBindingCurrent.gameObject != null) {
+										prefabType = PrefabUtility.GetPrefabType (clipBindingCurrent.gameObject);
+
+										if (prefabType == PrefabType.ModelPrefab || prefabType == PrefabType.Prefab)
+												clipBindingCurrent.gameObject.ResetPropertyModification<Transform> ();
+								}
 							
 							
 						}
@@ -505,7 +504,7 @@ namespace ws.winx.editor
 					
 						UnityEditorInternal.ComponentUtility.CopyComponent (clipBindingCurrent.gameObject.transform);
 						
-						if (clipBindingCurrent.gameObject != null && clipBindingCurrent.boneTransform!=null)
+						if (clipBindingCurrent.gameObject != null && clipBindingCurrent.boneTransform != null)
 								clipBindingCurrent.gameObject.ResetPropertyModification<Transform> ();
 						
 						UnityEditorInternal.ComponentUtility.PasteComponentValues (clipBindingCurrent.gameObject.transform);
