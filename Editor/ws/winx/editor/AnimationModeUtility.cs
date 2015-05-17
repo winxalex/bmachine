@@ -10,7 +10,12 @@ namespace ws.winx.editor
 {
 		public class AnimationModeUtility
 		{
-
+				/// <summary>
+				/// Gets the current value.
+				/// </summary>
+				/// <returns>The current value.</returns>
+				/// <param name="rootGameObject">Root game object.</param>
+				/// <param name="curveBinding">Curve binding.</param>
 				public static object GetCurrentValue (GameObject rootGameObject, EditorCurveBinding curveBinding)
 				{
 						if (curveBinding.isPPtrCurve) {
@@ -23,6 +28,16 @@ namespace ws.winx.editor
 						return num;
 				}
 	
+
+				/// <summary>
+				/// Adds the key.
+				/// </summary>
+				/// <param name="time">Time.</param>
+				/// <param name="rootGameObject">Root game object.</param>
+				/// <param name="activeAnimationClip">Active animation clip.</param>
+				/// <param name="binding">Binding.</param>
+				/// <param name="type">Type.</param>
+				/// <param name="modification">Modification.</param>
 				private static void AddKey (float time, GameObject rootGameObject, AnimationClip activeAnimationClip, EditorCurveBinding binding, Type type, PropertyModification modification)
 				{
 		
@@ -310,7 +325,7 @@ namespace ws.winx.editor
 				/// </summary>
 				/// <param name="clipBindings">Clip bindings.</param>
 				/// <param name="time">Time.</param>
-				public static void ResampleAnimation (EditorClipBinding[] clipBindings, ref float time)
+				public static void ResampleAnimation (EditorClipBinding[] clipBindings, float time)
 				{
 						
 						
@@ -330,7 +345,7 @@ namespace ws.winx.editor
 								clipBindingCurrent = clipBindings [i];
 
 
-								ResampleAnimation (clipBindingCurrent,time);
+								ResampleAnimation (clipBindingCurrent, time);
 							
 								
 						}
@@ -345,6 +360,11 @@ namespace ws.winx.editor
 						
 				}
 
+				/// <summary>
+				/// Resamples the animation.
+				/// </summary>
+				/// <param name="clipBindingCurrent">Clip binding current.</param>
+				/// <param name="time">Time.</param>
 				public static void ResampleAnimation (EditorClipBinding clipBindingCurrent, float time)
 				{
 						AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, time);
@@ -363,7 +383,7 @@ namespace ws.winx.editor
 
 
 				/// <summary>
-				/// Resamples the animation. !!! Doesn't apply position,rotation correction
+				/// Resamples the animation. !!! Doesn't apply position,rotation correction with offset calculate by SetBindingsOffset
 				/// </summary>
 				/// <param name="animatedObjects">Animated objects.</param>
 				/// <param name="animationClips">Animation clips.</param>
@@ -399,26 +419,102 @@ namespace ws.winx.editor
 				}
 
 
+
 				/// <summary>
-				/// Resets the transform property modification.
+				/// Sets the bindings boonRoot offset  - position before animation from boonRoot position at time=0s.
 				/// </summary>
-				/// <param name="gameObjectRootAnimated">Game object root animated.</param>
-				public static void ResetTransformPropertyModification (GameObject gameObjectRootAnimated)
+				/// <param name="clipBindings">Clip bindings.</param>
+				public static void SetBindingsOffset (EditorClipBinding[] clipBindings)
+				{
+
+						int len = clipBindings.Length;
+							
+						EditorClipBinding clipBindingCurrent;
+							
+							
+						for (int i=0; i<len; i++) {
+								clipBindingCurrent = clipBindings [i];
+
+
+					
+								SetBindingOffset (clipBindingCurrent);
+								
+						
+						}
+				}
+
+
+
+				/// <summary>
+				/// Sets the binding boonRoot offset - position before animation from boonRoot position at time=0s
+				/// </summary>
+				/// <param name="clipBindingCurrent">Clip binding current.</param>
+				public static void SetBindingOffset (EditorClipBinding clipBindingCurrent)
+				{
+						if (clipBindingCurrent.gameObject != null && clipBindingCurrent.boneTransform != null) {
+							
+								//save bone position
+								Vector3 positionPrev = clipBindingCurrent.boneTransform.transform.position;
+							
+								//make sample at 0f (sample would probably change bone position according to ani clip)
+								AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, 0f);
+							
+							
+								//calculate difference of bone position orginal - bone postion after clip effect
+								clipBindingCurrent.boneOrginalPositionOffset = positionPrev - clipBindingCurrent.boneTransform.transform.position;
+							
+							
+							
+							
+						}
+				}
+
+
+				/// <summary>
+				/// Resets the only transform property modifications and restore gameObject transform state as before animation.
+				/// </summary>
+				/// <param name="clipBindings">Clip bindings.</param>
+				public static void ResetBindingsTransformPropertyModification (EditorClipBinding[] clipBindings)
+				{
+						
+						int len = clipBindings.Length;
+						
+						EditorClipBinding clipBindingCurrent;
+						
+						
+						for (int i=0; i<len; i++) {
+								clipBindingCurrent = clipBindings [i];
+							
+							
+								if(clipBindingCurrent.gameObject!=null && clipBindingCurrent.boneTransform)
+								clipBindingCurrent.gameObject.ResetPropertyModification<Transform>();
+							
+							
+						}
+				}
+
+
+
+				/// <summary>
+				/// Resets the binding Transform property modification.
+				/// </summary>
+				/// <param name="clipBindingCurrent">Clip binding current.</param>
+				public static void ResetBindingTransformPropertyModification (EditorClipBinding clipBindingCurrent)
 				{
 					
-						UnityEditorInternal.ComponentUtility.CopyComponent (gameObjectRootAnimated.transform);
 					
-						//Get all modification except of type Transform
-						PropertyModification[] modifications = PrefabUtility.GetPropertyModifications (gameObjectRootAnimated).Select ((itm) => itm).Where ((itm) => itm.target.GetType () != typeof(UnityEngine.Transform)).ToArray ();
-					
-					
-					
-						PrefabUtility.SetPropertyModifications (gameObjectRootAnimated, modifications);
-					
-					
-						UnityEditorInternal.ComponentUtility.PasteComponentValues (gameObjectRootAnimated.transform);
+						UnityEditorInternal.ComponentUtility.CopyComponent (clipBindingCurrent.gameObject.transform);
+						
+						if (clipBindingCurrent.gameObject != null && clipBindingCurrent.boneTransform!=null)
+								clipBindingCurrent.gameObject.ResetPropertyModification<Transform> ();
+						
+						UnityEditorInternal.ComponentUtility.PasteComponentValues (clipBindingCurrent.gameObject.transform);
+						
 					
 				}
+
+
+				
 
 
 

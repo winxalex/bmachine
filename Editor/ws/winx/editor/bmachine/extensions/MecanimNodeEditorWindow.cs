@@ -53,12 +53,15 @@ namespace ws.winx.editor.bmachine.extensions
 				private static bool __isPlaying;
 				private static bool __isRecording;
 				private static float __timeCurrent;//in [seconds]
+				private static EditorClipBinding __nodeClipBinding;
 
 				public static void Show (MecanimNode target, SerializedNode node, Rect? position)
 				{
 						MecanimNodeEditorWindow.__mecanimNode = target;
 
 						MecanimNodeEditorWindow.__serializedNode = node;
+
+
 						
 
 						///////   ACCESS SERIALIZED DATA /////////
@@ -68,6 +71,8 @@ namespace ws.winx.editor.bmachine.extensions
 						__isRecording = false;
 						_variableSelected = null;
 						timeNormalized = 0f;
+						AnimationMode.StopAnimationMode ();
+						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 
 
 						if (iterator.Find ("animatorStateSelected"))
@@ -80,6 +85,15 @@ namespace ws.winx.editor.bmachine.extensions
 						if (iterator.Find ("clipBindings"))
 								clipBindingsSerialized = iterator.current;
 
+
+
+			
+						if (__nodeClipBinding == null)
+							__nodeClipBinding = ScriptableObject.CreateInstance<EditorClipBinding> ();
+						
+						__nodeClipBinding.gameObject = target.self;
+						__nodeClipBinding.clip = getNodeClip ();
+						__nodeClipBinding.boneTransform = __nodeClipBinding.gameObject.GetRootBone ();
 
 						/////// INIT SERIALIZED NODE PROPERTIES - CURVES, COLORS, VARIABLES //////
 						
@@ -98,6 +112,7 @@ namespace ws.winx.editor.bmachine.extensions
 								variablesBindedToCurvesSerialized = iterator.current;
 						else
 								Debug.LogError ("MecananimNode should have public field 'variablesBindedToCurves'");
+		
 							
 							
 							
@@ -105,7 +120,8 @@ namespace ws.winx.editor.bmachine.extensions
 						curveColors = (Color[])curvesColorsSerialized.value;
 						variablesBindedToCurves = (UnityVariable[])variablesBindedToCurvesSerialized.value;
 						
-					
+						AnimationModeUtility.ResetBindingsTransformPropertyModification(clipBindingsSerialized.value as EditorClipBinding[]);
+						AnimationModeUtility.ResetBindingTransformPropertyModification(__nodeClipBinding);
 						
 
 						__gameObjectClipList = new ReorderableList (clipBindingsSerialized.value as IList, typeof(EditorClipBinding), true, true, true, true);
@@ -255,9 +271,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 						if (EditorGUI.EndChangeCheck () && clipBindingCurrent.gameObject != null) {	
 								clipBindingCurrent.boneTransform = clipBindingCurrent.gameObject.GetRootBone ();
-								
-								
-								
+					
 						}
 
 
@@ -266,11 +280,11 @@ namespace ws.winx.editor.bmachine.extensions
 						rect.xMax = width - 60f;
 
 
-						EditorGUI.BeginChangeCheck ();
+						
 
 						clipBindingCurrent.clip = EditorGUI.ObjectField (rect, clipBindingCurrent.clip, typeof(AnimationClip), true) as AnimationClip;
 
-						if (EditorGUI.EndChangeCheck () && clipBindingCurrent.clip == null) {
+						if (clipBindingCurrent.clip == null) {
 
 								rect.xMin = rect.xMax + 2;
 								rect.xMax = width;
@@ -303,8 +317,36 @@ namespace ws.winx.editor.bmachine.extensions
 
 				/// /////////////////////////////////////////////////////////////////////
 
-				
 
+	
+		static AnimationClip getNodeClip(){
+			//////////  MOTION OVERRIDE HANDLING  //////////
+			
+			UnityEngine.Motion motion = null;
+			
+			UnityVariable motionOverridVariable = (UnityVariable)motionOverrideSerialized.value;
+			
+			//if there are no override use motion of selected AnimationState
+			//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
+			if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
+				motion = ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion;
+			else //
+				motion = (UnityEngine.Motion)motionOverridVariable.Value;
+			
+			
+			
+			if (motionOverridVariable != null && motionOverridVariable.Value != null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
+				Debug.LogError ("Can't override state that doesn't contain motion");
+			}
+
+			return motion as AnimationClip;
+
+		}
+
+				
+		/// <summary>
+		/// Raises the GU event.
+		/// </summary>
 				void OnGUI ()
 				{
 
@@ -591,25 +633,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-
-								//////////  MOTION OVERRIDE HANDLING  //////////
-				
-								UnityEngine.Motion motion = null;
-				
-								UnityVariable motionOverridVariable = (UnityVariable)motionOverrideSerialized.value;
-				
-								//if there are no override use motion of selected AnimationState
-								//Debug.Log(((UnityEngine.Object)mecanimNode.motionOverride.Value).);
-								if (motionOverridVariable == null || motionOverridVariable.Value == null || motionOverridVariable.ValueType != typeof(AnimationClip))
-										motion = ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion;
-								else //
-										motion = (UnityEngine.Motion)motionOverridVariable.Value;
-				
-				
-				
-								if (motionOverridVariable != null && motionOverridVariable.Value != null && ((ws.winx.unity.AnimatorState)animatorStateSerialized.value).motion == null) {
-										Debug.LogError ("Can't override state that doesn't contain motion");
-								}
+								__nodeClipBinding.clip=getNodeClip();
 
 
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
@@ -654,32 +678,21 @@ namespace ws.winx.editor.bmachine.extensions
 												AnimationMode.StartAnimationMode ();
 												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
-												//reset gameobject with bones to state before animation
-												Array.ForEach ((clipBindingsSerialized.value as EditorClipBinding[]), (itm) => {
+												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
+												AnimationModeUtility.SetBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
 
-														if (itm.gameObject != null && itm.boneTransform != null) {
-
-																//save bone position
-																Vector3 positionPrev = itm.boneTransform.transform.position;
-
-																//make sample at 0f (sample would probably change bone position according to ani clip)
-																//AnimationMode.SampleAnimationClip (itm.gameObject, itm.clip, 0f);
-
-																//calculate difference of bone position orginal - bone postion after clip effect
-																itm.boneOrginalPositionOffset = positionPrev - itm.boneTransform.transform.position;
-
-																//calculate time in seconds from the current postion of time scrubber
-																__timeCurrent = timeNormalized * ((AnimationClip)motion).length;
-
-																
-														}
-							
-												});
-
+												AnimationModeUtility.SetBindingOffset(__nodeClipBinding);
+												
+												//calculate time in seconds from the current postion of time scrubber
+												__timeCurrent = timeNormalized * getNodeClip().length;
 
 												//apply clip animaiton at __timeCurrent
 												AnimationModeUtility.ResampleAnimation (clipBindingsSerialized.value as EditorClipBinding[]
-						                                        , ref __timeCurrent);
+						                                        ,  __timeCurrent);
+
+												AnimationModeUtility.ResampleAnimation(__nodeClipBinding
+						                                        ,  __timeCurrent);
+
 
 										}
 									
@@ -692,12 +705,11 @@ namespace ws.winx.editor.bmachine.extensions
 										AnimationMode.StopAnimationMode ();
 
 										//reset gameobject with bones to state before animation
-										Array.ForEach ((clipBindingsSerialized.value as EditorClipBinding[]), (itm) => {
-												if (itm.gameObject != null && itm.boneTransform != null)
-														AnimationModeUtility.ResetTransformPropertyModification (itm.gameObject);
+										AnimationModeUtility.ResetBindingsTransformPropertyModification(clipBindingsSerialized.value as EditorClipBinding[]);
 
-										
-										});
+										//reset Node.self gameObject
+										AnimationModeUtility.ResetBindingTransformPropertyModification(__nodeClipBinding);
+												
 										
 						
 								}
@@ -717,27 +729,34 @@ namespace ws.winx.editor.bmachine.extensions
 								
 								if (EditorGUI.EndChangeCheck ()) {
 						
-										__timeCurrent = timeNormalized * ((AnimationClip)motion).length;
+										__timeCurrent = timeNormalized * getNodeClip().length;
 									
 
 										if (!AnimationMode.InAnimationMode ()) {
 												AnimationMode.StartAnimationMode ();
 
-											
+												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
+												AnimationModeUtility.SetBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
+
+												AnimationModeUtility.SetBindingOffset (__nodeClipBinding);
 
 										}
 
 										if (!__isRecording) {
 												__isRecording = true;	
+
 												//add recording Undo events handlers
 												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+
+												
 										}
 									
 
 								
+										
+										AnimationModeUtility.ResampleAnimation (clipBindingsSerialized.value as EditorClipBinding[], __timeCurrent);
 
-										AnimationModeUtility.ResampleAnimation (clipBindingsSerialized.value as EditorClipBinding[]
-					, ref __timeCurrent);
+					AnimationModeUtility.ResampleAnimation(__nodeClipBinding,  __timeCurrent);
 
 
 									

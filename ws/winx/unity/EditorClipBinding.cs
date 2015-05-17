@@ -16,7 +16,7 @@ namespace ws.winx.unity
 		public AnimationClip clip;
 
 		/// <summary>
-		/// GameObject root container of all (need to have Animator Component with RuntimeContoller and one state)
+		/// GameObject root - container of all
 		/// </summary>
 		public GameObject gameObject;
 

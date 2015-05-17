@@ -2,12 +2,45 @@ using UnityEngine;
 using System;
 using System.Reflection;
 using UnityEditor;
+using System.Linq;
 
 
 namespace ws.winx.editor
 {
 
+	#region GameObject Extensions
 
+	public static class GameObjectExtensions{
+
+
+		/// <summary>
+		/// Resets the only typeof(T) property modifications.
+		/// </summary>
+		/// <param name="gameObjectRootAnimated">Game object root animated.</param>
+		public static void ResetPropertyModification<T> (this GameObject gameObjectRootAnimated)
+		{
+			
+			
+			
+			//Get all modification except of type Transform
+			PropertyModification[] modifications = PrefabUtility.GetPropertyModifications (gameObjectRootAnimated).Select ((itm) => itm).Where ((itm) => itm.target.GetType () != typeof(T)).ToArray ();
+			
+			
+			
+			PrefabUtility.SetPropertyModifications (gameObjectRootAnimated, modifications);
+			
+			
+			
+			
+		}
+
+
+
+	}
+
+
+
+	#endregion
 
 
 
