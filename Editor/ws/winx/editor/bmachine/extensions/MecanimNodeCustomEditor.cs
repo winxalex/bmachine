@@ -25,6 +25,7 @@ using Motion = UnityEngine.Motion;
 using StateMachine = UnityEditor.Animations.AnimatorStateMachine;
 using ws.winx.bmachine;
 using UnityEditor.Animations;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.bmachine.extensions
 {

@@ -27,10 +27,10 @@ public class UnityClipboard : ScriptableObject
 		internal struct ObjectInfo
 		{
 				public int uid;
-				public MemberInfo[] members;
-				public object[] values;
+				public MemberInfo[] memberInfosPrimitiveType;
+				public object[] valuesPrimitiveTypes;
 				public Dictionary<MemberInfo,int[]> membersInstanceIDs;
-				public Dictionary<MemberInfo,SerializedObject[]> memberInfoSerializedObject;
+				public Dictionary<MemberInfo,SerializedObject[]> memberInfosSerializedObject;
 
 
 				
@@ -73,7 +73,7 @@ public class UnityClipboard : ScriptableObject
 
 						objInfo = new ObjectInfo ();
 						//objInfo.membersInstanceIDs = new Dictionary<MemberInfo, int[]> ();
-						objInfo.memberInfoSerializedObject = new Dictionary<MemberInfo, SerializedObject[]> ();
+						objInfo.memberInfosSerializedObject = new Dictionary<MemberInfo, SerializedObject[]> ();
 				}
 
 				objInfo.uid = uid;
@@ -83,111 +83,51 @@ public class UnityClipboard : ScriptableObject
 						members = obj.GetType ().GetFields ();
 
 
-				//remove ScriptableObjects or Array of ScirptableObjects
-				objInfo.members = members.Select ((Item) => Item).Where ((item) => !item.GetUnderlyingType ().IsSubclassOf (typeof(ScriptableObject)) && !(item.GetUnderlyingType ().IsArray && item.GetUnderlyingType ().GetElementType ().IsSubclassOf (typeof(ScriptableObject)))).ToArray ();
+				//TODO Extend to All UnityEngine.UnityObject types
 
 
-				
-				MemberInfo[] scriptableObjectsMemberInfo = members.Select ((Item) => Item).Where ((item) => item.GetUnderlyingType ().IsSubclassOf (typeof(ScriptableObject)) || (item.GetUnderlyingType ().IsArray && (item.GetUnderlyingType ().GetElementType ().IsSubclassOf (typeof(ScriptableObject))))).ToArray ();
+				Type typeUnityObject = typeof(UnityEngine.Object);
+
+				//remove UnityEngine.Object or Array of UnityEnigine.Object[]
+				objInfo.memberInfosPrimitiveType = members.Select ((Item) => Item).Where ((item) => !item.GetUnderlyingType ().IsSubclassOf (typeUnityObject) && !(item.GetUnderlyingType ().IsArray && item.GetUnderlyingType ().GetElementType ().IsSubclassOf (typeUnityObject))).ToArray ();
+
+
+				//
+				MemberInfo[] unityObjectsMemberInfo = members.Select ((Item) => Item).Where ((item) => item.GetUnderlyingType ().IsSubclassOf (typeUnityObject) || (item.GetUnderlyingType ().IsArray && (item.GetUnderlyingType ().GetElementType ().IsSubclassOf (typeUnityObject)))).ToArray ();
 				
 				MemberInfo memberInfoCurrent;
 				
 
-				if (scriptableObjectsMemberInfo.Length > 0) {
-						for (int i=0; i<scriptableObjectsMemberInfo.Length; i++) {
-								memberInfoCurrent = scriptableObjectsMemberInfo [i];
+				if (unityObjectsMemberInfo.Length > 0) {
+						for (int i=0; i<unityObjectsMemberInfo.Length; i++) {
+								memberInfoCurrent = unityObjectsMemberInfo [i];
 
 								//if memberInfoCurrent is info for array of scriptableObject
 								if (memberInfoCurrent.GetUnderlyingType ().IsArray) {
 
-										UnityEngine.ScriptableObject[] scriptableObjects = (UnityEngine.ScriptableObject[])memberInfoCurrent.GetValue (obj);
+										UnityEngine.Object[] unityObjects = (UnityEngine.Object[])memberInfoCurrent.GetValue (obj);
 
-										SerializedObject[] serializedObjects = new SerializedObject[scriptableObjects.Length];
+										SerializedObject[] serializedObjects = new SerializedObject[unityObjects.Length];
 									
-										for (int scriptableObjectsInx=0; scriptableObjectsInx<scriptableObjects.Length; scriptableObjectsInx++) {	
+										for (int scriptableObjectsInx=0; scriptableObjectsInx<unityObjects.Length; scriptableObjectsInx++) {	
 
-												serializedObjects [scriptableObjectsInx] = new SerializedObject (scriptableObjects [scriptableObjectsInx]);
+												serializedObjects [scriptableObjectsInx] = new SerializedObject (unityObjects [scriptableObjectsInx]);
 										}
 
-										objInfo.memberInfoSerializedObject [memberInfoCurrent] = serializedObjects;
+										objInfo.memberInfosSerializedObject [memberInfoCurrent] = serializedObjects;
 
 								} else {
 										
-										objInfo.memberInfoSerializedObject [memberInfoCurrent] = new SerializedObject[]{ new SerializedObject ((ScriptableObject)memberInfoCurrent.GetValue (obj))};
+										objInfo.memberInfosSerializedObject [memberInfoCurrent] = new SerializedObject[]{ new SerializedObject ((UnityEngine.Object)memberInfoCurrent.GetValue (obj))};
 
 								}
 						}
 				}
 
 
-		/// SOME IDEAS ABOUT SAVING THINGS ON DISK ALSO
-
-				//clean .asset from any left
-//				foreach (var memberInfoInstanceIDPair in objInfo.membersInstanceIDs) {
-//						memberInfoCurrent = memberInfoInstanceIDPair.Key;
-//						//remove previous clones from .asset
-//						
-//						int[] IDs = objInfo.membersInstanceIDs [memberInfoCurrent];
-//						
-//						// destroy object and its footprint in .asset
-//						for (int k=0; k<IDs.Length; k++)
-//								UnityEngine.Object.DestroyImmediate (EditorUtility.InstanceIDToObject (IDs [k]), true);
-//						
-//				}
-		
-		
-//		if (scriptableObjectsMemberInfo.Length > 0) {
-//						for (int i=0; i<scriptableObjectsMemberInfo.Length; i++) {
-//								memberInfoCurrent = scriptableObjectsMemberInfo [i];
-//								if (memberInfoCurrent.GetUnderlyingType ().IsArray) {
-//										IList so = (IList)memberInfoCurrent.GetValue (obj);
-//										List<int> instanceIDs = new List<int> ();
-//										for (int j = 0; j < so.Count; j++) {
-//												scriptableObjectCurrent = so [j] as ScriptableObject;
-//												if (scriptableObjectCurrent != null) {
-//				
-//															
-//														scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectCurrent);
-//														//save instanceIDs so can be used whild restore fro accesing cloned
-//														instanceIDs.Add (scriptableObjectClone.GetInstanceID ());
-//							
-//														//save to .asset
-//														AssetDatabase.AddObjectToAsset (scriptableObjectClone, this);
-//												}
-//										}
-//
-//					
-//								if (instanceIDs.Count > 0){
-//												objInfo.membersInstanceIDs [memberInfoCurrent] = instanceIDs.ToArray ();
-//										}
-//
-//								} else {
-//										scriptableObjectCurrent = memberInfoCurrent.GetValue (obj) as ScriptableObject;
-//										
-//										if (scriptableObjectCurrent != null) {
-//
-//
-//												scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectCurrent);
-//
-//												//save cloned SO id's
-//												objInfo.membersInstanceIDs [memberInfoCurrent] = new int[]{  scriptableObjectClone.GetInstanceID ()};
-//											
-//												//save to .asset
-//												AssetDatabase.AddObjectToAsset (scriptableObjectClone, this);
-//					//	AssetDatabase.AddObjectToAsset (((UnityVariable)scriptableObjectClone).__reflectedInstanceUnity, this);
-//										}
-//					
-//
-//								}
-//						}
-//
-//						AssetDatabase.SaveAssets ();
-//						
-//				}
-
 
 				//get values from Members of Obj
-				objInfo.values = FormatterServices.GetObjectData (obj, objInfo.members);		
+				objInfo.valuesPrimitiveTypes = FormatterServices.GetObjectData (obj, objInfo.memberInfosPrimitiveType);		
 
 				__objectInstanceMembers [uid] = objInfo;
 
@@ -233,17 +173,17 @@ public class UnityClipboard : ScriptableObject
 						ObjectInfo objInfo = __objectInstanceMembers [uid];
 
 						//restore values of normal members(not ScriptableObjects)
-						FormatterServices.PopulateObjectMembers (obj, objInfo.members, objInfo.values);
+						FormatterServices.PopulateObjectMembers (obj, objInfo.memberInfosPrimitiveType, objInfo.valuesPrimitiveTypes);
 
 						SerializedObject serializedObjectCurrent;
 						SerializedObject serializedObjectSaved;
-						ScriptableObject scriptabledObjectCurrent;
-						foreach (var memberInfoInstanceIDPair in objInfo.memberInfoSerializedObject) {
+						UnityEngine.Object scriptabledObjectCurrent;
+						foreach (var memberInfoInstanceIDPair in objInfo.memberInfosSerializedObject) {
 								
 								
 								if (memberInfoInstanceIDPair.Key.GetUnderlyingType ().IsArray) {
 
-										UnityEngine.ScriptableObject[] scriptableObjects = (UnityEngine.ScriptableObject[])memberInfoInstanceIDPair.Key.GetValue (obj);
+										UnityEngine.Object[] scriptableObjects = (UnityEngine.Object[])memberInfoInstanceIDPair.Key.GetValue (obj);
 									
 										SerializedObject[] serializedObjects = memberInfoInstanceIDPair.Value;
 										
@@ -262,9 +202,12 @@ public class UnityClipboard : ScriptableObject
 
 														
 												} else {//if new ScriptableObject is added during Preserve
-
+														if(typeElement is ScriptableObject)
 														//create
 														scriptabledObjectCurrent = ScriptableObject.CreateInstance (typeElement);
+														else
+															scriptabledObjectCurrent=(UnityEngine.Object)Activator.CreateInstance(typeElement);//Some types should be handled manually
+														
 														
 												}
 
@@ -301,62 +244,8 @@ public class UnityClipboard : ScriptableObject
 						}
 
 
-//			ScriptableObject scriptableObjectSaved;
-//			ScriptableObject scriptableObjectClone;
-//						foreach (var memberInfoInstanceIDPair in objInfo.membersInstanceIDs) {
-//								
-//								if (memberInfoInstanceIDPair.Key.GetUnderlyingType ().IsArray) {
-//										IList scriptableObjectArray = (IList)memberInfoInstanceIDPair.Key.GetValue (obj);
-//
-//									
-//				
-//										
-//										for (int j = 0; j < scriptableObjectArray.Count; j++) {
-//												
-//												
-//										//get saved object from .asset
-//										scriptableObjectSaved = (ScriptableObject)EditorUtility.InstanceIDToObject (memberInfoInstanceIDPair.Value [j]);
-//										
-//										//clone
-//										scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectSaved);
-//										
-//										//apply
-//										scriptableObjectArray[j]=scriptableObjectClone;
-//							
-//										// destroy object and its footprint in .asset
-//										UnityEngine.Object.DestroyImmediate (scriptableObjectSaved, true);
-//										
-//										
-//										
-//									}
-//								} else {
-//										
-//										//get saved object
-//										scriptableObjectSaved = (ScriptableObject)EditorUtility.InstanceIDToObject (memberInfoInstanceIDPair.Value [0]);
-//				
-//										//clone
-//										 scriptableObjectClone = UnityEngine.Object.Instantiate (scriptableObjectSaved);
-//
-//										//apply
-//										memberInfoInstanceIDPair.Key.SetValue (obj, scriptableObjectClone);
-//
-//										// destroy object and its footprint in .asset
-//										UnityEngine.Object.DestroyImmediate (scriptableObjectSaved, true);
-//
-//	
-//
-//								}
-//
-//							
-//						}
-//
-//						AssetDatabase.SaveAssets ();
-//
-//						//reimport
-//						AssetDatabase.ImportAsset (AssetDatabase.GetAssetPath (this.GetInstanceID ()));
 
-//						objInfo.membersInstanceIDs.Clear ();
-						objInfo.memberInfoSerializedObject.Clear();
+						objInfo.memberInfosSerializedObject.Clear();
 
 						__objectInstanceMembers.Remove (uid);
 

@@ -11,7 +11,7 @@ using ws.winx.editor.drawers;
 using System.IO;
 using UnityEditor.Animations;
 
-namespace ws.winx.editor
+namespace ws.winx.editor.utilities
 {
 		public class EditorUtilityEx
 		{

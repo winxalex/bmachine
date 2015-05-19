@@ -103,7 +103,7 @@ namespace ws.winx.unity
 				clipOverride=animatorOverrideController.clips[0].originalClip;
 			} else {
 				//AS RuntimeAnimatorController can't be created at runtime
-				RuntimeAnimatorController dummyController = AnimationUtilityEx.DUMMY_CONTROLLER;
+				RuntimeAnimatorController dummyController = AnimatorUtilityEx.DUMMY_CONTROLLER;
 				
 				clipOverride=dummyController.animationClips[0];
 				

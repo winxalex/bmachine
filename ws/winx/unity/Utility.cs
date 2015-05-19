@@ -522,7 +522,7 @@ namespace ws.winx.unity{
 
 
 
-	public static class AnimationUtilityEx{
+	public static class AnimatorUtilityEx{
 
 		static RuntimeAnimatorController _dummyController;
 

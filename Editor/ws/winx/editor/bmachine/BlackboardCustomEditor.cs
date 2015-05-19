@@ -21,6 +21,7 @@ using ws.winx.csharp.extensions;
 using ws.winx.editor.windows;
 using UnityEngine.Events;
 using ws.winx.editor.drawers;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.bmachine
 {

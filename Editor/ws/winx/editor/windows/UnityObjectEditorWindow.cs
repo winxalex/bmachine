@@ -11,6 +11,7 @@ using UnityEngine.Events;
 using UnityEditorInternal;
 using System.Runtime.Serialization;
 using System.CodeDom.Compiler;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.windows
 {

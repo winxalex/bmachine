@@ -316,6 +316,7 @@ public class AnimaTestEditor : EditorWindow
 
 
 								EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
+
 								int curveBindingLen = curveBindings.Length;
 								curves = new AnimationCurve[curveBindingLen];
 								variables = new UnityVariable[curveBindingLen];

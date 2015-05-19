@@ -20,6 +20,7 @@ using BehaviourMachine;
 using UnityEngine.Events;
 using System.Runtime.Serialization;
 using ws.winx.csharp.extensions;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.extensions
 {
@@ -105,7 +106,7 @@ namespace ws.winx.editor.extensions
 
 				public delegate void MenuCallback<T> (int selectedIndex,T SelectedObject,int controlID);
 
-				public delegate void EventCallback (int ownerControlID,Event e);
+				public delegate void EventCallback<T>(int ownerControlID,Event e,T userData);
 
 				public delegate void ObjectPropertyCallback (UnityEngine.Object @object,Type type,string property);
 
@@ -249,7 +250,7 @@ namespace ws.winx.editor.extensions
 				/// <typeparam name="T">The 1st type parameter.</typeparam>
 				public static int CustomPopup<T> (GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
 		                                 MenuCallback<T> onSelection=null,
-		                                 EventCallback onEvent=null,
+		                                 EventCallback<T> onEvent=null,
 		                                 GUIStyle style=null,
 		                                  UnityEngine.Rect? position=null
 		                                
@@ -350,20 +351,9 @@ namespace ws.winx.editor.extensions
 			
 						//dispatch events
 						if (onEvent != null && controlID == GUIUtility.hotControl) {
-								onEvent (controlID, Event.current);
+								onEvent (controlID, Event.current,values[selectedIndex]);
 						}
-						//								switch (Event.current.GetTypeForControl (controlID)) {
-						//								case EventType.mouseDown://never triggered
-						//										Debug.Log ("Event " + Event.current.type);
-						//
-						//										break;
-						//								case EventType.mouseUp:
-						//										Debug.Log ("Event " + Event.current.type);
-						//										break;
-						//			default:
-						//				Debug.Log ("Event "+Event.current.type);
-						//				break;
-						//			}
+						 
 			
 						bool clicked;
 
@@ -427,7 +417,7 @@ namespace ws.winx.editor.extensions
 		#region CustomObjectPopup
 				public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values, Func<T,T,bool> comparer=null,
 		                                      MenuCallback<T> onSelection=null,
-		                                      EventCallback onEvent=null,
+		                                      EventCallback<T> onEvent=null,
 		                                      GUIStyle labelStyle=null,
 
 		                                      UnityEngine.Rect? position=null

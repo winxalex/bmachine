@@ -20,12 +20,13 @@ using System.Collections.Generic;
 using System.Linq;
 using ws.winx.editor.extensions;
 using System.IO;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.bmachine.extensions
 {
 		public class MecanimNodeEditorWindow:EditorWindow
 		{
-				private static MecanimNodeEditorWindow window;
+				private static MecanimNodeEditorWindow __window;
 				private static MecanimNode __mecanimNode;
 				private static SerializedNode __serializedNode;
 				private static ReorderableList __gameObjectClipList;
@@ -38,7 +39,7 @@ namespace ws.winx.editor.bmachine.extensions
 				private static	SerializedNodeProperty animatorStateRunTimeControlSerialized;
 				private static	SerializedNodeProperty motionOverrideSerialized;
 				private static	SerializedNodeProperty clipBindingsSerialized;
-				private static float timeNormalized;
+				private static float __timeNormalized;
 				private static AnimationCurve[] curves;
 				private		static Color[] curveColors;
 				private		static UnityVariable[] variablesBindedToCurves;
@@ -49,12 +50,13 @@ namespace ws.winx.editor.bmachine.extensions
 				private		static CurveEditorW curveEditor;
 				private		static GUIContent propertyPopupLabel = new GUIContent (String.Empty);
 				private		static Vector2 curvePropertiesScroller;
-				private		static UnityVariable _variableSelected;
+				private		static UnityVariable __variableSelected;
 				private static bool __isPlaying;
 				private static bool __isRecording;
 				private static float __timeCurrent;//in [seconds]
 				private static EditorClipBinding __nodeClipBinding;
 				private static EditorClipBinding[] __clipBindings;
+				private static bool __timeNormalizedUpdate;
 
 				public static void Show (MecanimNode target, SerializedNode node, Rect? position)
 				{
@@ -70,10 +72,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 						__isPlaying = false;
 						__isRecording = false;
-						_variableSelected = null;
-						timeNormalized = 0f;
+						__variableSelected = null;
+						__timeNormalized = 0f;
+						__timeNormalizedUpdate = false;
+						__timeCurrent = 0f;
 						AnimationMode.StopAnimationMode ();
 						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+
+						SceneView.onSceneGUIDelegate += OnSceneGUI;
 
 
 						if (iterator.Find ("animatorStateSelected"))
@@ -123,7 +129,13 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						AnimationModeUtility.ResetBindingsTransformPropertyModification (clipBindingsSerialized.value as EditorClipBinding[]);
 						AnimationModeUtility.ResetBindingTransformPropertyModification (__nodeClipBinding);
+
+						int clipBindingsNumber = (clipBindingsSerialized.value as EditorClipBinding[]).Length;
+
 						
+						
+
+						//create Reordable list of gameObject-animationClip
 
 						__gameObjectClipList = new ReorderableList (clipBindingsSerialized.value as IList, typeof(EditorClipBinding), true, true, true, true);
 						__gameObjectClipList.drawElementCallback = onDrawElement;
@@ -134,28 +146,29 @@ namespace ws.winx.editor.bmachine.extensions
 									
 						__gameObjectClipList.onRemoveCallback = onRemoveCallback;
 						__gameObjectClipList.onAddCallback = onAddCallback;
+						__gameObjectClipList.onSelectCallback = onSelectCallback;
 						
 									
 						//__gameObjectClipList.elementHeight = 32f;                                    
 			                                                              
 			                                                              
-						if (MecanimNodeEditorWindow.window != null)//restore last 
-								position = window.position;
+						if (MecanimNodeEditorWindow.__window != null)//restore last 
+								position = __window.position;
 
 		
-						MecanimNodeEditorWindow.window = (MecanimNodeEditorWindow)EditorWindow.GetWindow (typeof(MecanimNodeEditorWindow));
+						MecanimNodeEditorWindow.__window = (MecanimNodeEditorWindow)EditorWindow.GetWindow (typeof(MecanimNodeEditorWindow));
 
 
 						 
 						if (position.HasValue)
-								MecanimNodeEditorWindow.window.position = position.Value;
-						MecanimNodeEditorWindow.window.Show ();
+								MecanimNodeEditorWindow.__window.position = position.Value;
+						MecanimNodeEditorWindow.__window.Show ();
 				}
 
 				public static void Hide ()
 				{
-						if (window != null)
-								window.Close ();
+						if (__window != null)
+								__window.Close ();
 				}
 
 
@@ -163,7 +176,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// Ons the curve select.
 				/// </summary>
 				/// <param name="index">Index.</param>
-				void onCurveSelect (int index)
+				private static void onCurveSelect (int index)
 				{
 						Debug.Log ("Curve " + index + " selected");
 					
@@ -173,28 +186,132 @@ namespace ws.winx.editor.bmachine.extensions
 					
 				}
 
+				private static void OnSceneGUI (SceneView sceneView)
+				{
+						int gameObjectCount = __gameObjectClipList.count;
+						Color clr = Color.red;
+						Vector3[] gameObjectPositionsInTime = null;
+						AnimationClip clip = null;
+						Vector3 cubeSize = new Vector3 (0.1f, 0.1f, 0.1f);
+						EditorClipBinding clipBindingCurrent = null;
+
+						long indexListAndindexFramePacked = 0;
+				
+
+						for (int i=0; i<gameObjectCount; i++) {
+
+								clipBindingCurrent = (__gameObjectClipList.list [i] as EditorClipBinding);
+
+								if (clipBindingCurrent.visible) {
+									
+										
+										clip = clipBindingCurrent.clip;
+
+										if (clip != null && clipBindingCurrent.gameObject != null) {
+
+												clr = Handles.color;
+												clipBindingCurrent.color.a = 1;
+											
+
+												gameObjectPositionsInTime = AnimationUtilityEx.GetPositions (clip, clipBindingCurrent.gameObject.transform.root);
+
+												if (gameObjectPositionsInTime != null)			
+														for (int j=0; j<gameObjectPositionsInTime.Length; j++) {
+
+																indexListAndindexFramePacked = i;//put index of clipBinding in list/array
+																indexListAndindexFramePacked = indexListAndindexFramePacked << 32 | j;
+			
+
+																Vector3 newPosition = HandlesEx.DragHandle (gameObjectPositionsInTime [j], 0.1f, Handles.SphereCap, Color.red, "j", indexListAndindexFramePacked, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new long[]{j}, null);
+							
 
 
+														}
+							
 
-				///////// ANIMATION MODE ////////////////
-	
-//		private static void SetAutoRecordMode (bool record)
-//		{
-//			if ( != record) {
-//				if (record) {
-//					//Undo.postprocessModifications+=this.PostprocessAnimationRecordingModifications;
-//					
-//					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Combine (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
-//				} else {
-//					Undo.postprocessModifications = (Undo.PostprocessModifications)Delegate.Remove (Undo.postprocessModifications, new Undo.PostprocessModifications (PostprocessAnimationRecordingModifications));
+
+												Handles.DrawPolyLine (gameObjectPositionsInTime);
+
+												//restore color
+												Handles.color = clr;
+										}
+								}
+						}
+					
+
+						//Debug.Log ("hot"+GUIUtility.hotControl);
+					
+						SceneView.RepaintAll ();
+				}
+
+				private static void onDragHandleEvent (int controlID, Event e, long userData)
+				{
+						if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Delete) {
+								int bindingInx = (int)(userData >> 32);
+								int keyframeInx = (int)userData;
+
+								
+								EditorClipBinding[] clipBindings = (clipBindingsSerialized.value as EditorClipBinding[]);
+								AnimationClip clip = clipBindings [bindingInx].clip;
+								AnimationUtilityEx.RemovePositionAt (clip, keyframeInx);
+								
+
+						} else if (e.type == EventType.MouseDown && e.button == 0 && e.clickCount == 1) {
+								int bindingInx = (int)(userData >> 32);
+								int keyframeInx =(int)(userData & 0x0000FFFF);
+								EditorClipBinding[] clipBindings = (clipBindingsSerialized.value as EditorClipBinding[]);
+								AnimationClip clip = clipBindings [bindingInx].clip;
+
+
+								Debug.Log ("bind:"+bindingInx+" "+keyframeInx);
+
+								//get curve 
+								//				
+								float timeAtKeyframe = AnimationUtility.GetEditorCurve (clip, EditorCurveBinding.FloatCurve ("", typeof(Transform), "m_LocalPosition.x")).keys [keyframeInx].time;
+								__timeNormalized = timeAtKeyframe * 1f / getNodeClip ().length;
+								__timeNormalizedUpdate = true;
+				                
+								__window.Repaint ();
+						}
+
+				}
+
+
+//				// Custom Gizmos, Create as many as you'd like
+//				[DrawGizmo(GizmoType.NotSelected | GizmoType.Selected)]
+//				private static void DrawGizmo (Transform aTarget, GizmoType aGizmoType)
+//				{
+//
+//						if (__gameObjectClipList == null)
+//								return;
+//
+//						int gameObjectCount = __gameObjectClipList.count;
+//
+//						Vector3[] gameObjectPositionsInTime = null;
+//						Vector3 cubeSize = new Vector3 (0.1f, 0.1f, 0.1f);
+//						AnimationClip clip = null;
+//						Color clr = Color.green;
+//			
+//						for (int i=0; i<gameObjectCount; i++) {
+//
+//								clip = (__gameObjectClipList.list [i] as EditorClipBinding).clip;
+//
+//								if (clip != null) {
+//										gameObjectPositionsInTime = AnimationUtilityEx.GetPositions (clip);
+//				
+//										clr = Gizmos.color;
+//			
+//
+//										Gizmos.color = Color.green;
+//
+//										for (int j=0; j<gameObjectPositionsInTime.Length; j++)
+//												Gizmos.DrawCube (gameObjectPositionsInTime [j], cubeSize);
+//
+//										Gizmos.color = clr;
+//
+//								}
+//						}
 //				}
-//				this.m_AutoRecord = record;
-//				//			if (this.m_AutoRecord)
-//				//			{
-//				//				this.EnsureAnimationMode ();
-//				//			}
-//			}
-//		}
 		
 				private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
 				{
@@ -272,13 +389,13 @@ namespace ws.winx.editor.bmachine.extensions
 
 						if (EditorGUI.EndChangeCheck () && clipBindingCurrent.gameObject != null) {	
 								clipBindingCurrent.boneTransform = clipBindingCurrent.gameObject.GetRootBone ();
-					
+								
 						}
 
 
 
 						rect.xMin = rect.xMax + 2;
-						rect.xMax = width - 60f;
+						rect.xMax = width - 100f;
 
 
 						
@@ -288,7 +405,7 @@ namespace ws.winx.editor.bmachine.extensions
 						if (clipBindingCurrent.clip == null) {
 
 								rect.xMin = rect.xMax + 2;
-								rect.xMax = width;
+								rect.xMax = rect.xMin + 30f;
 
 								if (GUI.Button (rect, "New Clip")) {
 
@@ -300,15 +417,23 @@ namespace ws.winx.editor.bmachine.extensions
 										
 										if (!String.IsNullOrEmpty (path)) {
 											
-												AnimationClip clip = new AnimationClip();//UnityEditor.Animations.AnimatorController.AllocateAnimatorClip ();
-						clip.name=Path.GetFileNameWithoutExtension (path);		
-						AssetDatabase.CreateAsset(clip,"Assets/"+Path.GetFileName (path));
-												AssetDatabase.SaveAssets();
-												clipBindingCurrent.clip=clip;
+												AnimationClip clip = new AnimationClip ();//UnityEditor.Animations.AnimatorController.AllocateAnimatorClip ();
+												clip.name = Path.GetFileNameWithoutExtension (path);		
+												AssetDatabase.CreateAsset (clip, AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+												AssetDatabase.SaveAssets ();
+												clipBindingCurrent.clip = clip;
 
 										}
 								}
 						}
+
+						rect.xMin = rect.xMax + 2f;
+						rect.xMax = rect.xMin + 30f;
+						clipBindingCurrent.color = EditorGUI.ColorField (rect, clipBindingCurrent.color);
+
+						rect.xMin = rect.xMax + 2f;
+						rect.xMax = width;
+						clipBindingCurrent.visible = EditorGUI.Toggle (rect, clipBindingCurrent.visible);
 			
 				}
 		
@@ -317,7 +442,11 @@ namespace ws.winx.editor.bmachine.extensions
 						EditorGUI.LabelField (rect, "GameObject - AnimationClips:");
 				}
 
+				static void onSelectCallback (ReorderableList list)
+				{
 
+						Selection.activeGameObject = (list.list as EditorClipBinding[]) [list.index].gameObject;
+				}
 
 				/// /////////////////////////////////////////////////////////////////////
 
@@ -474,7 +603,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 						
-												_variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent ("Var:"), _variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
+												__variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent ("Var:"), __variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
 						
 						
 						
@@ -490,13 +619,13 @@ namespace ws.winx.editor.bmachine.extensions
 					
 					
 										/////////////// ADD CURVE(+) /////////
-										if (GUILayout.Button ("Add") && _variableSelected != null) {
+										if (GUILayout.Button ("Add") && __variableSelected != null) {
 						
 						
 						
 						
 												List<UnityVariable> vList = variablesBindedToCurves.ToList ();
-												vList.Add (_variableSelected);
+												vList.Add (__variableSelected);
 												variablesBindedToCurvesSerialized.value = variablesBindedToCurves = vList.ToArray ();
 												variablesBindedToCurvesSerialized.ValueChanged ();
 												//variablesBindedToCurvesSerialized.ApplyModifiedValue ();
@@ -525,7 +654,7 @@ namespace ws.winx.editor.bmachine.extensions
 												List<AnimationCurve> crList = curves.ToList ();
 						
 												curveAnimationNew = new AnimationCurve (new Keyframe[] {
-							new Keyframe (0f, (float)_variableSelected.Value),
+							new Keyframe (0f, (float)__variableSelected.Value),
 							new Keyframe (1f, 1f)
 						});
 						
@@ -556,7 +685,7 @@ namespace ws.winx.editor.bmachine.extensions
 												__serializedNode.ApplyModifiedProperties ();
 						
 						
-												_variableSelected = null;
+												__variableSelected = null;
 						
 										}
 
@@ -600,7 +729,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 												_curveIndexSelected = -1;
-												_variableSelected = null;
+												__variableSelected = null;
 						
 												__serializedNode.ApplyModifiedProperties ();
 						
@@ -680,7 +809,7 @@ namespace ws.winx.editor.bmachine.extensions
 								if (AnimationMode.InAnimationMode ())
 										GUI.color = AnimationMode.animatedPropertyColor;
 
-								__isRecording = GUI.Toggle (timeControlRect, !__isRecording, TimeControlW.style.recordIcon, EditorStyles.toolbarButton);
+								__isRecording = GUI.Toggle (timeControlRect, __isRecording, TimeControlW.style.recordIcon, EditorStyles.toolbarButton);
 
 								GUI.color = color;
 
@@ -708,7 +837,7 @@ namespace ws.winx.editor.bmachine.extensions
 												AnimationModeUtility.SetBindingOffset (__nodeClipBinding);
 												
 												//calculate time in seconds from the current postion of time scrubber
-												__timeCurrent = timeNormalized * getNodeClip ().length;
+												__timeCurrent = __timeNormalized * getNodeClip ().length;
 
 												//apply clip animaiton at __timeCurrent
 												AnimationModeUtility.SampleClipBindingAt (__clipBindings
@@ -745,14 +874,16 @@ namespace ws.winx.editor.bmachine.extensions
 
 								EditorGUI.BeginChangeCheck ();
 
-								timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, timeNormalized, 0f, 1f, TimeControlW.style.timeScrubber);
+								__timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, __timeNormalized, 0f, 1f, TimeControlW.style.timeScrubber);
 
 								
 
 								
-								if (EditorGUI.EndChangeCheck ()) {
-						
-										__timeCurrent = timeNormalized * getNodeClip ().length;
+								if (EditorGUI.EndChangeCheck () || __timeNormalizedUpdate) {
+					
+										__timeCurrent = __timeNormalized * getNodeClip ().length;
+
+										__timeNormalizedUpdate = false;
 									
 										
 										if (!AnimationMode.InAnimationMode ()) {
@@ -817,7 +948,7 @@ namespace ws.winx.editor.bmachine.extensions
 				
 										float leftrightMargin = 39f;// 40f;
 										float effectiveWidth = curveEditorRect.width - 2 * leftrightMargin - curveEditorRect.xMin;
-										float timeLineX = curveEditorRect.xMin + leftrightMargin + effectiveWidth * timeNormalized;
+										float timeLineX = curveEditorRect.xMin + leftrightMargin + effectiveWidth * __timeNormalized;
 				
 										Handles.DrawLine (new Vector2 (timeLineX, curveEditorRect.y), new Vector2 (timeLineX, curveEditorRect.y + curveEditorRect.height));
 								}
@@ -830,7 +961,7 @@ namespace ws.winx.editor.bmachine.extensions
 								for (int varriableCurrentinx=0; varriableCurrentinx<variablesNum; varriableCurrentinx++) {
 						
 						
-										variablesBindedToCurves [varriableCurrentinx].Value = curves [varriableCurrentinx].Evaluate (timeNormalized);
+										variablesBindedToCurves [varriableCurrentinx].Value = curves [varriableCurrentinx].Evaluate (__timeNormalized);
 								}
 					
 					
@@ -850,10 +981,20 @@ namespace ws.winx.editor.bmachine.extensions
 				
 				}
 
-
+				void OnDestroy ()
+				{
+				
+						SceneView.onSceneGUIDelegate -= OnSceneGUI;
+						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+				
+				}
 
 				
 
 		}
+
+
+
+		
 }
 

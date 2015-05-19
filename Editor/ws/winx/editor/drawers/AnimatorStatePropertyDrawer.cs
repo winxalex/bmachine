@@ -9,6 +9,7 @@ using ws.winx.unity;
 using System.Reflection;
 using ws.winx.unity.attributes;
 using UnityEditor.Animations;
+using ws.winx.editor.utilities;
 
 
 namespace ws.winx.editor.drawers

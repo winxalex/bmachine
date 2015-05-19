@@ -10,6 +10,7 @@ using BehaviourMachineEditor;
 using System.Linq;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.bmachine.drawers
 {

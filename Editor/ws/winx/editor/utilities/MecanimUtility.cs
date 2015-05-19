@@ -15,8 +15,9 @@ using System.Collections.Generic;
 using UnityEditor.Animations;
 using ws.winx.unity;
 using AnimatorState=UnityEditor.Animations.AnimatorState;
+using ws.winx.editor.extensions;
 
-namespace ws.winx.editor.extensions
+namespace ws.winx.editor.utilities
 {
 		public class MecanimUtility
 		{
