@@ -500,8 +500,8 @@ namespace ws.winx.editor.bmachine.extensions
 										}
 					
 										
-										//mecanimNode.animationRunTimeControlEnabled = EditorGUILayout.Toggle ("Enable TimeControl", mecanimNode.animationRunTimeControlEnabled);
-										List<int> nAnimatorStateRuntimeControlHaveEnabled = MecanimNode.nAnimatorStateRuntimeControlHaveEnabled;
+										
+										
 										if (animatorStateRuntimeControlEnabledSerialized != null && animatorStateRunTimeControlSerialized != null && (bool)animatorStateRuntimeControlEnabledSerialized.value) {
 												Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
 												timeControlRect.xMin += 38f;

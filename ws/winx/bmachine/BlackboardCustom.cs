@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
+using ws.winx.unity.utilities;
 
 namespace ws.winx.bmachine
 {
@@ -59,14 +60,14 @@ namespace ws.winx.bmachine
 				void ISerializationCallbackReceiver.OnBeforeSerialize ()
 				{
 						if (typesCustom != null) {
-								typesSerialized = Utility.Serialize (typesCustom);
+								typesSerialized = SerializationUtility.Serialize (typesCustom);
 						}
 				}
 
 				void ISerializationCallbackReceiver.OnAfterDeserialize ()
 				{
 						if (typesSerialized != null && typesSerialized.Length > 0) {
-								typesCustom = (List<Type>)Utility.Deserialize (typesSerialized);
+								typesCustom = (List<Type>)SerializationUtility.Deserialize (typesSerialized);
 						}
 
 

@@ -10,6 +10,7 @@ using System.Reflection;
 using ws.winx.editor.drawers;
 using System.IO;
 using UnityEditor.Animations;
+using ws.winx.csharp.extensions;
 
 namespace ws.winx.editor.utilities
 {
@@ -90,7 +91,7 @@ namespace ws.winx.editor.utilities
 				//
 				
 
-
+		#region GetDrawer of type
 				public static PropertyDrawer GetDrawer (Type type)
 				{
 						Type typeDrawer;
@@ -155,6 +156,7 @@ namespace ws.winx.editor.utilities
 
 
 
+		#endregion
 
 		#region SerializedObject
 
@@ -243,6 +245,156 @@ namespace ws.winx.editor.utilities
 			
 				}
 		#endregion
+
+
+
+		/// <summary>
+		/// Objects public members/submembers of type to display options - values.
+		/// </summary>
+		/// <param name="object">Object.</param>
+		/// <param name="type">Type.</param>
+		/// <param name="displayOptions">Display options.</param>
+		/// <param name="membersUniquePath">Members unique path.</param>
+		public static void ObjectToDisplayOptionsValues (UnityEngine.Object @object,Type type,out GUIContent[] displayOptions,out string[] membersUniquePath)
+		{
+			
+			
+			Type target = null;
+			List<GUIContent> guiContentList = new List<GUIContent> ();
+			List<string> membersUniquePathList = new List<string> ();
+			
+			MemberInfo memberInfo;
+			
+			
+			
+			target = @object.GetType ();
+			
+			
+			
+			
+			
+			List<string> list = new List<string> ();
+			
+			
+			
+			
+			
+			
+			MemberInfo[] publicMembers ;
+			int numMembers = 0;
+			int numSubMembers = 0;
+			
+			
+			
+			
+			//GET OBJECT NON STATIC PROPERTIES
+			publicMembers = target.GetPublicMembersOfType (type,false, true, true);
+			
+			numMembers = publicMembers.Length;
+			
+			for (int j = 0; j < numMembers; j++)
+			{
+				memberInfo=publicMembers [j];
+				
+				guiContentList.Add(new GUIContent (@object.GetType ().Name + "/" + memberInfo.Name));
+				
+				membersUniquePathList.Add (memberInfo.Name+"@"+@object.GetInstanceID());
+				
+				
+			}
+			
+			//GET properties in COMPONENTS IF GAME OBJECT
+			GameObject gameObject = @object as GameObject;
+			if (gameObject != null)
+			{
+				Component currentComponent=null;
+				Component[] components = gameObject.GetComponents<Component> ();
+				for (int k = 0; k < components.Length; k++)
+				{
+					currentComponent = components [k];
+					Type compType = currentComponent.GetType ();
+					string uniqueNameInList = StringUtility.GetIndexNameInList (list, compType.Name);
+					list.Add (uniqueNameInList);
+					
+					
+					
+					
+					//NONSTATIC PROPERTIES
+					publicMembers = compType.GetPublicMembersOfType (type, false, true, true);
+					for (int m = 0; m < publicMembers.Length; m++)
+					{
+						memberInfo=publicMembers [m];
+						
+						guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name));
+						
+						membersUniquePathList.Add(memberInfo.Name+"@"+currentComponent.GetInstanceID());
+					}
+					
+					
+					publicMembers = compType.GetMembers(BindingFlags.Instance | BindingFlags.Public);
+					
+					MemberInfo[] publicSubMembers=null;
+					MemberInfo memberSubCurrent=null;
+					numMembers=publicMembers.Length;
+					
+					for (int m = 0; m < numMembers; m++)
+					{
+						
+						memberInfo=publicMembers [m];
+						if(memberInfo.MemberType!=MemberTypes.Property && memberInfo.MemberType!=MemberTypes.Field)
+							continue;
+						
+						publicSubMembers=memberInfo.GetUnderlyingType().GetPublicMembersOfType (type, false, true, true);
+						numSubMembers=publicSubMembers.Length;
+						
+						for(int r=0; r<numSubMembers; r++){
+							
+							memberSubCurrent=publicSubMembers[r];
+							guiContentList.Add(new GUIContent (uniqueNameInList + "/" + memberInfo.Name+"."+memberSubCurrent.Name));
+							
+							membersUniquePathList.Add(memberInfo.Name+"."+memberSubCurrent.Name+"@"+currentComponent.GetInstanceID());
+							
+						}
+						
+						
+					}
+					
+				}
+			}
+			
+			
+			displayOptions=guiContentList.ToArray();
+			membersUniquePath=membersUniquePathList.ToArray();
+			
+			
+			
+			
+		}//end function
+
+
+		#region UnityClipboard
+
+		private static UnityClipboard __clipboard;
+		
+		public static UnityClipboard Clipboard {
+			get {
+				if (__clipboard == null) {
+					
+					__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
+					
+					if (__clipboard == null)
+						AssetDatabase.CreateAsset (ScriptableObject.CreateInstance<UnityClipboard> (), "Assets/Resources/UnityClipboard.asset");
+					
+					__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
+				}
+				
+				return __clipboard;
+			}
+		}
+
+		#endregion
+
+
 
 				
 				/// ////////////////////////////////   MENU EXTENSIONS /////////////////////////
@@ -333,23 +485,7 @@ namespace ws.winx.editor.utilities
 
 		#endregion
 
-				private static UnityClipboard __clipboard;
-
-				public static UnityClipboard Clipboard {
-						get {
-								if (__clipboard == null) {
-													
-										__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
-
-										if (__clipboard == null)
-												AssetDatabase.CreateAsset (ScriptableObject.CreateInstance<UnityClipboard> (), "Assets/Resources/UnityClipboard.asset");
-
-										__clipboard = Resources.Load<UnityClipboard> ("UnityClipboard");
-								}
-
-								return __clipboard;
-						}
-				}
+				
 
 
 

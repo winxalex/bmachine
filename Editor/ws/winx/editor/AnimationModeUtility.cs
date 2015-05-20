@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using ws.winx.unity;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor
 {
@@ -474,19 +475,14 @@ namespace ws.winx.editor
 						int len = clipBindings.Length;
 						
 						EditorClipBinding clipBindingCurrent;
-						PrefabType prefabType = PrefabType.None;
+						
 						
 						for (int i=0; i<len; i++) {
 								clipBindingCurrent = clipBindings [i];
 							
 
 							
-								if (clipBindingCurrent.gameObject != null) {
-										prefabType = PrefabUtility.GetPrefabType (clipBindingCurrent.gameObject);
-
-										if (prefabType == PrefabType.ModelPrefab || prefabType == PrefabType.Prefab)
-												clipBindingCurrent.gameObject.ResetPropertyModification<Transform> ();
-								}
+								ResetBindingTransformPropertyModification (clipBindingCurrent);
 							
 							
 						}
@@ -501,13 +497,28 @@ namespace ws.winx.editor
 				public static void ResetBindingTransformPropertyModification (EditorClipBinding clipBindingCurrent)
 				{
 					
-					
-						UnityEditorInternal.ComponentUtility.CopyComponent (clipBindingCurrent.gameObject.transform);
+						PrefabType prefabType = PrefabType.None;
+
 						
-						if (clipBindingCurrent.gameObject != null && clipBindingCurrent.boneTransform != null)
-								clipBindingCurrent.gameObject.ResetPropertyModification<Transform> ();
 						
-						UnityEditorInternal.ComponentUtility.PasteComponentValues (clipBindingCurrent.gameObject.transform);
+
+						
+						
+						
+						
+						if (clipBindingCurrent.gameObject != null) {
+								prefabType = PrefabUtility.GetPrefabType (clipBindingCurrent.gameObject);
+				
+								if (prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance)
+										clipBindingCurrent.gameObject.ResetPropertyModification<Transform> ();
+
+
+							//rewind to start position
+							clipBindingCurrent.ResetRoot ();
+						}
+						
+						
+						
 						
 					
 				}

@@ -18,10 +18,12 @@ public class UnityClipboard : ScriptableObject
 {
 
 
-
+		
 		
 
-		Dictionary<int,ObjectInfo> __objectInstanceMembers;
+		private static Dictionary<int,ObjectInfo> __objectInstanceMembers;
+		private static Vector3 __positionSaved=Vector3.zero;
+		private static Quaternion __rotationSaved=Quaternion.identity;
 
 
 		internal struct ObjectInfo
@@ -33,15 +35,13 @@ public class UnityClipboard : ScriptableObject
 				public Dictionary<MemberInfo,SerializedObject[]> memberInfosSerializedObject;
 
 
-				
+			
 		}
 
 		public void OnReset ()
 		{
-			__objectInstanceMembers = new Dictionary<int, ObjectInfo> ();	
+				__objectInstanceMembers = new Dictionary<int, ObjectInfo> ();	
 		}
-
-
 
 		public bool HasBeenPreseved (int uid)
 		{
@@ -83,8 +83,7 @@ public class UnityClipboard : ScriptableObject
 						members = obj.GetType ().GetFields ();
 
 
-				//TODO Extend to All UnityEngine.UnityObject types
-
+				
 
 				Type typeUnityObject = typeof(UnityEngine.Object);
 
@@ -138,8 +137,8 @@ public class UnityClipboard : ScriptableObject
 		public void remove (int id)
 		{
 
-			// destroy object and its footprint in .asset
-			UnityEngine.Object.DestroyImmediate (EditorUtility.InstanceIDToObject(id), true);
+				// destroy object and its footprint in .asset
+				UnityEngine.Object.DestroyImmediate (EditorUtility.InstanceIDToObject (id), true);
 	
 
 
@@ -202,11 +201,11 @@ public class UnityClipboard : ScriptableObject
 
 														
 												} else {//if new ScriptableObject is added during Preserve
-														if(typeElement is ScriptableObject)
+														if (typeElement is ScriptableObject)
 														//create
-														scriptabledObjectCurrent = ScriptableObject.CreateInstance (typeElement);
+																scriptabledObjectCurrent = ScriptableObject.CreateInstance (typeElement);
 														else
-															scriptabledObjectCurrent=(UnityEngine.Object)Activator.CreateInstance(typeElement);//Some types should be handled manually
+																scriptabledObjectCurrent = (UnityEngine.Object)Activator.CreateInstance (typeElement);//Some types should be handled manually
 														
 														
 												}
@@ -245,7 +244,7 @@ public class UnityClipboard : ScriptableObject
 
 
 
-						objInfo.memberInfosSerializedObject.Clear();
+						objInfo.memberInfosSerializedObject.Clear ();
 
 						__objectInstanceMembers.Remove (uid);
 
@@ -258,5 +257,16 @@ public class UnityClipboard : ScriptableObject
 				
 		}
 
+		public static void PasteTransform (ref Transform transformRoot)
+		{
+			transformRoot.position = __positionSaved;
+			transformRoot.rotation = __rotationSaved;
+		}
+
+		public static void CopyTransform (Transform transformRoot)
+		{
+			__positionSaved = transformRoot.position;
+			__rotationSaved = transformRoot.rotation;
+		}
 
 }

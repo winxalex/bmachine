@@ -9,6 +9,7 @@ using UnityEngine.Events;
 using System.CodeDom.Compiler;
 using System.Runtime.Serialization;
 using ws.winx.csharp.utilities;
+using ws.winx.unity.utilities;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -133,6 +134,12 @@ namespace ws.winx.unity
 
 					
 
+				}
+
+
+				public void SetDirty(){
+
+					this.OnBeforeSerialize ();
 				}
 
 				/// <summary>
@@ -350,6 +357,9 @@ namespace ws.winx.unity
 						return variable;
 				}
 
+
+				
+
 		#region ISerializationCallbackReceiver implementation
 
 				public void OnBeforeSerialize ()
@@ -358,7 +368,7 @@ namespace ws.winx.unity
 //								if (__memberInfo != null)
 //										memberInfoSerialized = Utility.Serialize (this.__memberInfo);
 
-								valueTypeSerialized = Utility.Serialize (_valueType);
+								valueTypeSerialized = SerializationUtility.Serialize (_valueType);
 
 								//if it is not reference to other UnityVariable isn't null and not reference to UnityObject
 								if (__unityVariableReferencedInstanceID == 0 && (__valueObject != null) && (__instanceUnityObject == null || (__instanceUnityObject != null && __instanceUnityObject.GetInstanceID () == 0) && __event == null) 
@@ -370,7 +380,7 @@ namespace ws.winx.unity
 
 						
 										try {
-												valueObjectSerialized = Utility.Serialize (__valueObject);
+												valueObjectSerialized = SerializationUtility.Serialize (__valueObject);
 										} catch (Exception ex) {
 
 												Debug.LogWarning (ex.Message + " name:" + this.name + __valueObject + " " + __instanceUnityObject);
@@ -396,7 +406,7 @@ namespace ws.winx.unity
 								}
 
 								if (valueTypeSerialized != null && valueTypeSerialized.Length > 0)
-										_valueType = (Type)Utility.Deserialize (valueTypeSerialized);
+										_valueType = (Type)SerializationUtility.Deserialize (valueTypeSerialized);
 								else 
 										_valueType = typeof(System.Object);
 
@@ -412,7 +422,7 @@ namespace ws.winx.unity
 
 						
 			
-										__valueObject = Utility.Deserialize (valueObjectSerialized);
+										__valueObject = SerializationUtility.Deserialize (valueObjectSerialized);
 
 #if UNITY_EDITOR
 										__seralizedProperty = null;

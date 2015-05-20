@@ -1282,7 +1282,7 @@ namespace ws.winx.editor.extensions
 
 							
 										//get properties from object by object type
-										Utility.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out membersUniquePath);
+										EditorUtilityEx.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out membersUniquePath);
 
 										
 										

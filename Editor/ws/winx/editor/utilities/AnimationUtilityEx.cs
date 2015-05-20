@@ -26,6 +26,22 @@ namespace ws.winx.editor.utilities
 			AnimationUtility.GetEditorCurve (clip, EditorCurveBinding.FloatCurve ("", T, "m_LocalPosition.z")).RemoveKey (keyframeInx);
 		}
 
+
+		public static float GetTimeAt(AnimationClip clip,int keyFrameInx){
+
+			return AnimationUtility.GetEditorCurve (clip, EditorCurveBinding.FloatCurve ("", typeof(Transform), "m_LocalPosition.x")).keys[keyFrameInx].time;
+
+
+		}
+
+
+
+		/// <summary>
+		/// Gets the positions x,y,z by keyframes transformed from local to world space
+		/// </summary>
+		/// <returns>The positions.</returns>
+		/// <param name="clip">Clip.</param>
+		/// <param name="transform">Transform.</param>
 		public static Vector3[] GetPositions(AnimationClip clip,Transform transform=null)
 		{
 

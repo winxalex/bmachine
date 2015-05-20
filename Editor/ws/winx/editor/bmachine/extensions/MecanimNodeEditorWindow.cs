@@ -55,7 +55,7 @@ namespace ws.winx.editor.bmachine.extensions
 				private static bool __isRecording;
 				private static float __timeCurrent;//in [seconds]
 				private static EditorClipBinding __nodeClipBinding;
-				private static EditorClipBinding[] __clipBindings;
+				private static EditorClipBinding[] __clipBindingsToBeAnimated;
 				private static bool __timeNormalizedUpdate;
 
 				public static void Show (MecanimNode target, SerializedNode node, Rect? position)
@@ -100,7 +100,9 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						__nodeClipBinding.gameObject = target.self;
 						__nodeClipBinding.clip = getNodeClip ();
-						__nodeClipBinding.boneTransform = __nodeClipBinding.gameObject.GetRootBone ();
+						
+
+						
 
 						/////// INIT SERIALIZED NODE PROPERTIES - CURVES, COLORS, VARIABLES //////
 						
@@ -130,7 +132,7 @@ namespace ws.winx.editor.bmachine.extensions
 						AnimationModeUtility.ResetBindingsTransformPropertyModification (clipBindingsSerialized.value as EditorClipBinding[]);
 						AnimationModeUtility.ResetBindingTransformPropertyModification (__nodeClipBinding);
 
-						int clipBindingsNumber = (clipBindingsSerialized.value as EditorClipBinding[]).Length;
+						
 
 						
 						
@@ -186,21 +188,34 @@ namespace ws.winx.editor.bmachine.extensions
 					
 				}
 
+
+				/// <summary>
+				/// Raises the scene GUI event.
+				/// </summary>
+				/// <param name="sceneView">Scene view.</param>
 				private static void OnSceneGUI (SceneView sceneView)
 				{
-						int gameObjectCount = __gameObjectClipList.count;
+					if (clipBindingsSerialized.value == null) return;
+
+			EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
+						int bindingsLength=clipBindings.Length;
 						Color clr = Color.red;
-						Vector3[] gameObjectPositionsInTime = null;
+						Vector3[] positionsInKeyframe = null;
 						AnimationClip clip = null;
-						Vector3 cubeSize = new Vector3 (0.1f, 0.1f, 0.1f);
+						
 						EditorClipBinding clipBindingCurrent = null;
 
 						long indexListAndindexFramePacked = 0;
+
+						Transform transformRoot = null;
+
+						
+						
 				
 
-						for (int i=0; i<gameObjectCount; i++) {
+						for (int i=0; i<bindingsLength; i++) {
 
-								clipBindingCurrent = (__gameObjectClipList.list [i] as EditorClipBinding);
+								clipBindingCurrent = clipBindings[i];
 
 								if (clipBindingCurrent.visible) {
 									
@@ -209,31 +224,59 @@ namespace ws.winx.editor.bmachine.extensions
 
 										if (clip != null && clipBindingCurrent.gameObject != null) {
 
-												clr = Handles.color;
-												clipBindingCurrent.color.a = 1;
+												
 											
+												
+												if(!clipBindingCurrent.gameObject.isRoot())
+												{
+														transformRoot = clipBindingCurrent.gameObject.transform.root;
 
-												gameObjectPositionsInTime = AnimationUtilityEx.GetPositions (clip, clipBindingCurrent.gameObject.transform.root);
+														//save
+														
+														UnityClipboard.CopyTransform(transformRoot);
 
-												if (gameObjectPositionsInTime != null)			
-														for (int j=0; j<gameObjectPositionsInTime.Length; j++) {
+														//rewind to start position
+														transformRoot.position = clipBindingCurrent.positionOriginalRoot;
+														transformRoot.rotation = clipBindingCurrent.rotationOriginalRoot;
+
+														positionsInKeyframe = AnimationUtilityEx.GetPositions (clip, transformRoot);
+
+														//restore saved
+														UnityClipboard.PasteTransform(ref transformRoot);
+														
+												}else{
+
+													positionsInKeyframe = AnimationUtilityEx.GetPositions (clip);
+
+												}
+												
+
+												if (positionsInKeyframe != null) {			
+														for (int j=0; j<positionsInKeyframe.Length; j++) {
 
 																indexListAndindexFramePacked = i;//put index of clipBinding in list/array
-																indexListAndindexFramePacked = indexListAndindexFramePacked << 32 | j;
-			
+																indexListAndindexFramePacked = indexListAndindexFramePacked << 32 | (uint)j;
 
-																Vector3 newPosition = HandlesEx.DragHandle (gameObjectPositionsInTime [j], 0.1f, Handles.SphereCap, Color.red, "j", indexListAndindexFramePacked, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new long[]{j}, null);
+																//actualy this is static handle
+																 HandlesEx.DragHandle (positionsInKeyframe [j], 0.1f, Handles.SphereCap, Color.red, "("+j+")"+" "+AnimationUtilityEx.GetTimeAt(clip,j), indexListAndindexFramePacked, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new long[]{j}, null);
 							
 
 
 														}
-							
+														//save color
+														clr = Handles.color;
+
+														
+														clipBindingCurrent.color.a = 1;
+														Handles.color = clipBindingCurrent.color;
 
 
-												Handles.DrawPolyLine (gameObjectPositionsInTime);
+														Handles.DrawPolyLine (positionsInKeyframe);
+														//restore color
+														Handles.color = clr;
+												}
 
-												//restore color
-												Handles.color = clr;
+												
 										}
 								}
 						}
@@ -244,6 +287,13 @@ namespace ws.winx.editor.bmachine.extensions
 						SceneView.RepaintAll ();
 				}
 
+
+				/// <summary>
+				/// Ons the DragHandle event.
+				/// </summary>
+				/// <param name="controlID">Control I.</param>
+				/// <param name="e">E.</param>
+				/// <param name="userData">User data.</param>
 				private static void onDragHandleEvent (int controlID, Event e, long userData)
 				{
 						if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Delete) {
@@ -258,12 +308,12 @@ namespace ws.winx.editor.bmachine.extensions
 
 						} else if (e.type == EventType.MouseDown && e.button == 0 && e.clickCount == 1) {
 								int bindingInx = (int)(userData >> 32);
-								int keyframeInx =(int)(userData & 0x0000FFFF);
+								int keyframeInx = (int)(userData & 0x0000FFFF);
 								EditorClipBinding[] clipBindings = (clipBindingsSerialized.value as EditorClipBinding[]);
 								AnimationClip clip = clipBindings [bindingInx].clip;
 
 
-								Debug.Log ("bind:"+bindingInx+" "+keyframeInx);
+								Debug.Log ("bind:" + bindingInx + " " + keyframeInx);
 
 								//get curve 
 								//				
@@ -312,7 +362,13 @@ namespace ws.winx.editor.bmachine.extensions
 //								}
 //						}
 //				}
-		
+
+
+				/// <summary>
+				/// Postprocesses the animation recording and property modifications.
+				/// </summary>
+				/// <returns>The animation recording modifications.</returns>
+				/// <param name="modifications">Modifications.</param>
 				private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
 				{
 						List<UndoPropertyModification> propertyModificationList = new List<UndoPropertyModification> ();
@@ -383,12 +439,17 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						rect.xMax = 200f;
 
+						
+
 						EditorGUI.BeginChangeCheck ();
 
-						clipBindingCurrent.gameObject = EditorGUI.ObjectField (rect, clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
+						GameObject gameObjectBinded = EditorGUI.ObjectField (rect, clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
 
-						if (EditorGUI.EndChangeCheck () && clipBindingCurrent.gameObject != null) {	
-								clipBindingCurrent.boneTransform = clipBindingCurrent.gameObject.GetRootBone ();
+						if (EditorGUI.EndChangeCheck () && gameObjectBinded != null) {	
+
+								clipBindingCurrent.gameObject = gameObjectBinded;
+								
+								
 								
 						}
 
@@ -451,7 +512,11 @@ namespace ws.winx.editor.bmachine.extensions
 				/// /////////////////////////////////////////////////////////////////////
 
 
-	
+				
+				/// <summary>
+				/// Gets the MecanimNode clip.
+				/// </summary>
+				/// <returns>The node clip.</returns>
 				static AnimationClip getNodeClip ()
 				{
 						//////////  MOTION OVERRIDE HANDLING  //////////
@@ -479,7 +544,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 				
 				/// <summary>
-				/// Raises the GU event.
+				/// Raises the GUI event.
 				/// </summary>
 				void OnGUI ()
 				{
@@ -563,6 +628,8 @@ namespace ws.winx.editor.bmachine.extensions
 					
 					
 										/////////////   ADD/REMOVE CURVE BINDED TO OBJECT PROP OR GLOBAL VARIABLE /////////////
+										///                                                                                  //
+
 										EditorGUILayout.BeginHorizontal ();
 					
 					
@@ -807,7 +874,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 								if (AnimationMode.InAnimationMode ())
-										GUI.color = AnimationMode.animatedPropertyColor;
+										GUI.color = AnimationMode.animatedPropertyColor;//change color of record button to red
 
 								__isRecording = GUI.Toggle (timeControlRect, __isRecording, TimeControlW.style.recordIcon, EditorStyles.toolbarButton);
 
@@ -826,7 +893,7 @@ namespace ws.winx.editor.bmachine.extensions
 												List<EditorClipBinding> list = (clipBindingsSerialized.value as EditorClipBinding[]).ToList ();
 												list.Add (__nodeClipBinding);
 
-												__clipBindings = list.ToArray ();
+												__clipBindingsToBeAnimated = list.ToArray ();
 												
 												AnimationMode.StartAnimationMode ();
 												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
@@ -840,7 +907,7 @@ namespace ws.winx.editor.bmachine.extensions
 												__timeCurrent = __timeNormalized * getNodeClip ().length;
 
 												//apply clip animaiton at __timeCurrent
-												AnimationModeUtility.SampleClipBindingAt (__clipBindings
+												AnimationModeUtility.SampleClipBindingAt (__clipBindingsToBeAnimated
 						                                        , __timeCurrent);
 
 												
@@ -905,15 +972,15 @@ namespace ws.winx.editor.bmachine.extensions
 												List<EditorClipBinding> list = (clipBindingsSerialized.value as EditorClipBinding[]).ToList ();
 												list.Add (__nodeClipBinding);
 						
-												__clipBindings = list.ToArray ();
+												__clipBindingsToBeAnimated = list.ToArray ();
 
 												
 										}
 									
 
 								
-										
-										AnimationModeUtility.SampleClipBindingAt (__clipBindings, __timeCurrent);
+										//this moves clip binded to gameObject to _timeCurrent
+										AnimationModeUtility.SampleClipBindingAt (__clipBindingsToBeAnimated, __timeCurrent);
 
 							
 

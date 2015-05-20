@@ -9,10 +9,10 @@ public class HandlesEx
 {
 	// internal state for HandlesEx()
 	static int HANDLESEX_HASH = "HandlesEx".GetHashCode();
-	static Vector2 s_DragHandleMouseStart;
-	static Vector2 s_DragHandleMouseCurrent;
-	static Vector3 s_DragHandleWorldStart;
-	static bool s_DragHandleHasMoved;
+	static Vector2 MOUSE_POS_AT_START;
+	static Vector2 MOUSE_POS_CURRENT;
+	static Vector3 HANDLE_POS_WORLD;
+	//static bool s_DragHandleHasMoved;
 
 	
 
@@ -49,9 +49,9 @@ public class HandlesEx
 			if (HandleUtility.nearestControl == id && (Event.current.button == 0 || Event.current.button == 1))
 			{
 				GUIUtility.hotControl = id;
-				s_DragHandleMouseCurrent = s_DragHandleMouseStart = Event.current.mousePosition;
-				s_DragHandleWorldStart = position;
-				s_DragHandleHasMoved = false;
+				MOUSE_POS_CURRENT = MOUSE_POS_AT_START = Event.current.mousePosition;
+				HANDLE_POS_WORLD = position;
+				//s_DragHandleHasMoved = false;
 				
 				//Event.current.Use();
 				EditorGUIUtility.SetWantsMouseJumping(1);
@@ -116,22 +116,22 @@ public class HandlesEx
 		case EventType.MouseDrag:
 			if (GUIUtility.hotControl == id)
 			{
-				s_DragHandleMouseCurrent += new Vector2(Event.current.delta.x, -Event.current.delta.y);
-				Vector3 position2 = Camera.current.WorldToScreenPoint(Handles.matrix.MultiplyPoint(s_DragHandleWorldStart))
-					+ (Vector3)(s_DragHandleMouseCurrent - s_DragHandleMouseStart);
+				MOUSE_POS_CURRENT += new Vector2(Event.current.delta.x, -Event.current.delta.y);
+				Vector3 position2 = Camera.current.WorldToScreenPoint(Handles.matrix.MultiplyPoint(HANDLE_POS_WORLD))
+					+ (Vector3)(MOUSE_POS_CURRENT - MOUSE_POS_AT_START);
 				position = Handles.matrix.inverse.MultiplyPoint(Camera.current.ScreenToWorldPoint(position2));
 				
 				if (Camera.current.transform.forward == Vector3.forward || Camera.current.transform.forward == -Vector3.forward)
-					position.z = s_DragHandleWorldStart.z;
+					position.z = HANDLE_POS_WORLD.z;
 				if (Camera.current.transform.forward == Vector3.up || Camera.current.transform.forward == -Vector3.up)
-					position.y = s_DragHandleWorldStart.y;
+					position.y = HANDLE_POS_WORLD.y;
 				if (Camera.current.transform.forward == Vector3.right || Camera.current.transform.forward == -Vector3.right)
-					position.x = s_DragHandleWorldStart.x;
+					position.x = HANDLE_POS_WORLD.x;
 				
 					if(onEvent!=null)
 						onEvent(id,Event.current,userData);
 				
-				s_DragHandleHasMoved = true;
+				//s_DragHandleHasMoved = true;
 				
 				GUI.changed = true;
 				//Event.current.Use();

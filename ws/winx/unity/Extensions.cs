@@ -4,6 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
 using System.Linq.Expressions;
+using ws.winx.unity.utilities;
 
 namespace ws.winx.unity
 {
@@ -331,6 +332,11 @@ namespace ws.winx.unity
 	#region GameObjectExtensions
 	public static class GameObjectExtensions
 	{
+
+		public static bool isRoot(this GameObject go){
+
+			return go.transform == go.transform.root;
+		}
 
 		public static Transform GetRootBone(this GameObject go){
 

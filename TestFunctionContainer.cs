@@ -9,6 +9,8 @@ public class TestFunctionContainer : MonoBehaviour {
 
 	public AnimationCurve curve;
 
+	public Quaternion quat;
+
 	public GameObject g;
 
 	[MinMaxRange(0f,1f)]
