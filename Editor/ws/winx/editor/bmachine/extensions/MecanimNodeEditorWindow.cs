@@ -898,10 +898,12 @@ namespace ws.winx.editor.bmachine.extensions
 												AnimationMode.StartAnimationMode ();
 												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
-												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
-												AnimationModeUtility.SetBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
+												
 
-												AnimationModeUtility.SetBindingOffset (__nodeClipBinding);
+												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
+												AnimationModeUtility.SaveBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
+
+												AnimationModeUtility.SaveBindingStatus(__nodeClipBinding);
 												
 												//calculate time in seconds from the current postion of time scrubber
 												__timeCurrent = __timeNormalized * getNodeClip ().length;
@@ -957,9 +959,9 @@ namespace ws.winx.editor.bmachine.extensions
 												AnimationMode.StartAnimationMode ();
 
 												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
-												AnimationModeUtility.SetBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
+												AnimationModeUtility.SaveBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
 
-												AnimationModeUtility.SetBindingOffset (__nodeClipBinding);
+												AnimationModeUtility.SaveBindingStatus (__nodeClipBinding);
 
 										}
 

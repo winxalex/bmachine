@@ -416,10 +416,11 @@ namespace ws.winx.editor
 
 
 				/// <summary>
-				/// Sets the bindings boonRoot offset  - position before animation from boonRoot position at time=0s.
+				/// Saves the binding boonRoot offset - position before animation from boonRoot position at time=0s
+				/// Saves current root position/rotation
 				/// </summary>
 				/// <param name="clipBindings">Clip bindings.</param>
-				public static void SetBindingsOffset (EditorClipBinding[] clipBindings)
+				public static void SaveBindingsOffset (EditorClipBinding[] clipBindings)
 				{
 
 						int len = clipBindings.Length;
@@ -432,7 +433,7 @@ namespace ws.winx.editor
 
 
 					
-								SetBindingOffset (clipBindingCurrent);
+								SaveBindingStatus (clipBindingCurrent);
 								
 						
 						}
@@ -441,13 +442,15 @@ namespace ws.winx.editor
 
 
 				/// <summary>
-				/// Sets the binding boonRoot offset - position before animation from boonRoot position at time=0s
+				/// Saves the binding boonRoot offset - position before animation from boonRoot position at time=0s
+				/// Saves current root position/rotation
 				/// </summary>
 				/// <param name="clipBindingCurrent">Clip binding current.</param>
-				public static void SetBindingOffset (EditorClipBinding clipBindingCurrent)
+				public static void SaveBindingStatus (EditorClipBinding clipBindingCurrent)
 				{
-						if (clipBindingCurrent.gameObject != null && clipBindingCurrent.boneTransform != null) {
+						if (clipBindingCurrent.gameObject != null) {
 							
+								if(clipBindingCurrent.boneTransform!=null){
 								//save bone position
 								Vector3 positionPrev = clipBindingCurrent.boneTransform.transform.position;
 							
@@ -457,8 +460,11 @@ namespace ws.winx.editor
 							
 								//calculate difference of bone position orginal - bone postion after clip effect
 								clipBindingCurrent.boneOrginalPositionOffset = positionPrev - clipBindingCurrent.boneTransform.transform.position;
-							
-							
+								}
+
+
+								clipBindingCurrent.positionOriginalRoot = clipBindingCurrent.gameObject.transform.root.position;
+								clipBindingCurrent.rotationOriginalRoot = clipBindingCurrent.gameObject.transform.root.rotation;
 							
 							
 						}
@@ -513,8 +519,8 @@ namespace ws.winx.editor
 										clipBindingCurrent.gameObject.ResetPropertyModification<Transform> ();
 
 
-							//rewind to start position
-							clipBindingCurrent.ResetRoot ();
+								//rewind to start position
+								clipBindingCurrent.ResetRoot ();
 						}
 						
 						
