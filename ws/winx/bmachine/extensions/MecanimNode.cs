@@ -292,15 +292,27 @@ namespace ws.winx.bmachine.extensions
 						animator.CrossFade (animatorStateSelected.nameHash, transitionDuration, layer, range.rangeStart);
 
 						//loop thru binded animation and play them
-//						EditorClipBinding editorClipBinding;
-//						Animator animatorComponent;
-//
-//						if (editorClipBinding.gameObject != null && (animatorComponent = editorClipBinding.gameObject.GetComponent<Animator> ()) != null) {
-//							
-//								//animatorComponent.Play(
-//								
-//
-//						}
+						EditorClipBinding clipBindingCurrent;
+						Animator animatorComponent;
+
+						int clipBindingsNum = this.clipBindings.Length;
+
+						for (int i=0; i<clipBindingsNum; i++) {
+
+								clipBindingCurrent = clipBindings [i];
+
+								if (clipBindingCurrent.gameObject != null && clipBindingCurrent.clip != null) {
+
+										if ((animatorComponent = clipBindingCurrent.gameObject.GetComponent<Animator> ()) == null) 
+												animatorComponent = clipBindingCurrent.gameObject.AddComponent<Animator> ();
+
+
+											animatorComponent.enabled=true;
+											animatorComponent.Play(clipBindingCurrent.clip,range.rangeStart);
+											
+
+								}
+						}
 						
 			
 				}

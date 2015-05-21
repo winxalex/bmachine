@@ -241,7 +241,7 @@ namespace ws.winx.editor
 		static MethodInfo IsBoneTransform_MethodInfo {
 			get {
 				if(_IsBoneTransform_MethodInfo==null)
-					_IsBoneTransform_MethodInfo=RealType.GetMethod("IsBoneTransform",new Type[]{typeof(Transform)});
+					_IsBoneTransform_MethodInfo=RealType.GetMethod("IsBoneTransform",BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
 				
 				return _IsBoneTransform_MethodInfo;
 			}

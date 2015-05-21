@@ -357,10 +357,11 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 												serializedNode.ApplyModifiedProperties ();
-						
-												mecanimNode.blendX.OnBeforeSerialize ();
-												mecanimNode.blendY.OnBeforeSerialize ();
-												mecanimNode.motionOverride.OnBeforeSerialize ();
+
+												UnityVariable.SetDirty(mecanimNode.blendX);
+												
+												UnityVariable.SetDirty(mecanimNode.blendY);
+												UnityVariable.SetDirty(mecanimNode.motionOverride);
 
 //												if (variablesBindedToCurves != null) {
 //														UnityVariable[] varArray = variablesBindedToCurves;

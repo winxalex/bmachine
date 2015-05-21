@@ -137,9 +137,9 @@ namespace ws.winx.unity
 				}
 
 
-				public void SetDirty(){
+				public static void SetDirty(UnityVariable variable){
 
-					this.OnBeforeSerialize ();
+					variable.OnBeforeSerialize ();
 				}
 
 				/// <summary>
