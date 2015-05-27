@@ -24,6 +24,12 @@ using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.bmachine.extensions
 {
+		/// <summary>
+		/// Mecanim node editor window.
+		/// 1) Bind property to curve
+		/// 2) Bind gameObject with animationClip 
+		/// sync both with node animation
+		/// </summary>
 		public class MecanimNodeEditorWindow:EditorWindow
 		{
 				private static MecanimNodeEditorWindow __window;
@@ -48,7 +54,7 @@ namespace ws.winx.editor.bmachine.extensions
 				private		static Color _colorSelected;
 				private		static bool _curvesEditorShow;
 				private		static CurveEditorW curveEditor;
-				private		static GUIContent propertyPopupLabel = new GUIContent (String.Empty);
+				private		static GUIContent bindingCurvesGUIContent = new GUIContent (String.Empty);
 				private		static Vector2 curvePropertiesScroller;
 				private		static UnityVariable __variableSelected;
 				private static bool __isPlaying;
@@ -381,12 +387,16 @@ namespace ws.winx.editor.bmachine.extensions
 						List<UndoPropertyModification> propertyModificationList = new List<UndoPropertyModification> ();
 						EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
 
-						List<EditorClipBinding> list=clipBindings.ToList();
-							list.Add (__nodeClipBinding);
+						List<EditorClipBinding> list = clipBindings.ToList ();
+						list.Add (__nodeClipBinding);
 																	
-						list.ForEach ( (itm) => {
+						list.ForEach ((itm) => {
 
-								propertyModificationList.Concat (AnimationModeUtility.Process (itm.gameObject, itm.clip, modifications, __timeCurrent));
+
+			
+				if (itm.gameObject != null && itm.clip != null) 	
+					//propertyModificationList.Concat (AnimationModeUtility.Process (itm.gameObject.transform.GetChild(0).gameObject, itm.clip, modifications, __timeCurrent));
+										propertyModificationList.Concat (AnimationModeUtility.Process (itm.gameObject, itm.clip, modifications, __timeCurrent));
 
 
 						});
@@ -655,28 +665,40 @@ namespace ws.winx.editor.bmachine.extensions
 										if (_curveIndexSelected > -1 && _curveIndexSelected < variablesBindedToCurves.Length) {
 						
 												UnityVariable variableSelected = variablesBindedToCurves [_curveIndexSelected];
-						
-						
-												EditorGUILayout.LabelField (variableSelected.name, new GUILayoutOption[]{});
-						
-												EditorGUI.BeginChangeCheck ();
-												Color colorNew = EditorGUILayout.ColorField (curveColors [_curveIndexSelected]);
-						
-						
-												if (EditorGUI.EndChangeCheck ()) {
-														curveEditor.animationCurves [_curveIndexSelected].color = colorNew;
-														curveColors [_curveIndexSelected] = colorNew;
-														curvesColorsSerialized.ValueChanged ();
-														curvesColorsSerialized.ApplyModifiedValue ();
+
+												try {
+														bindingCurvesGUIContent.text = variableSelected.instanceBinded.name + "." + variableSelected.memberPath;
+												
+														EditorGUILayout.LabelField (bindingCurvesGUIContent, new GUILayoutOption[]{});
+														
+														EditorGUI.BeginChangeCheck ();
+														Color colorNew = EditorGUILayout.ColorField (curveColors [_curveIndexSelected]);
+														
+														
+														if (EditorGUI.EndChangeCheck ()) {
+															curveEditor.animationCurves [_curveIndexSelected].color = colorNew;
+															curveColors [_curveIndexSelected] = colorNew;
+															curvesColorsSerialized.ValueChanged ();
+															curvesColorsSerialized.ApplyModifiedValue ();
+															
+															
+														}
 							
 							
+												} catch (MissingReferenceException ex) {
+
+														bindingCurvesGUIContent.text = "Invalid UVariable " + ex.Message;
+
 												}
+												
+
+												
 						
 										} else {
 						
 						
 						
-												propertyPopupLabel.text = "Select blackboard var";
+												bindingCurvesGUIContent.text = "Curve binding:";
 						
 						
 												List<UnityVariable> blackboardLocalList = __mecanimNode.blackboard.GetVariableBy (typeof(float));
@@ -686,7 +708,7 @@ namespace ws.winx.editor.bmachine.extensions
 						
 						
 						
-												__variableSelected = EditorGUILayoutEx.UnityVariablePopup (new GUIContent ("Var:"), __variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
+												__variableSelected = EditorGUILayoutEx.UnityVariablePopup (bindingCurvesGUIContent, __variableSelected, typeof(float), displayOptionsList, blackboardLocalList);
 						
 						
 						
@@ -1041,12 +1063,17 @@ namespace ws.winx.editor.bmachine.extensions
 					
 					
 					
-								////////// EVALUTE CURVES //////////
+								////////// EVALUATE CURVES //////////
 								int variablesNum = variablesBindedToCurves.Length;
 								for (int varriableCurrentinx=0; varriableCurrentinx<variablesNum; varriableCurrentinx++) {
 						
-						
-										variablesBindedToCurves [varriableCurrentinx].Value = curves [varriableCurrentinx].Evaluate (__timeNormalized);
+										try {
+												variablesBindedToCurves [varriableCurrentinx].Value = curves [varriableCurrentinx].Evaluate (__timeNormalized);
+										} catch (Exception ex) {
+
+												variablesBindedToCurves [varriableCurrentinx].name ="Invalid UVariable" + ex.Message;
+
+										}
 								}
 					
 					

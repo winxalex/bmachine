@@ -80,7 +80,6 @@ namespace ws.winx.unity
 				[NonSerialized]
 				private object
 						__valueObject;
-
 				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object>  __structSetterDelegate;
 				private Func<object,object> __structGetterDelegate;
 				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object> __valueSetterDelegate;
@@ -131,15 +130,15 @@ namespace ws.winx.unity
 						this.valueObject = instance;
 
 					
-
+						
 					
 
 				}
 
+				public static void SetDirty (UnityVariable variable)
+				{
 
-				public static void SetDirty(UnityVariable variable){
-
-					variable.OnBeforeSerialize ();
+						variable.OnBeforeSerialize ();
 				}
 
 				/// <summary>
@@ -311,15 +310,15 @@ namespace ws.winx.unity
 												initInstanceMember ();
 
 										
-										if(__structGetterDelegate!=null){
-											__instanceMember=__structGetterDelegate(__instanceUnityObject);
+										if (__structGetterDelegate != null) {
+												__instanceMember = __structGetterDelegate (__instanceUnityObject);
 										}
 										
 										valueSetterDelegate (ref __instanceMember, value);
 
 										if (__structSetterDelegate != null) {
 												
-												object unityObject=__instanceUnityObject;
+												object unityObject = __instanceUnityObject;
 												__structSetterDelegate (ref unityObject, __instanceMember);
 												
 										
@@ -534,16 +533,16 @@ namespace ws.winx.unity
 				public override string ToString ()
 				{
 						string n = String.IsNullOrEmpty (name) ? "no name" : name;
-						string print="UnityVariable[" + n + "] of type " + ValueType;
+						string print = "UnityVariable[" + n + "] of type " + ValueType;
 
-						if (IsBinded()) {
-							print += "Value=" + this.Value.ToString ()+" binded "+memberPath+" on instance of "+ instanceBinded.GetType();
+						if (IsBinded ()) {
+								print += "Value=" + this.Value.ToString () + " binded " + memberPath + " on instance of " + instanceBinded.GetType ();
 
 						} else {
-							if(valueObject==null)
-								print +=" Not initialized";
-							else
-								print +="Value=" +this.Value.ToString ();
+								if (valueObject == null)
+										print += " Not initialized";
+								else
+										print += "Value=" + this.Value.ToString ();
 						}
 						
 						
@@ -569,9 +568,9 @@ namespace ws.winx.unity
 							
 										//if it is property is of type struct => create additional setter (ex. transform.rotation.x where memberPath is "rotation.x" and __instanceUnityObject is "Transform"
 										// so 
-										if (__instanceMember.GetType ().IsValueType){
+										if (__instanceMember.GetType ().IsValueType) {
 												__structSetterDelegate = __instanceUnityObject.GetType ().GetSetDelegate (memberPathSegments [0]);
-												__structGetterDelegate=__instanceUnityObject.GetType().GetGetDelegate(memberPathSegments [0]);
+												__structGetterDelegate = __instanceUnityObject.GetType ().GetGetDelegate (memberPathSegments [0]);
 										}
 								} else //ex.path2 => _instanceMember = "Light" component
 										__instanceMember = __instanceUnityObject;

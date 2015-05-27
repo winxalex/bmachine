@@ -14,7 +14,8 @@ using ws.winx.csharp.extensions;
 
 namespace ws.winx.editor.utilities
 {
-		public class EditorUtilityEx
+	[InitializeOnLoad]
+	public class EditorUtilityEx
 		{
 				public delegate Rect SwitchDrawerDelegate (Rect rect,UnityVariable variable);
 
@@ -22,6 +23,54 @@ namespace ws.winx.editor.utilities
 				//into static editor Utilityor somthing
 				static List<Func<Type,SwitchDrawerDelegate>> _drawers;
 				static Func<Type,SwitchDrawerDelegate> _defaultSwitchDrawer;
+
+				const string showLockIconPrefKey = "Lock_ShowIcon";
+				const string addLockUndoRedoPrefKey = "Lock_UndoRedo";
+				const string lockMultiSelectionPrefKey = "Lock_MultiSelection";
+
+
+
+				static EditorUtilityEx()
+				{
+
+					bool drawLockIcon = false;
+
+
+
+					if (!EditorPrefs.HasKey (showLockIconPrefKey)) {
+								EditorPrefs.SetBool (showLockIconPrefKey, true);
+								drawLockIcon=true;
+						} else {
+
+								drawLockIcon=EditorPrefs.GetBool(showLockIconPrefKey);
+
+						}
+
+							EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyWindowItemOnGUI;
+
+						if (drawLockIcon) {
+								
+								EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
+							
+								
+								EditorApplication.RepaintHierarchyWindow ();
+								
+								
+							}
+			
+			
+			
+					if (!EditorPrefs.HasKey(addLockUndoRedoPrefKey))
+					{
+						EditorPrefs.SetBool(addLockUndoRedoPrefKey, true);
+					}
+					if (!EditorPrefs.HasKey(lockMultiSelectionPrefKey))
+					{
+						EditorPrefs.SetBool(lockMultiSelectionPrefKey, false);
+					}
+				}
+
+
 		
 				public static void AddCustomDrawer<T> (SwitchDrawerDelegate drawer)
 				{
@@ -397,7 +446,7 @@ namespace ws.winx.editor.utilities
 
 
 				
-				/// ////////////////////////////////   MENU EXTENSIONS /////////////////////////
+				/// ////////////////////////////////   MENU EXTENSIONS //////////////////////////////////////
 				
 		#region RemoveSubAsset
 				[MenuItem("Assets/Delete/Remove SubAsset")]
@@ -470,13 +519,13 @@ namespace ws.winx.editor.utilities
 						}
 				}
 
-				[MenuItem("GameObject/Create/ Prefab From Selected", true)]
+				[MenuItem("GameObject/Create/Prefab From Selected", true)]
 				static bool ValidateCreatePrefab ()
 				{
 						return Selection.activeGameObject != null;
 				}
 		
-				static void CreateNew (GameObject obj, string localPath)
+				public static void CreateNew (GameObject obj, string localPath)
 				{
 						var prefab = PrefabUtility.CreateEmptyPrefab (localPath);
 						PrefabUtility.ReplacePrefab (obj, prefab, ReplacePrefabOptions.ConnectToPrefab);
@@ -485,7 +534,308 @@ namespace ws.winx.editor.utilities
 
 		#endregion
 
+		#region lock/unlock
+
+		const string lockMenuItem = "GameObject/UnityLock/Lock GameObject";
+		const string lockRecursivelyMenuItem = "GameObject/UnityLock/Lock GameObject and Children %#l";
+		const string unlockMenuItem = "GameObject/UnityLock/Unlock GameObject";
+		const string unlockRecursivelyMenuItem = "GameObject/UnityLock/Unlock GameObject and Children %#u";
+
+		private static Texture2D _lockIcon;
+
+
+		//	// Have we loaded the prefs yet
+		//	private static var prefsLoaded : boolean = false;
+		//	
+		//	// The Preferences
+		//	public static var boolPreference : boolean = false;
+		//	
+		//	// Add preferences section named "My Preferences" to the Preferences Window
+		//	@PreferenceItem ("My Preferences")
+		//	static function PreferencesGUI () {
+		//		// Load the preferences
+		//		if (!prefsLoaded) {
+		//			boolPreference = EditorPrefs.GetBool ("BoolPreferenceKey", false);
+		//			prefsLoaded = true;
+		//		}
+		//		
+		//		// Preferences GUI
+		//		boolPreference = EditorGUILayout.Toggle ("Bool Preference", boolPreference);
+		//		
+		//		// Save the preferences
+		//		if (GUI.changed)
+		//			EditorPrefs.SetBool ("BoolPreferenceKey", boolPreference);
+		//	}
+
+
+		[PreferenceItem("Lock")]
+		static void LockPreferencesGUI(){
+
+
+
+
+
+
+			//Preferences GUI
+
+			EditorGUILayout.BeginVertical();
+
+			EditorGUI.BeginChangeCheck ();
+			bool drawIcon = ShowLockIconPrefsBoolOption(showLockIconPrefKey, "Show lock icon in hierarchy");
+
+			if (EditorGUI.EndChangeCheck ()) {
+								if (drawIcon) {
+										EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
+								} else {
+										EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyWindowItemOnGUI;
+								}
+			
+								EditorApplication.RepaintHierarchyWindow ();
+						}
+
+			EditorGUILayout.HelpBox(
+				"When enabled a small lock icon will appear in the hierarchy view for all locked objects.",
+				MessageType.None);
+			
+			EditorGUILayout.Space();
+			
+			bool wasSelectionDisabled = EditorPrefs.GetBool(lockMultiSelectionPrefKey);
+			bool isSelectionDisabled = ShowLockIconPrefsBoolOption(lockMultiSelectionPrefKey, "Disable selecting locked objects");
+			EditorGUILayout.HelpBox(
+				"When enabled locked objects will not be selectable in the scene view with a left click. Some objects can still be selected by using a selection rectangle; it doesn't appear to be possible to prevent this.\n\nObjects represented only with gizmos will not be drawn as gizmos aren't rendered when selection is disabled.",
+				MessageType.None);
+			
+			if (wasSelectionDisabled != isSelectionDisabled)
+			{
+				ToggleSelectionOfLockedObjects(isSelectionDisabled);
+			}
+			
+			EditorGUILayout.Space();
+			
+			ShowLockIconPrefsBoolOption(addLockUndoRedoPrefKey, "Support undo/redo for lock and unlock");
+			EditorGUILayout.HelpBox(
+				"When enabled the lock and unlock operations will be properly inserted into the undo stack just like any other action.\n\nIf this is disabled the Undo button will never lock or unlock an object. This can cause other operations to silently fail, such as trying to undo a translation on a locked object.",
+				MessageType.None);
+			
+			EditorGUILayout.EndVertical();
+
+
+		}
+
+
+		private static void OnHierarchyWindowItemOnGUI(int instanceID, Rect selectionRect)
+		{
+			var obj = EditorUtility.InstanceIDToObject(instanceID) as UnityEngine.Object;
+			if (obj && (obj.hideFlags & HideFlags.NotEditable) == HideFlags.NotEditable)
+			{
+				if (!_lockIcon)
+				{
+					_lockIcon = AssetDatabase.LoadAssetAtPath("Assets" + Directory.GetFiles(Application.dataPath, "LockHierarchyIcon.png", SearchOption.AllDirectories)[0].Substring(Application.dataPath.Length).Replace('\\', '/'), typeof(Texture2D)) as Texture2D;
+				}
 				
+				GUI.Box(new Rect(selectionRect.xMax - 16f, selectionRect.center.y - (16f / 2f), 16f, 16f), _lockIcon, GUIStyle.none);
+			}
+		}
+
+		static bool ShowLockIconPrefsBoolOption(string key, string name)
+		{
+			EditorGUILayout.BeginHorizontal();
+			
+			EditorGUILayout.LabelField(name, GUILayout.ExpandWidth(true));
+			bool oldValue = EditorPrefs.GetBool(key);
+			bool newValue = EditorGUILayout.Toggle(oldValue, GUILayout.Width(20));
+			if (newValue != oldValue)
+			{
+				EditorPrefs.SetBool(key, newValue);
+			}
+			
+			EditorGUILayout.EndHorizontal();
+			
+			return newValue;
+		}
+
+
+
+		public static void ToggleSelectionOfLockedObjects(bool disableSelection)
+		{
+			foreach (GameObject go in GameObject.FindObjectsOfType(typeof(GameObject)))
+			{
+				if ((go.hideFlags & HideFlags.NotEditable) == HideFlags.NotEditable)
+				{
+					foreach (Component comp in go.GetComponents(typeof(Component)))
+					{
+						if (!(comp is Transform))
+						{
+							if (disableSelection)
+							{
+								comp.hideFlags |= HideFlags.NotEditable;
+								comp.hideFlags |= HideFlags.HideInHierarchy;
+							}
+							else
+							{
+								comp.hideFlags &= ~HideFlags.NotEditable;
+								comp.hideFlags &= ~HideFlags.HideInHierarchy;
+							}
+						}
+					}
+					
+					EditorUtility.SetDirty(go);
+				}
+			}
+		}
+
+
+	/// <summary>
+	/// Lock the specified gameObject and includeChildren.
+	/// </summary>
+	/// <param name="gameObject">Game object.</param>
+	/// <param name="includeChildren">If set to <c>true</c> include children.</param>
+		public static void Lock(GameObject gameObject, bool includeChildren=false)
+		{
+			if (EditorPrefs.GetBool(addLockUndoRedoPrefKey))
+			{
+				Undo.RegisterSceneUndo("Lock Object");
+			}
+			gameObject.hideFlags |= HideFlags.NotEditable;
+			foreach (Component comp in gameObject.GetComponents(typeof(Component)))
+			{
+				if (!(comp is Transform))
+				{
+					if (EditorPrefs.GetBool(lockMultiSelectionPrefKey))
+					{
+						comp.hideFlags |= HideFlags.NotEditable;
+						comp.hideFlags |= HideFlags.HideInHierarchy;
+					}
+				}
+			}
+			EditorUtility.SetDirty(gameObject);
+
+
+			if (includeChildren) {
+				foreach (Transform childTransform in gameObject.transform)
+				{
+					Lock(childTransform.gameObject,true);
+				}
+
+
+			}
+		}
+
+		/// <summary>
+		/// Lock the specified gameObjects and includeChildren.
+		/// </summary>
+		/// <param name="gameObjects">Game objects.</param>
+		/// <param name="includeChildren">If set to <c>true</c> include children.</param>
+		public static void Lock(GameObject[] gameObjects,bool includeChildren=false)
+		{
+			foreach (var go in gameObjects)
+			{
+				Lock(go,includeChildren);
+			}
+		}
+
+
+		public static void Unlock(GameObject gameObject,bool includeChildren=false)
+		{
+			if (EditorPrefs.GetBool(addLockUndoRedoPrefKey))
+			{
+				Undo.RegisterSceneUndo("Unlock Object");
+			}
+			gameObject.hideFlags &= ~HideFlags.NotEditable;
+			foreach (Component comp in gameObject.GetComponents(typeof(Component)))
+			{
+				if (!(comp is Transform))
+				{
+					// Don't check pref key; no harm in removing flags that aren't there
+					comp.hideFlags &= ~HideFlags.NotEditable;
+					comp.hideFlags &= ~HideFlags.HideInHierarchy;
+				}
+			}
+			EditorUtility.SetDirty(gameObject);
+
+
+			if (includeChildren) {
+				foreach (Transform childTransform in gameObject.transform)
+				{
+					Unlock(childTransform.gameObject,true);
+				}
+				
+				
+			}
+		}
+
+
+		/// <summary>
+		/// Unlock the specified gameObjects and includeChildren.
+		/// </summary>
+		/// <param name="gameObjects">Game objects.</param>
+		/// <param name="includeChildren">If set to <c>true</c> include children.</param>
+		public static void Unlock(GameObject[] gameObjects,bool includeChildren=false)
+		{
+			foreach (var go in gameObjects)
+			{
+				Unlock(go,includeChildren);
+			}
+		}
+
+
+		
+		[MenuItem(lockMenuItem)]
+		static void LockSelection()
+		{
+			Lock (Selection.gameObjects);
+		}
+		
+		[MenuItem(lockMenuItem, true)]
+		static bool CanLock()
+		{
+			return Selection.gameObjects.Length > 0;
+		}
+		
+		[MenuItem(lockRecursivelyMenuItem)]
+		static void LockSelectionRecursively()
+		{
+			Lock (Selection.gameObjects,true);
+		}
+		
+		[MenuItem(lockRecursivelyMenuItem, true)]
+		static bool CanLockRecursively()
+		{
+			return Selection.gameObjects.Length > 0;
+		}
+		
+		[MenuItem(unlockMenuItem)]
+		static void UnlockSelection()
+		{
+			Unlock(Selection.gameObjects);
+		}
+		
+		[MenuItem(unlockMenuItem, true)]
+		static bool CanUnlock()
+		{
+			return Selection.gameObjects.Length > 0;
+		}
+		
+		[MenuItem(unlockRecursivelyMenuItem)]
+		static void UnlockSelectionRecursively()
+		{
+			Unlock (Selection.gameObjects, true);
+		}
+		
+		[MenuItem(unlockRecursivelyMenuItem, true)]
+		static bool CanUnlockRecursively()
+		{
+			return Selection.gameObjects.Length > 0;
+		}
+
+
+
+
+
+
+
+
+#endregion
 
 
 

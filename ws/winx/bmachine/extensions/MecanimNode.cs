@@ -306,7 +306,9 @@ namespace ws.winx.bmachine.extensions
 										if ((animatorComponent = clipBindingCurrent.gameObject.GetComponent<Animator> ()) == null) 
 												animatorComponent = clipBindingCurrent.gameObject.AddComponent<Animator> ();
 
-
+										//clipBindingCurrent.gameObject.transform.position=self.transform.position;
+										//	animatorComponent.rootPosition=self.transform.position;
+										//	animatorComponent.rootRotation=self.transform.rotation;
 											animatorComponent.enabled=true;
 											animatorComponent.Play(clipBindingCurrent.clip,range.rangeStart);
 											

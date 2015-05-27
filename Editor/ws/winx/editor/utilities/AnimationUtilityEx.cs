@@ -56,7 +56,63 @@ namespace ws.winx.editor.utilities
 			
 				}
 
+				public static EditorCurveBinding EditorCurveBinding_RotX {
+						get {
+						
+								return _editorCurveBinding_RotX;
+						}
+					
+					
+				}
+				
+				public static EditorCurveBinding EditorCurveBinding_RotY {
+						get {
+						
+						
+								return _editorCurveBinding_RotY;
+						}
+					
+					
+				}
+				
+				public static EditorCurveBinding EditorCurveBinding_RotZ {
+						get {
+						
+								return _editorCurveBinding_RotZ;
+						}
+					
+					
+				}
 
+				public static EditorCurveBinding EditorCurveBinding_SclX {
+						get {
+				
+								return _editorCurveBinding_SclX;
+						}
+			
+			
+				}
+		
+				public static EditorCurveBinding EditorCurveBinding_SclY {
+						get {
+				
+				
+								return _editorCurveBinding_SclY;
+						}
+			
+			
+				}
+		
+				public static EditorCurveBinding EditorCurveBinding_SclZ {
+						get {
+				
+								return _editorCurveBinding_SclZ;
+						}
+			
+			
+				}
+		
+		
 				/// <summary>
 				/// Removes the keyframe from clip (!!! Inserts hidden keyframes in between)
 				/// </summary>
