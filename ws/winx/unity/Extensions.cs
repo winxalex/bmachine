@@ -85,6 +85,8 @@ namespace ws.winx.unity
 
 
 
+
+
 	#region AnimatorExtension
 		public static class AnimatorExtension
 		{
@@ -142,33 +144,39 @@ namespace ws.winx.unity
 	public static class TransformExtension
 	{
 		
+		/// <summary>
+		/// Gets the position offset delta negated.
+		/// </summary>
+		/// <returns>The position offset delta negated.</returns>
+		/// <param name="fromTransform">From transform.</param>
+		/// <param name="toTransform">To transform.</param>
+		public static Vector3 GetPositionOffsetDeltaNegated(this Transform fromTransform,Transform toTransform)
+		{
+			return Quaternion.Inverse(fromTransform.rotation) * (toTransform.position - fromTransform.position);
+		}
 
+		/// <summary>
+		/// Adds the position offset.
+		/// </summary>
+		/// <returns>The position offset.</returns>
+		/// <param name="fromTransform">From transform.</param>
+		/// <param name="positionOffset">Position offset.</param>
+		public static Vector3 AddPositionOffset(this Transform fromTransform, Vector3 positionOffsetDeltaNegated)
+		{
+			return fromTransform.position + fromTransform.rotation * positionOffsetDeltaNegated;
+		}
 
+		//fromTransform.position + fromTransform.rotation(current) * Quaternion (fromTransform.rotation)(at start) * (toTransform - fromTransform);
+		//fromTransform.position + delta Rotation * (toTransform - fromTransform);
 
-
-
-
-		public static void ResetTransformation(this Transform trans)
+		public static void Reset(this Transform trans)
 		{
 			trans.position = Vector3.zero;
 			trans.localRotation = Quaternion.identity;
 			trans.localScale = new Vector3(1, 1, 1);
 		}
 
-		public static void SetPositionX(this Transform t, float newX)
-		{
-			t.position = new Vector3(newX, t.position.y, t.position.z);
-		}
-		
-		public static void SetPositionY(this Transform t, float newY)
-		{
-			t.position = new Vector3(t.position.x, newY, t.position.z);
-		}
-		
-		public static void SetPositionZ(this Transform t, float newZ)
-		{
-			t.position = new Vector3(t.position.x, t.position.y, newZ);
-		}
+
 
 		public static float GetPositionX(this Transform t)
 		{
@@ -186,13 +194,17 @@ namespace ws.winx.unity
 			return t.position.z;
 		}
 
+		public static void SetPositionX( this Transform t, float s ) { Vector3 v = t.position; v.x  = s; t.position = v; }
+		public static void SetPositionY( this Transform t, float s ) { Vector3 v = t.position; v.y  = s; t.position = v; }
+		public static void SetPositionZ( this Transform t, float s ) { Vector3 v = t.position; v.z  = s; t.position = v; }
 
-		public static void LocalScaleSetX( this Transform t, float s ) { Vector3 v = t.localScale; v.x  = s; t.localScale = v; }
-		public static void LocalScaleSetY( this Transform t, float s ) { Vector3 v = t.localScale; v.y  = s; t.localScale = v; }
-		public static void LocalScaleSetZ( this Transform t, float s ) { Vector3 v = t.localScale; v.z  = s; t.localScale = v; }
-		public static void LocalScaleMulX( this Transform t, float s ) { Vector3 v = t.localScale; v.x *= s; t.localScale = v; }
-		public static void LocalScaleMulY( this Transform t, float s ) { Vector3 v = t.localScale; v.y *= s; t.localScale = v; }
-		public static void LocalScaleMulZ( this Transform t, float s ) { Vector3 v = t.localScale; v.z *= s; t.localScale = v; }
+
+		public static void SetLocalScaleX( this Transform t, float s ) { Vector3 v = t.localScale; v.x  = s; t.localScale = v; }
+		public static void SetLocalScaleY( this Transform t, float s ) { Vector3 v = t.localScale; v.y  = s; t.localScale = v; }
+		public static void SetLocalScaleZ( this Transform t, float s ) { Vector3 v = t.localScale; v.z  = s; t.localScale = v; }
+		public static void MulLocalScaleX( this Transform t, float s ) { Vector3 v = t.localScale; v.x *= s; t.localScale = v; }
+		public static void MulLocalScaleY( this Transform t, float s ) { Vector3 v = t.localScale; v.y *= s; t.localScale = v; }
+		public static void MulLocalScaleZ( this Transform t, float s ) { Vector3 v = t.localScale; v.z *= s; t.localScale = v; }
 	}
 
 
@@ -203,26 +215,49 @@ namespace ws.winx.unity
 	
 	public static class QuaternionExtensions
 	{
-		public static void set_x(this Quaternion t, float x)
-		{
-			Quaternion v = t; t.x  = x; t = v;
+
+
+//		public Vector3 relativeDirection = Vector3.forward;
+//		void Update() {
+//			Vector3 absoluteDirection = transform.rotation * relativeDirection;
+//			transform.position += absoluteDirection * Time.deltaTime;
+//		}
+
+		/// <summary>
+		/// Rotations the offset. (ex. q1=40,q2=30 => new q=10)
+		/// </summary>
+		/// <returns>The offset.</returns>
+		/// <param name="quaternion1">Quaternion1.</param>
+		/// <param name="quaternion2">Quaternion2.</param>
+		public static Quaternion RotationOffset(this Quaternion quaternion1, Quaternion quaternion2){
+
+			return Quaternion.Inverse (quaternion1) * quaternion2;
 
 		}
 
-		public static void set_y(this Quaternion t, float y)
-		{
-			t = new Quaternion(t.x, y, t.z,t.w);
+		/// <summary>
+		/// Add the specified "offset" to quaternion2 .
+		/// 
+		/// </summary>
+		/// <param name="quaternion2">Quaternion2.</param>
+		/// <param name="offset">Offset.</param>
+		public static Quaternion Add(this Quaternion quaternion2, Quaternion offset){
+			
+			return quaternion2 * offset;
+			
 		}
 
 
-		public static void set_z(this Quaternion t, float z)
+		public static Quaternion Normalize(this Quaternion q)
 		{
-			t = new Quaternion(t.x, t.y, z,t.w);
-		}
+			float sum = 0;
+			for (int i = 0; i < 4; ++i)
+				sum += q[i] * q[i];
+			float magnitudeInverse = 1 / Mathf.Sqrt(sum);
+			for (int i = 0; i < 4; ++i)
+				q[i] *= magnitudeInverse; 
 
-		public static void set_w(this Quaternion t, float w)
-		{
-			t = new Quaternion(t.x, t.y, t.z,w);
+			return q;
 		}
 
 
@@ -258,7 +293,7 @@ namespace ws.winx.unity
 
 
 		/// <summary>
-		/// Froms to around axis creates a FromToRotation, but makes sure it's axis remains fixed near to th Quaternion singularity point.
+		/// From to around axis creates a FromToRotation, but makes sure it's axis remains fixed near to th Quaternion singularity point.
 		/// </summary>
 		/// <returns>
 		/// The from to rotation around an axis.
@@ -301,12 +336,45 @@ namespace ws.winx.unity
 			
 			return to * Quaternion.Inverse(from);
 		}
+
+
+
+		// To get the local right vector from just a rotation.
+		public static Vector3 GetRight (this Quaternion rotation)
+		{
+			return new Vector3(1 - 2 * (rotation.y * rotation.y + rotation.z * rotation.z),
+			                   2 * (rotation.x * rotation.y + rotation.w * rotation.z),
+			                   2 * (rotation.x * rotation.z - rotation.w * rotation.y));
+		}
+		
+		
+		// To get the local up vector from just a rotation.
+		public static Vector3 GetUp(this Quaternion rotation)
+		{
+			return new Vector3(2 * (rotation.x * rotation.y - rotation.w * rotation.z),
+			                   1 - 2 * (rotation.x * rotation.x + rotation.z * rotation.z),
+			                   2 * (rotation.y * rotation.z + rotation.w * rotation.x));
+		}
+		
+		
+		// To get the local forward vector from just a rotation.
+		public static Vector3 GetForward(this Quaternion rotation)
+		{
+			return new Vector3(2f * (rotation.x * rotation.z + rotation.w * rotation.y),
+			                   2f * (rotation.y * rotation.x - rotation.w * rotation.x),
+			                   1f - 2f * (rotation.x * rotation.x + rotation.y * rotation.y));
+		}
 	}
 	#endregion
 
 
 	#region Vector Extensions
 	public static class VectorExtensions {
+
+
+
+
+
 		public static Vector3 ToGuiCoordinateSystem(this Vector3 a) {
 			var copy = a;
 			copy.y = Screen.height - copy.y;

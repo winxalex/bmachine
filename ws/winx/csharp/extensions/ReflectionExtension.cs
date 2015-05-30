@@ -897,9 +897,9 @@ namespace ws.winx.csharp.extensions
 				/// Stores the method info for the method that performs the assignment of the field value.
 				/// Note: There is no assign expression in .NET 3.0/3.5. With .NET 4.0 this method becomes obsolete.
 				/// </summary>
-				private static readonly MethodInfo setFieldMethod =
-			typeof(ReflectionUtility).GetMethod ("SetField",
-			                                    BindingFlags.NonPublic | BindingFlags.Static);
+				//private static readonly MethodInfo setFieldMethod =
+//			typeof(ReflectionUtility).GetMethod ("SetField",
+//			BindingFlags.NonPublic | BindingFlags.Static);
 		
 				/// <summary>
 				/// A strong type method that assigns the given value to the field that is represented by the given field reference.
@@ -908,10 +908,10 @@ namespace ws.winx.csharp.extensions
 				/// <typeparam name="TValue">The type of the field.</typeparam>
 				/// <param name="field">A reference to the field.</param>
 				/// <param name="newValue">The new value that should be assigned to the field.</param>
-				private static void SetField<TValue> (ref TValue field, TValue newValue)
-				{
-						field = newValue;
-				}
+//				private static void SetField<TValue> (ref TValue field, TValue newValue)
+//				{
+//						field = newValue;
+//				}
 		
 		#endregion Called by reflection - Don't delete.
 		

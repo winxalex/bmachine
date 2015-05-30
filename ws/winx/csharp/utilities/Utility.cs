@@ -164,31 +164,15 @@ namespace ws.winx.csharp.utilities
 
 
 
-//		public static string GetMemberName<T>(T argument)
-//		{
-//			Expression<Func<T>> lamda=()=>argument;
-//			return 
-//
-//			ParameterExpression argumentParameter=Expression.Constant(argument,typeof(T));
-//			Expression<Func<T>> lamda2 = Expression.Lambda (typeof(Func<T>),argumentParameter);
-//			return ((MemberExpression)lamda2.Body).Member.Name;
-//
-//
-//		}
 
-
-		public static string GetMemberName<T>(Expression<Func<T>> memberExpression)
-		{
-			BinaryExpression b;
-			//b.Method.GetParameters()[0].Member.Name
-			//MemberExpression expressionBody = (MemberExpression)memberExpression.Body;
-
-			BinaryExpression expresssionBody = (BinaryExpression)memberExpression.Body;
-			return "";
-		}
 	
 
 	}
+
+
+
+
+
 
 	/// <summary>
 	/// Attribute utility.

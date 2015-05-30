@@ -694,7 +694,7 @@ namespace ws.winx.editor.utilities
 		{
 			if (EditorPrefs.GetBool(addLockUndoRedoPrefKey))
 			{
-				Undo.RegisterSceneUndo("Lock Object");
+				Undo.RecordObject(gameObject,"Lock Object");
 			}
 			gameObject.hideFlags |= HideFlags.NotEditable;
 			foreach (Component comp in gameObject.GetComponents(typeof(Component)))
@@ -739,7 +739,7 @@ namespace ws.winx.editor.utilities
 		{
 			if (EditorPrefs.GetBool(addLockUndoRedoPrefKey))
 			{
-				Undo.RegisterSceneUndo("Unlock Object");
+				Undo.RecordObject(gameObject,"Unlock Object");
 			}
 			gameObject.hideFlags &= ~HideFlags.NotEditable;
 			foreach (Component comp in gameObject.GetComponents(typeof(Component)))

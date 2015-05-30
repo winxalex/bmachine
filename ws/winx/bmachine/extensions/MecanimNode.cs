@@ -306,11 +306,19 @@ namespace ws.winx.bmachine.extensions
 										if ((animatorComponent = clipBindingCurrent.gameObject.GetComponent<Animator> ()) == null) 
 												animatorComponent = clipBindingCurrent.gameObject.AddComponent<Animator> ();
 
-										//clipBindingCurrent.gameObject.transform.position=self.transform.position;
-										//	animatorComponent.rootPosition=self.transform.position;
-										//	animatorComponent.rootRotation=self.transform.rotation;
-											animatorComponent.enabled=true;
-											animatorComponent.Play(clipBindingCurrent.clip,range.rangeStart);
+										GameObject gameObjectBinded = clipBindingCurrent.gameObject;
+										gameObjectBinded.transform.rotation = self.transform.rotation * clipBindingCurrent.rotationOffset;
+										gameObjectBinded.transform.position = self.transform.position + self.transform.rotation * clipBindingCurrent.positionOffset;
+
+										//speed of bindind with main animation should be same (also same framerate)
+										animatorComponent.speed = animator.speed;
+
+										if (clipBindingCurrent.clip.frameRate != (animatorStateSelected.motion as AnimationClip).frameRate)
+												Debug.LogWarning (clipBindingCurrent.clip.name + " should have frameRate of " + (animatorStateSelected.motion as AnimationClip).frameRate + " instead of " + clipBindingCurrent.clip.frameRate);
+					   
+										//clipBindingCurrent
+										animatorComponent.enabled = true;
+										animatorComponent.Play (clipBindingCurrent.clip, range.rangeStart);
 											
 
 								}

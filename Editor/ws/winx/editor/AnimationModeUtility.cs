@@ -506,12 +506,6 @@ namespace ws.winx.editor
 						PrefabType prefabType = PrefabType.None;
 
 						
-						
-
-						
-						
-						
-						
 						if (clipBindingCurrent.gameObject != null) {
 								prefabType = PrefabUtility.GetPrefabType (clipBindingCurrent.gameObject);
 				

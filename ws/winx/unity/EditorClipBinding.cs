@@ -19,7 +19,7 @@ namespace ws.winx.unity
 		public AudioClip audioClip;
 
 		/// <summary>
-		/// GameObject on which binding is applied
+		/// (root) GameObject on which binding is applied
 		/// </summary>
 		[SerializeField]
 		 GameObject _gameObject;
@@ -42,6 +42,9 @@ namespace ws.winx.unity
 			}
 		}
 
+
+		public Vector3 positionOffset=Vector3.zero;
+		public Quaternion rotationOffset=Quaternion.identity;
 	
 
 		/// <summary>
