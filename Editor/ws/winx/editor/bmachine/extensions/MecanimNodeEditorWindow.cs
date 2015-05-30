@@ -67,6 +67,11 @@ namespace ws.winx.editor.bmachine.extensions
 				private static EditorClipBinding __nodeClipBinding;
 				private static EditorClipBinding[] __clipBindingsToBeAnimated;
 				private static bool __timeNormalizedUpdate;
+				private static float[] eventTimeValues;
+				private static float[] eventTimeValuesPrev;
+				private static bool eventTimeLineInitalized;
+				private static bool[] eventTimeValuesSelected;
+				private static string[] eventDisplayNames;
 
 
 //		public GUIContent addKeyframeContent = EditorGUIUtility.IconContent ("Animation.AddKeyframe");
@@ -158,10 +163,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 						
 
-						
+						eventTimeValues = new float[0];
+						eventTimeValuesPrev = new float[0];
+
+						eventTimeValuesSelected = new bool[0];
+						eventDisplayNames = new string[0];
 						
 
-						//create Reordable list of gameObject-animationClip
+						///////////// create Reordable list of gameObject-animationClip //////////////////
 
 						__gameObjectClipList = new ReorderableList (clipBindingsSerialized.value as IList, typeof(EditorClipBinding), true, true, true, true);
 						__gameObjectClipList.drawElementCallback = onDrawElement;
@@ -309,7 +318,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 					
 						
-												positionsInKeyframe = AnimationUtilityEx.GetKeyframesPositions (clip, AnimationUtility.CalculateTransformPath (transformFirstChild, transformRoot), transformRoot);
+												positionsInKeyframe = AnimationUtilityEx.GetPositions (clip, AnimationUtility.CalculateTransformPath (transformFirstChild, transformRoot), transformRoot);
 						
 																				
 		
@@ -321,7 +330,7 @@ namespace ws.winx.editor.bmachine.extensions
 																indexListAndindexFramePacked = indexListAndindexFramePacked << 32 | (uint)j;//pack together with keyframe index
 
 																//actualy this is static handle
-																HandlesEx.DragHandle (positionsInKeyframe [j], 0.1f, Handles.SphereCap, Color.red, "(" + j + ")" + " " + Decimal.Round (Convert.ToDecimal (AnimationUtilityEx.GetTimeAt (clip, j)), 2).ToString (), indexListAndindexFramePacked, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new long[]{j}, null);
+																HandlesEx.DragHandle (positionsInKeyframe [j], 0.1f, Handles.SphereCap, Color.red, "(" + j + ")" + " " + Decimal.Round (Convert.ToDecimal (AnimationUtilityEx.GetTimeAt (clip, j, AnimationUtilityEx.EditorCurveBinding_PosX)), 2).ToString (), indexListAndindexFramePacked, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new long[]{j}, null);
 							
 
 
@@ -392,7 +401,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 								
 								//make animation jump to selected keyframe represented by Handle
-								float timeAtKeyframe = AnimationUtilityEx.GetTimeAt (clip, keyframeInx);
+								float timeAtKeyframe = AnimationUtilityEx.GetTimeAt (clip, keyframeInx, AnimationUtilityEx.EditorCurveBinding_PosX);
 								__timeNormalized = timeAtKeyframe * 1f / getNodeClip ().length;
 								__timeNormalizedUpdate = true;
 				                
@@ -675,7 +684,7 @@ namespace ws.winx.editor.bmachine.extensions
 				/// Locks the root game object.
 				/// </summary>
 				/// <param name="lockGameObject">If set to <c>true</c> lock root game object.</param>
-				void LockRootGameObject (bool lockGameObject)
+				static void LockRootGameObject (bool lockGameObject)
 				{
 						EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
 						Array.ForEach (clipBindings, (itm) => {
@@ -687,6 +696,17 @@ namespace ws.winx.editor.bmachine.extensions
 								}
 						});
 
+				}
+
+				/// <summary>
+				/// Ons the mecanim event edit.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				static void onKeyframeEdit (TimeLineArgs<float> args)
+				{
+						
+						
+						
 				}
 				
 				/// <summary>
@@ -1159,16 +1179,58 @@ namespace ws.winx.editor.bmachine.extensions
 								}
 
 
-//				Rect timeLineRect = GUILayoutUtility.GetRect (Screen.width - 16f, 50f);
-//				//Rect timeLineRect = GUILayoutUtility.GetLastRect ();
-//				
+								Rect timeLineRect = GUILayoutUtility.GetRect (Screen.width - 16f, 50f);
+								//Rect timeLineRect = GUILayoutUtility.GetLastRect ();
+				
 //				timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
 //				timeLineRect.xMax -= EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
 //				//timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
 //				timeLineRect.width -= 66f;
-//				EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
-//				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd
-//				                                  );
+
+								if (Selection.activeGameObject != null) {
+
+										if (Tools.current == Tool.Rotate) {
+
+					
+												EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
+
+												if (clipBindingCurrent != null && clipBindingCurrent.clip != null) {
+														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;
+														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
+														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding);
+
+												}
+							
+
+					
+										}else
+										if (Tools.current == Tool.Scale) {
+												EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
+						
+												if (clipBindingCurrent != null && clipBindingCurrent.clip != null) {
+														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_SclX;
+														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
+														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding);
+							
+												}
+
+										} else
+												eventTimeValues = new float[0];
+
+
+								} else {
+										eventTimeValues = new float[0];
+								}
+
+
+
+								eventDisplayNames = eventTimeValues.Select ((itm) => {
+										return Decimal.Round (Convert.ToDecimal (itm)).ToString () + ".s"; }).ToArray ();
+								eventTimeValuesSelected = new bool[eventTimeValues.Length];
+
+								EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, __timeNormalized,
+				                                  null, null, null, onKeyframeEdit, null
+								);
 
 
 								EditorGUILayout.LabelField ("Time: " + Decimal.Round (Convert.ToDecimal (__timeCurrent), 2).ToString () + "s (" + Mathf.FloorToInt (__timeNormalized * 100) + "%) Frame:" + Mathf.FloorToInt (__timeCurrent * getNodeClip ().frameRate).ToString ());

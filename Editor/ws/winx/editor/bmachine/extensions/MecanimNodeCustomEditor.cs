@@ -45,6 +45,7 @@ namespace ws.winx.editor.bmachine.extensions
 				
 				MecanimNode mecanimNode;
 				ws.winx.unity.AnimatorState selectedAnimaStateInfo;
+
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
 				bool eventTimeLineInitalized;
@@ -52,6 +53,7 @@ namespace ws.winx.editor.bmachine.extensions
 				bool[] eventTimeValuesSelected;
 				EventComparer eventTimeComparer = new EventComparer ();
 				string[] eventDisplayNames;
+
 				float timeNormalizedStartPrev = -1f;
 				float timeNormalizedEndPrev = 1.1f;
 				GUIStyle playButtonStyle;

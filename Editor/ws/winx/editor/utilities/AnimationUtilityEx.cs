@@ -61,30 +61,45 @@ namespace ws.winx.editor.utilities
 
 
 				/// <summary>
-				/// Gets the time at clip and keyFrameInx.
+				/// Gets the time at clip, keyFrameInx and curveBinding.
 				/// </summary>
 				/// <returns>The <see cref="System.Single"/>.</returns>
 				/// <param name="clip">Clip.</param>
 				/// <param name="keyFrameInx">Key frame inx.</param>
-				public static float GetTimeAt (AnimationClip clip, int keyFrameInx)
+				/// <param name="curveBinding">Curve binding.</param>
+				public static float GetTimeAt (AnimationClip clip, int keyFrameInx, EditorCurveBinding curveBinding)
 				{
 
-						return AnimationUtility.GetEditorCurve (clip, EditorCurveBinding_PosX).keys [keyFrameInx].time;
+						return AnimationUtility.GetEditorCurve (clip, curveBinding).keys [keyFrameInx].time;
 
 
 				}
 
+				/// <summary>
+				/// Gets the times.
+				/// </summary>
+				/// <returns>The times.</returns>
+				/// <param name="clip">Clip.</param>
+				/// <param name="curveBinding">Curve binding.</param>
+				public static float[] GetTimes (AnimationClip clip, EditorCurveBinding curveBinding)
+				{
+						AnimationCurve curve = AnimationUtility.GetEditorCurve (clip, curveBinding);
+						if(curve==null) return new float[0];
+						return curve.keys.Select ((itm) => itm.time).ToArray ();
+					
+				}
 
-		/// <summary>
-		/// Gets the keyframe positions. If keyframes are rotation or scale, for time of keyframe position value is
-		/// calculated on Positon curve
-		/// its is expected curves to exist for every property or postion,rotation on scale and
-		/// to have equal num of keyframes ex. for x,y,z position or x,y,z, rotation
-		/// </summary>
-		/// <returns>The keyframe positions.</returns>
-		/// <param name="clip">Clip.</param>
-		/// <param name="path">Path.</param>
-		/// <param name="transform">Transform.</param>
+
+				/// <summary>
+				/// Gets the keyframe positions. If keyframes are rotation or scale, for time of keyframe position value is
+				/// calculated on Positon curve
+				/// its is expected curves to exist for every property or postion,rotation on scale and
+				/// to have equal num of keyframes ex. for x,y,z position or x,y,z, rotation
+				/// </summary>
+				/// <returns>The keyframe positions.</returns>
+				/// <param name="clip">Clip.</param>
+				/// <param name="path">Path.</param>
+				/// <param name="transform">Transform.</param>
 //		public static Vector3[] GetKeyframesPositions (AnimationClip clip, string path="", Transform transform=null)
 //		{
 //			
@@ -288,18 +303,22 @@ namespace ws.winx.editor.utilities
 
 
 
-
 				/// <summary>
 				/// Gets the positions x,y,z by keyframes transformed from local to world space
 				/// //expect every clip to have x,y,z curves
 				/// </summary>
 				/// <returns>The positions.</returns>
 				/// <param name="clip">Clip.</param>
+				/// <param name="path">Path.</param>
 				/// <param name="transform">Transform.</param>
-				public static Vector3[] GetPositions (AnimationClip clip, Transform transform=null)
+				public static Vector3[] GetPositions (AnimationClip clip, string path="", Transform transform=null)
 				{
 
-						Type T = typeof(Transform);	
+						EditorCurveBinding_PosX.path = path;
+						EditorCurveBinding_PosY.path = path;
+						EditorCurveBinding_PosZ.path = path;
+						
+						
 						AnimationCurve curvePosX = AnimationUtility.GetEditorCurve (clip, EditorCurveBinding_PosX);
 						AnimationCurve curvePosY = AnimationUtility.GetEditorCurve (clip, EditorCurveBinding_PosY);
 						AnimationCurve curvePosZ = AnimationUtility.GetEditorCurve (clip, EditorCurveBinding_PosZ);
