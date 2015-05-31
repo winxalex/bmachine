@@ -1530,7 +1530,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 40, y: 60}
   m_Transitions: []
-  m_CachedInstanceID: 25724
+  m_CachedInstanceID: 25684
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -1608,7 +1608,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25726
+  m_CachedInstanceID: 25686
   m_Description: 
   m_EnabledState: {fileID: 0}
   m_LastEnabledState: {fileID: 0}
@@ -2688,7 +2688,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1556058893}
   m_LocalRotation: {x: .924858868, y: -.0977224708, z: .0455687419, w: .364705205}
-  m_LocalPosition: {x: 32.4327927, y: 1.5, z: 2.80999994}
+  m_LocalPosition: {x: 71.0108795, y: 1.5, z: 2.80999994}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2985,7 +2985,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25882
+  m_CachedInstanceID: 25842
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -3749,7 +3749,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25906
+  m_CachedInstanceID: 25866
   m_NodeSerialization:
     m_NodeTypes:
     - BehaviourMachine.EveryFrame
@@ -3921,7 +3921,7 @@ MonoBehaviour:
   audioClip: {fileID: 0}
   _gameObject: {fileID: 814913334}
   positionOffset: {x: .870000005, y: 2.67000008, z: .210000008}
-  rotationOffset: {x: .00181197235, y: 0, z: 0, w: .999998391}
+  rotationOffset: {x: .00181197235, y: 2.14768647e-09, z: 4.61088875e-11, w: .999998391}
   boneTransform: {fileID: 0}
   positionOriginalRoot: {x: -.770956397, y: 2.67000008, z: -2.2026155}
   boneOrginalPositionOffset: {x: 0, y: 0, z: 0}
@@ -4176,7 +4176,7 @@ MonoBehaviour:
   audioClip: {fileID: 0}
   _gameObject: {fileID: 233815138}
   positionOffset: {x: -1.26000011, y: 2.67000008, z: -2.01000047}
-  rotationOffset: {x: .00181197235, y: 0, z: 0, w: .999998391}
+  rotationOffset: {x: .00181197235, y: 2.14768647e-09, z: 4.61088875e-11, w: .999998391}
   boneTransform: {fileID: 0}
   positionOriginalRoot: {x: -2.98552275, y: 2.67000008, z: -.0669656992}
   boneOrginalPositionOffset: {x: 0, y: 0, z: 0}

@@ -72,13 +72,9 @@ namespace ws.winx.editor.bmachine.extensions
 				private static bool eventTimeLineInitalized;
 				private static bool[] eventTimeValuesSelected;
 				private static string[] eventDisplayNames;
+				private static GUIContent _keyframeMarker;
 
 
-//		public GUIContent addKeyframeContent = EditorGUIUtility.IconContent ("Animation.AddKeyframe");
-//		public GUIContent addEventContent = EditorGUIUtility.IconContent ("Animation.AddEvent");
-//		public GUIStyle curveEditorBackground = "AnimationCurveEditorBackground";
-//		public GUIStyle eventBackground = "AnimationEventBackground";
-//		public GUIStyle keyframeBackground = "AnimationKeyframeBackground";
 
 
 				/// <summary>
@@ -698,15 +694,31 @@ namespace ws.winx.editor.bmachine.extensions
 
 				}
 
+
+				/////////////  HANDLING KEYFRAMES ROTATION/SCALE Events ////////////////
+
 				/// <summary>
 				/// Ons the mecanim event edit.
 				/// </summary>
 				/// <param name="args">Arguments.</param>
 				static void onKeyframeEdit (TimeLineArgs<float> args)
 				{
+					__timeNormalized = args.selectedValue;
+					__timeNormalizedUpdate = true;	
 						
-						
-						
+				}
+
+				/// <summary>
+				/// Ons the keyframe delete.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				static void onKeyframeDelete (TimeLineArgs<float> args)
+				{
+
+							EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
+							
+							
+							AnimationUtilityEx.RemoveKeyframeFrom (clipBindingCurrent.clip, args.selectedIndex);
 				}
 				
 				/// <summary>
@@ -715,7 +727,11 @@ namespace ws.winx.editor.bmachine.extensions
 				void OnGUI ()
 				{
 
+						//if (EditorGUILayoutEx.ANIMATION_STYLES == null)
+						//	EditorGUILayoutEx.ANIMATION_STYLES = new EditorGUILayoutEx.AnimationStyles ();
 
+						if (_keyframeMarker == null)
+								_keyframeMarker = new GUIContent (EditorGUILayoutEx.ANIMATION_STYLES.pointIcon);
 			
 						if (!Application.isPlaying && __mecanimNode != null && animatorStateSerialized.value != null) {
 
@@ -1029,7 +1045,7 @@ namespace ws.winx.editor.bmachine.extensions
 							
 
 								/////////////  PLAY ANIMATION TOGGLE  /////////
-								__isPlaying = GUI.Toggle (timeControlRect, __isPlaying, !__isPlaying ? TimeControlW.style.playIcon : TimeControlW.style.pauseIcon, TimeControlW.style.playButton);
+								__isPlaying = GUI.Toggle (timeControlRect, __isPlaying, !__isPlaying ? EditorGUILayoutEx.ANIMATION_STYLES.playIcon : EditorGUILayoutEx.ANIMATION_STYLES.pauseIcon, EditorGUILayoutEx.ANIMATION_STYLES.playButton);
 
 
 								if (__isPlaying) {
@@ -1058,7 +1074,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 								/////////////  RECORD ANIMATION TOGGLE  /////////
-								__isRecording = GUI.Toggle (timeControlRect, __isRecording, TimeControlW.style.recordIcon, EditorStyles.toolbarButton);
+								__isRecording = GUI.Toggle (timeControlRect, __isRecording, EditorGUILayoutEx.ANIMATION_STYLES.recordIcon, EditorStyles.toolbarButton);
 
 								GUI.color = color;//restore color
 
@@ -1125,8 +1141,9 @@ namespace ws.winx.editor.bmachine.extensions
 
 								EditorGUI.BeginChangeCheck ();
 
+								
 								/// TIMELINE SLIDER ///
-								__timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, __timeNormalized, 0f, 1f, TimeControlW.style.timeScrubber);
+								__timeNormalized = EditorGUILayoutEx.CustomHSlider (timeControlRect, __timeNormalized, 0f, 1f, EditorGUILayoutEx.ANIMATION_STYLES.timeScrubber);
 
 								
 
@@ -1178,14 +1195,14 @@ namespace ws.winx.editor.bmachine.extensions
 
 								}
 
+								/////////////  ROTATION/SCALE KEYFRAMES  /////////////////////////
+				 
+								Rect keyframesRect = GUILayoutUtility.GetRect (Screen.width - 16f, 16f);
 
-								Rect timeLineRect = GUILayoutUtility.GetRect (Screen.width - 16f, 50f);
-								//Rect timeLineRect = GUILayoutUtility.GetLastRect ();
-				
-//				timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
-//				timeLineRect.xMax -= EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
-//				//timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
-//				timeLineRect.width -= 66f;
+								keyframesRect.xMax = timeControlRect.xMax+_keyframeMarker.image.width*0.5f;
+								keyframesRect.xMin = timeControlRect.xMin-_keyframeMarker.image.width*0.5f;
+
+					
 
 								if (Selection.activeGameObject != null) {
 
@@ -1194,25 +1211,27 @@ namespace ws.winx.editor.bmachine.extensions
 					
 												EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
 
-												if (clipBindingCurrent != null && clipBindingCurrent.clip != null) {
+												if (clipBindingCurrent != null && clipBindingCurrent.visible && clipBindingCurrent.clip != null) {
 														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;
 														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
-														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding);
+														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, getNodeClip ().length);
 
-												}
+												}else
+													eventTimeValues = new float[0];
 							
 
 					
-										}else
+										} else
 										if (Tools.current == Tool.Scale) {
 												EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
 						
-												if (clipBindingCurrent != null && clipBindingCurrent.clip != null) {
+												if (clipBindingCurrent != null && clipBindingCurrent.visible && clipBindingCurrent.clip != null) {
 														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_SclX;
 														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
-														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding);
-							
-												}
+														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, getNodeClip ().length);
+
+											}else
+												eventTimeValues = new float[0];
 
 										} else
 												eventTimeValues = new float[0];
@@ -1225,11 +1244,12 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 								eventDisplayNames = eventTimeValues.Select ((itm) => {
-										return Decimal.Round (Convert.ToDecimal (itm)).ToString () + ".s"; }).ToArray ();
+										return Decimal.Round (Convert.ToDecimal (itm * getNodeClip ().length), 2).ToString () + ".s"; }).ToArray ();
 								eventTimeValuesSelected = new bool[eventTimeValues.Length];
 
-								EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, __timeNormalized,
-				                                  null, null, null, onKeyframeEdit, null
+								
+								EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, _keyframeMarker, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, -1,
+				                                  null, onKeyframeDelete, null, onKeyframeEdit, null
 								);
 
 

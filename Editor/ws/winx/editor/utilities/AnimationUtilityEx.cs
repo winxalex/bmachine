@@ -81,11 +81,12 @@ namespace ws.winx.editor.utilities
 				/// <returns>The times.</returns>
 				/// <param name="clip">Clip.</param>
 				/// <param name="curveBinding">Curve binding.</param>
-				public static float[] GetTimes (AnimationClip clip, EditorCurveBinding curveBinding)
+				/// <param name="clipLength">Clip length.</param>
+				public static float[] GetTimes (AnimationClip clip, EditorCurveBinding curveBinding,float clipLength=1f)
 				{
 						AnimationCurve curve = AnimationUtility.GetEditorCurve (clip, curveBinding);
 						if(curve==null) return new float[0];
-						return curve.keys.Select ((itm) => itm.time).ToArray ();
+						return curve.keys.Select ((itm) => itm.time/clipLength).ToArray ();
 					
 				}
 

@@ -93,30 +93,50 @@ namespace ws.winx.editor.extensions
 	
 				}
 
-				private static Texture __eventMarkerTexture;
 
-				public static Texture eventMarkerTexture {
-						get {
-								if (__eventMarkerTexture == null)
-										__eventMarkerTexture = EditorGUIUtility.IconContent ("Animation.EventMarker").image;
-
-								return __eventMarkerTexture;
-						}
-				}
 
 				public delegate void MenuCallback<T> (int selectedIndex,T SelectedObject,int controlID);
 
-				public delegate void EventCallback<T>(int ownerControlID,Event e,T userData);
+				public delegate void EventCallback<T> (int ownerControlID,Event e,T userData);
 
 				public delegate void ObjectPropertyCallback (UnityEngine.Object @object,Type type,string property);
 
+
+				
 
 
 
 				//
 				// Nested Types
 				//
-				private class ToolTipStyles
+
+				public class AnimationStyles
+				{
+						public Texture2D pointIcon = EditorGUIUtilityW.LoadIcon ("animationkeyframe");
+						public GUIContent eventMarker = EditorGUIUtility.IconContent ("Animation.EventMarker");
+						public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
+						public GUIContent playIconSmall = EditorGUIUtility.IconContent ("Animation.Play");
+						public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
+						public GUIContent recordIcon = EditorGUIUtility.IconContent ("Animation.Record");
+						public GUIStyle playButton = "TimeScrubberButton";
+						public GUIStyle timeScrubber = "TimeScrubber";
+					
+					
+				}
+				
+				
+				private static AnimationStyles __ANIMATION_STYLES;
+
+				public static AnimationStyles ANIMATION_STYLES {
+						get {
+							
+								if (__ANIMATION_STYLES == null)
+										__ANIMATION_STYLES = new AnimationStyles ();
+								return __ANIMATION_STYLES;
+						}
+				}				
+
+				public class ToolTipStyles
 				{
 					
 						public GUIStyle tooltipBackground = "AnimationEventTooltip";
@@ -124,8 +144,18 @@ namespace ws.winx.editor.extensions
 
 				}
 				
-				private static ToolTipStyles TOOLTIP_STYLES;
+				private static ToolTipStyles __TOOLTIP_STYLES;
 
+				public static ToolTipStyles TOOLTIP_STYLES {
+						get {
+								if (__TOOLTIP_STYLES == null)
+										__TOOLTIP_STYLES = new ToolTipStyles ();
+								return __TOOLTIP_STYLES;
+						}
+				}
+
+
+				
 
 				
 			
@@ -164,7 +194,7 @@ namespace ws.winx.editor.extensions
 										interact = true;
 										current.Use ();
 
-										GUI.changed=true;
+										GUI.changed = true;
 								}
 								break;
 						case EventType.MouseUp:
@@ -181,7 +211,7 @@ namespace ws.winx.editor.extensions
 										interact = true;
 										current.Use ();
 
-										GUI.changed=true;
+										GUI.changed = true;
 								}
 								break;
 						case EventType.KeyDown:
@@ -351,7 +381,7 @@ namespace ws.winx.editor.extensions
 			
 						//dispatch events
 						if (onEvent != null && controlID == GUIUtility.hotControl) {
-								onEvent (controlID, Event.current,values[selectedIndex]);
+								onEvent (controlID, Event.current, values [selectedIndex]);
 						}
 						 
 			
@@ -505,10 +535,8 @@ namespace ws.winx.editor.extensions
 
 				public static void  CustomTooltip (Rect positionRect, string text)
 				{
-		
-						if (EditorGUILayoutEx.TOOLTIP_STYLES == null) {
-								EditorGUILayoutEx.TOOLTIP_STYLES = new EditorGUILayoutEx.ToolTipStyles ();
-						}
+						
+						
 						GUIStyle gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipArrow;
 						Vector2 arrowSize = gUIStyle.CalcSize (new GUIContent ());
 		
@@ -597,7 +625,8 @@ namespace ws.winx.editor.extensions
 				
 				
 								if (args.Delete != null)
-										args.Delete (new TimeLineArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
+									args.Delete (new TimeLineArgs<float> (args.selectedIndex, 0f, (float[])CHANGED_VALUES, null, args.controlID));
+										//args.Delete (new TimeLineArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
 						}
 				}
 		
@@ -738,7 +767,7 @@ namespace ws.winx.editor.extensions
 				/// <param name="EditClose">Edit close.</param>
 				/// <param name="EditOpen">Edit open.</param>
 				/// <param name="DragEnd">Drag end.</param>
-				public static void CustomTimeLine (ref Rect rectGlobal, ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
+				public static void CustomTimeLine (ref Rect rectGlobal, GUIContent marker, ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
 		                                   Action<TimeLineArgs<float>> Add=null, Action<TimeLineArgs<float>> Delete=null, Action<TimeLineArgs<float>> EditClose=null, Action<TimeLineArgs<float>> EditOpen=null, Action<TimeLineArgs<float>> DragEnd=null
 				)
 				{
@@ -764,7 +793,7 @@ namespace ws.winx.editor.extensions
 			
 						//background
 						//GUI.Box (rectLocal, GUIContent.none);
-						rectLocal.width -= eventMarkerTexture.width;
+						rectLocal.width -= marker.image.width;
 			
 			
 			
@@ -842,7 +871,7 @@ namespace ws.winx.editor.extensions
 				
 				
 				
-								Rect rect3 = new Rect (timeValuePositionX, eventMarkerTexture.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)eventMarkerTexture.width, (float)eventMarkerTexture.height);
+								Rect rect3 = new Rect (timeValuePositionX, marker.image.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)marker.image.width, (float)marker.image.height);
 				
 				
 								positionsHitRectArray [i] = rect3;
@@ -873,7 +902,7 @@ namespace ws.winx.editor.extensions
 						float startSelect;
 						float endSelect;
 			
-						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, new GUIContent (__eventMarkerTexture), positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
+						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, marker, positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
 			
 						
 			
@@ -1042,7 +1071,7 @@ namespace ws.winx.editor.extensions
 				
 				
 				
-								EditorGUILayoutEx.CustomTooltip (positionRect, displayNames [hoverInx] + "[" + timeValues [hoverInx] + "]");
+								EditorGUILayoutEx.CustomTooltip (positionRect, displayNames [hoverInx] + "[" + Decimal.Round(Convert.ToDecimal(timeValues [hoverInx]),2) + "]");
 				
 						}
 			
@@ -1104,18 +1133,17 @@ namespace ws.winx.editor.extensions
 						//if _variableSelected is NULL 
 						// or NOT INITIALIZED 
 						// => create new UnityVariable and add default type value
-						if (variableSelected == null || (!variableSelected.IsBinded() && variableSelected.ValueType.IsValueType && variableSelected.Value==null)) {
+						if (variableSelected == null || (!variableSelected.IsBinded () && variableSelected.ValueType.IsValueType && variableSelected.Value == null)) {
 								indexSelected = 0;
 								variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
-								variableSelected.displayMode=UnityVariable.DisplayMode.Raw;
+								variableSelected.displayMode = UnityVariable.DisplayMode.Raw;
 						} else 
 								indexSelected = values.IndexOf (variableSelected);
 
 						//if UnityVariable is not in supplied list of values(most likely blackboard vars)
 						if (indexSelected < 0) {
 								indexSelected = (int)variableSelected.displayMode;
-						}
-						else{
+						} else {
 								indexSelected += 2;//shift cos of "Variable" and "Bind"
 
 						}
@@ -1143,7 +1171,7 @@ namespace ws.winx.editor.extensions
 							
 
 
-								variableSelected.displayMode=UnityVariable.DisplayMode.Raw;	
+								variableSelected.displayMode = UnityVariable.DisplayMode.Raw;	
 
 												
 								//////// CHOOSE DRAWER ///////
@@ -1243,7 +1271,7 @@ namespace ws.winx.editor.extensions
 								
 
 								//FROM LOCALS/GLOBALS TO BIND => create new fresh Variable
-								if (indexSelectedPrev ==0 || indexSelectedPrev>1) {
+								if (indexSelectedPrev == 0 || indexSelectedPrev > 1) {
 										variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
 									
 									
@@ -1254,7 +1282,7 @@ namespace ws.winx.editor.extensions
 								UnityEngine.Object _objectSelected = null;
 				
 								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
-								if (variableSelected.IsBinded()) {
+								if (variableSelected.IsBinded ()) {
 
 										if (variableSelected.instanceBinded is Component)
 												_objectSelected = ((Component)variableSelected.instanceBinded).gameObject;
@@ -1292,10 +1320,10 @@ namespace ws.winx.editor.extensions
 												//pos.xMin=popPos.xMax+10;
 										}
 
-										string currentSelectedPath=variableSelected.memberPath;
+										string currentSelectedPath = variableSelected.memberPath;
 
-										if(variableSelected.instanceBinded!=null)
-											currentSelectedPath+="@"+variableSelected.instanceBinded.GetInstanceID();
+										if (variableSelected.instanceBinded != null)
+												currentSelectedPath += "@" + variableSelected.instanceBinded.GetInstanceID ();
 
 										//Debug.Log("currentSelectedPath:"+currentSelectedPath+" "+Time.frameCount);
 
@@ -1307,15 +1335,15 @@ namespace ws.winx.editor.extensions
 
 
 										
-											if (!String.IsNullOrEmpty (memberPath) && memberPath!=currentSelectedPath) {
-											//	Debug.Log("CHANGE memberPath:"+memberPath+" "+Time.frameCount);
+										if (!String.IsNullOrEmpty (memberPath) && memberPath != currentSelectedPath) {
+												//	Debug.Log("CHANGE memberPath:"+memberPath+" "+Time.frameCount);
 												
 
-												String[] memberPathAndID=memberPath.Split('@');
+												String[] memberPathAndID = memberPath.Split ('@');
 										
-												variableSelected.Bind(EditorUtility.InstanceIDToObject(int.Parse(memberPathAndID[1])),memberPathAndID[0]);
+												variableSelected.Bind (EditorUtility.InstanceIDToObject (int.Parse (memberPathAndID [1])), memberPathAndID [0]);
 												
-											} 
+										} 
 							
 									
 							

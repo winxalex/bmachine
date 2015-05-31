@@ -45,7 +45,6 @@ namespace ws.winx.editor.bmachine.extensions
 				
 				MecanimNode mecanimNode;
 				ws.winx.unity.AnimatorState selectedAnimaStateInfo;
-
 				float[] eventTimeValues;
 				float[] eventTimeValuesPrev;
 				bool eventTimeLineInitalized;
@@ -53,7 +52,6 @@ namespace ws.winx.editor.bmachine.extensions
 				bool[] eventTimeValuesSelected;
 				EventComparer eventTimeComparer = new EventComparer ();
 				string[] eventDisplayNames;
-
 				float timeNormalizedStartPrev = -1f;
 				float timeNormalizedEndPrev = 1.1f;
 				GUIStyle playButtonStyle;
@@ -335,6 +333,7 @@ namespace ws.winx.editor.bmachine.extensions
 				{
 						int i = 0;
 
+						
 
 						//////  RESTORE SAVED  //////
 						//restore and delete clipboard
@@ -360,10 +359,10 @@ namespace ws.winx.editor.bmachine.extensions
 						
 												serializedNode.ApplyModifiedProperties ();
 
-												UnityVariable.SetDirty(mecanimNode.blendX);
+												UnityVariable.SetDirty (mecanimNode.blendX);
 												
-												UnityVariable.SetDirty(mecanimNode.blendY);
-												UnityVariable.SetDirty(mecanimNode.motionOverride);
+												UnityVariable.SetDirty (mecanimNode.blendY);
+												UnityVariable.SetDirty (mecanimNode.motionOverride);
 
 //												if (variablesBindedToCurves != null) {
 //														UnityVariable[] varArray = variablesBindedToCurves;
@@ -447,8 +446,10 @@ namespace ws.winx.editor.bmachine.extensions
 										
 								DrawDefaultInspector ();
 
-										
-						
+//										
+//				if (EditorGUILayoutEx.ANIMATION_STYLES == null)
+//					EditorGUILayoutEx.ANIMATION_STYLES = new EditorGUILayoutEx.AnimationStyles ();
+
 
 
 								/////////////////////////////// ANIMATOR STATE /////////////////////////////////
@@ -509,7 +510,7 @@ namespace ws.winx.editor.bmachine.extensions
 												Rect timeControlRect = GUILayoutUtility.GetRect (Screen.width - 16f, 26f);
 												timeControlRect.xMin += 38f;
 												timeControlRect.xMax -= 70f;
-												animatorStateRunTimeControlSerialized.value = EditorGUILayoutEx.CustomHSlider (timeControlRect, (float)animatorStateRunTimeControlSerialized.value, 0f, 1f, TimeControlW.style.timeScrubber);
+												animatorStateRunTimeControlSerialized.value = EditorGUILayoutEx.CustomHSlider (timeControlRect, (float)animatorStateRunTimeControlSerialized.value, 0f, 1f,EditorGUILayoutEx.ANIMATION_STYLES.timeScrubber);
 												
 
 										}	
@@ -573,7 +574,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 								
 																		
-																	avatarPreview.timeControl.nextCurrentTime = avatarPreview.timeControl.startTime * (1f - mecanimNode.range.rangeStart) + avatarPreview.timeControl.stopTime * mecanimNode.range.rangeStart;	
+																		avatarPreview.timeControl.nextCurrentTime = avatarPreview.timeControl.startTime * (1f - mecanimNode.range.rangeStart) + avatarPreview.timeControl.stopTime * mecanimNode.range.rangeStart;	
 
 																}
 														} else {
@@ -669,11 +670,13 @@ namespace ws.winx.editor.bmachine.extensions
 										Rect timeLineRect = GUILayoutUtility.GetRect (Screen.width - 16f, 50f);
 										//Rect timeLineRect = GUILayoutUtility.GetLastRect ();
 
-										timeLineRect.xMin += playButtonSize.x - EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
-										timeLineRect.xMax -= EditorGUILayoutEx.eventMarkerTexture.width * 0.5f;
+									
+										Texture eventMarkerTexture = EditorGUILayoutEx.ANIMATION_STYLES.eventMarker.image;
+										timeLineRect.xMin += playButtonSize.x - eventMarkerTexture.width * 0.5f;
+										timeLineRect.xMax -= eventMarkerTexture.width * 0.5f;
 										//timeLineRect.height = EditorGUILayoutEx.eventMarkerTexture.height * 3 * 0.66f + playButtonSize.y;
 										timeLineRect.width -= 66f;
-										EditorGUILayoutEx.CustomTimeLine (ref timeLineRect, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
+										EditorGUILayoutEx.CustomTimeLine (ref timeLineRect,new GUIContent(eventMarkerTexture), ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, avatarPreview.timeControl.normalizedTime,
 				                                  onMecanimEventAdd, onMecanimEventDelete, onMecanimEventClose, onMecanimEventEdit, onMecanimEventDragEnd
 										);
 				
@@ -688,7 +691,7 @@ namespace ws.winx.editor.bmachine.extensions
 										for (i=0; i<eventTimeValuesNumber; i++) {
 												ev = ((SendEventNormalizedNode)mecanimNode.children [i]);	
 												//ev.timeNormalized.Value = eventTimeValues [i];
-												ev.timeNormalized.Value= eventTimeValues [i];
+												ev.timeNormalized.Value = eventTimeValues [i];
 					
 												//if changes have been made in pop editor or SendEventNormailized inspector
 												if (ev.name != eventDisplayNames [i])

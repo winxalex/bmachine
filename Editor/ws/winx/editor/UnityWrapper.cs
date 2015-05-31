@@ -8,6 +8,7 @@ using ws.winx.unity;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Linq;
+using ws.winx.editor.extensions;
 
 namespace ws.winx.editor
 {
@@ -24,7 +25,35 @@ namespace ws.winx.editor
 				SelectionChanged
 		}
 
+	#region EditorGUIUtilityW
+	public class EditorGUIUtilityW
+	{
+		
+		private static Type __RealType;
+		private static ConstructorInfo method_ctor;
+		static MethodInfo _LoadIcon_MethodInfo;
+		
+		public static Texture2D LoadIcon (string name){
 
+			if (_LoadIcon_MethodInfo == null) 
+								_LoadIcon_MethodInfo = GetWrappedType ().GetMethod ("LoadIcon", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+
+
+			return _LoadIcon_MethodInfo.Invoke (null, new object[]{name}) as Texture2D;
+		}
+		
+		public static Type GetWrappedType ()
+		{
+			if (__RealType == null) {
+				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+				__RealType = assembly.GetType ("UnityEditor.EditorGUIUtility");
+			}
+			
+			return __RealType;
+		}
+	}
+
+	#endregion
 
 	#region EditorGUIExtW
 		public class EditorGUIExtW
@@ -681,26 +710,7 @@ namespace ws.winx.editor
 				//
 				// Nested Types
 				//
-				public class Styles
-				{
-						public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
-						public GUIContent playIconSmall = EditorGUIUtility.IconContent ("Animation.Play");
-						public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
-						public GUIContent recordIcon = EditorGUIUtility.IconContent ("Animation.Record");
-						public GUIStyle playButton = "TimeScrubberButton";
-						public GUIStyle timeScrubber = "TimeScrubber";
-				}
-		
-				static Styles s_Styles;
-
-				public static Styles style {
-						get {
-								if (s_Styles == null)
-										s_Styles = new TimeControlW.Styles ();
-								return s_Styles;
-						}
-				}
-
+				
 				float m_MouseDrag;
 				bool m_WrapForwardDrag;
 				string[] displayNames;
@@ -710,9 +720,7 @@ namespace ws.winx.editor
 				//
 				public void DoTimeControl2 (Rect rect)
 				{
-						if (TimeControlW.s_Styles == null) {
-								TimeControlW.s_Styles = new TimeControlW.Styles ();
-						}
+						
 						Event current = Event.current;
 						//int controlID = GUIUtility.GetControlID (TimeControl.kScrubberIDHash, FocusType.Keyboard);
 						int controlID = GUIUtility.GetControlID (FocusType.Passive);
@@ -777,7 +785,7 @@ namespace ws.winx.editor
 						}
 			
 						//GUI.Box (rect2, GUIContent.none, TimeControl.s_Styles.timeScrubber);
-						GUI.Box (rect2, GUIContent.none, TimeControlW.s_Styles.timeScrubber);
+						GUI.Box (rect2, GUIContent.none, EditorGUILayoutEx.ANIMATION_STYLES.timeScrubber);
 
 						//this are the buttons
 						//thisg = GUI.Toggle (rect2, this.playing, (!this.playing) ? TimeControl.s_Styles.playIcon : TimeControl.s_Styles.pauseIcon, TimeControl.s_Styles.playButton);
