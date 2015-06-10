@@ -601,8 +601,8 @@ namespace ws.winx.unity
 				
 				if (__seralizedProperty == null && this.Value != null) {
 					
-					CreateSerializedProperty ();
-
+					__seralizedObject=SerializeVariable ();
+					__seralizedProperty = __seralizedObject.FindProperty ("value");
 				
 					
 				}
@@ -619,7 +619,7 @@ namespace ws.winx.unity
 
 
 		
-		void CreateSerializedProperty ()
+		SerializedObject SerializeVariable ()
 				{
 
 						using (Microsoft.CSharp.CSharpCodeProvider foo = 
@@ -676,6 +676,9 @@ namespace ws.winx.unity
 														", '" + CompErr.ErrorText + ";" 
 												);
 										}
+
+								return null;
+
 								} else {
 							
 										var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
@@ -686,9 +689,9 @@ namespace ws.winx.unity
 							
 							
 							
-										__seralizedObject = new SerializedObject (st);
+										return new SerializedObject (st);
 							
-										__seralizedProperty = __seralizedObject.FindProperty ("value");
+										
 							
 								}
 						
@@ -748,10 +751,14 @@ namespace ws.winx.unity
 			if (__seralizedObject != null) {
 				
 					if (__seralizedObject.targetObject == null) { //has been destroyed by Unity ????
+
 					__seralizedObject=null;
 					__seralizedProperty=null;
-										CreateSerializedProperty ();
-						}
+
+					__seralizedObject=SerializeVariable ();
+					__seralizedProperty = __seralizedObject.FindProperty ("value");
+
+				}
 
 				__seralizedObject.ApplyModifiedProperties ();
 				
