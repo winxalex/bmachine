@@ -297,7 +297,7 @@ namespace ws.winx.editor.bmachine.extensions
 										
 										clip = clipBindingCurrent.clip;
 
-										if (clip != null && clipBindingCurrent.gameObject != null && (transformFirstChild = clipBindingCurrent.gameObject.transform.GetChild (0)) != null) {
+										if (clip != null && clipBindingCurrent.gameObject != null && clipBindingCurrent.gameObject.transform.childCount>0 && (transformFirstChild = clipBindingCurrent.gameObject.transform.GetChild (0)) != null) {
 
 													
 												if (gameObjectCharacterSelected) {//=> move and/or rotate clip binding's gameobjects
@@ -550,14 +550,15 @@ namespace ws.winx.editor.bmachine.extensions
 
 						EditorGUI.BeginChangeCheck ();
 
-						GameObject gameObjectBinded = EditorGUI.ObjectField (rect, clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
+						GameObject gameObjectHolderBinded = EditorGUI.ObjectField (rect, clipBindingCurrent.gameObject, typeof(GameObject), true) as GameObject;
 
-						if (EditorGUI.EndChangeCheck () && gameObjectBinded != null) {	
+						
+						if (EditorGUI.EndChangeCheck () && gameObjectHolderBinded != null && gameObjectHolderBinded.transform.childCount==1) {	
 
-								clipBindingCurrent.gameObject = gameObjectBinded;
+								clipBindingCurrent.gameObject = gameObjectHolderBinded;
 								
 								clipBindingCurrent.positionOffset = Quaternion.Inverse (__mecanimNode.self.transform.rotation) * (clipBindingCurrent.gameObject.transform.position - __mecanimNode.self.transform.position);
-								clipBindingCurrent.rotationOffset = Quaternion.Inverse (__mecanimNode.self.transform.rotation) * gameObjectBinded.transform.rotation;
+								clipBindingCurrent.rotationOffset = Quaternion.Inverse (__mecanimNode.self.transform.rotation) * gameObjectHolderBinded.transform.rotation;
 								
 								
 						}
@@ -593,12 +594,14 @@ namespace ws.winx.editor.bmachine.extensions
 												AssetDatabase.CreateAsset (clip, AssetDatabaseUtility.AbsoluteUrlToAssets (path));
 												AssetDatabase.SaveAssets ();
 												clipBindingCurrent.clip = clip;
-												
+												clipBindingCurrent.clip.frameRate = getNodeClip ().frameRate;
 										}
+
+									
 								}
 
 
-								clipBindingCurrent.clip.frameRate = getNodeClip ().frameRate;
+								
 						}
 
 
@@ -634,7 +637,7 @@ namespace ws.winx.editor.bmachine.extensions
 						GameObject rootGameObject = (list.list as EditorClipBinding[]) [list.index].gameObject;
 						GameObject rootFirstChildGameObject;
 
-						if (rootGameObject != null && (rootFirstChildGameObject = rootGameObject.transform.GetChild (0).gameObject) != null) {
+						if (rootGameObject != null && rootGameObject.transform.childCount>0 && (rootFirstChildGameObject = rootGameObject.transform.GetChild (0).gameObject) != null) {
 								Selection.activeGameObject = rootFirstChildGameObject;
 
 								//EditorWindow.GetWindow<SceneHierarchyWindow> ().Focus ();
