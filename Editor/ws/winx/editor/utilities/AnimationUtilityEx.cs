@@ -69,8 +69,11 @@ namespace ws.winx.editor.utilities
 				/// <param name="curveBinding">Curve binding.</param>
 				public static float GetTimeAt (AnimationClip clip, int keyFrameInx, EditorCurveBinding curveBinding)
 				{
-
-						return AnimationUtility.GetEditorCurve (clip, curveBinding).keys [keyFrameInx].time;
+						AnimationCurve curve = AnimationUtility.GetEditorCurve (clip, curveBinding);
+						if (keyFrameInx < 0 || keyFrameInx > curve.length - 1)
+								return 0f;
+					
+						return curve.keys [keyFrameInx].time;
 
 
 				}

@@ -437,10 +437,7 @@ namespace ws.winx.editor.bmachine.extensions
 								}
 
 								
-								if (GUILayout.Button ("BindEditor")) {
-
-										MecanimNodeEditorWindow.Show (mecanimNode, this.serializedNode, null);
-								}
+			
 								
 							
 										
@@ -487,6 +484,11 @@ namespace ws.winx.editor.bmachine.extensions
 									
 								}
 								///////////////////////////////////////////////////
+			
+								if (GUILayout.Button ("BindEditor") && motion!=null) {
+									
+									MecanimNodeEditorWindow.Show ( mecanimNode.self, motion as AnimationClip, this.serializedNode, null);
+								}
 
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
 								if (Application.isPlaying) {
