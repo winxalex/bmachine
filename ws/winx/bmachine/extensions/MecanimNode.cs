@@ -32,7 +32,7 @@ namespace ws.winx.bmachine.extensions
 						get{ return (BlackboardCustom)base.blackboard; }
 				}
 
-				//[HideInInspector]
+				[HideInInspector]
 				public EditorClipBinding[]
 						clipBindings;
 				[HideInInspector]
