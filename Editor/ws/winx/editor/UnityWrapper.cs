@@ -26,32 +26,33 @@ namespace ws.winx.editor
 		}
 
 	#region EditorGUIUtilityW
-	public class EditorGUIUtilityW
-	{
+		public class EditorGUIUtilityW
+		{
 		
-		private static Type __RealType;
-		private static ConstructorInfo method_ctor;
-		static MethodInfo _LoadIcon_MethodInfo;
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				static MethodInfo _LoadIcon_MethodInfo;
 		
-		public static Texture2D LoadIcon (string name){
+				public static Texture2D LoadIcon (string name)
+				{
 
-			if (_LoadIcon_MethodInfo == null) 
+						if (_LoadIcon_MethodInfo == null) 
 								_LoadIcon_MethodInfo = GetWrappedType ().GetMethod ("LoadIcon", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 
 
-			return _LoadIcon_MethodInfo.Invoke (null, new object[]{name}) as Texture2D;
-		}
+						return _LoadIcon_MethodInfo.Invoke (null, new object[]{name}) as Texture2D;
+				}
 		
-		public static Type GetWrappedType ()
-		{
-			if (__RealType == null) {
-				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-				__RealType = assembly.GetType ("UnityEditor.EditorGUIUtility");
-			}
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.EditorGUIUtility");
+						}
 			
-			return __RealType;
+						return __RealType;
+				}
 		}
-	}
 
 	#endregion
 
@@ -1309,7 +1310,55 @@ namespace ws.winx.editor
 		}
 	#endregion
 	
-	
+		/// <summary>
+		/// Curve editor wrapper.
+		/// 
+		///  Use it like;
+		/// 
+		// if (curveEditor == null) {
+			
+		//	CurveWrapperW[] curveWrappers;
+		//	
+		//	int numCurves = curves.Length;
+		//	
+		//	curveWrappers = new CurveWrapperW[numCurves];
+		//	
+		//	CurveWrapperW curveWrapperNew;
+		//	
+		//	for (i=0; i<numCurves; i++) {
+		//		curveWrapperNew = new CurveWrapperW ();
+		//		curveWrapperNew.curve = curves [i];
+		//		curveWrapperNew.color = curveColors [i];
+		//		curveWrappers [i] = curveWrapperNew;
+		//	}
+		//	
+		//	
+		//	
+		//	curveEditor = new CurveEditorW (curveEditorRect, curveWrappers, false);
+		//	
+		//	curveEditor.FrameSelected (true, true);
+		//	curveEditor.scaleWithWindow = true;
+		//	curveEditor.hSlider = false;
+		//	curveEditor.hRangeMin = 0f;
+		//	curveEditor.hRangeMax = 1f;
+		//	curveEditor.hRangeLocked = true;
+		//	
+		//	curveEditor.onSelect += onCurveSelect;
+		//	
+		//	
+		//	
+		//	
+		//} else {
+		//	
+		//	curveEditor.rect = curveEditorRect;
+		//	curveEditor.FrameSelected (false, false);
+		//	
+		//}
+		//
+		//
+		//
+		//curveEditor.DoEditor ();
+		/// </summary>
 	#region CurveEditorW
 		public class CurveEditorW
 		{
@@ -1323,7 +1372,16 @@ namespace ws.winx.editor
 				static MethodInfo MethodInfo_getCurveWrapperById;
 				static MethodInfo MethodInfo_GetGUIPoint;
 				static MethodInfo MethodInfo_DeleteKeys;
-				private static PropertyInfo PropertyInfo_rect;
+				private static PropertyInfo __PropertyInfo_rect;
+
+				static PropertyInfo PropertyInfo_rect {
+						get {
+								if (__PropertyInfo_rect == null)
+										__PropertyInfo_rect = __RealType.GetProperty ("rect");
+								return __PropertyInfo_rect;
+						}
+				}
+
 				private static PropertyInfo PropertyInfo_scaleWithWindow;
 				private static PropertyInfo PropertyInfo_drawRect;
 				static PropertyInfo PropertyInfo_margin;
@@ -1506,7 +1564,7 @@ namespace ws.winx.editor
 						
 				});
 								
-								PropertyInfo_rect = __RealType.GetProperty ("rect");
+							
 								PropertyInfo_scaleWithWindow = __RealType.GetProperty ("scaleWithWindow");
 								PropertyInfo_margin = __RealType.GetProperty ("margin");
 								PropertyInfo_topmargin = __RealType.GetProperty ("topmargin");
@@ -1905,6 +1963,438 @@ namespace ws.winx.editor
 	#endregion
 
 
+		///!!! Stareted optmizaiton with MethodInfo Getters
+
+		//TickHandler
+	#region TickHandlerWrapper
+		public class TickHandlerW
+		{
+
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				private object __instance;
+				private static MethodInfo __SetTickModulosForFrameRate_MethodInfo;
+				private static MethodInfo __SetTickModulos_MethodInfo;
+
+				public static MethodInfo SetTickModulos_MethodInfo {
+						get {
+								if (__SetTickModulos_MethodInfo == null)
+										__SetTickModulos_MethodInfo = __RealType.GetMethod ("SetTickModulos");
+
+								return __SetTickModulos_MethodInfo;
+						}
+				}
+
+				public static MethodInfo SetTickModulosForFrameRate_MethodInfo {
+						get {
+
+								if (__SetTickModulosForFrameRate_MethodInfo == null)
+										__SetTickModulosForFrameRate_MethodInfo = __RealType.GetMethod ("SetTickModulosForFrameRate");
+
+								return __SetTickModulosForFrameRate_MethodInfo;
+						}
+				}
+
+				public object wrapped {
+						get {
+								return __instance;
+						}
+						set {
+								__instance = value;
+						}
+			
+				}
+		
+				public static void InitType ()
+				{
+						if (method_ctor == null) {
+
+								method_ctor = GetWrappedType ().GetConstructor (new Type[] {});
+			
+						}
+				}
+		
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.TickHandler");
+						}
+				
+						return __RealType;
+				
+				}
+
+				public void SetTickModulosForFrameRate (float frameRate)
+				{
+						SetTickModulosForFrameRate_MethodInfo.Invoke (__instance, new object[]{frameRate});
+				}
+
+				public void SetTickModulos (float[] tickModulos)
+				{
+					
+						SetTickModulos_MethodInfo.Invoke (__instance, new object[]{tickModulos});
+				}
+
+				public TickHandlerW ()
+				{
+						InitType ();
+
+						__instance = method_ctor.Invoke (new object[]{});
+
+				}
+		}
+	#endregion
+	
+	
+	
+	
+		/// <summary>
+		/// Time arear wrapper.
+		/// </summary>
+	#region TimeAreaWrapper
+		public class TimeAreaW
+		{
+				private object __instance;
+				private TickHandlerW _hTicks;
+				private TickHandlerW _vTicks;
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				private static MethodInfo __DrawMajorTicks_MethodInfo;
+				private	static MethodInfo EndViewGUI_MethodInfo;
+				private	static MethodInfo TimeRuler_MethodInfo;
+				private	static MethodInfo BeginViewGUI_MethodInfo;
+				private static MethodInfo __TimeToPixel_MethodInfo;
+
+				public static MethodInfo TimeToPixel_MethodInfo {
+						get {
+								if (__TimeToPixel_MethodInfo == null)
+										__TimeToPixel_MethodInfo = __RealType.GetMethod ("TimeToPixel");
+
+								return __TimeToPixel_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __PixelToTime_MethodInfo;
+
+				public static MethodInfo PixelToTime_MethodInfo {
+						get {
+								if (__PixelToTime_MethodInfo == null) 
+										__PixelToTime_MethodInfo = __RealType.GetMethod ("PixelToTime");
+
+								return __PixelToTime_MethodInfo;
+						}
+				}
+
+				private static PropertyInfo __PropertyInfo_scaleWithWindow;
+
+				public static PropertyInfo PropertyInfo_scaleWithWindow {
+						get {
+								if (__PropertyInfo_scaleWithWindow == null)
+										__PropertyInfo_scaleWithWindow = GetWrappedType ().GetProperty ("scaleWithWindow");
+
+								return __PropertyInfo_scaleWithWindow;
+						}
+				}
+
+				private static PropertyInfo __PropertyInfo_rect;
+				
+				static PropertyInfo PropertyInfo_rect {
+						get {
+								if (__PropertyInfo_rect == null)
+										__PropertyInfo_rect = __RealType.GetProperty ("rect");
+								return __PropertyInfo_rect;
+						}
+				}
+
+				static PropertyInfo PropertyInfo_margin;
+				static PropertyInfo PropertyInfo_topmargin;
+				static PropertyInfo PropertyInfo_leftmargin;
+				static PropertyInfo PropertyInfo_rightmargin;
+				static PropertyInfo PropertyInfo_bottommargin;
+				static PropertyInfo PropertyInfo_vSlider;
+				static PropertyInfo PropertyInfo_hSlider;
+				static PropertyInfo PropertyInfo_hRangeMax;
+				static PropertyInfo PropertyInfo_hRangeMin;
+				static PropertyInfo PropertyInfo_vRangeMax;
+				static PropertyInfo PropertyInfo_vRangeMin;
+				static PropertyInfo PropertyInfo_vRangeLocked;
+				static PropertyInfo PropertyInfo_hRangeLocked;
+				static PropertyInfo __PropertyInfo_hTicks;
+
+				public static PropertyInfo PropertyInfo_hTicks {
+						get {
+								if (__PropertyInfo_hTicks == null)
+										__PropertyInfo_hTicks = __RealType.GetProperty ("hTicks");
+
+
+								return __PropertyInfo_hTicks;
+						}
+				}
+
+				static PropertyInfo __PropertyInfo_vTicks;
+
+				public static PropertyInfo PropertyInfo_vTicks {
+						get {
+								if (__PropertyInfo_vTicks == null)
+										__PropertyInfo_vTicks = __RealType.GetProperty ("vTicks");
+
+								return __PropertyInfo_vTicks;
+						}
+				}
+
+				static MethodInfo DrawMajorTicks_MethodInfo {
+						get {
+								if (__DrawMajorTicks_MethodInfo == null)
+										__DrawMajorTicks_MethodInfo = TimeAreaW.GetWrappedType ().GetMethod ("DrawMajorTicks");
+
+
+								return __DrawMajorTicks_MethodInfo;
+						}
+				}
+	
+				public object wrapped {
+						get {
+								return __instance;
+						}
+						
+				}
+
+				public TickHandlerW hTicks {
+						get { 
+								if (_hTicks == null) {
+										_hTicks = new TickHandlerW ();
+										_hTicks.wrapped = PropertyInfo_hTicks.GetValue (__instance, null);
+								}
+								return _hTicks;
+						}
+						set{ _hTicks = value;}
+				}
+
+				public TickHandlerW vTicks {
+						get { 
+								if (_vTicks == null) {
+										_vTicks = new TickHandlerW ();
+										_vTicks.wrapped = PropertyInfo_vTicks.GetValue (__instance, null);
+								}
+								return _vTicks;
+						}
+						set { 
+								_vTicks = value;
+								PropertyInfo_vTicks.SetValue (__instance, _vTicks.wrapped, null);
+						}
+				}
+		
+				public Rect rect {
+						get{ return (Rect)PropertyInfo_rect.GetValue (__instance, null);}
+						set{ PropertyInfo_rect.SetValue (__instance, value, null);}
+				}
+
+				public bool scaleWithWindow {
+						get{ return (bool)PropertyInfo_scaleWithWindow.GetValue (__instance, null);}
+						set{ PropertyInfo_scaleWithWindow.SetValue (__instance, value, null);}
+				}
+
+				public float margin {
+					
+						set{ PropertyInfo_margin.SetValue (__instance, value, null);}
+				}
+				
+				public float topmargin {
+					
+						set{ PropertyInfo_topmargin.SetValue (__instance, value, null);}
+				}
+				
+				public float leftmargin {
+					
+						set{ PropertyInfo_leftmargin.SetValue (__instance, value, null);}
+				}
+				
+				public float rightmargin {
+					
+						set{ PropertyInfo_rightmargin.SetValue (__instance, value, null);}
+				}
+				
+				public float bottommargin {
+					
+						set{ PropertyInfo_bottommargin.SetValue (__instance, value, null);}
+				}
+
+				public	bool hRangeLocked {
+			
+						get{ return (bool)PropertyInfo_hRangeLocked.GetValue (__instance, null);}
+						set{ PropertyInfo_hRangeLocked.SetValue (__instance, value, null);}
+				}
+		
+				public	bool vRangeLocked {
+						get{ return (bool)PropertyInfo_vRangeLocked.GetValue (__instance, null);}
+						set{ PropertyInfo_vRangeLocked.SetValue (__instance, value, null);}
+				}
+		
+				public	bool hSlider {
+			
+						get{ return (bool)PropertyInfo_hSlider.GetValue (__instance, null);}
+						set{ PropertyInfo_hSlider.SetValue (__instance, value, null);}
+				}
+		
+				public	bool vSlider {
+			
+						get{ return (bool)PropertyInfo_hSlider.GetValue (__instance, null);}
+						set{ PropertyInfo_vSlider.SetValue (__instance, value, null);}
+				}
+		
+				public float hRangeMin {
+			
+						get{ return (float)PropertyInfo_hRangeMin.GetValue (__instance, null);}
+						set{ PropertyInfo_hRangeMin.SetValue (__instance, value, null);}
+				}
+		
+				public float hRangeMax {
+			
+						get{ return (float)PropertyInfo_hRangeMax.GetValue (__instance, null);}
+						set{ PropertyInfo_hRangeMax.SetValue (__instance, value, null);}
+				}
+		
+				public float vRangeMin {
+			
+						get{ return (float)PropertyInfo_vRangeMin.GetValue (__instance, null);}
+						set{ PropertyInfo_vRangeMin.SetValue (__instance, value, null);}
+				}
+		
+				public float vRangeMax {
+			
+						get{ return (float)PropertyInfo_vRangeMax.GetValue (__instance, null);}
+						set{ PropertyInfo_vRangeMax.SetValue (__instance, value, null);}
+				}
+
+				/// <summary>
+				/// Inits the type.
+				/// </summary>
+				public static void InitType ()
+				{
+						if (method_ctor == null) {
+							
+							
+							
+							
+								method_ctor = GetWrappedType ().GetConstructor (new Type[] {
+								typeof(bool)
+									
+							});
+							
+								PropertyInfo_margin = __RealType.GetProperty ("margin");
+								PropertyInfo_topmargin = __RealType.GetProperty ("topmargin");
+								PropertyInfo_leftmargin = __RealType.GetProperty ("leftmargin");
+								PropertyInfo_rightmargin = __RealType.GetProperty ("rightmargin");
+								PropertyInfo_bottommargin = __RealType.GetProperty ("rightmargin");
+								PropertyInfo_vSlider = __RealType.GetProperty ("vSlider");
+								PropertyInfo_hSlider = __RealType.GetProperty ("hSlider");
+								PropertyInfo_hRangeMax = __RealType.GetProperty ("hRangeMax");
+								PropertyInfo_hRangeMin = __RealType.GetProperty ("hRangeMin");
+								PropertyInfo_vRangeMax = __RealType.GetProperty ("vRangeMax");
+								PropertyInfo_vRangeMin = __RealType.GetProperty ("vRangeMin");
+								PropertyInfo_vRangeLocked = __RealType.GetProperty ("vRangeLocked");
+								PropertyInfo_hRangeLocked = __RealType.GetProperty ("hRangeLocked");
+								
+								
+				
+
+
+								EndViewGUI_MethodInfo = __RealType.GetMethod ("EndViewGUI");
+								BeginViewGUI_MethodInfo = __RealType.GetMethod ("BeginViewGUI");
+								TimeRuler_MethodInfo = __RealType.GetMethod ("TimeRuler");
+
+							
+						}
+				}
+
+				/// <summary>
+				/// Initializes a new instance of the <see cref="ws.winx.editor.TimeAreaW"/> class.
+				/// </summary>
+				/// <param name="minimalGUI">If set to <c>true</c> minimal GU.</param>
+				public TimeAreaW (bool minimalGUI)
+				{
+						InitType ();
+						
+						__instance = method_ctor.Invoke (new object[] {
+							
+							minimalGUI
+						});
+
+
+						//this.margin = 0f;
+
+				}
+					
+				/// <summary>
+				/// Gets the type of the wrapped.
+				/// </summary>
+				/// <returns>The wrapped type.</returns>
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.TimeArea");
+						}
+						
+						return __RealType;
+						
+				}
+
+				public float TimeToPixel (float time, Rect rect)
+				{
+						return (float)TimeToPixel_MethodInfo.Invoke (__instance, new object[] {
+								time,
+								rect
+						});
+
+				}
+
+				public float PixelToTime (float pixelX, Rect rect)
+				{
+						return (float)PixelToTime_MethodInfo.Invoke (__instance, new object[] {
+								pixelX,
+								rect
+						});
+				}
+
+				/// <summary>
+				/// Do the time area.
+				/// </summary>
+				/// <param name="position">Position.</param>
+				/// <param name="framerate">Framerate.</param>
+				public void DoTimeArea (Rect position, int framerate)
+				{
+
+
+//						if (Event.current.type == EventType.Repaint)
+//						{
+//							this.rect = position;
+//						}
+
+						this.rect = position;
+
+						DrawMajorTicks_MethodInfo.Invoke (__instance, new object[] {
+				position,
+				framerate
+			});
+			
+						BeginViewGUI_MethodInfo.Invoke (__instance, null);
+
+						// TimeRuller label hegth=20f
+						TimeRuler_MethodInfo.Invoke (__instance, new object[] {
+								new Rect (position.x, position.y, position.width, 20f),
+								framerate
+			});
+			
+						EndViewGUI_MethodInfo.Invoke (__instance, null);
+
+						
+				}
+
+
+		}
+	#endregion
 
 
 }//namespace

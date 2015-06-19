@@ -707,13 +707,12 @@ namespace ws.winx.editor.bmachine.extensions
 				void OnGUI ()
 				{
 
-						//if (EditorGUILayoutEx.ANIMATION_STYLES == null)
-						//	EditorGUILayoutEx.ANIMATION_STYLES = new EditorGUILayoutEx.AnimationStyles ();
+					
 
 						if (_keyframeMarker == null)
 								_keyframeMarker = new GUIContent (EditorGUILayoutEx.ANIMATION_STYLES.pointIcon);
 			
-						if (!Application.isPlaying) {
+								if (!Application.isPlaying && 	__gameObjectClipList!=null) {
 
 
 
@@ -997,6 +996,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 										///////////// GAMEOBJECT - CLIP BINDINGS //////////
 								
+									
 										__gameObjectClipList.DoLayoutList ();
 
 
