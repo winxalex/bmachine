@@ -63,6 +63,10 @@ namespace ws.winx.bmachine.extensions
 				[UnityVariableProperty(typeof(float),"blendY")]
 				public UnityVariable
 						blendY;
+
+				//The duration of the transition. Value is in source state normalized time.
+				//if this value is 0.3 as normalized time, so 0.3 * source.length=timeInSeconds would
+				// be used in source and destination state for transition
 				[RangeAttribute(0f,1f)]
 				public float
 						transitionDuration = 0.1f;

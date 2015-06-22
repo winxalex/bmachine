@@ -723,11 +723,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2663aae3741e9e64b9cb08b2c75b7845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodes:
-  - {fileID: 1445558729}
-  - {fileID: 1563161155}
-  - {fileID: 555782821}
-  selectedNode: {fileID: 555782821}
+  _nodes:
+  - {fileID: 597858290}
+  selectedNode: {fileID: 597858290}
   sequenceEnd: 11.1499996
   wrap: 3
   playOnStart: 1
@@ -739,7 +737,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 412413700}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.19000006, y: 0, z: 0}
+  m_LocalPosition: {x: 3.3900001, y: 0, z: -2.0999999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -837,24 +835,6 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
---- !u!114 &555782821
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 1198830075}
-  startTime: 6.96794033
-  duration: 36.557106
-  channel: 2
-  actions: []
-  eventNode: 0
-  frameRate: 30
 --- !u!114 &576331568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -901,6 +881,27 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
+--- !u!114 &597858290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
+  m_Name: Kick
+  m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  startTime: 38.2725067
+  duration: 36.25
+  channel: 0
+  actions: []
+  eventNode: 0
+  frameRate: 30
+  audioClip: {fileID: 0}
+  movieTexture: {fileID: 0}
+  _animationClip: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
 --- !u!28 &599413840
 Texture2D:
   m_ObjectHideFlags: 0
@@ -929,6 +930,27 @@ Texture2D:
   m_ColorSpace: 1
   image data: 20
   _typelessdata: cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd
+--- !u!114 &607332509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
+  m_Name: Kick
+  m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  startTime: 11.7974062
+  duration: 31.1511021
+  channel: 0
+  actions: []
+  eventNode: 0
+  frameRate: 30
+  audioClip: {fileID: 0}
+  movieTexture: {fileID: 0}
+  _animationClip: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
 --- !u!1 &651688943
 GameObject:
   m_ObjectHideFlags: 0
@@ -1005,8 +1027,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2663aae3741e9e64b9cb08b2c75b7845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodes: []
-  selectedNode: {fileID: 0}
+  _nodes:
+  - {fileID: 607332509}
+  selectedNode: {fileID: 607332509}
   sequenceEnd: 0
   wrap: 3
   playOnStart: 1
@@ -1687,7 +1710,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 40, y: 60}
   m_Transitions: []
-  m_CachedInstanceID: 25834
+  m_CachedInstanceID: 30940
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -1765,7 +1788,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25836
+  m_CachedInstanceID: 30942
   m_Description: 
   m_EnabledState: {fileID: 0}
   m_LastEnabledState: {fileID: 0}
@@ -2776,24 +2799,6 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
---- !u!114 &1445558729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 1198830075}
-  startTime: 23.5425644
-  duration: 27.8825397
-  channel: 0
-  actions: []
-  eventNode: 0
-  frameRate: 30
 --- !u!1 &1449677201
 GameObject:
   m_ObjectHideFlags: 1
@@ -3033,24 +3038,6 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
---- !u!114 &1563161155
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 1198830075}
-  startTime: 48.3270493
-  duration: 16.7295227
-  channel: 1
-  actions: []
-  eventNode: 0
-  frameRate: 30
 --- !u!21 &1563844146
 Material:
   serializedVersion: 5
@@ -3320,7 +3307,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 26008
+  m_CachedInstanceID: 31114
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -3985,6 +3972,7 @@ GameObject:
   - 81: {fileID: 1801017122}
   - 114: {fileID: 1801017128}
   - 114: {fileID: 1801017132}
+  - 82: {fileID: 1801017127}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4057,6 +4045,75 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 10
+--- !u!82 &1801017127
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1801017121}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
 --- !u!114 &1801017128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4101,7 +4158,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 26032
+  m_CachedInstanceID: 31138
   m_NodeSerialization:
     m_NodeTypes:
     - BehaviourMachine.EveryFrame

@@ -625,7 +625,7 @@ namespace ws.winx.editor.utilities
 
 		private static void OnHierarchyWindowItemOnGUI(int instanceID, Rect selectionRect)
 		{
-			var obj = EditorUtility.InstanceIDToObject(instanceID) as UnityEngine.Object;
+			var obj = EditorUtility.InstanceIDToObject(instanceID);
 			if (obj && (obj.hideFlags & HideFlags.NotEditable) == HideFlags.NotEditable)
 			{
 				if (!_lockIcon)

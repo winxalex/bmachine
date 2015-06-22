@@ -109,6 +109,7 @@ namespace ws.winx.editor.bmachine.extensions
 						__timeNormalized = 0f;
 						__timeNormalizedUpdate = false;
 						__timeCurrent = 0f;
+
 						AnimationMode.StopAnimationMode ();
 						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 
