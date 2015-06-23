@@ -1963,7 +1963,7 @@ namespace ws.winx.editor
 	#endregion
 
 
-		///!!! Stareted optmizaiton with MethodInfo Getters
+		///!!! Started optmizaiton with MethodInfo Getters
 
 		//TickHandler
 	#region TickHandlerWrapper
@@ -1973,10 +1973,40 @@ namespace ws.winx.editor
 				private static Type __RealType;
 				private static ConstructorInfo method_ctor;
 				private object __instance;
+				public static MethodInfo __GetLevelWithMinSeparation_MethodInfo;
+
+				public static MethodInfo GetLevelWithMinSeparation_MethodInfo {
+						get {
+								if (__GetLevelWithMinSeparation_MethodInfo == null)
+										__GetLevelWithMinSeparation_MethodInfo = __RealType.GetMethod ("GetLevelWithMinSeparation");
+								return __GetLevelWithMinSeparation_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __GetTicksAtLevel_MethodInfo;
+
+				public static MethodInfo GetTicksAtLevel_MethodInfo {
+						get {
+								if (__GetTicksAtLevel_MethodInfo == null)
+										__GetTicksAtLevel_MethodInfo = __RealType.GetMethod ("GetTicksAtLevel");
+								return __GetTicksAtLevel_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __GetStrengthOfLevel_MethodInfo;
+
+				public static MethodInfo GetStrengthOfLevel_MethodInfo {
+						get {
+								if (__GetStrengthOfLevel_MethodInfo == null)
+										__GetStrengthOfLevel_MethodInfo = __RealType.GetMethod ("GetStrengthOfLevel");
+								return __GetStrengthOfLevel_MethodInfo;
+						}
+				}
+
 				private static MethodInfo __SetTickModulosForFrameRate_MethodInfo;
 				private static MethodInfo __SetTickModulos_MethodInfo;
 
-				public static MethodInfo SetTickModulos_MethodInfo {
+				static MethodInfo SetTickModulos_MethodInfo {
 						get {
 								if (__SetTickModulos_MethodInfo == null)
 										__SetTickModulos_MethodInfo = __RealType.GetMethod ("SetTickModulos");
@@ -1985,13 +2015,32 @@ namespace ws.winx.editor
 						}
 				}
 
-				public static MethodInfo SetTickModulosForFrameRate_MethodInfo {
+				static MethodInfo SetTickModulosForFrameRate_MethodInfo {
 						get {
 
 								if (__SetTickModulosForFrameRate_MethodInfo == null)
 										__SetTickModulosForFrameRate_MethodInfo = __RealType.GetMethod ("SetTickModulosForFrameRate");
 
 								return __SetTickModulosForFrameRate_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __SetTickStrengths_MethodInfo;
+
+				static MethodInfo SetTickStrengths_MethodInfo {
+					get {
+						if(__SetTickStrengths_MethodInfo==null) __SetTickStrengths_MethodInfo=__RealType.GetMethod("SetTickStrengths");
+						return __SetTickStrengths_MethodInfo;
+					}
+				}
+
+				private static PropertyInfo __tickLevels_PropertyInfo;
+
+				static PropertyInfo tickLevels_PropertyInfo {
+						get {
+								if (__tickLevels_PropertyInfo == null)
+										__tickLevels_PropertyInfo = __RealType.GetProperty ("tickLevels");
+								return __tickLevels_PropertyInfo;
 						}
 				}
 
@@ -2003,6 +2052,13 @@ namespace ws.winx.editor
 								__instance = value;
 						}
 			
+				}
+
+				public int tickLevels {
+						get {
+							return	(int)tickLevels_PropertyInfo.GetValue (__instance, null);
+						}
+						
 				}
 		
 				public static void InitType ()
@@ -2025,6 +2081,25 @@ namespace ws.winx.editor
 				
 				}
 
+				public int GetLevelWithMinSeparation (float pixelSeparation)
+				{
+					
+						return (int)GetLevelWithMinSeparation_MethodInfo.Invoke (__instance, new object[]{pixelSeparation});
+				}
+
+				public float[] GetTicksAtLevel (int level, bool excludeTicksFromHigherlevels)
+				{
+						return (float[])GetTicksAtLevel_MethodInfo.Invoke (__instance, new object[] {
+								level,
+								excludeTicksFromHigherlevels
+						});
+				}
+
+				public float GetStrengthOfLevel (int level)
+				{
+						return (float)GetStrengthOfLevel_MethodInfo.Invoke (__instance, new object[]{level});
+				}
+
 				public void SetTickModulosForFrameRate (float frameRate)
 				{
 						SetTickModulosForFrameRate_MethodInfo.Invoke (__instance, new object[]{frameRate});
@@ -2036,6 +2111,11 @@ namespace ws.winx.editor
 						SetTickModulos_MethodInfo.Invoke (__instance, new object[]{tickModulos});
 				}
 
+				public void SetTickStrengths (float tickMinSpacing, float tickMaxSpacing, bool sqrt)
+				{
+			SetTickStrengths_MethodInfo.Invoke (__instance, new object[]{tickMinSpacing,tickMaxSpacing,sqrt});
+				}
+			
 				public TickHandlerW ()
 				{
 						InitType ();
@@ -2060,10 +2140,39 @@ namespace ws.winx.editor
 				private TickHandlerW _vTicks;
 				private static Type __RealType;
 				private static ConstructorInfo method_ctor;
-				private static MethodInfo __DrawMajorTicks_MethodInfo;
 				private	static MethodInfo EndViewGUI_MethodInfo;
 				private	static MethodInfo TimeRuler_MethodInfo;
 				private	static MethodInfo BeginViewGUI_MethodInfo;
+				private static MethodInfo __FrameToPixel_MethodInfo;
+
+				public static MethodInfo FrameToPixel_MethodInfo {
+						get {
+								if (__FrameToPixel_MethodInfo == null)
+										__FrameToPixel_MethodInfo = __RealType.GetMethod ("FrameToPixel");
+								return __FrameToPixel_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __FormatFrame_MethodInfo;
+
+				public static MethodInfo FormatFrame_MethodInfo {
+						get {
+								if (__FormatFrame_MethodInfo == null)
+										__FormatFrame_MethodInfo = __RealType.GetMethod ("FormatFrame");
+								return __FormatFrame_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __SetTickMarkerRanges_MethodInfo;
+
+				public static MethodInfo SetTickMarkerRanges_MethodInfo {
+						get {
+								if (__SetTickMarkerRanges_MethodInfo == null)
+										__SetTickMarkerRanges_MethodInfo = __RealType.GetMethod ("SetTickMarkerRanges", BindingFlags.NonPublic | BindingFlags.Instance);
+								return __SetTickMarkerRanges_MethodInfo;
+						}
+				}
+
 				private static MethodInfo __TimeToPixel_MethodInfo;
 
 				public static MethodInfo TimeToPixel_MethodInfo {
@@ -2143,6 +2252,8 @@ namespace ws.winx.editor
 						}
 				}
 
+				private static MethodInfo __DrawMajorTicks_MethodInfo;
+
 				static MethodInfo DrawMajorTicks_MethodInfo {
 						get {
 								if (__DrawMajorTicks_MethodInfo == null)
@@ -2152,7 +2263,10 @@ namespace ws.winx.editor
 								return __DrawMajorTicks_MethodInfo;
 						}
 				}
-	
+
+				public float tickMinSpacing = 3f;
+				public float tickMaxSpacing = 80f;
+			
 				public object wrapped {
 						get {
 								return __instance;
@@ -2267,6 +2381,12 @@ namespace ws.winx.editor
 						set{ PropertyInfo_vRangeMax.SetValue (__instance, value, null);}
 				}
 
+
+
+				public delegate void FrameFormatDelegate (int i,float frameRate);
+
+				public TimeAreaW.FrameFormatDelegate onFrameFormatCallback;
+
 				/// <summary>
 				/// Inits the type.
 				/// </summary>
@@ -2358,12 +2478,94 @@ namespace ws.winx.editor
 						});
 				}
 
+				public float FrameToPixel (float frame, float frameRate, Rect position)
+				{
+						return (float)FrameToPixel_MethodInfo.Invoke (__instance, new object[] {
+								frame,
+								frameRate,
+								position
+						});
+				}
+
+				public virtual string FormatFrame (int frame, float frameRate)
+				{
+						return (string)FormatFrame_MethodInfo.Invoke (__instance, new object[] {
+								frame,
+								frameRate
+						});
+				}
+
+				void SetTickMarkerRanges ()
+				{
+						SetTickMarkerRanges_MethodInfo.Invoke (__instance, null);
+				}
+
+				public virtual void TimeRuler (Rect position, float frameRate)
+				{
+						Color color = GUI.color;
+						GUI.BeginGroup (position);
+						if (Event.current.type != EventType.Repaint) {
+								GUI.EndGroup ();
+								return;
+						}
+						//TimeArea.InitStyles ();
+						HandleUtilityW.ApplyWireMaterial ();
+						GL.Begin (1);
+						Color backgroundColor = GUI.backgroundColor;
+						this.SetTickMarkerRanges ();
+						this.hTicks.SetTickStrengths (this.tickMinSpacing, this.tickMaxSpacing, true);
+						Color textColor = EditorGUILayoutEx.TIMEAREA_STYLES.TimelineTick.normal.textColor;
+						textColor.a = 0.75f;
+						for (int i = 0; i < this.hTicks.tickLevels; i++) {
+								float num = this.hTicks.GetStrengthOfLevel (i) * 0.9f;
+								float[] ticksAtLevel = this.hTicks.GetTicksAtLevel (i, true);
+								for (int j = 0; j < ticksAtLevel.Length; j++) {
+										if (ticksAtLevel [j] >= this.hRangeMin && ticksAtLevel [j] <= this.hRangeMax) {
+												int num2 = Mathf.RoundToInt (ticksAtLevel [j] * frameRate);
+												float num3 = position.height * Mathf.Min (1f, num) * 0.7f;
+												float num4 = this.FrameToPixel ((float)num2, frameRate, position);
+												GL.Color (new Color (1f, 1f, 1f, num / 0.5f) * textColor);
+												GL.Vertex (new Vector3 (num4, position.height - num3 + 0.5f, 0f));
+												GL.Vertex (new Vector3 (num4, position.height - 0.5f, 0f));
+												if (num > 0.5f) {
+														GL.Color (new Color (1f, 1f, 1f, num / 0.5f - 1f) * textColor);
+														GL.Vertex (new Vector3 (num4 + 1f, position.height - num3 + 0.5f, 0f));
+														GL.Vertex (new Vector3 (num4 + 1f, position.height - 0.5f, 0f));
+												}
+										}
+								}
+						}
+						GL.End ();
+						int levelWithMinSeparation = this.hTicks.GetLevelWithMinSeparation (40f);
+						float[] ticksAtLevel2 = this.hTicks.GetTicksAtLevel (levelWithMinSeparation, false);
+						for (int k = 0; k < ticksAtLevel2.Length; k++) {
+								if (ticksAtLevel2 [k] >= this.hRangeMin && ticksAtLevel2 [k] <= this.hRangeMax) {
+										int num5 = Mathf.RoundToInt (ticksAtLevel2 [k] * frameRate);
+										float num6 = Mathf.Floor (this.FrameToPixel ((float)num5, frameRate, this.rect));
+
+
+										string text = String.Empty;
+										if (onFrameFormatCallback != null)
+												onFrameFormatCallback (num5, frameRate);
+										else
+												this.FormatFrame (num5, frameRate);
+
+										GUI.Label (new Rect (num6 + 3f, -3f, 40f, 20f), text, EditorGUILayoutEx.TIMEAREA_STYLES.TimelineTick);
+								}
+						}
+						GUI.EndGroup ();
+						GUI.backgroundColor = backgroundColor;
+						GUI.color = color;
+				}
+		
 				/// <summary>
-				/// Do the time area.
+				/// Do the "time ruller area" at position and frame rate
+				/// If you set framerate=60 then 60 fps in 1s and makers
+				/// 0  0.15  0.30 0.45 1.00 
 				/// </summary>
 				/// <param name="position">Position.</param>
 				/// <param name="framerate">Framerate.</param>
-				public void DoTimeArea (Rect position, int framerate)
+				public void DoTimeArea (Rect position, float framerate)
 				{
 
 
@@ -2376,16 +2578,19 @@ namespace ws.winx.editor
 
 						DrawMajorTicks_MethodInfo.Invoke (__instance, new object[] {
 				position,
-				framerate
+				60f
 			});
 			
 						BeginViewGUI_MethodInfo.Invoke (__instance, null);
 
-						// TimeRuller label hegth=20f
-						TimeRuler_MethodInfo.Invoke (__instance, new object[] {
-								new Rect (position.x, position.y, position.width, 20f),
-								framerate
-			});
+						// TimeRuller label heigth=20f
+//						TimeRuler_MethodInfo.Invoke (__instance, new object[] {
+//								new Rect (position.x, position.y, position.width, 20f),
+//								framerate
+//			});
+
+			TimeRuler (new Rect (position.x, position.y, position.width, 20f), framerate);
+
 			
 						EndViewGUI_MethodInfo.Invoke (__instance, null);
 
@@ -2397,6 +2602,45 @@ namespace ws.winx.editor
 	#endregion
 
 
+
+	#region TimeAreaWrapper
+		public class HandleUtilityW
+		{
+				private object __instance;
+				private static Type __RealType;
+				private static ConstructorInfo method_ctor;
+				private static MethodInfo __ApplyWireMaterial_MethodInfo;
+
+				public static MethodInfo ApplyWireMaterial_MethodInfo {
+						get {
+								if (__ApplyWireMaterial_MethodInfo == null)
+										__ApplyWireMaterial_MethodInfo = GetWrappedType ().GetMethod ("ApplyWireMaterial", BindingFlags.NonPublic | BindingFlags.Static);
+								return __ApplyWireMaterial_MethodInfo;
+						}
+				}
+
+				/// <summary>
+				/// Gets the type of the wrapped.
+				/// </summary>
+				/// <returns>The wrapped type.</returns>
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.HandleUtility");
+						}
+			
+						return __RealType;
+			
+				}
+
+				public static void ApplyWireMaterial ()
+				{
+						ApplyWireMaterial_MethodInfo.Invoke (null, null);
+				}
+		}
+
+	#endregion
 }//namespace
 
 

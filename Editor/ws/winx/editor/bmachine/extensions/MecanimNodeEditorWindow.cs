@@ -73,11 +73,11 @@ namespace ws.winx.editor.bmachine.extensions
 				private static EditorClipBinding __nodeClipBinding;
 				private static EditorClipBinding[] __clipBindingsToBeAnimated;
 				private static bool __timeNormalizedUpdate;
-				private static float[] eventTimeValues;
+				private static float[] keyframeTimeValues;
 				private static float[] eventTimeValuesPrev;
 				private static bool eventTimeLineInitalized;
-				private static bool[] eventTimeValuesSelected;
-				private static string[] eventDisplayNames;
+				private static bool[] keyframeTimeValuesSelected;
+				private static string[] keyframesDisplayNames;
 				private static GUIContent _keyframeMarker;
 
 
@@ -163,11 +163,11 @@ namespace ws.winx.editor.bmachine.extensions
 
 						
 
-						eventTimeValues = new float[0];
+						keyframeTimeValues = new float[0];
 						eventTimeValuesPrev = new float[0];
 
-						eventTimeValuesSelected = new bool[0];
-						eventDisplayNames = new string[0];
+						keyframeTimeValuesSelected = new bool[0];
+						keyframesDisplayNames = new string[0];
 						
 
 						///////////// create Reordable list of gameObject-animationClip //////////////////
@@ -575,7 +575,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 						
-						/////////////  ADD CLIP TO CLIPBINDING  /////////
+						/////////////  ADD ANIMATION CLIP TO CLIPBINDING  /////////
 
 						clipBindingCurrent.clip = EditorGUI.ObjectField (rect, clipBindingCurrent.clip, typeof(AnimationClip), true) as AnimationClip;
 
@@ -1195,10 +1195,10 @@ namespace ws.winx.editor.bmachine.extensions
 												if (clipBindingCurrent != null && clipBindingCurrent.visible && clipBindingCurrent.clip != null) {
 														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;
 														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
-														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
+														keyframeTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
 
 												}else
-													eventTimeValues = new float[0];
+													keyframeTimeValues = new float[0];
 							
 
 					
@@ -1209,27 +1209,28 @@ namespace ws.winx.editor.bmachine.extensions
 												if (clipBindingCurrent != null && clipBindingCurrent.visible && clipBindingCurrent.clip != null) {
 														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_SclX;
 														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
-														eventTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
+														keyframeTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
 
 											}else
-												eventTimeValues = new float[0];
+												keyframeTimeValues = new float[0];
 
 										} else
-												eventTimeValues = new float[0];
+												keyframeTimeValues = new float[0];
 
 
 								} else {
-										eventTimeValues = new float[0];
+										keyframeTimeValues = new float[0];
 								}
 
 
 
-								eventDisplayNames = eventTimeValues.Select ((itm) => {
+								keyframesDisplayNames = keyframeTimeValues.Select ((itm) => {
 										return Decimal.Round (Convert.ToDecimal (itm * __spaceGameObjectAnimationClip.length), 2).ToString () + ".s"; }).ToArray ();
-								eventTimeValuesSelected = new bool[eventTimeValues.Length];
 
-								
-								EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, _keyframeMarker, ref eventTimeValues, ref eventTimeValuesPrev, ref eventDisplayNames, ref eventTimeValuesSelected, -1f,
+								keyframeTimeValuesSelected = new bool[keyframeTimeValues.Length];//used for multiselection option not used here
+
+								//create custom timeline showing rotation or scale keyframes
+								EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, _keyframeMarker, ref keyframeTimeValues, ref eventTimeValuesPrev, ref keyframesDisplayNames, ref keyframeTimeValuesSelected, -1f,
 				                                  null, onKeyframeDelete, null, onKeyframeEdit, null
 								);
 

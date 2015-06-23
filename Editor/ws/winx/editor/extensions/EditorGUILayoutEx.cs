@@ -155,7 +155,22 @@ namespace ws.winx.editor.extensions
 				}
 
 
+				public class TimeAreaStyles
+				{
+					public GUIStyle TimelineTick = "AnimationTimelineTick";
+					public GUIStyle labelTickMarks = "CurveEditorLabelTickMarks";
+				}
+
+
+				private static TimeAreaStyles __TIMEAREA_STYLES;
 				
+				public static TimeAreaStyles TIMEAREA_STYLES {
+					get {
+						if (__TIMEAREA_STYLES == null)
+							__TIMEAREA_STYLES = new TimeAreaStyles ();
+						return __TIMEAREA_STYLES;
+					}
+				}
 
 				
 			

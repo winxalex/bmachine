@@ -9,6 +9,8 @@ using VisualTween.Action;
 using VisualTween.Action.Generic;
 using UnityEditorInternal;
 using ws.winx.editor;
+using System.IO;
+using ws.winx.editor.utilities;
 
 namespace VisualTween
 {
@@ -38,6 +40,8 @@ namespace VisualTween
 				private static int __frameRate = 30;
 				private const float NODE_RECT_HEIGHT = 20f;
 				private const float TIME_LABEL_HEIGHT = 40f;//20f for timer ruller + 20f for Events Pad
+
+				private static GUIContent __frameRateGUIContent=new GUIContent("fps:");
 		
 				private static SequenceNode __nodeSelected {
 						get {
@@ -85,7 +89,7 @@ namespace VisualTween
 //				__timeAreaW.margin = 40f;
 								__timeAreaW.scaleWithWindow = true;
 								//__timeAreaW.ignoreScrollWheelUntilClicked = false;
-								__timeAreaW.hTicks.SetTickModulosForFrameRate (30f);
+								//__timeAreaW.hTicks.SetTickModulosForFrameRate (0.1f);
 
 
 			
@@ -115,7 +119,7 @@ namespace VisualTween
 
 				private static void DoNode (SequenceNode node, Rect rect)
 				{
-						//Rect boxRect=new Rect(timeline.SecondsToGUI(node.startTime),node.channel*20,timeline.SecondsToGUI(node.duration),20);
+						
 
 						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + node.channel * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);			
 						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + node.channel * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);
@@ -542,7 +546,7 @@ namespace VisualTween
 				private void OnSettingsGUI (float width)
 				{
 						GUILayout.BeginHorizontal ();
-						if (GUILayout.Button (__sequence != null ? __sequence.name : "[None Selected]", EditorStyles.toolbarDropDown, GUILayout.Width (width * 0.5f))) {
+						if (GUILayout.Button (__sequence != null ? __sequence.name : "[None Selected]", EditorStyles.toolbarDropDown, GUILayout.Width (width * 0.3f))) {
 								GenericMenu toolsMenu = new GenericMenu ();
 				
 								List<Sequence> sequences = FindAll<Sequence> ();
@@ -550,6 +554,7 @@ namespace VisualTween
 										toolsMenu.AddItem (new GUIContent (sequence.name), false, OnGameObjectSelectionChanged, sequence);
 								}
 								toolsMenu.AddItem (new GUIContent ("[New Sequence]"), false, CreateNewSequence);
+								toolsMenu.AddItem (new GUIContent ("[New Animation Clip]"), false, CreateNewAnimationClip);
 				
 								toolsMenu.DropDown (new Rect (3, 37, 0, 0));
 								EditorGUIUtility.ExitGUI ();
@@ -558,13 +563,20 @@ namespace VisualTween
 						if (__sequence != null) {
 								wrap = __sequence.wrap;			
 						}
-						wrap = (Sequence.SequenceWrap)EditorGUILayout.EnumPopup (wrap, EditorStyles.toolbarDropDown, GUILayout.Width (width * 0.5f));
+						wrap = (Sequence.SequenceWrap)EditorGUILayout.EnumPopup (wrap, EditorStyles.toolbarDropDown, GUILayout.Width (width * 0.4f));
 						if (__sequence != null) {
 								__sequence.wrap = wrap;			
 						}
 
 
+					
 						
+
+						EditorGUILayout.LabelField (__frameRateGUIContent,GUILayout.Width(width * 0.1f));
+						__frameRate = Mathf.Max (EditorGUILayout.IntField (__frameRate, GUILayout.Width (width * 0.2f)), 1);
+			
+			
+			
 
 						GUILayout.EndHorizontal ();
 
@@ -711,7 +723,7 @@ namespace VisualTween
 						Handles.color = Color.white;
 
 						//TimeArea
-						__timeAreaW.DoTimeArea (rect, 30);
+						__timeAreaW.DoTimeArea (rect, __frameRate);
 
 						if (__sequence == null) {
 								return;		
@@ -733,7 +745,7 @@ namespace VisualTween
 						foreach (SequenceNode node in __sequence.nodes) {
 								//if (!node.eventNode) {
 
-										DoNode (node, rect);
+								DoNode (node, rect);
 //					Rect boxRect=new Rect(timeline.SecondsToGUI(node.startTime),node.channel*20,timeline.SecondsToGUI(node.duration),20);
 //					GUI.Box (boxRect,"","TL LogicBar 0");
 //
@@ -746,7 +758,7 @@ namespace VisualTween
 //					Vector3 size=style.CalcSize(new GUIContent(node.target.name));
 //					Rect rect1=new Rect(boxRect.x+boxRect.width*0.5f-size.x*0.5f,boxRect.y+boxRect.height*0.5f-size.y*0.5f,size.x,size.y);
 //					GUI.Label(rect1,node.target.name,style);
-							//	}
+								//	}
 						}
 
 						HandleEvents (rect);
@@ -1051,8 +1063,36 @@ namespace VisualTween
 								
 
 				}
+				
 
 
+
+
+				/// <summary>
+				/// Creates the new animation clip.
+				/// </summary>
+				private static void CreateNewAnimationClip ()
+				{
+
+						string path = EditorUtility.SaveFilePanel (
+					"Create New Clip",
+					"Assets",
+					"",
+					"anim");
+
+						if (!String.IsNullOrEmpty (path)) {
+				
+								AnimationClip clip = new AnimationClip ();//UnityEditor.Animations.AnimatorController.AllocateAnimatorClip ();
+								clip.name = Path.GetFileNameWithoutExtension (path);		
+								AssetDatabase.CreateAsset (clip, AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+								AssetDatabase.SaveAssets ();
+								clip.frameRate = __frameRate;
+					
+						}
+		
+				}
+		
+		
 				////   CREATE NEW SEQUENCE GAME OBJECT WITH SEQUENCE BEHAVIOUR ////
 				/// <summary>
 				/// Creates the new sequence.
