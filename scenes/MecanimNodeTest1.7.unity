@@ -160,42 +160,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1747501042}
   m_RootOrder: 4
---- !u!114 &23661781
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000bd7a3a8400b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &63848958
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c02fc4d339837494db8ab8b2a892cf51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rangeStart: 0
-  rangeEnd: 1
 --- !u!1 &71477030
 GameObject:
   m_ObjectHideFlags: 0
@@ -269,19 +233,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 71477030}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &81008146
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c02fc4d339837494db8ab8b2a892cf51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rangeStart: 0
-  rangeEnd: 1
 --- !u!1 &125724281
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,41 +279,6 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &158104980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New UnityEvent
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001d556e697479456e67696e652e4576656e74732e556e6974794576656e7404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1039650067}
-        m_MethodName: Debug
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-          m_IntArgument: 0
-          m_FloatArgument: 78788
-          m_StringArgument: Local Event
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &158110947
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,29 +352,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 158110947}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &167355911
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001d556e697479456e67696e652e4576656e74732e556e6974794576656e7404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1001 &233815137
 Prefab:
   m_ObjectHideFlags: 0
@@ -493,56 +386,6 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8d52707709ecd43b88947a891c90b954, type: 2}
   m_IsPrefabParent: 0
---- !u!1 &233815138
-GameObject:
-  m_PrefabParentObject: {fileID: 136116, guid: 8d52707709ecd43b88947a891c90b954, type: 2}
-  m_PrefabInternal: {fileID: 233815137}
---- !u!114 &270038896
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Rect
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000010556e697479456e67696e652e5265637404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000010556e697479456e67696e652e526563740400000001780179017a0177000000000b0b0b0b02000000713dd2400000000000000000000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &292274695
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New GameObject
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000016556e697479456e67696e652e47616d654f626a65637404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &299509207
 GameObject:
   m_ObjectHideFlags: 0
@@ -630,72 +473,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &340841869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Int32
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000c53797374656d2e496e7433320400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000c53797374656d2e496e74333201000000076d5f76616c75650008000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &383834392
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: Move
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b906c333d0b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &410806988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abadc0edd1189407cb59dbf558b7e3d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iKOnFeet: 0
-  mirror: 0
-  motion: {fileID: 7400000, guid: 09953f5c995004641a7805b1ea6f1f5c, type: 2}
-  nameHash: 2071291059
-  speed: 0
-  tag: 
-  writeDefaultValues: 0
-  blendParamsHashes: 
-  layer: 0
 --- !u!1 &412413700
 GameObject:
   m_ObjectHideFlags: 0
@@ -723,10 +500,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2663aae3741e9e64b9cb08b2c75b7845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _nodes:
-  - {fileID: 597858290}
-  selectedNode: {fileID: 597858290}
-  sequenceEnd: 11.1499996
+  _channels:
+  - _target: {fileID: 0}
+    _nodes:
+    - {fileID: 1799138731}
+    - {fileID: 1321124934}
+  - _target: {fileID: 0}
+    _nodes:
+    - {fileID: 557579642}
+  - _target: {fileID: 0}
+    _nodes:
+    - {fileID: 2000232011}
+  selectedNode: {fileID: 2000232011}
+  sequenceEnd: 0
   wrap: 3
   playOnStart: 1
   passedTime: 0
@@ -739,149 +525,11 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.3900001, y: 0, z: -2.0999999}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 686953336}
   m_Father: {fileID: 0}
   m_RootOrder: 20
---- !u!114 &480751359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Material
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000014556e697479456e67696e652e4d6174657269616c04000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 2100000, guid: 97d97a6b870b841d1b5c003713e15eba,
-    type: 2}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &518642387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New String
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e537472696e670400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000601000000117a6f73746f206e656d6120737472696e670b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &528503303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000012556e697479456e67696e652e4f626a65637404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &531586719
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &576331568
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New FsmEvent1
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d65010001080602000000194265686176696f75724d616368696e652e46736d4576656e740400000006030000004e4265686176696f75724d616368696e6552756e74696d652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c02000000174265686176696f75724d616368696e6552756e74696d650501000000194265686176696f75724d616368696e652e46736d4576656e7406000000096d5f4576656e7449640a6d5f497353797374656d0d5661726961626c652b6d5f49440f5661726961626c652b6d5f4e616d65155661726961626c652b6d5f426c61636b626f617264155661726961626c652b6d5f4973436f6e7374616e74000000010400080108234265686176696f75724d616368696e652e496e7465726e616c426c61636b626f6172640200000001020000000000000000000000000a0a000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &587159583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: position.x
-  displayMode: 1
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b000000000b
-  __instanceUnityObject: {fileID: 1556058895}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &597858290
+--- !u!114 &557579642
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -890,67 +538,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: Kick
+  m_Name: Microsoft Future vision @ 2020
   m_EditorClassIdentifier: 
   _target: {fileID: 0}
-  startTime: 38.2725067
-  duration: 36.25
-  channel: 0
+  startTime: 5.76666689
+  duration: 348.566681
+  channel: 2
   actions: []
-  eventNode: 0
-  frameRate: 30
-  audioClip: {fileID: 0}
-  movieTexture: {fileID: 0}
-  _animationClip: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
---- !u!28 &599413840
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_Width: 2
-  m_Height: 2
-  m_CompleteImageSize: 20
-  m_TextureFormat: 5
-  m_MipMap: 1
-  m_IsReadable: 1
-  m_ReadAllowed: 1
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapMode: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  image data: 20
-  _typelessdata: cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd
---- !u!114 &607332509
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: Kick
-  m_EditorClassIdentifier: 
-  _target: {fileID: 0}
-  startTime: 11.7974062
-  duration: 31.1511021
-  channel: 0
-  actions: []
-  eventNode: 0
-  frameRate: 30
-  audioClip: {fileID: 0}
-  movieTexture: {fileID: 0}
-  _animationClip: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
+  source: {fileID: 15200000, guid: 03d7128aade3a47099759c68e1615928, type: 3}
 --- !u!1 &651688943
 GameObject:
   m_ObjectHideFlags: 0
@@ -1027,9 +622,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2663aae3741e9e64b9cb08b2c75b7845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _nodes:
-  - {fileID: 607332509}
-  selectedNode: {fileID: 607332509}
+  _channels: []
+  selectedNode: {fileID: 1268053992}
   sequenceEnd: 0
   wrap: 3
   playOnStart: 1
@@ -1041,74 +635,11 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 686953334}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -3.3900001, y: 0, z: 2.0999999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 21
---- !u!114 &705131244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &730607686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abadc0edd1189407cb59dbf558b7e3d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iKOnFeet: 0
-  mirror: 0
-  motion: {fileID: 7400000, guid: 16a2f33d14c3346c09bb359b8cc7715f, type: 2}
-  nameHash: 2050359991
-  speed: 0
-  tag: 
-  writeDefaultValues: 0
-  blendParamsHashes: 
-  layer: 0
---- !u!114 &753136141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abadc0edd1189407cb59dbf558b7e3d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iKOnFeet: 0
-  mirror: 0
-  motion: {fileID: 20600000, guid: 4cb8bc5d9281546f9a6140eb2e3acec3, type: 2}
-  nameHash: 1326225478
-  speed: 0
-  tag: 
-  writeDefaultValues: 0
-  blendParamsHashes: 47152020862f91e7
-  layer: 0
+  m_Father: {fileID: 412413702}
+  m_RootOrder: 0
 --- !u!1 &764999729
 GameObject:
   m_ObjectHideFlags: 0
@@ -1196,49 +727,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1211708373}
   m_RootOrder: 1
---- !u!114 &773679485
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abadc0edd1189407cb59dbf558b7e3d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iKOnFeet: 0
-  mirror: 0
-  motion: {fileID: 7400000, guid: 4ed6d019fd30243439adbc756a67faa5, type: 2}
-  nameHash: 125937960
-  speed: 0
-  tag: 
-  writeDefaultValues: 0
-  blendParamsHashes: 
-  layer: 0
---- !u!114 &777059861
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Vector3
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000013556e697479456e67696e652e566563746f723304000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000013556e697479456e67696e652e566563746f72330300000001780179017a0000000b0b0b020000000000000000000000000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &778221618
 GameObject:
   m_ObjectHideFlags: 0
@@ -1391,29 +879,6 @@ MonoBehaviour:
     y: 0
     width: 600
     height: 430
---- !u!114 &800214097
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001d556e697479456e67696e652e4576656e74732e556e6974794576656e7404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &814913334
 GameObject:
   m_ObjectHideFlags: 0
@@ -1454,53 +919,6 @@ Transform:
   - {fileID: 814913336}
   m_Father: {fileID: 0}
   m_RootOrder: 2
---- !u!114 &826512751
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001d556e697479456e67696e652e4576656e74732e556e6974794576656e7404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &849273201
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: N1
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e,
-    type: 2}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &869896292
 GameObject:
   m_ObjectHideFlags: 0
@@ -1604,76 +1022,6 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &891119346
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 7400000, guid: 110583791f0de4b2faca6df5ecbf3bb9,
-    type: 2}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &899760558
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Boolean
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000e53797374656d2e426f6f6c65616e0400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000e53797374656d2e426f6f6c65616e01000000076d5f76616c75650001010b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &932670396
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &935385191
 GameObject:
   m_ObjectHideFlags: 0
@@ -1710,7 +1058,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 40, y: 60}
   m_Transitions: []
-  m_CachedInstanceID: 25838
+  m_CachedInstanceID: 25726
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -1788,7 +1136,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25840
+  m_CachedInstanceID: 25728
   m_Description: 
   m_EnabledState: {fileID: 0}
   m_LastEnabledState: {fileID: 0}
@@ -1833,42 +1181,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 9
---- !u!114 &957768705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: Turn
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &973768464
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c02fc4d339837494db8ab8b2a892cf51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp:ws.winx.unity.attributes:MinMaxRangeSO
-  rangeStart: 0
-  rangeEnd: 1
 --- !u!1 &980165688
 GameObject:
   m_ObjectHideFlags: 0
@@ -2088,29 +1400,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 12
---- !u!114 &1034647964
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: MyEvent
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001d556e697479456e67696e652e4576656e74732e556e6974794576656e7404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1039650065
 GameObject:
   m_ObjectHideFlags: 0
@@ -2160,92 +1449,10 @@ MonoBehaviour:
   range:
     rangeStart: 0
     rangeEnd: 0
-  variable6: {fileID: 23661781}
+  variable6: {fileID: 0}
   changer: 5.26999998
-  motion: {fileID: 7400000, guid: e255ace0d069a456cadcff85e3915950, type: 2}
+  motion: {fileID: 0}
   rigidBody: {fileID: 0}
---- !u!114 &1047856934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001d556e697479456e67696e652e4576656e74732e556e6974794576656e7404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1146548887
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c02fc4d339837494db8ab8b2a892cf51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rangeStart: 0
-  rangeEnd: 1
---- !u!114 &1191267454
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: position.x
-  displayMode: 1
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b000000000b
-  __instanceUnityObject: {fileID: 814913336}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1195013372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b6822ac3e0b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1198830075
 GameObject:
   m_ObjectHideFlags: 0
@@ -2318,7 +1525,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 22
+  m_RootOrder: 21
 --- !u!1 &1205951898
 GameObject:
   m_ObjectHideFlags: 0
@@ -2392,29 +1599,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 13
---- !u!114 &1208620273
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b33c4f13e0b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1211708372
 GameObject:
   m_ObjectHideFlags: 0
@@ -2517,29 +1701,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
---- !u!114 &1226239444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Color
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000011556e697479456e67696e652e436f6c6f7204000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000011556e697479456e67696e652e436f6c6f720400000001780179017a0177000000000b0b0b0b02000000254f153f6a69293f4534653e000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1230436942
 GameObject:
   m_ObjectHideFlags: 0
@@ -2609,7 +1770,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1265722046
+--- !u!114 &1268053992
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -2617,19 +1778,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abadc0edd1189407cb59dbf558b7e3d3, type: 3}
-  m_Name: 
+  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
+  m_Name: Kick
   m_EditorClassIdentifier: 
-  iKOnFeet: 0
-  mirror: 0
-  motion: {fileID: 20613966, guid: 4cb8bc5d9281546f9a6140eb2e3acec3, type: 2}
-  nameHash: -2015693266
-  speed: 0
-  tag: 
-  writeDefaultValues: 0
-  blendParamsHashes: 47152020862f91e7
-  layer: 0
---- !u!114 &1354016151
+  _target: {fileID: 0}
+  startTime: 61.6666679
+  duration: 1.20000005
+  channel: 0
+  actions: []
+  source: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
+--- !u!114 &1321124934
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -2637,18 +1795,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abadc0edd1189407cb59dbf558b7e3d3, type: 3}
-  m_Name: 
+  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
+  m_Name: Kick
   m_EditorClassIdentifier: 
-  iKOnFeet: 0
-  mirror: 0
-  motion: {fileID: 7400000, guid: 4ed6d019fd30243439adbc756a67faa5, type: 2}
-  nameHash: 125937960
-  speed: 0
-  tag: 
-  writeDefaultValues: 0
-  blendParamsHashes: 
-  layer: 0
+  _target: {fileID: 0}
+  startTime: 10.166667
+  duration: 1.20000005
+  channel: 0
+  actions: []
+  source: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
 --- !u!1001 &1362278110
 Prefab:
   m_ObjectHideFlags: 0
@@ -2707,98 +1862,6 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d1edc5c37110d49669734300e80f8667, type: 3}
   m_IsPrefabParent: 0
---- !u!114 &1397708491
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1418593145
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1422781578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1426423587
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1449677201
 GameObject:
   m_ObjectHideFlags: 1
@@ -2872,89 +1935,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &1466598623
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: N2
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 7400000, guid: 110583791f0de4b2faca6df5ecbf3bb9,
-    type: 2}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1473261754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New FsmEvent
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d65010001080602000000194265686176696f75724d616368696e652e46736d4576656e740400000006030000004e4265686176696f75724d616368696e6552756e74696d652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c02000000174265686176696f75724d616368696e6552756e74696d650501000000194265686176696f75724d616368696e652e46736d4576656e7406000000096d5f4576656e7449640a6d5f497353797374656d0d5661726961626c652b6d5f49440f5661726961626c652b6d5f4e616d65155661726961626c652b6d5f426c61636b626f617264155661726961626c652b6d5f4973436f6e7374616e74000000010400080108234265686176696f75724d616368696e652e496e7465726e616c426c61636b626f6172640200000001020000000000000000000000000a0a000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1478903844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c02fc4d339837494db8ab8b2a892cf51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rangeStart: 0
-  rangeEnd: 0
---- !u!114 &1531552646
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1556058893
 GameObject:
   m_ObjectHideFlags: 0
@@ -3015,29 +1995,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 8
---- !u!114 &1556795180
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Bounds
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000012556e697479456e67696e652e426f756e647304000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000012556e697479456e67696e652e426f756e64730200000001630173040413556e697479456e67696e652e566563746f72330200000013556e697479456e67696e652e566563746f72330200000002000000050300000013556e697479456e67696e652e566563746f72330300000001780179017a0000000b0b0b020000000000000000000000000000000104000000030000000000000000000000000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!21 &1563844146
 Material:
   serializedVersion: 5
@@ -3065,75 +2022,6 @@ Material:
         first:
           name: _Color
         second: {r: .250980407, g: .70588237, b: .850980401, a: 1}
---- !u!114 &1623049441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1626338135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: MyCurve2
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001a556e697479456e67696e652e416e696d6174696f6e437572766504000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e6505010000001a556e697479456e67696e652e416e696d6174696f6e43757276650b000000056b65797430056b65797630066b6579696e30076b65796f757430076b65796d6f6430056b65797431056b65797631066b6579696e31076b65796f757431076b65796d6f6431056b6579736e00000000000000000000000b0b0b0b080b0b0b0b08080200000000000000000000000000000000000000000000000000803f0000803f000000000000000000000000020000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1626629743
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1636621874
 GameObject:
   m_ObjectHideFlags: 0
@@ -3207,52 +2095,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 14
---- !u!114 &1656899415
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1684960450
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Quaternion
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000016556e697479456e67696e652e5175617465726e696f6e04000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000016556e697479456e67696e652e5175617465726e696f6e0400000001780179017a0177000000000b0b0b0b02000000cdcc0c400000c03f00000000000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1747501041
 GameObject:
   m_ObjectHideFlags: 0
@@ -3307,7 +2149,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 26012
+  m_CachedInstanceID: 25850
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -3346,66 +2188,66 @@ MonoBehaviour:
     m_NodeFieldStartIndex: 00000000030000000f0000001b0000001d0000001f000000210000002d000000480000004c000000500000006c00000070000000720000007e000000800000008c000000a1000000a4000000a6000000b2000000c7000000cb000000e0000000e4000000eb000000ed000000f90000000e010000
     m_BranchIndex: ffffffff000000000000000000000000030000000400000005000000050000000700000007000000050000000a000000040000000c0000000c0000000e0000000e0000001000000004000000120000001200000012000000040000001600000003000000180000001900000019000000
     m_UnityObjectValue:
-    - {fileID: 383834392}
-    - {fileID: 957768705}
     - {fileID: 0}
-    - {fileID: 1871354310}
-    - {fileID: 1902215970}
-    - {fileID: 2080697967}
-    - {fileID: 587159583}
-    - {fileID: 1749931499}
-    - {fileID: 773679485}
-    - {fileID: 705131244}
-    - {fileID: 383834392}
-    - {fileID: 383834392}
-    - {fileID: 973768464}
-    - {fileID: 1195013372}
-    - {fileID: 826512751}
-    - {fileID: 1426423587}
-    - {fileID: 800214097}
-    - {fileID: 1816358341}
-    - {fileID: 1766491380}
-    - {fileID: 1191267454}
-    - {fileID: 1749931499}
-    - {fileID: 1354016151}
-    - {fileID: 932670396}
-    - {fileID: 383834392}
-    - {fileID: 383834392}
-    - {fileID: 81008146}
-    - {fileID: 1208620273}
-    - {fileID: 167355911}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 1749931499}
-    - {fileID: 1265722046}
-    - {fileID: 1623049441}
-    - {fileID: 957768705}
-    - {fileID: 383834392}
-    - {fileID: 1146548887}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 0}
     - {fileID: 1749931499}
-    - {fileID: 410806988}
-    - {fileID: 891119346}
-    - {fileID: 1418593145}
-    - {fileID: 1887936067}
-    - {fileID: 1862433155}
-    - {fileID: 528503303}
-    - {fileID: 1531552646}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 1749931499}
-    - {fileID: 753136141}
-    - {fileID: 1422781578}
-    - {fileID: 957768705}
-    - {fileID: 383834392}
-    - {fileID: 63848958}
-    - {fileID: 1397708491}
-    - {fileID: 1047856934}
-    - {fileID: 1656899415}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 1749931499}
-    - {fileID: 730607686}
-    - {fileID: 2032140450}
-    - {fileID: 531586719}
-    - {fileID: 1626629743}
-    - {fileID: 1478903844}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 1749931499}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 1749931499}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
     m_IntValue: 01000000010000000200000000000000000000003c11b186fdf9517901000000030000000000000000000000059927d7752fe7910100000004000000090000000a0000000b000000000000000200000028a9810728a98107000000000c000000000000000000000000000000000000001b0000001c0000000e0000000000000000000000000000000000000015000000100000001100000000000000030000002ef6da8728a9810700000000120000001300000000000000010000002ef6da8728a981070000000014000000000000000100000000000000000000000f000000160000001700000000000000020000005c5f20ed28a981070000000018000000000000000000000000000000000000000d00000019000000000000000100000000000000000000001a00000005000000000000000100000004000000030000000400000008000000070000000000000002000000b702367a28a98107010000000600000001000000000000000000000000000000
     m_FloatValue:
     - .437999994
@@ -3882,37 +2724,37 @@ MonoBehaviour:
   m_Namespace: 
   typesSerialized: 0001000000ffffffff010000000000000004010000007d53797374656d2e436f6c6c656374696f6e732e47656e657269632e4c69737460315b5b53797374656d2e547970652c206d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038395d5d03000000065f6974656d73055f73697a65085f76657273696f6e0300000d53797374656d2e547970655b5d0808090200000000000000000000000702000000000100000000000000030b53797374656d2e547970650b
   variablesList:
-  - {fileID: 777059861}
-  - {fileID: 292274695}
-  - {fileID: 383834392}
-  - {fileID: 957768705}
-  - {fileID: 849273201}
-  - {fileID: 576331568}
-  - {fileID: 158104980}
-  - {fileID: 2002020403}
-  - {fileID: 1034647964}
-  - {fileID: 1684960450}
-  - {fileID: 270038896}
-  - {fileID: 1879296353}
-  - {fileID: 899760558}
-  - {fileID: 340841869}
-  - {fileID: 518642387}
-  - {fileID: 1626338135}
-  - {fileID: 480751359}
-  - {fileID: 1556795180}
-  - {fileID: 1226239444}
-  - {fileID: 1851939542}
-  - {fileID: 1767190285}
-  - {fileID: 1960587944}
-  - {fileID: 1968849207}
-  - {fileID: 1466598623}
-  - {fileID: 1473261754}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!95 &1749931499
 Animator:
   m_PrefabParentObject: {fileID: 9500000, guid: d1edc5c37110d49669734300e80f8667,
     type: 3}
   m_PrefabInternal: {fileID: 1362278110}
---- !u!114 &1766491380
+--- !u!114 &1799138731
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -3920,44 +2762,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
+  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
+  m_Name: Kick
   m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: localPosition.y
-  displayMode: 1
-  valueObjectSerialized: 0001000000ffffffff010000000000000004010000000d53797374656d2e53696e676c6501000000076d5f76616c7565000b000000000b
-  __instanceUnityObject: {fileID: 814913336}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1767190285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Vector3
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000013556e697479456e67696e652e566563746f723304000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000013556e697479456e67696e652e566563746f72330300000001780179017a0000000b0b0b02000000b81edd409a9915418fc209410b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+  _target: {fileID: 0}
+  startTime: 2.0666666
+  duration: 1.20000005
+  channel: 0
+  actions: []
+  source: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
 --- !u!1 &1801017121
 GameObject:
   m_ObjectHideFlags: 0
@@ -4158,7 +2971,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 26038
+  m_CachedInstanceID: 25872
   m_NodeSerialization:
     m_NodeTypes:
     - BehaviourMachine.EveryFrame
@@ -4255,7 +3068,7 @@ Light:
   m_ShadowRadius: 0
   m_ShadowAngle: 0
   m_AreaSize: {x: 1, y: 1}
---- !u!114 &1816358341
+--- !u!114 &2000232011
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -4263,215 +3076,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45bc70b8244844ebe93a0a6e8f88b4b9, type: 3}
-  m_Name: 
+  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
+  m_Name: Kick
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 1, b: 0, a: 1}
-  visible: 0
-  clip: {fileID: 7400000, guid: b2595dc76d1e948deae7a9e557b1d87a, type: 2}
-  audioClip: {fileID: 0}
-  _gameObject: {fileID: 1556058893}
-  positionOffset: {x: 0, y: 0, z: 0}
-  rotationOffset: {x: 0, y: 0, z: 0, w: 0}
-  boneTransform: {fileID: 0}
-  positionOriginalRoot: {x: 1.53999996, y: 1.5, z: 2.80999994}
-  boneOrginalPositionOffset: {x: 0, y: 0, z: 0}
-  rotationOriginalRoot: {x: .924858868, y: -.0977224708, z: .0455687419, w: .364705205}
---- !u!114 &1851939542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Quaternion
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000016556e697479456e67696e652e5175617465726e696f6e04000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000016556e697479456e67696e652e5175617465726e696f6e0400000001780179017a0177000000000b0b0b0b02000000ae472941e17ab4406666ce405c8f72400b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1862433155
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c02fc4d339837494db8ab8b2a892cf51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rangeStart: 0
-  rangeEnd: 1
---- !u!114 &1871354310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45bc70b8244844ebe93a0a6e8f88b4b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: {r: .243295863, g: .315445691, b: .661764741, a: 1}
-  visible: 1
-  clip: {fileID: 7400000, guid: 00253ac664e45454abca8ed77570a35f, type: 2}
-  audioClip: {fileID: 0}
-  _gameObject: {fileID: 814913334}
-  positionOffset: {x: .870000005, y: 2.67000008, z: .210000008}
-  rotationOffset: {x: .00181197235, y: 2.14768647e-09, z: 4.61088875e-11, w: .999998391}
-  boneTransform: {fileID: 0}
-  positionOriginalRoot: {x: -.772217393, y: 2.67000008, z: -5.03053236}
-  boneOrginalPositionOffset: {x: 0, y: 0, z: 0}
-  rotationOriginalRoot: {x: .00127962464, y: .708005846, z: -.00128288905, w: .706204236}
---- !u!114 &1879296353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Bounds
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000012556e697479456e67696e652e426f756e647304000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e65050100000012556e697479456e67696e652e426f756e64730200000001630173040413556e697479456e67696e652e566563746f72330200000013556e697479456e67696e652e566563746f72330200000002000000050300000013556e697479456e67696e652e566563746f72330300000001780179017a0000000b0b0b02000000d7a30040713d9240000000000104000000030000007b140e419a99c940000000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1887936067
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000000d53797374656d2e53696e676c650400000006030000004b6d73636f726c69622c2056657273696f6e3d322e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d623737613563353631393334653038390b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1902215970
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45bc70b8244844ebe93a0a6e8f88b4b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: {r: 0, g: 1, b: 0, a: 1}
-  visible: 1
-  clip: {fileID: 7400000, guid: b2595dc76d1e948deae7a9e557b1d87a, type: 2}
-  audioClip: {fileID: 0}
-  _gameObject: {fileID: 125724281}
-  positionOffset: {x: -.0200002342, y: 1.01999998, z: -.0600000806}
-  rotationOffset: {x: 0, y: 0, z: 0, w: 1.00000012}
-  boneTransform: {fileID: 0}
-  positionOriginalRoot: {x: -1.03994894, y: 1.01999998, z: -4.1398468}
-  boneOrginalPositionOffset: {x: 0, y: 0, z: 0}
-  rotationOriginalRoot: {x: 0, y: .708007038, z: 0, w: .706205428}
---- !u!114 &1960587944
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New Texture2D
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000015556e697479456e67696e652e54657874757265324404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 599413840}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &1968849207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: New UnityEvent
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001d556e697479456e67696e652e4576656e74732e556e6974794576656e7404000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &2002020403
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: MyCurve1
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d650100010806020000001a556e697479456e67696e652e416e696d6174696f6e437572766504000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 0001000000ffffffff01000000000000000c020000000b556e697479456e67696e6505010000001a556e697479456e67696e652e416e696d6174696f6e43757276650b000000056b65797430056b65797630066b6579696e30076b65796f757430076b65796d6f6430056b65797431056b65797631066b6579696e31076b65796f757431076b65796d6f6431056b6579736e00000000000000000000000b0b0b0b080b0b0b0b08080200000000000000000000000000000000000000000000000000803f0000803f000000000000000000000000020000000b
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+  _target: {fileID: 0}
+  startTime: 12.7333336
+  duration: 1.20000005
+  channel: 1
+  actions: []
+  source: {fileID: 7400000, guid: 45850d3cd82824206971ed202dccc25e, type: 2}
 --- !u!1 &2007860451
 GameObject:
   m_ObjectHideFlags: 0
@@ -4545,48 +3158,3 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2007860451}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &2032140450
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c275d811fb25d482f85e914fb8b23ec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializable: 1
-  __unityVariableReferencedInstanceID: 0
-  valueTypeSerialized: 0001000000ffffffff010000000000000004010000001f53797374656d2e556e69747953657269616c697a6174696f6e486f6c64657203000000044461746109556e697479547970650c417373656d626c794e616d6501000108060200000019556e697479456e67696e652e416e696d6174696f6e436c697004000000060300000042556e697479456e67696e652c2056657273696f6e3d302e302e302e302c2043756c747572653d6e65757472616c2c205075626c69634b6579546f6b656e3d6e756c6c0b
-  __memberPath: 
-  displayMode: 0
-  valueObjectSerialized: 
-  __instanceUnityObject: {fileID: 0}
-  __event:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &2080697967
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45bc70b8244844ebe93a0a6e8f88b4b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: {r: 1, g: 0, b: .103447914, a: 1}
-  visible: 1
-  clip: {fileID: 7400000, guid: 00253ac664e45454abca8ed77570a35f, type: 2}
-  audioClip: {fileID: 0}
-  _gameObject: {fileID: 233815138}
-  positionOffset: {x: -1.26000011, y: 2.67000008, z: -2.01000047}
-  rotationOffset: {x: .00181197235, y: 2.14768647e-09, z: 4.61088875e-11, w: .999998391}
-  boneTransform: {fileID: 0}
-  positionOriginalRoot: {x: -2.98678374, y: 2.67000008, z: -2.8948822}
-  boneOrginalPositionOffset: {x: 0, y: 0, z: 0}
-  rotationOriginalRoot: {x: .00127962464, y: .708005846, z: -.00128288905, w: .706204236}

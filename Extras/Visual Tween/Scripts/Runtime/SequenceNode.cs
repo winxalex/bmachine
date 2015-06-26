@@ -10,7 +10,8 @@ namespace VisualTween
 		public class SequenceNode:ScriptableObject
 		{
 				[SerializeField]
-				GameObject _target;
+				GameObject
+						_target;
 
 				public GameObject target {
 						get {
@@ -21,29 +22,25 @@ namespace VisualTween
 						}
 				}
 
-
+				/// <summary>
+				/// The start time in Frames
+				/// </summary>
 				public float startTime;
+
+				/// <summary>
+				/// The duration in Frames (default=5Frames)
+				/// </summary>
 				public float duration = 5;
 				public int channel;
 				public List<BaseAction> actions;
 				private bool isRunning;
-				public bool eventNode;
-				public int frameRate = 30;
-				public AudioClip audioClip;
-				public MovieTexture movieTexture;
+			
+			
+				
 
-				[SerializeField]
-				public AnimationClip _animationClip;
+				public UnityEngine.Object source;
 
-				public AnimationClip animationClip {
-						get {
-								return _animationClip;
-						}
-						set {
-								_animationClip = value;
-								this.duration=frameRate*value.length;
-						}
-				}
+				
 
 				int stateNameHash;
 
@@ -51,18 +48,22 @@ namespace VisualTween
 				{
 
 						if (target != null) {
-								if (audioClip != null) {
-										AudioSource.PlayClipAtPoint (audioClip, target.transform.position);
+								if (source is AudioClip) {
+										AudioSource.PlayClipAtPoint (source as AudioClip, target.transform.position);
 
-								} else if (movieTexture != null) {
+								} else if (source is MovieTexture) {
 										Renderer renderer = target.GetComponent<Renderer> ();
 										if (renderer != null) {
+												MovieTexture movieTexture=(source as MovieTexture);
 												renderer.material.mainTexture = movieTexture;
+												if(movieTexture.audioClip!=null)
+												AudioSource.PlayClipAtPoint(movieTexture.audioClip,target.transform.position);
 												movieTexture.Play ();
 										} else
 												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
-								} else if (animationClip != null) {
+								} else if (source is AnimationClip) {
 										Animator animator = target.GetComponent<Animator> ();
+										
 										if (animator)
 												animator.CrossFade (stateNameHash, 0f, 0, 0f);
 								}

@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Linq;
 using ws.winx.editor.extensions;
 
+
 namespace ws.winx.editor
 {
 		public enum HighLevelEvent
@@ -2028,10 +2029,11 @@ namespace ws.winx.editor
 				private static MethodInfo __SetTickStrengths_MethodInfo;
 
 				static MethodInfo SetTickStrengths_MethodInfo {
-					get {
-						if(__SetTickStrengths_MethodInfo==null) __SetTickStrengths_MethodInfo=__RealType.GetMethod("SetTickStrengths");
-						return __SetTickStrengths_MethodInfo;
-					}
+						get {
+								if (__SetTickStrengths_MethodInfo == null)
+										__SetTickStrengths_MethodInfo = __RealType.GetMethod ("SetTickStrengths");
+								return __SetTickStrengths_MethodInfo;
+						}
 				}
 
 				private static PropertyInfo __tickLevels_PropertyInfo;
@@ -2056,7 +2058,7 @@ namespace ws.winx.editor
 
 				public int tickLevels {
 						get {
-							return	(int)tickLevels_PropertyInfo.GetValue (__instance, null);
+								return	(int)tickLevels_PropertyInfo.GetValue (__instance, null);
 						}
 						
 				}
@@ -2113,7 +2115,11 @@ namespace ws.winx.editor
 
 				public void SetTickStrengths (float tickMinSpacing, float tickMaxSpacing, bool sqrt)
 				{
-			SetTickStrengths_MethodInfo.Invoke (__instance, new object[]{tickMinSpacing,tickMaxSpacing,sqrt});
+						SetTickStrengths_MethodInfo.Invoke (__instance, new object[] {
+								tickMinSpacing,
+								tickMaxSpacing,
+								sqrt
+						});
 				}
 			
 				public TickHandlerW ()
@@ -2266,6 +2272,7 @@ namespace ws.winx.editor
 
 				public float tickMinSpacing = 3f;
 				public float tickMaxSpacing = 80f;
+				public float timeRullerLabelHeight = 20f;
 			
 				public object wrapped {
 						get {
@@ -2383,7 +2390,7 @@ namespace ws.winx.editor
 
 
 
-				public delegate void FrameFormatDelegate (int i,float frameRate);
+				public delegate string FrameFormatDelegate (int i,float frameRate);
 
 				public TimeAreaW.FrameFormatDelegate onFrameFormatCallback;
 
@@ -2461,6 +2468,15 @@ namespace ws.winx.editor
 						
 				}
 
+				public static float SnapTimeToWholeFPS (float time, float frameRate)
+				{
+					if (frameRate == 0f)
+					{
+						return time;
+					}
+					return Mathf.Round (time * frameRate) / frameRate;
+				}
+
 				public float TimeToPixel (float time, Rect rect)
 				{
 						return (float)TimeToPixel_MethodInfo.Invoke (__instance, new object[] {
@@ -2478,12 +2494,17 @@ namespace ws.winx.editor
 						});
 				}
 
-				public float FrameToPixel (float frame, float frameRate, Rect position)
+				public int PixelToFrame (float pixelX, int frameRate, Rect rect)
+				{
+						return (int)Mathf.Ceil(PixelToTime (pixelX, rect) * frameRate);
+				}
+		
+				public float FrameToPixel (float frame, float frameRate, Rect rect)
 				{
 						return (float)FrameToPixel_MethodInfo.Invoke (__instance, new object[] {
 								frame,
 								frameRate,
-								position
+								rect
 						});
 				}
 
@@ -2500,6 +2521,39 @@ namespace ws.winx.editor
 						SetTickMarkerRanges_MethodInfo.Invoke (__instance, null);
 				}
 
+				void DrawFrameTicks (Rect position, float frameRate)
+				{
+						Color color = Handles.color;
+						GUI.BeginGroup (position);
+						if (Event.current.type != EventType.Repaint) {
+								GUI.EndGroup ();
+								return;
+						}
+
+						this.SetTickMarkerRanges ();
+						this.hTicks.SetTickStrengths (3f, 80f, true);
+						Color textColor = EditorGUILayoutEx.TIMEAREA_STYLES.TimelineTick.normal.textColor;
+						textColor.a = 0.1f;
+						Handles.color = textColor;
+						for (int i = 0; i < this.hTicks.tickLevels; i++) {
+								float num = this.hTicks.GetStrengthOfLevel (i) * 0.9f;
+								if (num > 0.1f)//if (num > 0.5f) 
+								{
+					
+										float[] ticksAtLevel = this.hTicks.GetTicksAtLevel (i, true);
+										for (int j = 0; j < ticksAtLevel.Length; j++) {
+												if (ticksAtLevel [j] >= 0f) {
+														int num2 = Mathf.RoundToInt (ticksAtLevel [j] * frameRate);
+														float x = this.FrameToPixel ((float)num2, frameRate, position);
+														Handles.DrawLine (new Vector3 (x, 0f, 0f), new Vector3 (x, position.height, 0f));
+												}
+										}
+								}
+						}
+						GUI.EndGroup ();
+						Handles.color = color;
+				}
+		
 				public virtual void TimeRuler (Rect position, float frameRate)
 				{
 						Color color = GUI.color;
@@ -2545,12 +2599,13 @@ namespace ws.winx.editor
 
 
 										string text = String.Empty;
-										if (onFrameFormatCallback != null)
-												onFrameFormatCallback (num5, frameRate);
-										else
-												this.FormatFrame (num5, frameRate);
-
+										if (onFrameFormatCallback != null) {
+												text = onFrameFormatCallback (num5, frameRate);
+										} else {
+												text = this.FormatFrame (num5, frameRate);
+										}
 										GUI.Label (new Rect (num6 + 3f, -3f, 40f, 20f), text, EditorGUILayoutEx.TIMEAREA_STYLES.TimelineTick);
+										
 								}
 						}
 						GUI.EndGroup ();
@@ -2561,7 +2616,7 @@ namespace ws.winx.editor
 				/// <summary>
 				/// Do the "time ruller area" at position and frame rate
 				/// If you set framerate=60 then 60 fps in 1s and makers
-				/// 0  0.15  0.30 0.45 1.00 
+				/// 0s  0.15(frms)  0.30(frms) 0.45(frms) 1.00s[60frms]
 				/// </summary>
 				/// <param name="position">Position.</param>
 				/// <param name="framerate">Framerate.</param>
@@ -2576,9 +2631,13 @@ namespace ws.winx.editor
 
 						this.rect = position;
 
+						Rect frameRect = rect;
+						frameRect.yMin += timeRullerLabelHeight;
+
+						DrawFrameTicks (frameRect, framerate);
 						DrawMajorTicks_MethodInfo.Invoke (__instance, new object[] {
 				position,
-				60f
+				framerate
 			});
 			
 						BeginViewGUI_MethodInfo.Invoke (__instance, null);
@@ -2589,7 +2648,7 @@ namespace ws.winx.editor
 //								framerate
 //			});
 
-			TimeRuler (new Rect (position.x, position.y, position.width, 20f), framerate);
+						TimeRuler (new Rect (position.x, position.y, position.width, timeRullerLabelHeight), framerate);
 
 			
 						EndViewGUI_MethodInfo.Invoke (__instance, null);

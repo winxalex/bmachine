@@ -93,6 +93,20 @@ namespace ws.winx.editor.utilities
 					
 				}
 
+				
+
+				/// <summary>
+				/// Converts the time to whole FPS.
+				/// </summary>
+				/// <returns>The time to whole frames per second.</returns>
+				/// <param name="time">Time.</param>
+				/// <param name="frameRate">Frame rate.</param>
+				public static int TimeToFrame (float time, int frameRate){
+					
+						return (int)Mathf.Ceil (time * frameRate);
+				}
+
+
 
 				/// <summary>
 				/// Gets the keyframe positions. If keyframes are rotation or scale, for time of keyframe position value is
