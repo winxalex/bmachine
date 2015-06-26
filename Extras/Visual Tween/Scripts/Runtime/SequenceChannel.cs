@@ -9,6 +9,8 @@ namespace VisualTween
 		[System.Serializable]
 		public class SequenceChannel
 		{
+		public string name;
+			
 				[SerializeField]
 				GameObject
 						_target;

@@ -38,10 +38,11 @@ namespace VisualTween
 				private static bool __isPlaying;
 				private static bool __isRecording;
 				private static int __frameRate = 30;
-				private const float NODE_RECT_HEIGHT = 20f;
+				private const float NODE_RECT_HEIGHT = 40f;
 				private const float TIME_LABEL_HEIGHT = 40f;//20f for timer ruller + 20f for Events Pad
 
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
+				string channelLabel;
 		
 				private static SequenceNode __nodeSelected {
 						get {
@@ -179,8 +180,8 @@ namespace VisualTween
 						int channelsNumber = __sequence.channels.Count;
 
 						for (int i=0; i<channelsNumber; i++) {
-							channel=__sequence.channels[i];
-							channel.nodes.ForEach(itm=>itm.channel=i);
+								channel = __sequence.channels [i];
+								channel.nodes.ForEach (itm => itm.channel = i);
 						}
 
 						
@@ -204,30 +205,29 @@ namespace VisualTween
 				{
 						SequenceChannel channel = __sequenceChannelsReordableList.list [index] as SequenceChannel;
 						Rect temp = rect;
-						temp.yMax = 10f;
+						
 
-						string Label = "Channel";
-
-							Type sourceType=channel.nodes[0].source.GetType();
-						if (sourceType is AnimationClip)
-								Label = "Animation";
-						else if (sourceType is AudioClip)
-								Label = "Audio";
-						else if (sourceType is MovieTexture)
-								Label = "Video";
+		
+						
 
 						if (channel.target != null) {
-								temp.yMin = 10f;
+								temp.yMin = rect.yMax - 16f;
 								temp.yMax = rect.yMax;
-								EditorGUI.LabelField (temp, channel.target.name);
 
-								
-										
-								
+								EditorGUI.LabelField (temp, channel.target.name, EditorStyles.miniLabel);
+
 						}
+						int fontSize = 16;
+						temp.yMin = rect.yMin + (rect.height - fontSize) * 0.5f;
+						temp.yMax = rect.yMax;// temp.yMin + fontSize;
 
+						GUIStyle styleGUI = new GUIStyle (EditorStyles.label);
+						styleGUI.fontSize = fontSize;
 						
-						EditorGUI.LabelField (rect,Label);
+						channel.name = EditorGUI.TextField (temp, channel.name, styleGUI);
+
+
+
 			
 				}
 
@@ -514,25 +514,67 @@ namespace VisualTween
 
 						rect.y = 0;
 
+						
+
 						OnTimelineGUI (rect, __frameRate);
 
 						rect.width = rect.x;//20% for settings
 						rect.x = 0;
 						rect.y = 0;
 			
-						DoToolbarGUI (rect);
+						DoChannelsGUI (rect);
 
-
-						//DoNode (__testNode,new Rect(0,0,this.position.width,this.position.height));
-				
+						
 				}
 
+
+
+				/// <summary>
+				/// Sequences the drop channel target event handler.
+				/// </summary>
+				/// <param name="rect">Rect.</param>
+				/// <param name="channel">Channel.</param>
+				static void sequenceDropChannelTargetEventHandler (Rect rect, int channel)
+				{
+						Event evt = Event.current;
+
+
+						
+						switch (evt.type) {
+						case EventType.DragUpdated:
+						case EventType.DragPerform:
+								if (!rect.Contains (evt.mousePosition))
+										return;
+								DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+							
+								Type draggedType;
+							
+								if (evt.type == EventType.DragPerform) {
+										DragAndDrop.AcceptDrag ();
+										if (EditorApplication.isPlaying) {
+												Debug.Log ("Can't add tween object in play mode. Stop the play mode and readd it.");
+										} else {
+												GameObject target = DragAndDrop.objectReferences [0] as GameObject;
+
+												if (target != null) {
+
+														__sequence.channels [channel].target = target;
+												}
+										}
+
+
+
+
+								}
+								break;
+						}
+				}
 
 				/// <summary>
 				/// Dos the toolbar GUI.
 				/// </summary>
 				/// <param name="rect">Rect.</param>
-				private void DoToolbarGUI (Rect rect)
+				void DoChannelsGUI (Rect rect)
 				{
 						GUIStyle style = new GUIStyle ("ProgressBarBack");
 						style.padding = new RectOffset (0, 0, 0, 0);
@@ -567,12 +609,31 @@ namespace VisualTween
 						GUILayout.BeginVertical ();
 
 						OnSettingsGUI (rect.width - 1.5f);
-//			if (onSettingsGUI != null) {
-//				onSettingsGUI(timelineOffset-1.5f);			
-//			}
+
+						Rect rectLastControl = GUILayoutUtility.GetLastRect ();
+
+						rect.yMin = rectLastControl.yMax;
+
+						//Draw Channels
+						if (__sequenceChannelsReordableList != null)
+								__sequenceChannelsReordableList.DoLayoutList ();
+
+
+						rectLastControl = GUILayoutUtility.GetLastRect ();
+						rect.yMax = rectLastControl.yMax - 16f;//16f for +/- buttons
+
+
+						sequenceDropChannelTargetEventHandler (rect, (int)((Event.current.mousePosition.y - rect.y) / NODE_RECT_HEIGHT));
+
 						GUILayout.EndVertical ();
 						GUILayout.Space (1.5f);
 						GUILayout.EndHorizontal ();
+
+
+
+						
+
+
 						GUILayout.EndArea ();
 			
 				}
@@ -640,17 +701,17 @@ namespace VisualTween
 
 						GUILayout.EndHorizontal ();
 
-						if (__sequenceChannelsReordableList != null)
-								__sequenceChannelsReordableList.DoLayoutList ();
+
+					
 						
 
 
-						settingsScroll = GUILayout.BeginScrollView (settingsScroll);
-
-	
-
-						GUILayout.EndScrollView ();
-						GUILayout.FlexibleSpace ();
+//						settingsScroll = GUILayout.BeginScrollView (settingsScroll);
+//
+//	
+//
+//						GUILayout.EndScrollView ();
+//						GUILayout.FlexibleSpace ();
 
 
 
@@ -764,7 +825,7 @@ namespace VisualTween
 										
 
 						//make all area from end of label and Event pad to botton droppable
-						DropAreaGUI (new Rect (rect.x, TIME_LABEL_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
+						sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
 			
 						Handles.color = Color.white;
 
@@ -979,7 +1040,7 @@ namespace VisualTween
 								__sequence.channels.RemoveAt (channel);
 
 
-								int channelsNumber= __sequence.channels.Count;
+								int channelsNumber = __sequence.channels.Count;
 							
 								for (int i=channel; i<channelsNumber; i++) {
 
@@ -1012,11 +1073,11 @@ namespace VisualTween
 
 
 				/// <summary>
-				/// Drops the area GUI.
+				/// Sequences the drop source event handler.
 				/// </summary>
 				/// <param name="area">Area.</param>
 				/// <param name="channel">Channel.</param>
-				public void DropAreaGUI (Rect area, int channel)
+				public void sequenceDropSourceEventHandler (Rect area, int channel)
 				{
 			
 						Event evt = Event.current;
@@ -1056,6 +1117,19 @@ namespace VisualTween
 																		sequenceChannel = __sequence.channels [channel];
 																} else {
 																		sequenceChannel = new SequenceChannel ();
+
+
+
+										
+																		if (draggedType == typeof(AnimationClip)) {
+																				sequenceChannel.name = "Animation";
+																		} else if (draggedType == typeof(AudioClip)) {
+																				sequenceChannel.name = "Audio";
+																		} else if (draggedType == typeof(MovieTexture)) {
+																				sequenceChannel.name = "Video";
+																		}
+
+
 																		__sequence.channels.Add (sequenceChannel);
 																}
 
