@@ -4,142 +4,249 @@ using System.Collections.Generic;
 using VisualTween.Action;
 using System.Linq;
 
-namespace VisualTween{
-	public class Sequence : MonoBehaviour {
+namespace VisualTween
+{
+		public class Sequence : MonoBehaviour
+		{
 
-		[SerializeField]
-		List<SequenceChannel> _channels;
+				[SerializeField]
+				List<SequenceChannel>
+						_channels;
 
-		public List<SequenceChannel> channels {
-			get {
-				if(_channels==null) _channels=new List<SequenceChannel>();
-				return _channels;
-			}
-		}
-
-		public SequenceNode selectedNode;
-		public float sequenceEnd;
-		public SequenceWrap wrap=SequenceWrap.ClampForever;
-		private float time;
-		private bool stop=true;
-		private bool pause;
-		private float pauseTime;
-		public bool playOnStart=true;
-
-
-
-
-		private void Start(){
-			if (playOnStart) {
-				Play();			
-			}
-		}
-
-		public float passedTime;
-		private bool playForward=true;
-//		private void Update(){
-//			if (pause || stop) {
-//				return;			
-//			}
-//
-//			foreach (var kvp in GetGroupTargets()) {
-//				SequenceNode mNode=kvp.Value.OrderBy(x=>x.startTime).First();
-//				mNode.RecordAction();
-//			}
-//
-//
-//			if (Time.time > time) {
-//				switch(wrap){
-//				case SequenceWrap.PingPong:
-//					time=Time.time+sequenceEnd;
-//					playForward=!playForward;
-//					break;
-//				case SequenceWrap.Once:
-//					Stop(false);
-//					break;
-//				case SequenceWrap.ClampForever:
-//					Stop(true);
-//					break;
-//				case SequenceWrap.Loop:
-//					Restart();
-//					break;
-//				}			
-//			}
-//
-//			passedTime += Time.deltaTime*(playForward?1.0f:-1.0f);
-//
-//			foreach (SequenceNode node in nodes) {
-//				node.UpdateTween (passedTime);		
-//			}
-//
-//			
-//			foreach (var kvp in GetGroupTargets()) {
-//				SequenceNode mNode=kvp.Value.OrderBy(x=>x.startTime).ToList().Find(y=>((passedTime-y.startTime)/y.duration)<0.0f);
-//				if(mNode != null)
-//					mNode.UndoAction();
-//			}
-//		}
-
-		public void Play(){
-			sequenceEnd = 0;
-			stop = false;
-			pause = false;
-			passedTime = 0;
-
-			foreach (SequenceChannel channel in _channels)
-			foreach (SequenceNode node in channel.nodes) {
-				if(sequenceEnd< (node.startTime+node.duration)){
-					sequenceEnd=node.startTime+node.duration;
+				public List<SequenceChannel> channels {
+						get {
+								if (_channels == null)
+										_channels = new List<SequenceChannel> ();
+								return _channels;
+						}
 				}
-			}
-			time=Time.time+sequenceEnd;
-		}
 
-		public void Pause(){
-			pause = true;	
-			pauseTime = Time.time;
-		}
+				public SequenceNode selectedNode;
+				public SequenceWrap wrap = SequenceWrap.ClampForever;
+				public bool playOnStart = true;
+				public bool isPlaying;
+				public bool lastPlayState;
 
-		public void UnPause(){
-			if (pause) {
-				time += Time.time - pauseTime;
-			}
-			pause = false;
 
-		}
+				/// <summary>
+				/// The start time.in global time space (Time.time or EditorApplication.timeSinceStartup)
+				/// </summary>
+				double _startTime;
 
-		public void Restart(){
-			Stop (false);
-			Play ();
-		}
+				public double startTime {
+						get {
+								return _startTime;
+						}
+				}
 
-	
+				/// <summary>
+				/// The end time in global time space (Time.time or EditorApplication.timeSinceStartup)
+				/// </summary>
+				public double _timeAtEnd;
 
-		public void Stop(bool forward){
-//			stop = true;
+				public double endTime {
+						get {
+								return _timeAtEnd;
+						}
+				}
+
+				float __duration;
+
+				/// <summary>
+				/// Gets the duration.
+				/// </summary>
+				/// <value>The duration.</value>
+				public float duration {
+						get {
+								return __duration;
+						}
+				}
+
+				public bool playForward;
+				private bool stop = true;
+				private bool pause;
+				private float timeAtPause;
+
+				private void Start ()
+				{
+						if (playOnStart) {
+								Play ();			
+						}
+				}
+
+				double _passedTime;
+
+				public double passedTime {
+						get {
+								return _passedTime;
+						}
+
+				}
+
+
+				/// <summary>
+				/// Updates the sequence.
+				/// </summary>
+				/// <param name="t">T.</param>
+				public void UpdateSequence (double t)
+				{
+						if (pause || stop) {
+								return;			
+						}
+			
+
+			
+						if (t > _timeAtEnd) {
+								switch (wrap) {
+								case SequenceWrap.PingPong:
+										_timeAtEnd = t + __duration;
+										playForward = !playForward;
+										break;
+								case SequenceWrap.Once:
+										Stop (false);
+										break;
+								case SequenceWrap.ClampForever:
+										Stop (true);
+										break;
+								case SequenceWrap.Loop:
+										Restart ();
+										break;
+								}			
+						}
+			
+						_passedTime = t - _startTime;
+			
+						foreach (SequenceChannel channel in this.channels)
+								foreach (SequenceNode node in channel.nodes) {
+										node.UpdateNode (_passedTime);		
+								}
+				}
+
+				void Update ()
+				{
+						if (pause || stop) {
+								return;			
+						}
+
+
+					
+						UpdateSequence (Time.time);
+			
+
+				}
+
+				public void Play (double t)
+				{
+						__duration = calcDuration ();
+					
+						stop = false;
+						pause = false;
+						_passedTime = 0;
+
+						this._startTime = t;
+						this._timeAtEnd = t + __duration;
+				}
+
+				public void Play ()
+				{
+						__duration = calcDuration ();
+						stop = false;
+						pause = false;
+						_passedTime = 0;
+
+						_startTime = Time.time;
+						_timeAtEnd = _startTime + __duration;
+
+				}
+
+				public void Pause ()
+				{
+						pause = true;	
+						timeAtPause = Time.time;
+				}
+
+				public void Pause (float t)
+				{
+						pause = true;	
+						timeAtPause = t;
+				}
+
+				public void UnPause (float t)
+				{
+						if (pause) {
+								//extend endTime cos of time in pause
+								float pauseDuration = t - timeAtPause;
+								this._timeAtEnd += pauseDuration; //shift endTime for pauseDuration
+								this._startTime += pauseDuration; //shift startTime for pauseDuration
+						}
+						pause = false;
+			
+				}
+
+				public void UnPause ()
+				{
+						if (pause) {
+								_timeAtEnd += Time.time - timeAtPause;
+						}
+						pause = false;
+
+				}
+
+				public void Restart ()
+				{
+						Stop (false);
+						Play ();
+				}
+
+				public void Stop (bool forward)
+				{
+						stop = true;
 //			nodes=nodes.OrderBy(x=>x.startTime).ToList();
 //			if (!forward) {
 //				nodes.Reverse ();
 //				passedTime=0;
 //			}
-//			
-//			foreach (SequenceNode node in nodes) {
-//				
-//				node.CompleteTween(forward);
-//			}	
-//
-//			if (!forward) {
-//				foreach (SequenceNode node in nodes) {
-//					node.UpdateTween (passedTime);		
-//				}
-//				
+
+						foreach (SequenceChannel channel in channels)
+								foreach (SequenceNode node in channel.nodes) {
+
+										node.Stop ();
+								}	
+
+//						if (!forward) {
+//								foreach (SequenceChannel channel in channels)
+//										foreach (SequenceNode node in channel.nodes) {
+//												node.UpdateNode (_passedTime);		
+//										}
+				
 //				foreach (var kvp in GetGroupTargets()) {
 //					SequenceNode mNode=kvp.Value.OrderBy(x=>x.startTime).ToList().Find(y=>((passedTime-y.startTime)/y.duration)<0.0f);
 //					if(mNode != null)
 //						mNode.UndoAction();
 //				}			
-//			}
-		}
+//						}
+				}
+
+
+
+				/// <summary>
+				/// Value of Final Node end time in local sequence time space
+				/// </summary>
+				/// <value>The end time.</value>
+				float calcDuration ()
+				{
+						float duration = 0f;
+			
+						foreach (SequenceChannel channel  in this.channels)
+								foreach (SequenceNode node in channel.nodes) {
+										if (duration < (node.startTime + node.duration)) {
+												duration = node.startTime + node.duration;
+										}
+								}
+			
+						return duration;
+			
+				}
 
 //		private void OnGUI(){
 //			foreach (SequenceNode node in nodes) {
@@ -159,11 +266,12 @@ namespace VisualTween{
 //			return targets;
 //		}
 //
-		public enum SequenceWrap{
-			Once,
-			PingPong,
-			Loop,
-			ClampForever
+				public enum SequenceWrap
+				{
+						Once,
+						PingPong,
+						Loop,
+						ClampForever
+				}
 		}
-	}
 }

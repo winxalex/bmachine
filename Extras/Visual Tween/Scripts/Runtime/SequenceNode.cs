@@ -3,24 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using VisualTween.Action;
 using System;
+using UnityEngine.Events;
+
 
 namespace VisualTween
 {
 		[System.Serializable]
 		public class SequenceNode:ScriptableObject
 		{
-				[SerializeField]
-				GameObject
-						_target;
-
-				public GameObject target {
-						get {
-								return _target;
-						}
-						set {
-								_target = value;
-						}
-				}
+				public UnityEvent onStart=new UnityEvent();
 
 				/// <summary>
 				/// The start time in Frames
@@ -28,126 +19,206 @@ namespace VisualTween
 				public float startTime;
 
 				/// <summary>
-				/// The duration in Frames (default=5Frames)
+				/// The duration in [s] (default=5Frames)
 				/// </summary>
-				public float duration = 5;
-				public int channel;
+				float _duration = 5;
+				float _durationInv=0.2f;// 1/5
+
+				public float duration {
+					get {
+						return _duration;
+					}
+					set {
+						_duration = value;
+						_durationInv=1/_duration;
+					}
+				}
+
+				public int channelOrd;
+				public SequenceChannel channel;
 				public List<BaseAction> actions;
 				private bool isRunning;
-			
-			
-				
-
 				public UnityEngine.Object source;
-
-				
-
 				int stateNameHash;
 
-				public void StartTween ()
+				public void StartNode ()
 				{
+
+						GameObject target = channel.target;
+
+						isRunning = true;
 
 						if (target != null) {
 								if (source is AudioClip) {
-										AudioSource.PlayClipAtPoint (source as AudioClip, target.transform.position);
+											
+											
+										AudioSource audioSource = target.GetComponent<AudioSource> ();
+
+										if (audioSource == null)
+												audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
+
+										audioSource.clip = source as AudioClip;
+											
+										audioSource.Play ();
+
+					                        
+
 
 								} else if (source is MovieTexture) {
-										Renderer renderer = target.GetComponent<Renderer> ();
+										Renderer renderer = channel.target.GetComponent<Renderer> ();
 										if (renderer != null) {
-												MovieTexture movieTexture=(source as MovieTexture);
-												renderer.material.mainTexture = movieTexture;
-												if(movieTexture.audioClip!=null)
-												AudioSource.PlayClipAtPoint(movieTexture.audioClip,target.transform.position);
+												MovieTexture movieTexture = (source as MovieTexture);
+
+												if(Application.isPlaying)
+													renderer.material.mainTexture = movieTexture;
+												else
+													renderer.sharedMaterial.mainTexture=movieTexture;
+
+												AudioSource audioSource=null;
+												if (movieTexture.audioClip != null) {
+													
+														audioSource = target.GetComponent<AudioSource> ();
+													
+														if (audioSource == null)
+																audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
+													
+														audioSource.clip = movieTexture.audioClip;
+
+													
+														
+												}
+
+
+
 												movieTexture.Play ();
+												audioSource.Play ();
+
+					
 										} else
 												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
-								} else if (source is AnimationClip) {
-										Animator animator = target.GetComponent<Animator> ();
+								} else if (source is  AnimationClip) {
+//										Animator animator = target.GetComponent<Animator> ();
+//										
+//										if (animator){
+//												animator.enabled=true;
+//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
+//				}
+
+
 										
-										if (animator)
-												animator.CrossFade (stateNameHash, 0f, 0, 0f);
 								}
-						
+
+
+
+							
 				     
 						}
 
+//TODO put events with drag and drop handlers
+//						foreach (BaseAction action in actions) {
+//								action.OnEnter (target);		
+//						}
+						
+				}
 
-						foreach (BaseAction action in actions) {
-								action.OnEnter (target);		
+				public void Stop ()
+				{
+						GameObject target = channel.target;
+
+						isRunning = false;
+
+						if (target != null) {
+								if (source is AudioClip) {
+										AudioSource audioSource = target.GetComponent<AudioSource> ();
+										
+										if (audioSource != null)
+											audioSource.Stop();
+								
+								} else if (source is MovieTexture) {
+										Renderer renderer = target.GetComponent<Renderer> ();
+										if (renderer != null) {
+												MovieTexture movieTexture = (source as MovieTexture);
+								
+												movieTexture.Stop ();
+
+												AudioSource audioSource=null;
+												if(movieTexture.audioClip!=null && (audioSource=target.GetComponent<AudioSource>())!=null)
+													audioSource.Stop();
+									
+										} else
+												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
+								} else if (source is AnimationClip) {
+															Animator animator = target.GetComponent<Animator> ();
+																				
+															if (animator!=null)
+																	animator.enabled=false;
+
+																	
+								
+							
+								
+								}
+							
+							
 						}
-						isRunning = true;
+
 				}
 		
-				public void CompleteTween ()
-				{
-						foreach (BaseAction action in actions) {
-								action.OnExit (target);		
-						}
-						isRunning = false;
+//				public void End ()
+//				{
+////						foreach (BaseAction action in actions) {
+////								action.OnExit (target);		
+////						}
+//						isRunning = false;
+//
+//						Stop ();
+//				}
+
+//				public void End (bool forward)
+//				{
+//						if (!isRunning) {
+//								StartNode ();
+//						}
+//
+////						foreach (BaseAction action in actions) {
+////								action.OnUpdate (target, forward ? 1.0f : 0.0f);		
+////						}	
+//
+//						End ();
+//				}
+
+
+				public virtual void DoUpdate(){
+
+
 				}
 
-				public void CompleteTween (bool forward)
+				public void UpdateNode (double time)
 				{
-						if (!isRunning) {
-								StartTween ();
-						}
 
-						foreach (BaseAction action in actions) {
-								action.OnUpdate (target, forward ? 1.0f : 0.0f);		
-						}	
+						float timeNormalized = (((float)time - startTime) / _duration);
 
-						CompleteTween ();
-				}
-
-				public void UpdateTween (float time)
-				{
-						float percentage = ((time - startTime) / duration);
-	
-						if (percentage > 0.0f && percentage <= 1.0f) {
-								StartTween ();
-						}
-			
+			              
+			// 
 						if (isRunning) {
-								foreach (BaseAction action in actions) {
-										action.OnUpdate (target, percentage);		
-								}
+								if(timeNormalized <= 0.0f || timeNormalized > 1.0f) 
+								  Stop ();
+								else
+								  DoUpdate();
+						}else{
+							if(timeNormalized > 0.0f && timeNormalized <= 1.0f)
+							{
+								StartNode ();
+							}
+								
 						}
-			
-						if (percentage <= 0.0f || percentage > 1.0f) {
-								CompleteTween ();
-						}
+						
+
+
 				}
 
-				public void DoOnGUI ()
-				{
-						foreach (BaseAction action in actions) {
-								action.OnGUI ();		
-						}
-				}
 
-				private bool recorded;
 
-				public void RecordAction ()
-				{
-						if (!recorded && target != null) {
-								if (actions == null) {
-										actions = new List<BaseAction> ();
-								}
-								foreach (BaseAction action in actions) {
-										action.RecordAction (target);		
-								}
-								recorded = true;
-						}
-				}
 
-				public void UndoAction ()
-				{
-						if (recorded && target != null) {
-								foreach (BaseAction action in actions) {
-										action.UndoAction (target);		
-								}
-								recorded = false;
-						}
-				}
 		}
 }
