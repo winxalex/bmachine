@@ -11,12 +11,14 @@ using UnityEditorInternal;
 using ws.winx.editor;
 using System.IO;
 using ws.winx.editor.utilities;
+using ws.winx.editor.extensions;
+using ws.winx.unity.utilities;
 
 namespace VisualTween
 {
 		public class SequenceEditor : EditorWindow
 		{
-				private Timeline timeline;
+				//private Timeline timeline;
 				private static Sequence __sequence;
 				private Sequence.SequenceWrap wrap = Sequence.SequenceWrap.ClampForever;
 				private static GameObject __sequenceGameObject;
@@ -25,21 +27,24 @@ namespace VisualTween
 				private float timeClickOffset;
 				private bool resizeNodeStart;
 				private bool resizeNodeEnd;
-				private List<Record> records;
-				private bool lastRecordState;
-				private bool lastPlayState;
-				private float playStartTime;
+				//	private List<Record> records;
+				//private bool lastRecordState;
+				//private bool lastPlayState;
+				//private float playStartTime;
 				private bool stop;
-				private bool playForward;
-				private float time;
+				//private bool playForward;
+				//private float time;
 				private static TimeAreaW __timeAreaW;
 				private static SequenceNode __testNode;
 				private static ReorderableList __sequenceChannelsReordableList;
-				private static bool __isPlaying;
+				//private static bool __isPlaying;
 				private static bool __isRecording;
 				private static int __frameRate = 30;
 				private const float NODE_RECT_HEIGHT = 40f;
-				private const float TIME_LABEL_HEIGHT = 40f;//20f for timer ruller + 20f for Events Pad
+				private const float TIME_LABEL_HEIGHT = 20f;
+				private const float EVENT_PAD_HEIGHT = 20f;
+
+//20f for timer ruller + 20f for Events Pad
 
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				string channelLabel;
@@ -91,11 +96,11 @@ namespace VisualTween
 								__timeAreaW.margin = 0f;
 								
 								__timeAreaW.scaleWithWindow = true;
-								this.Repaint ();
+							
 								//__timeAreaW.ignoreScrollWheelUntilClicked = false;
 								__timeAreaW.hTicks.SetTickModulosForFrameRate (__frameRate);
 
-
+								this.Repaint ();
 			
 								
 			
@@ -104,20 +109,20 @@ namespace VisualTween
 					
 
 
-						if (timeline == null) {
-								timeline = new Timeline ();
+//						if (timeline == null) {
+//								timeline = new Timeline ();
+//
+//
+//
+//						}
 
-
-
-						}
-
-						timeline.onSettingsGUI = OnSettingsGUI;	
-						timeline.onEventGUI = OnEventGUI;
-						timeline.onAddEvent = OnAddEvent;
-						//timeline.onTimelineGUI = OnTimelineGUI;
-						timeline.onRecord = OnRecord;
-						timeline.onTimelineClick = OnTimelineClick;
-						timeline.onPlay = OnPlay;
+//						timeline.onSettingsGUI = OnSettingsGUI;	
+//						timeline.onEventGUI = OnEventGUI;
+//						timeline.onAddEvent = OnAddEvent;
+//						//timeline.onTimelineGUI = OnTimelineGUI;
+//						//timeline.onRecord = OnRecord;
+//						timeline.onTimelineClick = OnTimelineClick;
+//						timeline.onPlay = OnPlay;
 						EditorApplication.playmodeStateChanged += OnPlayModeStateChange;
 				}
 
@@ -128,17 +133,18 @@ namespace VisualTween
 				/// </summary>
 				/// <param name="node">Node.</param>
 				/// <param name="rect">Rect.</param>
-				private static void DoNode (SequenceNode node, Rect rect)
+				/// <param name="channelOrd">Channel ord.</param>
+				private static void DoNode (SequenceNode node, Rect rect, int channelOrd)
 				{
 						
 
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + node.channel * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);			
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + node.channel * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);
+						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);			
+						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);
 
 			
 			
 						float x = __timeAreaW.TimeToPixel (node.startTime, rect);
-						Rect boxRect = new Rect (x, TIME_LABEL_HEIGHT + node.channel * NODE_RECT_HEIGHT, __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - x, NODE_RECT_HEIGHT);
+						Rect boxRect = new Rect (x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + node.channelOrd * NODE_RECT_HEIGHT, __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - x, NODE_RECT_HEIGHT);
 
 						GUI.Box (boxRect, "", "TL LogicBar 0");
 
@@ -181,7 +187,7 @@ namespace VisualTween
 
 						for (int i=0; i<channelsNumber; i++) {
 								channel = __sequence.channels [i];
-								channel.nodes.ForEach (itm => itm.channel = i);
+								channel.nodes.ForEach (itm => itm.channelOrd = i);
 						}
 
 						
@@ -266,40 +272,71 @@ namespace VisualTween
 				private void OnPlayModeStateChange ()
 				{
 						if (EditorApplication.isPlaying) {
-								timeline.isRecording = true;
-								timeline.isPlaying = true;
-								StartRecord ();
+
+
+								//timeline.isRecording = true;
+								//__sequence.isPlaying = true;
+								//StartRecord ();
 						} else {
-								StopRecord ();
-								OnPlay (false);
-								timeline.isRecording = false;
-								timeline.isPlaying = false;
+								//StopRecord ();
+								//OnPlay (false);
+								//timeline.isRecording = false;
+								//__sequence.isPlaying = false;
+
+								List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
+								sequences.ForEach (itm => itm.Stop (__sequence.playForward));
+
 						}
 				}
 
 				private void Update ()
 				{
+
+						//Debug.Log ("Update SE");
+
+						//GameObject target = __sequence.channels [1].target;
+
+
+
+						if (__sequenceGameObject != null) {
+								__sequence = __sequenceGameObject.GetComponent<Sequence> ();
+						}
+				
+						if (__sequence != null && __sequence.isPlaying) {
+								
+								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
+								SceneView.RepaintAll ();
+						}
+
+				}
+
+//				private void Update ()
+//				{
 //						if (__sequenceGameObject != null) {
 //								__sequence = __sequenceGameObject.GetComponent<Sequence> ();
 //						}
 //
 //						if (__sequence != null) {
-//								__sequence.nodes.RemoveAll (x => x.target == null);	
-//								if (!__sequence.nodes.Contains (__nodeSelected)) {
-//										__nodeSelected = null;
-//								}
-//								if (!EditorApplication.isPlaying) {
-//										if (lastRecordState) {
-//												EditorUpdate (timeline.CurrentTime, false);
-//										}
-//								}
-//								if (lastPlayState && !stop) {
-//										if ((float)EditorApplication.timeSinceStartup > time) {
+//
+//								//remove all with channels without target
+//								__sequence.channels.RemoveAll (x => x.target == null);
+//
+////								if (!__sequence.nodes.Contains (__nodeSelected)) {
+////										__nodeSelected = null;
+////								}
+////								if (!EditorApplication.isPlaying) {
+////										if (lastRecordState) {
+////												EditorUpdate (timeline.CurrentTime, false);
+////										}
+////								}
+//
+//								if (__sequence.lastPlayState && !stop) {
+//										if ((float)EditorApplication.timeSinceStartup > __sequence.time) {
 //												switch (wrap) {
 //												case Sequence.SequenceWrap.PingPong:
-//														playForward = !playForward;
-//														time = (float)EditorApplication.timeSinceStartup + GetSequenceEnd ();
-//														if (playForward) {
+//														__sequence.playForward = !__sequence.playForward;
+//														__sequence.time = (float)EditorApplication.timeSinceStartup + __sequence.endTime;
+//														if (__sequence.playForward) {
 //																timeline.CurrentTime = 0;
 //																playStartTime = (float)EditorApplication.timeSinceStartup;
 //														}
@@ -319,7 +356,7 @@ namespace VisualTween
 //														playStartTime = (float)EditorApplication.timeSinceStartup;
 //														timeline.CurrentTime = 0;
 //														stop = false;
-//														time = (float)EditorApplication.timeSinceStartup + GetSequenceEnd ();
+//														time = (float)EditorApplication.timeSinceStartup + endTime ();
 //														break;
 //												}		
 //										}
@@ -337,43 +374,32 @@ namespace VisualTween
 //						} else {
 //								__sequence = Selection.activeGameObject != null ? Selection.activeGameObject.GetComponent<Sequence> () : null;			
 //						}
-				}
+//				}
 
-				public float GetSequenceEnd ()
-				{
-						
-						float sequenceEnd = 0;
-
-						foreach (SequenceChannel channel  in __sequence.channels)
-								foreach (SequenceNode node in channel.nodes) {
-										if (sequenceEnd < (node.startTime + node.duration)) {
-												sequenceEnd = node.startTime + node.duration;
-										}
-								}
-						return sequenceEnd;
-				}
+				
 
 				public void EditorUpdate (float time, bool forceUpdate)
 				{
 //						__sequence.nodes = __sequence.nodes.OrderBy (x => x.startTime).ToList ();
-//			
+			
 //						foreach (var kvp in GetGroupTargets()) {
 //								SequenceNode mNode = kvp.Value.OrderBy (x => x.startTime).First ();
 //								mNode.RecordAction ();
 //						}
-//			
-//						foreach (SequenceNode node in __sequence.nodes) {
-//								if (((time - node.startTime) / node.duration) > 0.0f && ((time - node.startTime) / node.duration) < 1.0f || forceUpdate && ((time - node.startTime) / node.duration) > 0.0f) {
-//										node.StartTween ();
-//								}
-//				
-//								node.UpdateTween (time);
-//				
-//								if (((time - node.startTime) / node.duration) < 0.0f || ((time - node.startTime) / node.duration) > 1.0f || forceUpdate) {
-//										node.CompleteTween ();
-//								}
-//						}
-//			
+
+//						foreach(SequenceChannel channel in __sequence.channels)
+//							foreach (SequenceNode node in channel.nodes) {
+//									if (((time - node.startTime) / node.duration) > 0.0f && ((time - node.startTime) / node.duration) < 1.0f || forceUpdate && ((time - node.startTime) / node.duration) > 0.0f) {
+//											node.StartTween ();
+//									}
+//					
+//									node.UpdateNode (time);
+//					
+//									if (((time - node.startTime) / node.duration) < 0.0f || ((time - node.startTime) / node.duration) > 1.0f || forceUpdate) {
+//											node.CompleteTween ();
+//									}
+//							}
+			
 //						foreach (var kvp in GetGroupTargets()) {
 //								SequenceNode mNode = kvp.Value.OrderBy (x => x.startTime).ToList ().Find (y => ((time - y.startTime) / y.duration) < 0.0f);
 //								if (mNode != null)
@@ -386,114 +412,64 @@ namespace VisualTween
 				{
 						if (EditorApplication.isPlaying) {
 								Debug.Log ("You can't stop preview playing in play mode.");
-								timeline.isPlaying = true;
+								__sequence.isPlaying = true;
 								return;			
 						}
-						lastPlayState = isPlaying;	
-						playStartTime = (float)EditorApplication.timeSinceStartup;
-						time = (float)EditorApplication.timeSinceStartup + GetSequenceEnd ();
-						timeline.CurrentTime = 0;
+
 						if (isPlaying) {
-								stop = false;
-								playForward = true;
-								StartRecord ();	
+								//AudioUtilW.PlayClip(
+								//__sequence.Play(AudioUtilW.PlayClip);
+								__sequence.Play (EditorApplication.timeSinceStartup);
 						} else {
-								StopRecord ();			
+								__sequence.Stop (__sequence.playForward);
 						}
+
+						
+
+
+						//lastPlayState = isPlaying;	
+
+						//__sequence.playStartTime = (float)EditorApplication.timeSinceStartup;
+						//__sequence.time = (float)EditorApplication.timeSinceStartup + __sequence.endTime;
+						//timeline.CurrentTime = 0;
+
+//						if (isPlaying) {
+//								stop = false;
+//								__sequence.playForward = true;
+//								//StartRecord ();	
+//						} else {
+//								//StopRecord ();			
+//						}
 				}
 
 				private void OnTimelineClick (float time)
 				{
-						if (EditorApplication.isPlaying) {
-								Debug.Log ("You can't change time in play mode.");
-								timeline.isRecording = true;
-								return;			
-						}
+//						if (EditorApplication.isPlaying) {
+//								Debug.Log ("You can't change time in play mode.");
+//								//timeline.isRecording = true;
+//								return;			
+//						}
 
-						if (lastPlayState) {
-								timeline.isPlaying = false;
-								OnPlay (false);
-								timeline.CurrentTime = time;
-						}
+//						if (lastPlayState) {
+//								__sequence.isPlaying = false;
+//								OnPlay (false);
+//								timeline.CurrentTime = time;
+//						}
 
-						if (!lastRecordState) {
-								StartRecord ();
-						}
+//						if (!lastRecordState) {
+//								StartRecord ();
+//						}
 		
 
-						timeline.isRecording = true;
-						if (__sequence != null) {
-								EditorUpdate (time, true);
-						}
+						//timeline.isRecording = true;
+//						if (__sequence != null) {
+//								EditorUpdate (time, true);
+//						}
 				}
 
-				private void OnRecord ()
-				{
-						if (EditorApplication.isPlaying) {
-								Debug.Log ("You can't stop recording in play mode.");
-								timeline.isRecording = true;
-								return;			
-						}
-						if (lastRecordState) {
-								StopRecord ();		
-						} else {
-								StartRecord ();			
-						}
-				}
-
-				private void StartRecord ()
-				{
-						if (lastRecordState) {
-								StopRecord ();			
-						}
 			
-						lastRecordState = true;
-						if (__sequence != null) {
-								records = new List<Record> ();
-				
-								foreach (var kvp in GetGroupTargets()) {
-										Record rec = new Record ();
-										rec.target = kvp.Key;
-										rec.nodes = kvp.Value;
-										rec.instantiatedTarget = (GameObject)Instantiate (kvp.Key);
-										rec.instantiatedTarget.name = rec.instantiatedTarget.name.Replace ("(Clone)", "");
-										if (Selection.activeGameObject == kvp.Key) {
-												Selection.activeGameObject = rec.instantiatedTarget;
-										}
-										rec.target.SetActive (false);
-										rec.target.hideFlags = HideFlags.HideInHierarchy;
-										foreach (SequenceNode node in rec.nodes) {
-												node.target = rec.instantiatedTarget;
-										}
-										records.Add (rec);
-								}
-						}
-				}
 
-				private void StopRecord ()
-				{
-						timeline.CurrentTime = 0;
-						if (lastRecordState) {
-								lastRecordState = false;	
-								if (__sequence != null) {
-										foreach (Record rec in records) {
-												foreach (SequenceNode node in rec.nodes) {
-														node.target = rec.target;
-												}
-												if (Selection.activeGameObject == rec.instantiatedTarget) {
-														Selection.activeGameObject = rec.target;
-												}
-												DestroyImmediate (rec.instantiatedTarget);
-					
-												rec.target.hideFlags = HideFlags.None;
-												rec.target.SetActive (true);
-										}	
-										records.Clear ();
-								}
-						}
-						Repaint ();
-				}
-
+			
 
 
 				/// <summary>
@@ -578,7 +554,7 @@ namespace VisualTween
 				{
 						GUIStyle style = new GUIStyle ("ProgressBarBack");
 						style.padding = new RectOffset (0, 0, 0, 0);
-						//GUILayout.BeginArea (new Rect (position.x,position.y, timelineOffset, position.height),GUIContent.none,style);
+						
 						GUILayout.BeginArea (rect, GUIContent.none, style);
 			
 						GUILayout.BeginHorizontal (EditorStyles.toolbar);
@@ -591,11 +567,12 @@ namespace VisualTween
 						}
 						GUI.backgroundColor = Color.white;
 			
-						if (GUILayout.Button (__isPlaying ? EditorGUIUtility.FindTexture ("d_PlayButton On") : EditorGUIUtility.FindTexture ("d_PlayButton"), EditorStyles.toolbarButton)) {
-								__isPlaying = !__isPlaying;
-//				if(onPlay != null){
-//					onPlay(isPlaying);
-//				}
+						if (GUILayout.Button (__sequence.isPlaying ? EditorGUIUtility.FindTexture ("d_PlayButton On") : EditorGUIUtility.FindTexture ("d_PlayButton"), EditorStyles.toolbarButton)) {
+								__sequence.isPlaying = !__sequence.isPlaying;
+
+								//AudioUtilW.PlayClip(__sequence.channels[0].nodes[0].source as AudioClip);
+								OnPlay (__sequence.isPlaying);
+
 						}
 						GUILayout.FlexibleSpace ();
 						if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.AddEvent"), EditorStyles.toolbarButton)) {
@@ -649,7 +626,7 @@ namespace VisualTween
 						if (GUILayout.Button (__sequence != null ? __sequence.name : "[None Selected]", EditorStyles.toolbarDropDown, GUILayout.Width (width * 0.3f))) {
 								GenericMenu toolsMenu = new GenericMenu ();
 				
-								List<Sequence> sequences = FindAll<Sequence> ();
+								List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
 								foreach (Sequence sequence in sequences) {
 										toolsMenu.AddItem (new GUIContent (sequence.name), false, OnGameObjectSelectionChanged, sequence);
 								}
@@ -716,83 +693,6 @@ namespace VisualTween
 
 
 				}
-	
-//				private void DoListGUI (SequenceNode node)
-//				{
-//
-//
-//
-//					
-//
-//
-//						GUILayout.BeginVertical ("box");
-//						EditorGUIUtility.labelWidth = 60;
-//
-//						SerializedObject serializedObject = new SerializedObject (node);
-//						serializedObject.Update ();
-//						/*SerializedProperty channelProperty = serializedObject.FindProperty ("channel");
-//			EditorGUILayout.PropertyField(channelProperty,new GUIContent("Channel","Channel for better organization."));
-//			channelProperty.intValue=Mathf.Clamp (channelProperty.intValue, 0, int.MaxValue);*/
-//						SerializedProperty startTimeProperty = serializedObject.FindProperty ("startTime");
-//						EditorGUILayout.PropertyField (startTimeProperty, new GUIContent ("Delay", "Delay the tween in seconds."));
-//						startTimeProperty.floatValue = Mathf.Clamp (startTimeProperty.floatValue, 0, Mathf.Infinity);
-//						SerializedProperty durationProperty = serializedObject.FindProperty ("duration");
-//						EditorGUILayout.PropertyField (durationProperty, new GUIContent ("Duration", "Duration of the tween in seconds."));
-//						durationProperty.floatValue = Mathf.Clamp (durationProperty.floatValue, 0, Mathf.Infinity);
-//						serializedObject.ApplyModifiedProperties ();
-//						GUILayout.EndVertical ();
-//						GUI.changed = false;
-//						int deleteActionIndex = -1;
-//						if (__nodeSelected.actions == null) {
-//								__nodeSelected.actions = new List<BaseAction> ();		
-//						}
-//						for (int i=0; i< __nodeSelected.actions.Count; i++) {
-//								BaseAction action = __nodeSelected.actions [i];
-//								FieldInfo[] fields = action.GetType ().GetFields (BindingFlags.Instance | BindingFlags.Public);
-//				
-//								bool foldout = EditorPrefs.GetBool (action.GetHashCode ().ToString (), true);
-//								GUIContent title = new GUIContent (action.name.Replace ("/", "."), "");
-//								GUILayout.BeginVertical ("box");
-//								GUILayout.BeginHorizontal ();
-//								if (fields.Length > 0) {
-//										foldout = EditorGUILayout.Foldout (foldout, title);		
-//								} 
-//								GUILayout.FlexibleSpace ();
-//								if (GUILayout.Button (EditorGUIUtility.FindTexture ("Toolbar Minus"), "Label", GUILayout.Width (20))) {
-//										deleteActionIndex = i;
-//								}
-//								GUILayout.EndHorizontal ();
-//								EditorPrefs.SetBool (action.GetHashCode ().ToString (), foldout);
-//				
-//								if (foldout) {
-//										if (action is TweenProperty) {
-//												DrawTweenProperty (action as TweenProperty);
-//										} else {
-//												SerializedObject serializedActionObject = new SerializedObject (action);
-//												serializedActionObject.Update ();
-//												for (int k=0; k< fields.Length; k++) {
-//														FieldInfo info = fields [k];
-//														if (!HasCustomAttribute (info, typeof(HideInInspector))) {
-//																SerializedProperty property = serializedActionObject.FindProperty (info.Name);
-//																if (property != null) {
-//																		EditorGUILayout.PropertyField (property, true);
-//																}
-//														}
-//												}
-//												serializedActionObject.ApplyModifiedProperties ();
-//										}
-//								}
-//				
-//								GUILayout.EndVertical ();
-//						}
-//			
-//						if (deleteActionIndex != -1) {
-//								__nodeSelected.actions.RemoveAt (deleteActionIndex);		
-//						}
-//						if (GUI.changed) {
-//								EditorUtility.SetDirty (__sequence);	
-//						}
-//				}
 
 				private void OnEventGUI (Rect rect)
 				{
@@ -816,7 +716,7 @@ namespace VisualTween
 						float lineY = 0f;
 						for (; y<rows; y++) {
 								//Handles.DrawLine (new Vector3 (0, y, 0), new Vector3 (rect.width, y, 0));	
-								lineY = TIME_LABEL_HEIGHT + y * NODE_RECT_HEIGHT;
+								lineY = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + y * NODE_RECT_HEIGHT;
 								Handles.DrawLine (new Vector3 (rect.xMin, lineY, 0), new Vector3 (rect.xMax, lineY, 0));	
 								
 								
@@ -825,28 +725,120 @@ namespace VisualTween
 										
 
 						//make all area from end of label and Event pad to botton droppable
-						sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
+						sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
 			
 						Handles.color = Color.white;
 
 						//TimeArea
 						__timeAreaW.DoTimeArea (rect, __frameRate);
 
-						if (__sequence == null) {
-								return;		
+					
+						if (Event.current.type == EventType.Repaint) 
+								EditorGUILayoutEx.ANIMATION_STYLES.eventBackground.Draw (new Rect (rect.x, EVENT_PAD_HEIGHT, rect.width, EVENT_PAD_HEIGHT), GUIContent.none, 0);
+
+						//DRAW NODES 
+						int channelNumber = __sequence.channels.Count;
+						SequenceChannel channel = null;
+						for (int i=0; i<channelNumber; i++) {
+								channel = __sequence.channels [i];
+								foreach (SequenceNode node in channel.nodes) {
+									
+										
+
+									sequenceNodeClickEventHandler(node,rect,i);
+									DoNode (node, rect, i);
+								}
+						}
+
+						//check timeline click
+						if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && new Rect (rect.x, 0, rect.width, TIME_LABEL_HEIGHT).Contains (Event.current.mousePosition)) {
+								
+									
+								//OnTimelineClick(__timeAreaW.TimeToPixel(time,rect));
+								Debug.Log ("Click on TimeLine");
+								Event.current.Use ();
+						}
+						
+
+
+						sequenceNodeDragEventHandler (rect);
+				}
+
+				private void sequenceNodeClickEventHandler ( SequenceNode node,Rect rect, int channelOrd)
+				{
+
+						Event ev = Event.current;
+						Rect clickRect;
+			
+						float startTime;
+						switch (ev.rawType) {
+						case EventType.MouseDown:
+				
+			
+					
+								clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
+					
+					//check start of the node rect width=5
+								if (clickRect.Contains (Event.current.mousePosition)) {
+										//if (new Rect (timeline.SecondsToGUI (node.startTime) - 5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
+										__nodeSelected = node;
+										resizeNodeStart = true;
+										ev.Use ();
+								}
+					
+								clickRect.x = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5;
+					
+					//check the end of node rect width=5
+					//if (new Rect (timeline.SecondsToGUI (node.startTime+node.duration)-5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
+								if (clickRect.Contains (Event.current.mousePosition)) {
+										__nodeSelected = node;
+										resizeNodeEnd = true;
+										ev.Use ();
+								}
+					
+					
+								clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect) + 5;
+								clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x - 5;
+					
+								if (clickRect.Contains (Event.current.mousePosition)) {
+										//if (new Rect(timeline.SecondsToGUI(node.startTime),node.channel*20,timeline.SecondsToGUI(node.duration),20).Contains (Event.current.mousePosition)) {
+										if (ev.button == 0) {
+												//timeClickOffset = node.startTime - timeline.GUIToSeconds (Event.current.mousePosition.x);
+												timeClickOffset = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+												dragNode = true;
+												__nodeSelected = node;
+										} 
+										if (ev.button == 1) {
+												GenericMenu genericMenu = new GenericMenu ();
+												genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
+												genericMenu.ShowAsContext ();
+										}
+										ev.Use ();
+								}
+
+								break;
+				
+						case EventType.ContextClick:
+				
+								clickRect = new Rect (0, 0, 0, NODE_RECT_HEIGHT);
+				
+
+					
+								clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect);
+								clickRect.y = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT;
+								clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x;
+					
+								if (clickRect.Contains (Event.current.mousePosition)) {
+										GenericMenu genericMenu = new GenericMenu ();
+										genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
+										genericMenu.ShowAsContext ();
+								}
+
+								break;
 						}
 
 
-						//DRAW NODES RECT
-						foreach (SequenceChannel channel in __sequence.channels)
-								foreach (SequenceNode node in channel.nodes) {
-										//if (!node.eventNode) {
 
-										DoNode (node, rect);
-
-								}
-
-						HandleEvents (rect);
 				}
 
 
@@ -854,78 +846,78 @@ namespace VisualTween
 				/// Handles the events, resize, pan.
 				/// </summary>
 				/// <param name="rect">Rect.</param>
-				private void HandleEvents (Rect rect)
+				private void sequenceNodeDragEventHandler (Rect rect)
 				{
 						Event ev = Event.current;
 						Rect clickRect;
 
 						float startTime;
 						switch (ev.rawType) {
-						case EventType.MouseDown:
-
-								foreach (SequenceChannel channel in __sequence.channels)
-										foreach (SequenceNode node in channel.nodes) {
-
-												clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + node.channel * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
-
-												//check start of the node rect width=5
-												if (clickRect.Contains (Event.current.mousePosition)) {
-														//if (new Rect (timeline.SecondsToGUI (node.startTime) - 5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
-														__nodeSelected = node;
-														resizeNodeStart = true;
-														ev.Use ();
-												}
-
-												clickRect.x = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5;
-
-												//check the end of node rect width=5
-												//if (new Rect (timeline.SecondsToGUI (node.startTime+node.duration)-5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
-												if (clickRect.Contains (Event.current.mousePosition)) {
-														__nodeSelected = node;
-														resizeNodeEnd = true;
-														ev.Use ();
-												}
-
-
-												clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect) + 5;
-												clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x - 5;
-
-												if (clickRect.Contains (Event.current.mousePosition)) {
-														//if (new Rect(timeline.SecondsToGUI(node.startTime),node.channel*20,timeline.SecondsToGUI(node.duration),20).Contains (Event.current.mousePosition)) {
-														if (ev.button == 0) {
-																//timeClickOffset = node.startTime - timeline.GUIToSeconds (Event.current.mousePosition.x);
-																timeClickOffset = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
-																dragNode = true;
-																__nodeSelected = node;
-														} 
-														if (ev.button == 1) {
-																GenericMenu genericMenu = new GenericMenu ();
-																genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
-																genericMenu.ShowAsContext ();
-														}
-														ev.Use ();
-												}
-										}
-								break;
-
-						case EventType.ContextClick:
-
-								clickRect = new Rect (0, 0, 0, NODE_RECT_HEIGHT);
-
-								foreach (SequenceChannel channel in __sequence.channels)
-										foreach (SequenceNode node in channel.nodes) {
-
-												clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect);
-												clickRect.y = TIME_LABEL_HEIGHT + node.channel * NODE_RECT_HEIGHT;
-												clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x;
-					
-												if (clickRect.Contains (Event.current.mousePosition)) {
-														GenericMenu genericMenu = new GenericMenu ();
-														genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
-														genericMenu.ShowAsContext ();
-												}
-										}
-								break;
+//						case EventType.MouseDown:
+//
+//								foreach (SequenceChannel channel in __sequence.channels)
+//										foreach (SequenceNode node in channel.nodes) {
+//
+//												clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + node.channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
+//
+//												//check start of the node rect width=5
+//												if (clickRect.Contains (Event.current.mousePosition)) {
+//														//if (new Rect (timeline.SecondsToGUI (node.startTime) - 5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
+//														__nodeSelected = node;
+//														resizeNodeStart = true;
+//														ev.Use ();
+//												}
+//
+//												clickRect.x = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5;
+//
+//												//check the end of node rect width=5
+//												//if (new Rect (timeline.SecondsToGUI (node.startTime+node.duration)-5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
+//												if (clickRect.Contains (Event.current.mousePosition)) {
+//														__nodeSelected = node;
+//														resizeNodeEnd = true;
+//														ev.Use ();
+//												}
+//
+//
+//												clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect) + 5;
+//												clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x - 5;
+//
+//												if (clickRect.Contains (Event.current.mousePosition)) {
+//														//if (new Rect(timeline.SecondsToGUI(node.startTime),node.channel*20,timeline.SecondsToGUI(node.duration),20).Contains (Event.current.mousePosition)) {
+//														if (ev.button == 0) {
+//																//timeClickOffset = node.startTime - timeline.GUIToSeconds (Event.current.mousePosition.x);
+//																timeClickOffset = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+//																dragNode = true;
+//																__nodeSelected = node;
+//														} 
+//														if (ev.button == 1) {
+//																GenericMenu genericMenu = new GenericMenu ();
+//																genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
+//																genericMenu.ShowAsContext ();
+//														}
+//														ev.Use ();
+//												}
+//										}
+//								break;
+//
+//						case EventType.ContextClick:
+//
+//								clickRect = new Rect (0, 0, 0, NODE_RECT_HEIGHT);
+//
+//								foreach (SequenceChannel channel in __sequence.channels)
+//										foreach (SequenceNode node in channel.nodes) {
+//
+//												clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect);
+//												clickRect.y = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + node.channelOrd * NODE_RECT_HEIGHT;
+//												clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x;
+//					
+//												if (clickRect.Contains (Event.current.mousePosition)) {
+//														GenericMenu genericMenu = new GenericMenu ();
+//														genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
+//														genericMenu.ShowAsContext ();
+//												}
+//										}
+//								break;
 						case EventType.MouseDrag:
 								if (resizeNodeStart) {
 										//selectedNode.startTime = timeline.GUIToSeconds (Event.current.mousePosition.x);
@@ -1002,19 +994,19 @@ namespace VisualTween
 //						StartRecord ();
 //				}
 
-				private Dictionary<GameObject,List<SequenceNode>> GetGroupTargets ()
-				{
-						Dictionary<GameObject,List<SequenceNode>> targets = new Dictionary<GameObject, List<SequenceNode>> ();
-						foreach (SequenceChannel channel in __sequence.channels)
-								foreach (SequenceNode node in channel.nodes) {
-										if (!targets.ContainsKey (node.target)) {
-												targets.Add (node.target, new List<SequenceNode> (){node});
-										} else {
-												targets [node.target].Add (node);
-										}
-								}
-						return targets;
-				}
+//				private Dictionary<GameObject,List<SequenceNode>> GetGroupTargets ()
+//				{
+//						Dictionary<GameObject,List<SequenceNode>> targets = new Dictionary<GameObject, List<SequenceNode>> ();
+//						foreach (SequenceChannel channel in __sequence.channels)
+//								foreach (SequenceNode node in channel.nodes) {
+//										if (!targets.ContainsKey (node.target)) {
+//												targets.Add (node.target, new List<SequenceNode> (){node});
+//										} else {
+//												targets [node.target].Add (node);
+//										}
+//								}
+//						return targets;
+//				}
 
 
 
@@ -1025,7 +1017,7 @@ namespace VisualTween
 				private void RemoveNode (object data)
 				{
 						SequenceNode node = data as SequenceNode;
-						int channel = node.channel;
+						int channel = node.channelOrd;
 						SequenceChannel sequenceChannel = __sequence.channels [channel];
 
 						//remove node
@@ -1040,16 +1032,16 @@ namespace VisualTween
 								__sequence.channels.RemoveAt (channel);
 
 
-								int channelsNumber = __sequence.channels.Count;
-							
-								for (int i=channel; i<channelsNumber; i++) {
-
-										sequenceChannel = __sequence.channels [i];
-										foreach (SequenceNode n in sequenceChannel.nodes) {
-
-												n.channel--;
-										}
-								}
+//								int channelsNumber = __sequence.channels.Count;
+//							
+//								for (int i=channel; i<channelsNumber; i++) {
+//
+//										sequenceChannel = __sequence.channels [i];
+//										foreach (SequenceNode n in sequenceChannel.nodes) {
+//
+//												n.channelOrd--;
+//										}
+//								}
 						}
 
 						
@@ -1106,7 +1098,8 @@ namespace VisualTween
 
 
 														if (draggedType == typeof(UnityEngine.AnimationClip) || 
-																draggedType == typeof(UnityEngine.AudioClip) || draggedType == typeof(UnityEngine.MovieTexture)) {
+																draggedType == typeof(UnityEngine.AudioClip) ||
+																draggedType == typeof(UnityEngine.MovieTexture)) {
 
 
 																//allow only dropping multiply items of same type in same channel
@@ -1142,7 +1135,7 @@ namespace VisualTween
 
 
 																//Vector2
-																SequenceNode node = CreateSequenceNode (Event.current.mousePosition, dragged_object, channel);
+																SequenceNode node = CreateNewSequenceNode (Event.current.mousePosition, dragged_object, channel);
 														
 
 																__sequence.channels [channel].nodes.Add (node);
@@ -1165,7 +1158,7 @@ namespace VisualTween
 				/// <param name="pos">Position.</param>
 				/// <param name="source">Source.</param>
 				/// <param name="channel">Channel.</param>
-				private SequenceNode CreateSequenceNode (Vector2 pos, UnityEngine.Object source, int channel)
+				private SequenceNode CreateNewSequenceNode (Vector2 pos, UnityEngine.Object source, int channelOrd)
 				{
 						SequenceNode node = ScriptableObject.CreateInstance<SequenceNode> ();
 						
@@ -1184,16 +1177,27 @@ namespace VisualTween
 
 						}
 
-
+						//node.onStart = new UnityEngine.Events.UnityEvent ().AddListener (new UnityEngine.Events.UnityAction (this, this.GetType ().GetMethod ("fdsaffa").MethodHandle.GetFunctionPointer ()));
+						
+						node.onStart.AddListener (onSequenceNodeStart);
 						node.name = source.name;
 						
-						node.channel = channel;
+						node.channelOrd = channelOrd;
+
+						node.channel = __sequence.channels [channelOrd];
 					
 						node.startTime = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __frameRate);
 						node.duration = TimeAreaW.SnapTimeToWholeFPS (duration, __frameRate);
 						
 			
 						return node;
+				}
+
+				//static
+				public  void onSequenceNodeStart ()
+				{
+
+
 				}
 
 
@@ -1257,6 +1261,9 @@ namespace VisualTween
 						}
 		
 				}
+
+
+					
 		
 		
 				////   CREATE NEW SEQUENCE GAME OBJECT WITH SEQUENCE BEHAVIOUR ////
@@ -1265,7 +1272,8 @@ namespace VisualTween
 				/// </summary>
 				private void CreateNewSequence ()
 				{
-						List<Sequence> sequences = FindAll<Sequence> ();
+						
+						List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
 						int count = 0;
 
 						while (sequences.Find(x=>x.name == "Sequence "+count.ToString())!=null) {
@@ -1279,9 +1287,6 @@ namespace VisualTween
 						__sequenceGameObject.AddComponent<Animator> ();
 
 
-//						if (__sequence.nodes == null) {
-//								__sequence.nodes = new List<SequenceNode> ();			
-//						}
 						Selection.activeGameObject = __sequenceGameObject;
 				}
 
@@ -1302,166 +1307,6 @@ namespace VisualTween
 						}
 				}
 
-				private void DrawTweenProperty (TweenProperty tween)
-				{
-						Component[] components = __nodeSelected.target.GetComponents (typeof(Component));
-						components = components.ToList ().FindAll (x => HasSupportedFields (x.GetType ()) == true).ToArray ();
-						List<string> componentTypes = components.Select (x => x.GetType ().ToString ().Split ('.').Last ()).ToList ();
-						EditorGUIUtility.labelWidth = 70;
-			
-						tween.componentTypeString = StringPopup ("Component", tween.componentTypeString, componentTypes.ToArray ());
-						Type selectedType = TweenProperty.GetType (tween.componentTypeString);
-						if (selectedType == null) {
-								selectedType = TweenProperty.GetType ("UnityEngine." + tween.componentTypeString);			
-						}
-			
-						if (selectedType != null) {
-								FieldInfo[] fields = selectedType
-					.GetFields (BindingFlags.Public | BindingFlags.Instance)
-						.Where (x => x.FieldType == typeof(float) || x.FieldType == typeof(Color) || x.FieldType == typeof(Vector4) || x.FieldType == typeof(Vector3) || x.FieldType == typeof(Vector2) || x.FieldType == typeof(Quaternion))
-						.ToArray ();
-								PropertyInfo[] properties = selectedType
-					.GetProperties (BindingFlags.Public | BindingFlags.Instance)
-						.Where (x => x.CanWrite && (x.PropertyType == typeof(float) || x.PropertyType == typeof(Color) || x.PropertyType == typeof(Vector4) || x.PropertyType == typeof(Vector3) || x.PropertyType == typeof(Vector2) || x.PropertyType == typeof(Quaternion)))
-						.ToArray ();	
-								if (fields.Length > 0 || properties.Length > 0) {
-										List<string> names = fields.Select (x => x.Name).ToList ();
-										names.AddRange (properties.Select (x => x.Name).ToList ());
-					
-										tween.propertyName = StringPopup ("Property", tween.propertyName, names.ToArray ());
-										FieldInfo field = fields.ToList ().Find (x => x.Name == tween.propertyName);
-										Type type = null;
-										if (field != null) {
-												type = fields.ToList ().Find (x => x.Name == tween.propertyName).FieldType;
-										} else {
-												type = properties.ToList ().Find (x => x.Name == tween.propertyName).PropertyType;
-										}
-										if (type != null) {
-												SerializedObject serializedObject = new SerializedObject (tween);
-												serializedObject.Update ();
-												if (type == typeof(float)) {
-														EditorGUILayout.PropertyField (serializedObject.FindProperty ("fromFloat"), new GUIContent ("From"));
-														EditorGUILayout.PropertyField (serializedObject.FindProperty ("toFloat"), new GUIContent ("To"));
-												} else if (type == typeof(UnityEngine.Color)) {
-														EditorGUILayout.PropertyField (serializedObject.FindProperty ("fromColor"), new GUIContent ("From"));
-														EditorGUILayout.PropertyField (serializedObject.FindProperty ("toColor"), new GUIContent ("To"));
-												} else if (type == typeof(UnityEngine.Vector3) || type == typeof(Quaternion)) {
-														tween.fromVector3 = EditorGUILayout.Vector3Field ("From", tween.fromVector3);
-														tween.toVector3 = EditorGUILayout.Vector3Field ("To", tween.toVector3);
-														/*Crash when using PropertyField
-							EditorGUILayout.PropertyField(prop,new GUIContent("From"),true);
-							EditorGUILayout.PropertyField(serializedObject.FindProperty("toVector3"),new GUIContent("To"));*/
-												} else if (type == typeof(UnityEngine.Vector2)) {
-														tween.fromVector2 = EditorGUILayout.Vector3Field ("From", tween.fromVector2);
-														tween.toVector2 = EditorGUILayout.Vector3Field ("To", tween.toVector2);
-														/*Crash when using PropertyField
-							EditorGUILayout.PropertyField(serializedObject.FindProperty("fromVector2"),new GUIContent("From"),true);
-							EditorGUILayout.PropertyField(serializedObject.FindProperty("toVector2"),new GUIContent("To"),true);*/
-												} else if (type == typeof(UnityEngine.Vector4)) {
-														tween.fromVector4 = EditorGUILayout.Vector4Field ("From", tween.fromVector4);
-														tween.toVector4 = EditorGUILayout.Vector4Field ("To", tween.toVector4);
-														/*Crash when using PropertyField
-							EditorGUILayout.PropertyField(serializedObject.FindProperty("fromVector2"),new GUIContent("From"),true);
-							EditorGUILayout.PropertyField(serializedObject.FindProperty("toVector2"),new GUIContent("To"),true);*/
-												}
-												EditorGUILayout.PropertyField (serializedObject.FindProperty ("easeType"), new GUIContent ("EaseType"));
-												serializedObject.ApplyModifiedProperties ();
-										}
-								}
-						}
-				}
-
-				public static List<T> FindAll<T> () where T : Component
-				{
-						T[] comps = Resources.FindObjectsOfTypeAll (typeof(T)) as T[];
-						List<T> list = new List<T> ();
-						foreach (T comp in comps) {
-								if (comp.gameObject.hideFlags == 0) {
-										string path = AssetDatabase.GetAssetPath (comp.gameObject);
-										if (string.IsNullOrEmpty (path))
-												list.Add (comp);
-								}
-						}
-						return list;
-				}
-
-				private bool HasCustomAttribute (FieldInfo info, Type type)
-				{
-						object[] attributes = info.GetCustomAttributes (true);
-						foreach (object attribute in attributes) {
-								if (attribute.GetType () == type) {
-										return true;
-								}
-						}
-						return false;	
-				}
-
-				private bool HasRequiredComponents (SequenceNode node, Type actionType)
-				{
-						object[] attributes = actionType.GetCustomAttributes (true);
-						bool result = false;
-						foreach (object attribute in attributes) {
-								if (attribute is RequireComponent) {
-										RequireComponent attr = attribute as RequireComponent;
-										if (attr.m_Type0 != null) {
-												result = node.target.GetComponent (attr.m_Type0) != null;
-												if (!result) {
-														return false;
-												}
-										}
-								}
-						}
-						return true;	
-				}
-		
-				private bool HasSupportedFields (Type type)
-				{
-						FieldInfo[] fields = type
-				.GetFields (BindingFlags.Public | BindingFlags.Instance)
-					.Where (x => x.FieldType == typeof(float) || x.FieldType == typeof(Color) || x.FieldType == typeof(Vector4) || x.FieldType == typeof(Vector3) || x.FieldType == typeof(Vector2))
-					.ToArray ();
-						PropertyInfo[] properties = type
-				.GetProperties (BindingFlags.Public | BindingFlags.Instance)
-					.Where (x => x.PropertyType == typeof(float) || x.PropertyType == typeof(Color) || x.PropertyType == typeof(Vector4) || x.PropertyType == typeof(Vector3) || x.PropertyType == typeof(Vector2))
-					.ToArray ();	
-						if (fields.Length > 0 || properties.Length > 0) {
-								return true;
-						}
-						return false;
-				}
-
-				private string GetCategory (Type type)
-				{
-						object[] attributes = type.GetCustomAttributes (true);
-						foreach (object attribute in attributes) {
-								if (attribute is CategoryAttribute) {
-										return (attribute as CategoryAttribute).category;
-								}
-						}
-						return string.Empty;
-				}
-
-				private string StringPopup (string label, string value, string[] list, params GUILayoutOption[] options)
-				{
-						int index = 0;
-						if (list != null && list.Length > 0) {
-								for (int cnt=0; cnt<list.Length; cnt++) {
-										if (value == list [cnt]) {
-												index = cnt;
-										}
-								}
-								index = string.IsNullOrEmpty (label) ? EditorGUILayout.Popup (index, list, options) : EditorGUILayout.Popup (label, index, list, options);
-								return list [index];
-						}
-						return string.Empty;
-				}
-
-				[System.Serializable]
-				public class Record
-				{
-						public GameObject target;
-						public GameObject instantiatedTarget;
-						public List<SequenceNode> nodes;
-				}
+				
 		}
 }

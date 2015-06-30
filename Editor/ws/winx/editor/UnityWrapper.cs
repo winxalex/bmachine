@@ -2700,6 +2700,98 @@ namespace ws.winx.editor
 		}
 
 	#endregion
+
+
+
+
+	#region AudioUtilW
+	public class AudioUtilW
+	{
+		private object __instance;
+		private static Type __RealType;
+		private static ConstructorInfo method_ctor;
+		private static MethodInfo __PlayClip_MethodInfo;
+		
+		public static MethodInfo PlayClip_MethodInfo {
+			get {
+				if (__PlayClip_MethodInfo == null)
+					__PlayClip_MethodInfo = GetWrappedType ().GetMethod ("PlayClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+				return __PlayClip_MethodInfo;
+			}
+		}
+
+		private static MethodInfo __StopClip__MethodInfo;
+		
+		public static MethodInfo StopClip__MethodInfo {
+			get {
+				if (__StopClip__MethodInfo == null)
+					__StopClip__MethodInfo = GetWrappedType ().GetMethod ("StopClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+				return __StopClip__MethodInfo;
+			}
+		}
+
+		private static MethodInfo __PauseClip__MethodInfo;
+		
+		public static MethodInfo PauseClip__MethodInfo {
+			get {
+				if (__PauseClip__MethodInfo == null)
+					__PauseClip__MethodInfo = GetWrappedType ().GetMethod ("PauseClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+				return __PauseClip__MethodInfo;
+			}
+		}
+
+
+		private static MethodInfo __ResumeClip__MethodInfo;
+		
+		public static MethodInfo ResumeClip__MethodInfo {
+			get {
+				if (__ResumeClip__MethodInfo == null)
+					__ResumeClip__MethodInfo = GetWrappedType ().GetMethod ("ResumeClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+				return __ResumeClip__MethodInfo;
+			}
+		}
+		
+		/// <summary>
+		/// Gets the type of the wrapped.
+		/// </summary>
+		/// <returns>The wrapped type.</returns>
+		public static Type GetWrappedType ()
+		{
+			if (__RealType == null) {
+				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+				__RealType = assembly.GetType ("UnityEditor.AudioUtil");
+			}
+			
+			return __RealType;
+			
+		}
+
+		public static void ResumeClip (AudioClip clip){
+
+			ResumeClip__MethodInfo.Invoke (null, new object[]{clip});
+		}
+
+
+		public static void PauseClip (AudioClip clip){
+			PauseClip__MethodInfo.Invoke (null, new object[]{clip});
+		}
+
+		public static void StopClip (AudioClip clip){
+			StopClip__MethodInfo.Invoke (null, new object[]{clip});
+
+		}
+		
+		public static void PlayClip (AudioClip clip,  int startSample=0, bool loop=false)
+		{
+			PlayClip_MethodInfo.Invoke (null, new object[]{clip,startSample,loop});
+		}
+	}
+	
+	#endregion
+
+
+
+
 }//namespace
 
 

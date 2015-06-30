@@ -120,6 +120,7 @@ namespace ws.winx.editor.extensions
 						public GUIContent recordIcon = EditorGUIUtility.IconContent ("Animation.Record");
 						public GUIStyle playButton = "TimeScrubberButton";
 						public GUIStyle timeScrubber = "TimeScrubber";
+						public GUIStyle  eventBackground = "AnimationEventBackground";
 					
 					
 				}
