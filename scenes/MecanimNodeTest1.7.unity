@@ -723,15 +723,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2663aae3741e9e64b9cb08b2c75b7845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodes:
-  - {fileID: 1445558729}
-  - {fileID: 1563161155}
-  - {fileID: 555782821}
-  selectedNode: {fileID: 555782821}
-  sequenceEnd: 11.1499996
+  _channels:
+  - name: Video
+    _target: {fileID: 869896292}
+    _nodes:
+    - {fileID: 1444615156}
+  - name: Audio
+    _target: {fileID: 980165688}
+    _nodes:
+    - {fileID: 1462777721}
+  selectedNode: {fileID: 1444615156}
   wrap: 3
-  playOnStart: 1
-  passedTime: 0
+  playOnStart: 0
+  isPlaying: 0
+  lastPlayState: 0
+  _timeAtEnd: 6719.6375278234482
+  playForward: 0
 --- !u!4 &412413702
 Transform:
   m_ObjectHideFlags: 0
@@ -837,24 +844,6 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
---- !u!114 &555782821
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 1198830075}
-  startTime: 6.96794033
-  duration: 36.557106
-  channel: 2
-  actions: []
-  eventNode: 0
-  frameRate: 30
 --- !u!114 &576331568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -978,6 +967,33 @@ Light:
   m_ShadowRadius: 0
   m_ShadowAngle: 0
   m_AreaSize: {x: 1, y: 1}
+--- !u!21 &669327435
+Material:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Blue (Instance) (Instance) (Instance) (Instance)
+  m_Shader: {fileID: 7, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 5
+  m_CustomRenderQueue: -1
+  m_SavedProperties:
+    serializedVersion: 2
+    m_TexEnvs:
+      data:
+        first:
+          name: _MainTex
+        second:
+          m_Texture: {fileID: 15200000, guid: 03d7128aade3a47099759c68e1615928, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+    m_Floats: {}
+    m_Colors:
+      data:
+        first:
+          name: _Color
+        second: {r: .250980407, g: .70588237, b: .850980401, a: 1}
 --- !u!1 &686953334
 GameObject:
   m_ObjectHideFlags: 0
@@ -1005,12 +1021,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2663aae3741e9e64b9cb08b2c75b7845, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodes: []
+  _channels: []
   selectedNode: {fileID: 0}
-  sequenceEnd: 0
   wrap: 3
-  playOnStart: 1
-  passedTime: 0
+  playOnStart: 0
+  isPlaying: 0
+  lastPlayState: 0
+  _timeAtEnd: 0
+  playForward: 0
 --- !u!4 &686953336
 Transform:
   m_ObjectHideFlags: 0
@@ -1490,7 +1508,7 @@ GameObject:
   - 65: {fileID: 869896294}
   - 23: {fileID: 869896293}
   - 114: {fileID: 869896297}
-  - 95: {fileID: 869896298}
+  - 82: {fileID: 869896298}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -1508,7 +1526,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 1563844146}
+  - {fileID: 669327435}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 0
@@ -1564,23 +1582,75 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a5384de6b7a3452eb23ea859c0d9a19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!95 &869896298
-Animator:
-  serializedVersion: 3
+--- !u!82 &869896298
+AudioSource:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 869896292}
   m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 03d7128aade3a47099759c68e1615928, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
 --- !u!114 &891119346
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1687,7 +1757,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 40, y: 60}
   m_Transitions: []
-  m_CachedInstanceID: 25834
+  m_CachedInstanceID: 25866
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -1765,7 +1835,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 25836
+  m_CachedInstanceID: 25868
   m_Description: 
   m_EnabledState: {fileID: 0}
   m_LastEnabledState: {fileID: 0}
@@ -2251,7 +2321,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 2100000, guid: 9081094ecb56d478d9acd63ab758eb51, type: 2}
+  - {fileID: 1781662282}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 0
@@ -2776,7 +2846,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
---- !u!114 &1445558729
+--- !u!114 &1444615156
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -2785,15 +2855,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: 
+  m_Name: Microsoft Future vision @ 2020
   m_EditorClassIdentifier: 
-  target: {fileID: 1198830075}
-  startTime: 23.5425644
-  duration: 27.8825397
-  channel: 0
+  onStart:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  startTime: .899999976
+  channelOrd: 0
+  channel:
+    name: Video
+    _target: {fileID: 869896292}
+    _nodes:
+    - {fileID: 1444615156}
   actions: []
-  eventNode: 0
-  frameRate: 30
+  source: {fileID: 15200000, guid: 03d7128aade3a47099759c68e1615928, type: 3}
 --- !u!1 &1449677201
 GameObject:
   m_ObjectHideFlags: 1
@@ -2867,6 +2944,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!114 &1462777721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
+  m_Name: ElevatorMusic
+  m_EditorClassIdentifier: 
+  onStart:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  startTime: 32.6333351
+  channelOrd: 1
+  channel:
+    name: Audio
+    _target: {fileID: 980165688}
+    _nodes:
+    - {fileID: 1462777721}
+  actions: []
+  source: {fileID: 8300000, guid: 4a2730336f68c4809b05894dd465269c, type: 3}
 --- !u!114 &1466598623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3033,51 +3135,6 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
---- !u!114 &1563161155
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2d87483473043042a52995c3a915e3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 1198830075}
-  startTime: 48.3270493
-  duration: 16.7295227
-  channel: 1
-  actions: []
-  eventNode: 0
-  frameRate: 30
---- !u!21 &1563844146
-Material:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_Name: Blue (Instance)
-  m_Shader: {fileID: 7, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: 
-  m_LightmapFlags: 5
-  m_CustomRenderQueue: -1
-  m_SavedProperties:
-    serializedVersion: 2
-    m_TexEnvs:
-      data:
-        first:
-          name: _MainTex
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-    m_Floats: {}
-    m_Colors:
-      data:
-        first:
-          name: _Color
-        second: {r: .250980407, g: .70588237, b: .850980401, a: 1}
 --- !u!114 &1623049441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3320,7 +3377,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 26008
+  m_CachedInstanceID: 26040
   m_Description: 
   m_IgnoreTimeScale: 0
   m_ResetStatusOnDisable: 1
@@ -3971,6 +4028,149 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
+--- !u!21 &1781662282
+Material:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Microsoft Future vision @ 2020 (Instance)
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 5
+  m_CustomRenderQueue: -1
+  m_SavedProperties:
+    serializedVersion: 2
+    m_TexEnvs:
+      data:
+        first:
+          name: _MainTex
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _BumpMap
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _DetailNormalMap
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _ParallaxMap
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _OcclusionMap
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _EmissionMap
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _DetailMask
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _DetailAlbedoMap
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _MetallicGlossMap
+        second:
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+    m_Floats:
+      data:
+        first:
+          name: _Cutoff
+        second: .5
+      data:
+        first:
+          name: _SrcBlend
+        second: 1
+      data:
+        first:
+          name: _DstBlend
+        second: 0
+      data:
+        first:
+          name: _ZWrite
+        second: 1
+      data:
+        first:
+          name: _Glossiness
+        second: .5
+      data:
+        first:
+          name: _BumpScale
+        second: 1
+      data:
+        first:
+          name: _Parallax
+        second: .0199999996
+      data:
+        first:
+          name: _OcclusionStrength
+        second: 1
+      data:
+        first:
+          name: _DetailNormalMapScale
+        second: 1
+      data:
+        first:
+          name: _UVSec
+        second: 0
+      data:
+        first:
+          name: _EmissionScaleUI
+        second: 0
+      data:
+        first:
+          name: _Mode
+        second: 0
+      data:
+        first:
+          name: _Metallic
+        second: 0
+    m_Colors:
+      data:
+        first:
+          name: _EmissionColor
+        second: {r: 0, g: 0, b: 0, a: 0}
+      data:
+        first:
+          name: _Color
+        second: {r: 1, g: 1, b: 1, a: 1}
+      data:
+        first:
+          name: _EmissionColorUI
+        second: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1801017121
 GameObject:
   m_ObjectHideFlags: 0
@@ -4101,7 +4301,7 @@ MonoBehaviour:
   m_HideScript: 1
   m_Position: {x: 0, y: 0}
   m_Transitions: []
-  m_CachedInstanceID: 26032
+  m_CachedInstanceID: 26066
   m_NodeSerialization:
     m_NodeTypes:
     - BehaviourMachine.EveryFrame

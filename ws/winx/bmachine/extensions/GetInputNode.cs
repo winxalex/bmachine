@@ -49,24 +49,16 @@ namespace ws.winx.bmachine.extensions
 				[EnumAttribute(typeof(ws.winx.input.states.States))]
 				public int //this is enum from Status.cs generated
 						inputStateNeg;
-
-				
 				public bool fullAxis = true;
-
 				[UnityVariablePropertyAttribute(typeof(float),"Input Value")]
 				public UnityVariable
 						variable;
-				
-				
 				public float
 						sensitivity = 0.25f;
-				
 				public float
 						dreadzone = 0.1f;
-				
 				public float
 						gravity = 0.3f;
-				
 				public float
 						multiplier = 1f;
 		
@@ -84,7 +76,7 @@ namespace ws.winx.bmachine.extensions
 				public override void Reset ()
 				{
 					
-			variable = UnityVariable.CreateInstanceOf (typeof(float));
+						variable = UnityVariable.CreateInstanceOf (typeof(float));
 						//variable.Value = 0f;//make it float type
 
 						multiplier = 1f;
@@ -98,9 +90,10 @@ namespace ws.winx.bmachine.extensions
 
 				}
 
-		public void onTick(){
+				public void onTick ()
+				{
 
-			Debug.Log ("tick");
+						Debug.Log ("tick");
 				}
 	
 				public override Status Update ()
