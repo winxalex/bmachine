@@ -2707,15 +2707,17 @@ namespace ws.winx.editor
 	#region AudioUtilW
 	public class AudioUtilW
 	{
-		private object __instance;
+
 		private static Type __RealType;
-		private static ConstructorInfo method_ctor;
+
+
+
 		private static MethodInfo __PlayClip_MethodInfo;
 		
 		public static MethodInfo PlayClip_MethodInfo {
 			get {
 				if (__PlayClip_MethodInfo == null)
-					__PlayClip_MethodInfo = GetWrappedType ().GetMethod ("PlayClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+					__PlayClip_MethodInfo = GetWrappedType ().GetMethod ("PlayClip",BindingFlags.Static | BindingFlags.Public,null,new Type[]{typeof(AudioClip),typeof(int),typeof(bool)},null);
 				return __PlayClip_MethodInfo;
 			}
 		}
@@ -2725,7 +2727,7 @@ namespace ws.winx.editor
 		public static MethodInfo StopClip__MethodInfo {
 			get {
 				if (__StopClip__MethodInfo == null)
-					__StopClip__MethodInfo = GetWrappedType ().GetMethod ("StopClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+					__StopClip__MethodInfo = GetWrappedType ().GetMethod ("StopClip",BindingFlags.Static | BindingFlags.Public);
 				return __StopClip__MethodInfo;
 			}
 		}
@@ -2735,7 +2737,7 @@ namespace ws.winx.editor
 		public static MethodInfo PauseClip__MethodInfo {
 			get {
 				if (__PauseClip__MethodInfo == null)
-					__PauseClip__MethodInfo = GetWrappedType ().GetMethod ("PauseClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+					__PauseClip__MethodInfo = GetWrappedType ().GetMethod ("PauseClip",BindingFlags.Static | BindingFlags.Public);
 				return __PauseClip__MethodInfo;
 			}
 		}
@@ -2746,8 +2748,19 @@ namespace ws.winx.editor
 		public static MethodInfo ResumeClip__MethodInfo {
 			get {
 				if (__ResumeClip__MethodInfo == null)
-					__ResumeClip__MethodInfo = GetWrappedType ().GetMethod ("ResumeClip",new Type[]{typeof(AudioClip),typeof(int),typeof(bool)});
+					__ResumeClip__MethodInfo = GetWrappedType ().GetMethod ("ResumeClip",BindingFlags.Static | BindingFlags.Public);
 				return __ResumeClip__MethodInfo;
+			}
+		}
+
+
+		private static MethodInfo __GetWaveForm_MethodInfo;
+		
+		public static MethodInfo GetWaveForm__MethodInfo {
+			get {
+				if (__GetWaveForm_MethodInfo == null)
+					__GetWaveForm_MethodInfo = GetWrappedType ().GetMethod ("GetWaveForm",BindingFlags.Static | BindingFlags.Public);
+				return __GetWaveForm_MethodInfo;
 			}
 		}
 		
@@ -2784,6 +2797,11 @@ namespace ws.winx.editor
 		public static void PlayClip (AudioClip clip,  int startSample=0, bool loop=false)
 		{
 			PlayClip_MethodInfo.Invoke (null, new object[]{clip,startSample,loop});
+		}
+
+
+		public static Texture2D GetWaveForm (AudioClip clip, AssetImporter importer, int channel, float width, float height){
+			return (Texture2D)GetWaveForm__MethodInfo.Invoke(null,new object[]{clip,importer,channel,width,height});
 		}
 	}
 	

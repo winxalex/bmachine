@@ -18,7 +18,7 @@ namespace VisualTween
 {
 		public class SequenceEditor : EditorWindow
 		{
-				//private Timeline timeline;
+				
 				private static Sequence __sequence;
 				private Sequence.SequenceWrap wrap = Sequence.SequenceWrap.ClampForever;
 				private static GameObject __sequenceGameObject;
@@ -27,10 +27,6 @@ namespace VisualTween
 				private float timeClickOffset;
 				private bool resizeNodeStart;
 				private bool resizeNodeEnd;
-				//	private List<Record> records;
-				//private bool lastRecordState;
-				//private bool lastPlayState;
-				//private float playStartTime;
 				private bool stop;
 				//private bool playForward;
 				//private float time;
@@ -41,11 +37,10 @@ namespace VisualTween
 				private static bool __isRecording;
 				private static int __frameRate = 30;
 				private const float NODE_RECT_HEIGHT = 40f;
+
+				//20f for timer ruller + 20f for Events Pad
 				private const float TIME_LABEL_HEIGHT = 20f;
 				private const float EVENT_PAD_HEIGHT = 20f;
-
-//20f for timer ruller + 20f for Events Pad
-
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				string channelLabel;
 		
@@ -109,20 +104,7 @@ namespace VisualTween
 					
 
 
-//						if (timeline == null) {
-//								timeline = new Timeline ();
-//
-//
-//
-//						}
 
-//						timeline.onSettingsGUI = OnSettingsGUI;	
-//						timeline.onEventGUI = OnEventGUI;
-//						timeline.onAddEvent = OnAddEvent;
-//						//timeline.onTimelineGUI = OnTimelineGUI;
-//						//timeline.onRecord = OnRecord;
-//						timeline.onTimelineClick = OnTimelineClick;
-//						timeline.onPlay = OnPlay;
 						EditorApplication.playmodeStateChanged += OnPlayModeStateChange;
 				}
 
@@ -144,7 +126,7 @@ namespace VisualTween
 			
 			
 						float x = __timeAreaW.TimeToPixel (node.startTime, rect);
-						Rect boxRect = new Rect (x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + node.channelOrd * NODE_RECT_HEIGHT, __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - x, NODE_RECT_HEIGHT);
+						Rect boxRect = new Rect (x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - x, NODE_RECT_HEIGHT);
 
 						GUI.Box (boxRect, "", "TL LogicBar 0");
 
@@ -180,15 +162,15 @@ namespace VisualTween
 				/// <param name="list">List.</param>
 				static void onReorderSequenceChannelCallback (ReorderableList list)
 				{
-						Debug.Log (list.index);
+						//	Debug.Log (list.index);
 
-						SequenceChannel channel = null;
-						int channelsNumber = __sequence.channels.Count;
-
-						for (int i=0; i<channelsNumber; i++) {
-								channel = __sequence.channels [i];
-								channel.nodes.ForEach (itm => itm.channelOrd = i);
-						}
+//						SequenceChannel channel = null;
+//						int channelsNumber = __sequence.channels.Count;
+//
+//						for (int i=0; i<channelsNumber; i++) {
+//								channel = __sequence.channels [i];
+//								channel.nodes.ForEach (itm => itm.channelOrd = i);
+//						}
 
 						
 						
@@ -283,8 +265,8 @@ namespace VisualTween
 								//timeline.isRecording = false;
 								//__sequence.isPlaying = false;
 
-								List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
-								sequences.ForEach (itm => itm.Stop (__sequence.playForward));
+								//List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
+								//sequences.ForEach (itm => itm.Stop (__sequence.playForward));
 
 						}
 				}
@@ -305,6 +287,9 @@ namespace VisualTween
 						if (__sequence != null && __sequence.isPlaying) {
 								
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
+
+								//this ensure update of MovieTexture (it its bottle neck do some reflection and force render call)
+								//GetWindow<SceneView>().Repaint();
 								SceneView.RepaintAll ();
 						}
 
@@ -420,6 +405,12 @@ namespace VisualTween
 								//AudioUtilW.PlayClip(
 								//__sequence.Play(AudioUtilW.PlayClip);
 								__sequence.Play (EditorApplication.timeSinceStartup);
+
+								__sequence.SequenceNodeStart -= onSequenceNodeStart;
+								__sequence.SequenceNodeStart += onSequenceNodeStart;
+
+
+								
 						} else {
 								__sequence.Stop (__sequence.playForward);
 						}
@@ -679,16 +670,7 @@ namespace VisualTween
 						GUILayout.EndHorizontal ();
 
 
-					
-						
 
-
-//						settingsScroll = GUILayout.BeginScrollView (settingsScroll);
-//
-//	
-//
-//						GUILayout.EndScrollView ();
-//						GUILayout.FlexibleSpace ();
 
 
 
@@ -745,8 +727,8 @@ namespace VisualTween
 									
 										
 
-									sequenceNodeClickEventHandler(node,rect,i);
-									DoNode (node, rect, i);
+										sequenceNodeClickEventHandler (node, rect, i);
+										DoNode (node, rect, i);
 								}
 						}
 
@@ -764,7 +746,7 @@ namespace VisualTween
 						sequenceNodeDragEventHandler (rect);
 				}
 
-				private void sequenceNodeClickEventHandler ( SequenceNode node,Rect rect, int channelOrd)
+				private void sequenceNodeClickEventHandler (SequenceNode node, Rect rect, int channelOrd)
 				{
 
 						Event ev = Event.current;
@@ -778,9 +760,9 @@ namespace VisualTween
 					
 								clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
 					
-					//check start of the node rect width=5
+								//check start of the node rect width=5
 								if (clickRect.Contains (Event.current.mousePosition)) {
-										//if (new Rect (timeline.SecondsToGUI (node.startTime) - 5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
+										
 										__nodeSelected = node;
 										resizeNodeStart = true;
 										ev.Use ();
@@ -788,8 +770,8 @@ namespace VisualTween
 					
 								clickRect.x = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5;
 					
-					//check the end of node rect width=5
-					//if (new Rect (timeline.SecondsToGUI (node.startTime+node.duration)-5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
+					
+								//check the end of node rect width=5
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										__nodeSelected = node;
 										resizeNodeEnd = true;
@@ -801,7 +783,7 @@ namespace VisualTween
 								clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x - 5;
 					
 								if (clickRect.Contains (Event.current.mousePosition)) {
-										//if (new Rect(timeline.SecondsToGUI(node.startTime),node.channel*20,timeline.SecondsToGUI(node.duration),20).Contains (Event.current.mousePosition)) {
+										
 										if (ev.button == 0) {
 												//timeClickOffset = node.startTime - timeline.GUIToSeconds (Event.current.mousePosition.x);
 												timeClickOffset = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
@@ -853,71 +835,7 @@ namespace VisualTween
 
 						float startTime;
 						switch (ev.rawType) {
-//						case EventType.MouseDown:
-//
-//								foreach (SequenceChannel channel in __sequence.channels)
-//										foreach (SequenceNode node in channel.nodes) {
-//
-//												clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + node.channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
-//
-//												//check start of the node rect width=5
-//												if (clickRect.Contains (Event.current.mousePosition)) {
-//														//if (new Rect (timeline.SecondsToGUI (node.startTime) - 5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
-//														__nodeSelected = node;
-//														resizeNodeStart = true;
-//														ev.Use ();
-//												}
-//
-//												clickRect.x = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5;
-//
-//												//check the end of node rect width=5
-//												//if (new Rect (timeline.SecondsToGUI (node.startTime+node.duration)-5, node.channel * 20 , 10, 20).Contains (Event.current.mousePosition)) {
-//												if (clickRect.Contains (Event.current.mousePosition)) {
-//														__nodeSelected = node;
-//														resizeNodeEnd = true;
-//														ev.Use ();
-//												}
-//
-//
-//												clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect) + 5;
-//												clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x - 5;
-//
-//												if (clickRect.Contains (Event.current.mousePosition)) {
-//														//if (new Rect(timeline.SecondsToGUI(node.startTime),node.channel*20,timeline.SecondsToGUI(node.duration),20).Contains (Event.current.mousePosition)) {
-//														if (ev.button == 0) {
-//																//timeClickOffset = node.startTime - timeline.GUIToSeconds (Event.current.mousePosition.x);
-//																timeClickOffset = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
-//																dragNode = true;
-//																__nodeSelected = node;
-//														} 
-//														if (ev.button == 1) {
-//																GenericMenu genericMenu = new GenericMenu ();
-//																genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
-//																genericMenu.ShowAsContext ();
-//														}
-//														ev.Use ();
-//												}
-//										}
-//								break;
-//
-//						case EventType.ContextClick:
-//
-//								clickRect = new Rect (0, 0, 0, NODE_RECT_HEIGHT);
-//
-//								foreach (SequenceChannel channel in __sequence.channels)
-//										foreach (SequenceNode node in channel.nodes) {
-//
-//												clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect);
-//												clickRect.y = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + node.channelOrd * NODE_RECT_HEIGHT;
-//												clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x;
-//					
-//												if (clickRect.Contains (Event.current.mousePosition)) {
-//														GenericMenu genericMenu = new GenericMenu ();
-//														genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
-//														genericMenu.ShowAsContext ();
-//												}
-//										}
-//								break;
+
 						case EventType.MouseDrag:
 								if (resizeNodeStart) {
 										//selectedNode.startTime = timeline.GUIToSeconds (Event.current.mousePosition.x);
@@ -969,44 +887,7 @@ namespace VisualTween
 						}
 				}
 
-//				private void AddAction (object data)
-//				{
-//			
-//						if (lastRecordState) {
-//								StopRecord ();
-//						}
-//						Type type = (Type)data;
-//			
-//						if (type.IsSubclassOf (typeof(SequenceEvent))) {
-//								SequenceNode node = CreateSequenceNode (selectedNode.target, 0, true);
-//								sequence.nodes.Add (node);
-//								selectedNode = node;
-//						}
-//						BaseAction action = ScriptableObject.CreateInstance (type) as BaseAction;
-//						action.name = type.ToString ().Split ('.').Last ();
-//						if (selectedNode.actions == null) {
-//								selectedNode.actions = new List<BaseAction> ();			
-//						}
-//						selectedNode.actions.Add (action);
-//			
-//						EditorUtility.SetDirty (sequence);
-//			
-//						StartRecord ();
-//				}
 
-//				private Dictionary<GameObject,List<SequenceNode>> GetGroupTargets ()
-//				{
-//						Dictionary<GameObject,List<SequenceNode>> targets = new Dictionary<GameObject, List<SequenceNode>> ();
-//						foreach (SequenceChannel channel in __sequence.channels)
-//								foreach (SequenceNode node in channel.nodes) {
-//										if (!targets.ContainsKey (node.target)) {
-//												targets.Add (node.target, new List<SequenceNode> (){node});
-//										} else {
-//												targets [node.target].Add (node);
-//										}
-//								}
-//						return targets;
-//				}
 
 
 
@@ -1017,8 +898,10 @@ namespace VisualTween
 				private void RemoveNode (object data)
 				{
 						SequenceNode node = data as SequenceNode;
-						int channel = node.channelOrd;
-						SequenceChannel sequenceChannel = __sequence.channels [channel];
+						
+
+
+						SequenceChannel sequenceChannel = __sequence.channels.Find (itm => itm.nodes.Exists (nd => nd.GetInstanceID () == node.GetInstanceID ()));
 
 						//remove node
 						sequenceChannel.nodes.Remove (node);
@@ -1029,19 +912,10 @@ namespace VisualTween
 						if (sequenceChannel.nodes.Count == 0) {
 
 								//remove channel
-								__sequence.channels.RemoveAt (channel);
+								__sequence.channels.Remove (sequenceChannel);
 
 
-//								int channelsNumber = __sequence.channels.Count;
-//							
-//								for (int i=channel; i<channelsNumber; i++) {
-//
-//										sequenceChannel = __sequence.channels [i];
-//										foreach (SequenceNode n in sequenceChannel.nodes) {
-//
-//												n.channelOrd--;
-//										}
-//								}
+
 						}
 
 						
@@ -1179,10 +1053,11 @@ namespace VisualTween
 
 						//node.onStart = new UnityEngine.Events.UnityEvent ().AddListener (new UnityEngine.Events.UnityAction (this, this.GetType ().GetMethod ("fdsaffa").MethodHandle.GetFunctionPointer ()));
 						
-						node.onStart.AddListener (onSequenceNodeStart);
+						
+					
 						node.name = source.name;
 						
-						node.channelOrd = channelOrd;
+						//node.channelOrd = channelOrd;
 
 						node.channel = __sequence.channels [channelOrd];
 					
@@ -1193,29 +1068,115 @@ namespace VisualTween
 						return node;
 				}
 
-				//static
-				public  void onSequenceNodeStart ()
+				
+				public static void onSequenceNodeStart (SequenceNode node)
 				{
+						GameObject target = node.channel.target;
+						UnityEngine.Object source = node.source;
+						AudioClip audioClip;
+					
+			
+						if (target != null) {
 
+								if (source is AudioClip) {
+										audioClip = source as AudioClip;
+
+
+										//AudioUtilW.PlayClip (audioClip, 0, node.loop);
+					
+
+					
+					
+					
+					
+								} else if (source is MovieTexture) {
+										Renderer renderer = target.GetComponent<Renderer> ();
+										if (renderer != null) {
+												MovieTexture movieTexture = (source as MovieTexture);
+						
+
+
+							
+												audioClip = movieTexture.audioClip;
+							
+												if (audioClip != null)
+														AudioUtilW.PlayClip (audioClip, 0, node.loop);
+							
+										}
+						
+						
+						
+						
+						
+						
+								} else
+										Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
+						} else if (source is  AnimationClip) {
+								//										Animator animator = target.GetComponent<Animator> ();
+								//										
+								//										if (animator){
+								//												animator.enabled=true;
+								//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
+								//				}
+					
+					
+					
+						}
 
 				}
 
 
-//		AudioUtil
-//
-//		[WrapperlessIcall]
-//		[MethodImpl (4096)]
-//		public static extern void PlayClip (AudioClip clip, [DefaultValue ("0")] int startSample, [DefaultValue ("false")] bool loop);
-
-//		public MovieTexture movTexture;
-//		void Start() {
-//			GetComponent<Renderer>().material.mainTexture = movTexture;
-//			movTexture.Play();
 
 
-//		}
-
-
+		public static void onSequenceNodeEnd (SequenceNode node)
+		{
+			GameObject target = node.channel.target;
+			UnityEngine.Object source = node.source;
+			AudioClip audioClip;
+			
+			
+			if (target != null) {
+				
+				if (source is AudioClip) {
+					audioClip = source as AudioClip;
+					AudioUtilW.PlayClip (audioClip, 0, node.loop);
+			
+					
+				} else if (source is MovieTexture) {
+					Renderer renderer = target.GetComponent<Renderer> ();
+					if (renderer != null) {
+						MovieTexture movieTexture = (source as MovieTexture);
+						
+						
+						
+						
+						audioClip = movieTexture.audioClip;
+						
+						if (audioClip != null)
+							AudioUtilW.PlayClip (audioClip, 0, node.loop);
+						
+					}
+					
+					
+					
+					
+					
+					
+				} else
+					Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
+			} else if (source is  AnimationClip) {
+				//										Animator animator = target.GetComponent<Animator> ();
+				//										
+				//										if (animator){
+				//												animator.enabled=true;
+				//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
+				//				}
+				
+				
+				
+			}
+			
+		}
 
 				private static void CreateNewReordableList ()
 				{
@@ -1289,6 +1250,79 @@ namespace VisualTween
 
 						Selection.activeGameObject = __sequenceGameObject;
 				}
+
+
+
+//		int num = AudioUtil.GetSampleCount (audioClip) / (int)r.width;
+//		switch (current.type)
+//		{
+//		case EventType.MouseDown:
+//		case EventType.MouseDrag:
+//			if (r.Contains (current.mousePosition) && !AudioUtil.IsMovieAudio (audioClip))
+//			{
+//				if (this.m_PlayingClip != audioClip)
+//				{
+//					AudioUtil.StopAllClips ();
+//					AudioUtil.PlayClip (audioClip, 0, AudioClipInspector.m_bLoop);
+//					this.m_PlayingClip = audioClip;
+//				}
+//				AudioUtil.SetClipSamplePosition (audioClip, num * (int)current.mousePosition.x);
+//				current.Use ();
+//			}
+//			break;
+//		}
+
+		
+		
+		public static Texture2D GetAudioClipTexture(AudioClip clip, float width, float height)
+		{
+			if (clip == null)
+			{
+				return null;
+			}
+			AudioImporter audioImporter = (AudioImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(clip));
+
+			Texture2D[] array = new Texture2D[clip.channels];
+			for (int i = 0; i < clip.channels; i++)
+			{
+				array[i] = (Texture2D)AudioUtilW.GetWaveForm(
+				                                    
+					clip,
+					audioImporter,
+					i,
+					width,
+					height / (float)clip.channels
+				);
+			}
+			return CombineWaveForms(array);
+		}
+
+
+		public static Texture2D CombineWaveForms(Texture2D[] waveForms)
+		{
+			if (waveForms.Length == 1)
+			{
+				return waveForms[0];
+			}
+			int width = waveForms[0].width;
+			int num = 0;
+			for (int i = 0; i < waveForms.Length; i++)
+			{
+				Texture2D texture2D = waveForms[i];
+				num += texture2D.height;
+			}
+			Texture2D texture2D2 = new Texture2D(width, num, TextureFormat.ARGB32, false);
+			int num2 = 0;
+			for (int j = 0; j < waveForms.Length; j++)
+			{
+				Texture2D texture2D3 = waveForms[j];
+				num2 += texture2D3.height;
+				texture2D2.SetPixels(0, num - num2, width, texture2D3.height, texture2D3.GetPixels());
+				GameObject.DestroyImmediate(texture2D3);
+			}
+			texture2D2.Apply();
+			return texture2D2;
+		}
 
 
 				/// <summary>

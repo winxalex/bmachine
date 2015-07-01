@@ -11,7 +11,12 @@ namespace VisualTween
 		[System.Serializable]
 		public class SequenceNode:ScriptableObject
 		{
-				public UnityEvent onStart=new UnityEvent();
+				public SequenceNodeEvent onStart = new SequenceNodeEvent();
+				public SequenceNodeEvent onStop = new SequenceNodeEvent();
+				public SequenceNodeEvent onPause = new SequenceNodeEvent();
+				public SequenceNodeEvent onUpdate = new SequenceNodeEvent();
+
+		public bool loop;
 
 				/// <summary>
 				/// The start time in Frames
@@ -34,9 +39,9 @@ namespace VisualTween
 					}
 				}
 
-				public int channelOrd;
+				//public int channelOrd;
 				public SequenceChannel channel;
-				public List<BaseAction> actions;
+				
 				private bool isRunning;
 				public UnityEngine.Object source;
 				int stateNameHash;
@@ -91,7 +96,8 @@ namespace VisualTween
 
 
 												movieTexture.Play ();
-												audioSource.Play ();
+
+												//audioSource.Play ();
 
 					
 										} else
@@ -126,6 +132,8 @@ namespace VisualTween
 						GameObject target = channel.target;
 
 						isRunning = false;
+
+						onStop.Invoke (this);
 
 						if (target != null) {
 								if (source is AudioClip) {
@@ -190,7 +198,7 @@ namespace VisualTween
 
 				public virtual void DoUpdate(){
 
-
+					onUpdate.Invoke (this);
 				}
 
 				public void UpdateNode (double time)
@@ -209,6 +217,8 @@ namespace VisualTween
 							if(timeNormalized > 0.0f && timeNormalized <= 1.0f)
 							{
 								StartNode ();
+								
+								onStart.Invoke(this);
 							}
 								
 						}

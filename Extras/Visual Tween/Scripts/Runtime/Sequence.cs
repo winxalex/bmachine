@@ -3,11 +3,46 @@ using System.Collections;
 using System.Collections.Generic;
 using VisualTween.Action;
 using System.Linq;
+using UnityEngine.Events;
 
 namespace VisualTween
 {
 		public class Sequence : MonoBehaviour
 		{
+
+				//events 
+
+
+//
+				public event UnityAction<SequenceNode> SequenceNodeStart {
+						add {
+								//this.channels.ForEach (chn => chn.nodes.ForEach (nd => nd.onStart.AddListener(value)));
+					
+								foreach (SequenceChannel channel in this.channels)
+										foreach (SequenceNode node in channel.nodes)
+												node.onStart.AddListener (value);
+						}
+						remove {
+								foreach (SequenceChannel channel in this.channels)
+										foreach (SequenceNode node in channel.nodes)
+												node.onStart.RemoveListener (value);
+						}
+				}
+				//
+				public event UnityAction<SequenceNode> SequenceNodeStop {
+						add {
+								foreach (SequenceChannel channel in this.channels)
+										foreach (SequenceNode node in channel.nodes)
+												node.onStop.AddListener (value);
+				
+				
+						}
+						remove {
+								foreach (SequenceChannel channel in this.channels)
+										foreach (SequenceNode node in channel.nodes)
+												node.onStop.AddListener (value);
+						}
+				}
 
 				[SerializeField]
 				List<SequenceChannel>
