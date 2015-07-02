@@ -32,7 +32,7 @@ namespace VisualTween{
 		
 
 			if (GUILayout.Button ("Play")) {
-				sequence.Play();
+				sequence.PlayAt();
 
 			}
 

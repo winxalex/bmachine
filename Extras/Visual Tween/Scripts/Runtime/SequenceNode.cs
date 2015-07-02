@@ -16,7 +16,9 @@ namespace VisualTween
 				public SequenceNodeEvent onPause = new SequenceNodeEvent();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent();
 
-		public bool loop;
+				public bool loop;
+
+				public float volume = 1f;
 
 				/// <summary>
 				/// The start time in Frames
@@ -24,9 +26,10 @@ namespace VisualTween
 				public float startTime;
 
 				/// <summary>
-				/// The duration in [s] (default=5Frames)
+				/// The duration in [s] 
 				/// </summary>
-				float _duration = 5;
+				[SerializeField]
+				float _duration;
 				float _durationInv=0.2f;// 1/5
 
 				public float duration {
@@ -42,16 +45,25 @@ namespace VisualTween
 				//public int channelOrd;
 				public SequenceChannel channel;
 				
-				private bool isRunning;
+				bool _isRunning;
+
+				public bool isRunning {
+					get {
+						return _isRunning;
+					}
+				}
+
 				public UnityEngine.Object source;
 				int stateNameHash;
 
 				public void StartNode ()
 				{
 
+						Debug.Log ("StartNode "+source.name);
+
 						GameObject target = channel.target;
 
-						isRunning = true;
+						_isRunning = true;
 
 						if (target != null) {
 								if (source is AudioClip) {
@@ -63,9 +75,16 @@ namespace VisualTween
 												audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
 
 										audioSource.clip = source as AudioClip;
-											
-										audioSource.Play ();
+										//audioSource.clip.LoadAudioData();
 
+										//if(Application.isPlaying)
+
+
+					audioSource.time=20;
+										audioSource.PlayOneShot(audioSource.clip);
+										audioSource.volume=this.volume;
+
+					audioSource.timeSamples=audioSource.clip.samples-10000;
 					                        
 
 
@@ -73,6 +92,8 @@ namespace VisualTween
 										Renderer renderer = channel.target.GetComponent<Renderer> ();
 										if (renderer != null) {
 												MovieTexture movieTexture = (source as MovieTexture);
+
+												movieTexture.Stop();
 
 												if(Application.isPlaying)
 													renderer.material.mainTexture = movieTexture;
@@ -97,7 +118,9 @@ namespace VisualTween
 
 												movieTexture.Play ();
 
-												//audioSource.Play ();
+
+												audioSource.PlayOneShot(audioSource.clip);
+
 
 					
 										} else
@@ -116,8 +139,8 @@ namespace VisualTween
 
 
 
-							
-				     
+							onStart.Invoke(this);
+				
 						}
 
 //TODO put events with drag and drop handlers
@@ -131,16 +154,18 @@ namespace VisualTween
 				{
 						GameObject target = channel.target;
 
-						isRunning = false;
+						_isRunning = false;
 
-						onStop.Invoke (this);
+						Debug.Log ("StopNode "+source.name);
+
+						
 
 						if (target != null) {
 								if (source is AudioClip) {
 										AudioSource audioSource = target.GetComponent<AudioSource> ();
 										
 										if (audioSource != null)
-											audioSource.Stop();
+											audioSource.Stop(); 
 								
 								} else if (source is MovieTexture) {
 										Renderer renderer = target.GetComponent<Renderer> ();
@@ -148,7 +173,7 @@ namespace VisualTween
 												MovieTexture movieTexture = (source as MovieTexture);
 								
 												movieTexture.Stop ();
-
+//
 												AudioSource audioSource=null;
 												if(movieTexture.audioClip!=null && (audioSource=target.GetComponent<AudioSource>())!=null)
 													audioSource.Stop();
@@ -169,6 +194,9 @@ namespace VisualTween
 							
 							
 						}
+
+
+							onStop.Invoke (this);
 
 				}
 		
@@ -208,7 +236,7 @@ namespace VisualTween
 
 			              
 			// 
-						if (isRunning) {
+						if (_isRunning) {
 								if(timeNormalized <= 0.0f || timeNormalized > 1.0f) 
 								  Stop ();
 								else
@@ -218,7 +246,7 @@ namespace VisualTween
 							{
 								StartNode ();
 								
-								onStart.Invoke(this);
+								
 							}
 								
 						}

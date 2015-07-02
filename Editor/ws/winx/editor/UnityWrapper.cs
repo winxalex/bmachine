@@ -2763,6 +2763,37 @@ namespace ws.winx.editor
 				return __GetWaveForm_MethodInfo;
 			}
 		}
+
+
+		private static MethodInfo __SetClipSamplePosition_MethodInfo;
+		
+		public static MethodInfo SetClipSamplePosition_MethodInfo {
+			get {
+				if (__SetClipSamplePosition_MethodInfo == null)
+					__SetClipSamplePosition_MethodInfo = GetWrappedType ().GetMethod ("SetClipSamplePosition",BindingFlags.Static | BindingFlags.Public);
+				return __SetClipSamplePosition_MethodInfo;
+			}
+		}
+
+		private static MethodInfo __StopAllClips_MethodInfo;
+		
+		public static MethodInfo StopAllClips_MethodInfo {
+			get {
+				if (__StopAllClips_MethodInfo == null)
+					__StopAllClips_MethodInfo = GetWrappedType ().GetMethod ("StopAllClips",BindingFlags.Static | BindingFlags.Public);
+				return __StopAllClips_MethodInfo;
+			}
+		}
+
+		private static MethodInfo __UpdateAudio_MethodInfo;
+		
+		public static MethodInfo UpdateAudio_MethodInfo {
+			get {
+				if (__UpdateAudio_MethodInfo == null)
+					__UpdateAudio_MethodInfo = GetWrappedType ().GetMethod ("StopAllClips",BindingFlags.Static | BindingFlags.Public);
+				return __UpdateAudio_MethodInfo;
+			}
+		}
 		
 		/// <summary>
 		/// Gets the type of the wrapped.
@@ -2799,6 +2830,20 @@ namespace ws.winx.editor
 			PlayClip_MethodInfo.Invoke (null, new object[]{clip,startSample,loop});
 		}
 
+
+		public static void SetClipSamplePosition (AudioClip clip, int iSamplePosition){
+			SetClipSamplePosition_MethodInfo.Invoke (null, new object[]{clip,iSamplePosition});
+		}
+
+		public static void StopAllClips (){
+			StopAllClips_MethodInfo.Invoke (null, null);
+		}
+
+		public static void UpdateAudio (){
+			UpdateAudio_MethodInfo.Invoke (null, null);
+		}
+
+	
 
 		public static Texture2D GetWaveForm (AudioClip clip, AssetImporter importer, int channel, float width, float height){
 			return (Texture2D)GetWaveForm__MethodInfo.Invoke(null,new object[]{clip,importer,channel,width,height});

@@ -274,10 +274,7 @@ namespace VisualTween
 				private void Update ()
 				{
 
-						//Debug.Log ("Update SE");
-
-						//GameObject target = __sequence.channels [1].target;
-
+					
 
 
 						if (__sequenceGameObject != null) {
@@ -288,175 +285,47 @@ namespace VisualTween
 								
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 
+								this.Repaint ();
+
 								//this ensure update of MovieTexture (it its bottle neck do some reflection and force render call)
 								//GetWindow<SceneView>().Repaint();
 								SceneView.RepaintAll ();
+
+				//AudioUtilW.UpdateAudio();
 						}
 
 				}
 
-//				private void Update ()
-//				{
-//						if (__sequenceGameObject != null) {
-//								__sequence = __sequenceGameObject.GetComponent<Sequence> ();
-//						}
-//
-//						if (__sequence != null) {
-//
-//								//remove all with channels without target
-//								__sequence.channels.RemoveAll (x => x.target == null);
-//
-////								if (!__sequence.nodes.Contains (__nodeSelected)) {
-////										__nodeSelected = null;
-////								}
-////								if (!EditorApplication.isPlaying) {
-////										if (lastRecordState) {
-////												EditorUpdate (timeline.CurrentTime, false);
-////										}
-////								}
-//
-//								if (__sequence.lastPlayState && !stop) {
-//										if ((float)EditorApplication.timeSinceStartup > __sequence.time) {
-//												switch (wrap) {
-//												case Sequence.SequenceWrap.PingPong:
-//														__sequence.playForward = !__sequence.playForward;
-//														__sequence.time = (float)EditorApplication.timeSinceStartup + __sequence.endTime;
-//														if (__sequence.playForward) {
-//																timeline.CurrentTime = 0;
-//																playStartTime = (float)EditorApplication.timeSinceStartup;
-//														}
-//														break;
-//												case Sequence.SequenceWrap.Once:
-//														__sequence.Stop (false);
-//														playStartTime = (float)EditorApplication.timeSinceStartup;
-//														timeline.CurrentTime = 0;
-//														stop = true;
-//														break;
-//												case Sequence.SequenceWrap.ClampForever:
-//														__sequence.Stop (true);
-//														stop = true;
-//														break;
-//												case Sequence.SequenceWrap.Loop:
-//														__sequence.Stop (false);
-//														playStartTime = (float)EditorApplication.timeSinceStartup;
-//														timeline.CurrentTime = 0;
-//														stop = false;
-//														time = (float)EditorApplication.timeSinceStartup + endTime ();
-//														break;
-//												}		
-//										}
-//
-//										timeline.CurrentTime = (playForward ? ((float)EditorApplication.timeSinceStartup - playStartTime) : time - (float)EditorApplication.timeSinceStartup);
-//
-//										EditorUpdate (timeline.CurrentTime, false);
-//										Repaint ();
-//								}
-//
-//								if (EditorApplication.isPlaying) {
-//										timeline.CurrentTime = __sequence.passedTime;
-//										Repaint ();
-//								}
-//						} else {
-//								__sequence = Selection.activeGameObject != null ? Selection.activeGameObject.GetComponent<Sequence> () : null;			
-//						}
-//				}
-
-				
-
-				public void EditorUpdate (float time, bool forceUpdate)
+				private void OnPlay ()
 				{
-//						__sequence.nodes = __sequence.nodes.OrderBy (x => x.startTime).ToList ();
-			
-//						foreach (var kvp in GetGroupTargets()) {
-//								SequenceNode mNode = kvp.Value.OrderBy (x => x.startTime).First ();
-//								mNode.RecordAction ();
-//						}
+						
 
-//						foreach(SequenceChannel channel in __sequence.channels)
-//							foreach (SequenceNode node in channel.nodes) {
-//									if (((time - node.startTime) / node.duration) > 0.0f && ((time - node.startTime) / node.duration) < 1.0f || forceUpdate && ((time - node.startTime) / node.duration) > 0.0f) {
-//											node.StartTween ();
-//									}
-//					
-//									node.UpdateNode (time);
-//					
-//									if (((time - node.startTime) / node.duration) < 0.0f || ((time - node.startTime) / node.duration) > 1.0f || forceUpdate) {
-//											node.CompleteTween ();
-//									}
-//							}
-			
-//						foreach (var kvp in GetGroupTargets()) {
-//								SequenceNode mNode = kvp.Value.OrderBy (x => x.startTime).ToList ().Find (y => ((time - y.startTime) / y.duration) < 0.0f);
-//								if (mNode != null)
-//										mNode.UndoAction ();
-//						}
-			
-				}
-
-				private void OnPlay (bool isPlaying)
-				{
-						if (EditorApplication.isPlaying) {
-								Debug.Log ("You can't stop preview playing in play mode.");
-								__sequence.isPlaying = true;
-								return;			
-						}
-
-						if (isPlaying) {
-								//AudioUtilW.PlayClip(
-								//__sequence.Play(AudioUtilW.PlayClip);
+						if (!__sequence.isPlaying) {
+								
 								__sequence.Play (EditorApplication.timeSinceStartup);
 
 								__sequence.SequenceNodeStart -= onSequenceNodeStart;
 								__sequence.SequenceNodeStart += onSequenceNodeStart;
 
-
-								
+								__sequence.SequenceNodeStop -= onSequenceNodeStop;
+								__sequence.SequenceNodeStop += onSequenceNodeStop;
+				
+				
+				
 						} else {
 								__sequence.Stop (__sequence.playForward);
+
+								__sequence.SequenceNodeStart -= onSequenceNodeStart;
+			
+				
+								__sequence.SequenceNodeStop -= onSequenceNodeStop;
 						}
 
 						
 
-
-						//lastPlayState = isPlaying;	
-
-						//__sequence.playStartTime = (float)EditorApplication.timeSinceStartup;
-						//__sequence.time = (float)EditorApplication.timeSinceStartup + __sequence.endTime;
-						//timeline.CurrentTime = 0;
-
-//						if (isPlaying) {
-//								stop = false;
-//								__sequence.playForward = true;
-//								//StartRecord ();	
-//						} else {
-//								//StopRecord ();			
-//						}
 				}
 
-				private void OnTimelineClick (float time)
-				{
-//						if (EditorApplication.isPlaying) {
-//								Debug.Log ("You can't change time in play mode.");
-//								//timeline.isRecording = true;
-//								return;			
-//						}
-
-//						if (lastPlayState) {
-//								__sequence.isPlaying = false;
-//								OnPlay (false);
-//								timeline.CurrentTime = time;
-//						}
-
-//						if (!lastRecordState) {
-//								StartRecord ();
-//						}
-		
-
-						//timeline.isRecording = true;
-//						if (__sequence != null) {
-//								EditorUpdate (time, true);
-//						}
-				}
+			
 
 			
 
@@ -559,10 +428,10 @@ namespace VisualTween
 						GUI.backgroundColor = Color.white;
 			
 						if (GUILayout.Button (__sequence.isPlaying ? EditorGUIUtility.FindTexture ("d_PlayButton On") : EditorGUIUtility.FindTexture ("d_PlayButton"), EditorStyles.toolbarButton)) {
-								__sequence.isPlaying = !__sequence.isPlaying;
+								
 
-								//AudioUtilW.PlayClip(__sequence.channels[0].nodes[0].source as AudioClip);
-								OnPlay (__sequence.isPlaying);
+								
+								OnPlay ();
 
 						}
 						GUILayout.FlexibleSpace ();
@@ -732,20 +601,36 @@ namespace VisualTween
 								}
 						}
 
+						
 						//check timeline click
-						if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && new Rect (rect.x, 0, rect.width, TIME_LABEL_HEIGHT).Contains (Event.current.mousePosition)) {
+						if (!__sequence.isPlaying && Event.current.type == EventType.MouseDown && Event.current.button == 0 && new Rect (rect.x, 0, rect.width, TIME_LABEL_HEIGHT).Contains (Event.current.mousePosition)) {
 								
-									
-								//OnTimelineClick(__timeAreaW.TimeToPixel(time,rect));
-								Debug.Log ("Click on TimeLine");
+								__sequence.timeCurrent = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+								
 								Event.current.Use ();
 						}
 						
 
+						//draw time scrubber
+						Color colorSaved = GUI.color;
+						
+						float timeScrubberX = __timeAreaW.TimeToPixel ((float)__sequence.timeCurrent, rect);
+						GUI.color = Color.red;
+						Handles.DrawLine (new Vector3 (timeScrubberX, rect.y), new Vector3 (timeScrubberX, rect.height - 16f));//horizontal scroller
+						GUI.color = colorSaved;
+							
 
 						sequenceNodeDragEventHandler (rect);
 				}
 
+
+
+				/// <summary>
+				/// Sequence's node click event handler.
+				/// </summary>
+				/// <param name="node">Node.</param>
+				/// <param name="rect">Rect.</param>
+				/// <param name="channelOrd">Channel ord.</param>
 				private void sequenceNodeClickEventHandler (SequenceNode node, Rect rect, int channelOrd)
 				{
 
@@ -785,7 +670,7 @@ namespace VisualTween
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										
 										if (ev.button == 0) {
-												//timeClickOffset = node.startTime - timeline.GUIToSeconds (Event.current.mousePosition.x);
+												
 												timeClickOffset = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
 												dragNode = true;
 												__nodeSelected = node;
@@ -849,8 +734,7 @@ namespace VisualTween
 												
 												ev.Use ();
 										}
-										//selectedNode.duration += __timeAreaW.PixelToTime (Event.current.mousePosition.x+ev.delta.x, rect)-selectedNode.startTime;
-										//selectedNode.duration -= timeline.GUIToSeconds (ev.delta.x);
+										
 
 										
 								}
@@ -862,7 +746,7 @@ namespace VisualTween
 								}
 
 								if (dragNode && !resizeNodeStart && !resizeNodeEnd) {
-										//selectedNode.startTime = timeline.GUIToSeconds (Event.current.mousePosition.x) + timeClickOffset;
+										
 										startTime = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) + timeClickOffset;
 										if (startTime >= 0)
 												__nodeSelected.startTime = TimeAreaW.SnapTimeToWholeFPS (startTime, __frameRate);
@@ -1068,7 +952,6 @@ namespace VisualTween
 						return node;
 				}
 
-				
 				public static void onSequenceNodeStart (SequenceNode node)
 				{
 						GameObject target = node.channel.target;
@@ -1078,14 +961,18 @@ namespace VisualTween
 			
 						if (target != null) {
 
+								int sampleStart = 0;
+
 								if (source is AudioClip) {
 										audioClip = source as AudioClip;
 
-
-										//AudioUtilW.PlayClip (audioClip, 0, node.loop);
-					
-
-					
+										
+										sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
+					                  
+//										AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
+//					
+//										AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+//					
 					
 					
 					
@@ -1099,15 +986,20 @@ namespace VisualTween
 							
 												audioClip = movieTexture.audioClip;
 							
-												if (audioClip != null)
-														AudioUtilW.PlayClip (audioClip, 0, node.loop);
-							
+												if (audioClip != null) {
+														//sampleStart=(int)Math.Ceiling(audioClip.samples * ((__sequence.timeCurrent-node.startTime)/audioClip.length));
+													
+														AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
+													
+														//AudioUtilW.SetClipSamplePosition(audioClip,sampleStart);
+												}
+						
 										}
-						
-						
-						
-						
-						
+					
+					
+					
+					
+					
 						
 								} else
 										Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
@@ -1125,58 +1017,59 @@ namespace VisualTween
 
 				}
 
+				public static void onSequenceNodeStop (SequenceNode node)
+				{
+						GameObject target = node.channel.target;
+						UnityEngine.Object source = node.source;
+						AudioClip audioClip;
 
 
-
-		public static void onSequenceNodeEnd (SequenceNode node)
-		{
-			GameObject target = node.channel.target;
-			UnityEngine.Object source = node.source;
-			AudioClip audioClip;
+						Debug.Log (node.channel.target.name);
 			
 			
-			if (target != null) {
+						if (target != null) {
 				
-				if (source is AudioClip) {
-					audioClip = source as AudioClip;
-					AudioUtilW.PlayClip (audioClip, 0, node.loop);
+								if (source is AudioClip) {
+										audioClip = source as AudioClip;
+				
+										//AudioUtilW.StopClip (audioClip);
+					//AudioUtilW.StopAllClips();
+					//AudioUtilW.SetClipSamplePosition(audioClip,audioClip.samples);
+										Debug.Log (audioClip.name);
 			
 					
-				} else if (source is MovieTexture) {
-					Renderer renderer = target.GetComponent<Renderer> ();
-					if (renderer != null) {
-						MovieTexture movieTexture = (source as MovieTexture);
+								} else if (source is MovieTexture) {
+										Renderer renderer = target.GetComponent<Renderer> ();
+										if (renderer != null) {
+												MovieTexture movieTexture = (source as MovieTexture);
 						
 						
 						
 						
-						audioClip = movieTexture.audioClip;
+												audioClip = movieTexture.audioClip;
 						
-						if (audioClip != null)
-							AudioUtilW.PlayClip (audioClip, 0, node.loop);
+												if (audioClip != null)
+														AudioUtilW.StopClip (audioClip);
 						
-					}
-					
-					
-					
-					
-					
-					
-				} else
-					Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
-			} else if (source is  AnimationClip) {
-				//										Animator animator = target.GetComponent<Animator> ();
-				//										
-				//										if (animator){
-				//												animator.enabled=true;
-				//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
-				//				}
+										} else {
+												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
+							
+										}
+								
+								} else if (source is  AnimationClip) {
+										//										Animator animator = target.GetComponent<Animator> ();
+										//										
+										//										if (animator){
+										//												animator.enabled=true;
+										//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
+										//				}
 				
 				
 				
-			}
+								}
+						}
 			
-		}
+				}
 
 				private static void CreateNewReordableList ()
 				{
@@ -1250,79 +1143,56 @@ namespace VisualTween
 
 						Selection.activeGameObject = __sequenceGameObject;
 				}
-
-
-
-//		int num = AudioUtil.GetSampleCount (audioClip) / (int)r.width;
-//		switch (current.type)
-//		{
-//		case EventType.MouseDown:
-//		case EventType.MouseDrag:
-//			if (r.Contains (current.mousePosition) && !AudioUtil.IsMovieAudio (audioClip))
-//			{
-//				if (this.m_PlayingClip != audioClip)
-//				{
-//					AudioUtil.StopAllClips ();
-//					AudioUtil.PlayClip (audioClip, 0, AudioClipInspector.m_bLoop);
-//					this.m_PlayingClip = audioClip;
-//				}
-//				AudioUtil.SetClipSamplePosition (audioClip, num * (int)current.mousePosition.x);
-//				current.Use ();
-//			}
-//			break;
-//		}
-
 		
-		
-		public static Texture2D GetAudioClipTexture(AudioClip clip, float width, float height)
-		{
-			if (clip == null)
-			{
-				return null;
-			}
-			AudioImporter audioImporter = (AudioImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(clip));
+				public static Texture2D GetAudioClipTexture (AudioClip clip, float width, float height)
+				{
+						if (clip == null) {
+								return null;
+						}
+						AudioImporter audioImporter = (AudioImporter)AssetImporter.GetAtPath (AssetDatabase.GetAssetPath (clip));
 
-			Texture2D[] array = new Texture2D[clip.channels];
-			for (int i = 0; i < clip.channels; i++)
-			{
-				array[i] = (Texture2D)AudioUtilW.GetWaveForm(
+						Texture2D[] array = new Texture2D[clip.channels];
+						for (int i = 0; i < clip.channels; i++) {
+								array [i] = (Texture2D)AudioUtilW.GetWaveForm (
 				                                    
 					clip,
 					audioImporter,
 					i,
 					width,
 					height / (float)clip.channels
-				);
-			}
-			return CombineWaveForms(array);
-		}
+								);
+						}
+						return CombineWaveForms (array);
+				}
 
 
-		public static Texture2D CombineWaveForms(Texture2D[] waveForms)
-		{
-			if (waveForms.Length == 1)
-			{
-				return waveForms[0];
-			}
-			int width = waveForms[0].width;
-			int num = 0;
-			for (int i = 0; i < waveForms.Length; i++)
-			{
-				Texture2D texture2D = waveForms[i];
-				num += texture2D.height;
-			}
-			Texture2D texture2D2 = new Texture2D(width, num, TextureFormat.ARGB32, false);
-			int num2 = 0;
-			for (int j = 0; j < waveForms.Length; j++)
-			{
-				Texture2D texture2D3 = waveForms[j];
-				num2 += texture2D3.height;
-				texture2D2.SetPixels(0, num - num2, width, texture2D3.height, texture2D3.GetPixels());
-				GameObject.DestroyImmediate(texture2D3);
-			}
-			texture2D2.Apply();
-			return texture2D2;
-		}
+				/// <summary>
+				/// TODO reflect this function from AudioClip
+				/// </summary>
+				/// <returns>The wave forms.</returns>
+				/// <param name="waveForms">Wave forms.</param>
+				public static Texture2D CombineWaveForms (Texture2D[] waveForms)
+				{
+						if (waveForms.Length == 1) {
+								return waveForms [0];
+						}
+						int width = waveForms [0].width;
+						int num = 0;
+						for (int i = 0; i < waveForms.Length; i++) {
+								Texture2D texture2D = waveForms [i];
+								num += texture2D.height;
+						}
+						Texture2D texture2D2 = new Texture2D (width, num, TextureFormat.ARGB32, false);
+						int num2 = 0;
+						for (int j = 0; j < waveForms.Length; j++) {
+								Texture2D texture2D3 = waveForms [j];
+								num2 += texture2D3.height;
+								texture2D2.SetPixels (0, num - num2, width, texture2D3.height, texture2D3.GetPixels ());
+								GameObject.DestroyImmediate (texture2D3);
+						}
+						texture2D2.Apply ();
+						return texture2D2;
+				}
 
 
 				/// <summary>

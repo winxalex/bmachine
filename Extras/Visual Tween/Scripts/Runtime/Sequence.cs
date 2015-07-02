@@ -40,7 +40,7 @@ namespace VisualTween
 						remove {
 								foreach (SequenceChannel channel in this.channels)
 										foreach (SequenceNode node in channel.nodes)
-												node.onStop.AddListener (value);
+												node.onStop.RemoveListener (value);
 						}
 				}
 
@@ -59,18 +59,27 @@ namespace VisualTween
 				public SequenceNode selectedNode;
 				public SequenceWrap wrap = SequenceWrap.ClampForever;
 				public bool playOnStart = true;
-				public bool isPlaying;
-				public bool lastPlayState;
+
+
+				bool _isPlaying;
+
+				public bool isPlaying {
+					get {
+						return _isPlaying;
+					}
+				}
+
+				
 
 
 				/// <summary>
 				/// The start time.in global time space (Time.time or EditorApplication.timeSinceStartup)
 				/// </summary>
-				double _startTime;
+				double _timeStart;
 
-				public double startTime {
+				public double timeStart {
 						get {
-								return _startTime;
+								return _timeStart;
 						}
 				}
 
@@ -96,24 +105,28 @@ namespace VisualTween
 								return __duration;
 						}
 				}
-
+				
 				public bool playForward;
-				private bool stop = true;
-				private bool pause;
-				private float timeAtPause;
+				 bool _stop = true;
+				 bool _pause;
+
+				double _timeLast;
+
+				private float _timeAtPause;
+				public double timeCurrent;
 
 				private void Start ()
 				{
 						if (playOnStart) {
-								Play ();			
+								PlayAt ();			
 						}
 				}
 
-				double _passedTime;
+				double _timePassed;
 
-				public double passedTime {
+				public double timePassed {
 						get {
-								return _passedTime;
+								return _timePassed;
 						}
 
 				}
@@ -122,10 +135,10 @@ namespace VisualTween
 				/// <summary>
 				/// Updates the sequence.
 				/// </summary>
-				/// <param name="t">T.</param>
+				/// <param name="t">/// The "time" in global time space (Time.time or EditorApplication.timeSinceStartup)</param>
 				public void UpdateSequence (double t)
 				{
-						if (pause || stop) {
+						if (_pause || _stop) {
 								return;			
 						}
 			
@@ -144,22 +157,24 @@ namespace VisualTween
 										Stop (true);
 										break;
 								case SequenceWrap.Loop:
-										Restart ();
+										Restart (t);
 										break;
 								}			
 						}
 			
-						_passedTime = t - _startTime;
+						timeCurrent+= t - _timeLast;//dt
+
+						_timeLast = t;
 			
 						foreach (SequenceChannel channel in this.channels)
 								foreach (SequenceNode node in channel.nodes) {
-										node.UpdateNode (_passedTime);		
+										node.UpdateNode (timeCurrent);		
 								}
 				}
 
 				void Update ()
 				{
-						if (pause || stop) {
+						if (_pause || _stop) {
 								return;			
 						}
 
@@ -170,72 +185,90 @@ namespace VisualTween
 
 				}
 
+
+				/// <summary>
+				/// Play the sequence
+				/// </summary>
+				/// <param name="t">global "time"  (Time.time or EditorApplicaiton.timeSinceStartUp).</param>
 				public void Play (double t)
 				{
 						__duration = calcDuration ();
-					
-						stop = false;
-						pause = false;
-						_passedTime = 0;
 
-						this._startTime = t;
-						this._timeAtEnd = t + __duration;
+						//prevent
+						timeCurrent = Mathf.Min ((float)timeCurrent, __duration);
+						
+						_isPlaying = true;
+						_stop = false;
+						_pause = false;
+						_timePassed = 0;
+
+						this._timeLast = t;
+						this._timeAtEnd = t + __duration - timeCurrent;
 				}
 
-				public void Play ()
-				{
-						__duration = calcDuration ();
-						stop = false;
-						pause = false;
-						_passedTime = 0;
 
-						_startTime = Time.time;
-						_timeAtEnd = _startTime + __duration;
+				/// <summary>
+				/// Play the  sequence  at specified time.
+				/// </summary>
+				/// <param name="t">T is local sequence time.</param>
+				public void PlayAt(double t=0)
+				{
+						
+
+						timeCurrent = t;
+						
+						Play (Time.time);
 
 				}
 
 				public void Pause ()
 				{
-						pause = true;	
-						timeAtPause = Time.time;
+					Pause (Time.time);
 				}
 
 				public void Pause (float t)
 				{
-						pause = true;	
-						timeAtPause = t;
+						_pause = true;	
+						_timeLast = t;
+						_isPlaying = false;
 				}
 
 				public void UnPause (float t)
 				{
-						if (pause) {
+						if (_pause) {
 								//extend endTime cos of time in pause
-								float pauseDuration = t - timeAtPause;
+								double pauseDuration = t - _timeLast;
 								this._timeAtEnd += pauseDuration; //shift endTime for pauseDuration
-								this._startTime += pauseDuration; //shift startTime for pauseDuration
+								_timeLast=t;
+								
 						}
-						pause = false;
+
+						_pause = false;
+						_isPlaying = true;
 			
 				}
 
 				public void UnPause ()
 				{
-						if (pause) {
-								_timeAtEnd += Time.time - timeAtPause;
-						}
-						pause = false;
+					UnPause (Time.time);
 
 				}
 
+				public void Restart (double t)
+				{
+						Stop (false);
+						Play (t);
+				}
+		
 				public void Restart ()
 				{
 						Stop (false);
-						Play ();
+						PlayAt ();
 				}
 
 				public void Stop (bool forward)
 				{
-						stop = true;
+						_stop = true;
 //			nodes=nodes.OrderBy(x=>x.startTime).ToList();
 //			if (!forward) {
 //				nodes.Reverse ();
@@ -244,8 +277,8 @@ namespace VisualTween
 
 						foreach (SequenceChannel channel in channels)
 								foreach (SequenceNode node in channel.nodes) {
-
-										node.Stop ();
+										if(node.isRunning)
+											node.Stop ();
 								}	
 
 //						if (!forward) {
@@ -260,6 +293,8 @@ namespace VisualTween
 //						mNode.UndoAction();
 //				}			
 //						}
+
+						_isPlaying = false;
 				}
 
 
@@ -283,24 +318,9 @@ namespace VisualTween
 			
 				}
 
-//		private void OnGUI(){
-//			foreach (SequenceNode node in nodes) {
-//				node.DoOnGUI();		
-//			}
-//		}
 
-//		private Dictionary<GameObject,List<SequenceNode>> GetGroupTargets(){
-//			Dictionary<GameObject,List<SequenceNode>> targets= new Dictionary<GameObject, List<SequenceNode>>();
-//			foreach (SequenceNode node in nodes) {
-//				if(!targets.ContainsKey(node.target)){
-//					targets.Add(node.target,new List<SequenceNode>(){node});
-//				}else{
-//					targets[node.target].Add(node);
-//				}
-//			}
-//			return targets;
-//		}
-//
+
+
 				public enum SequenceWrap
 				{
 						Once,
