@@ -35,7 +35,7 @@ namespace VisualTween
 					}
 				}
 
-
+		public RuntimeAnimatorController runtimeAnimatorController;
 
 
 

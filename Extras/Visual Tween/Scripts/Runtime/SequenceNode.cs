@@ -16,6 +16,8 @@ namespace VisualTween
 				public SequenceNodeEvent onPause = new SequenceNodeEvent();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent();
 
+				public int index=-1;
+
 				public bool loop;
 
 				public float volume = 1f;
@@ -54,7 +56,7 @@ namespace VisualTween
 				}
 
 				public UnityEngine.Object source;
-				int stateNameHash;
+				public int stateNameHash;
 
 				public void StartNode ()
 				{
@@ -73,18 +75,29 @@ namespace VisualTween
 
 										if (audioSource == null)
 												audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
-
+											
+										audioSource.playOnAwake=false;
 										audioSource.clip = source as AudioClip;
+
+
 										//audioSource.clip.LoadAudioData();
 
 										//if(Application.isPlaying)
 
+//					audio.timeSamples = audio.clip.samples - 1;
+//					audio.pitch = -1;
+//					audio.Play();
 
-					audioSource.time=20;
-										audioSource.PlayOneShot(audioSource.clip);
-										audioSource.volume=this.volume;
 
-					audioSource.timeSamples=audioSource.clip.samples-10000;
+//					audioSource.time=20;
+//									audioSource.PlayOneShot(audioSource.clip);
+//					audioSource.Stop();
+//					audioSource.Play();
+//
+//					audioSource.time=20;
+//										audioSource.volume=this.volume;
+
+					//audioSource.timeSamples=audioSource.clip.samples-10000;
 					                        
 
 
@@ -126,12 +139,16 @@ namespace VisualTween
 										} else
 												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
 								} else if (source is  AnimationClip) {
-//										Animator animator = target.GetComponent<Animator> ();
-//										
-//										if (animator){
-//												animator.enabled=true;
-//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
-//				}
+
+										Animator animator = target.GetComponent<Animator> ();
+										
+										if (animator==null){
+											animator=target.AddComponent<Animator>();
+										}
+												animator.runtimeAnimatorController=this.channel.runtimeAnimatorController;
+												animator.enabled=true;
+												animator.CrossFade (stateNameHash, 0f, 0, 0f);
+										
 
 
 										
@@ -226,6 +243,24 @@ namespace VisualTween
 
 				public virtual void DoUpdate(){
 
+
+			GameObject target = channel.target;
+
+			
+			
+			
+//			if (target != null) {
+//								if (source is AudioClip) {
+//										AudioSource audioSource = target.GetComponent<AudioSource> ();
+//
+//										audioSource.clip.LoadAudioData ();
+//					//audioSource.Play();
+//
+//					Debug.Log ("DoUpadate" + audioSource.time+" "+audioSource.timeSamples);
+//					audioSource.timeSamples=audioSource.timeSamples+1000;
+//								}
+//						}
+					
 					onUpdate.Invoke (this);
 				}
 

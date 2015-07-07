@@ -60,6 +60,9 @@ namespace ws.winx.editor.utilities
 						}
 				}
 
+
+				
+
 				//private Dictionary<AnimatorController,List<AnimatorControllerState>> __controllerAnimationStates;
 		
 				//public int GetLayerInx(AnimatorState state){ return __controllerAnimationStates[0].Get

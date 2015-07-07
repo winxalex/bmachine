@@ -13,7 +13,7 @@ namespace VisualTween
 				//events 
 
 
-//
+
 				public event UnityAction<SequenceNode> SequenceNodeStart {
 						add {
 								//this.channels.ForEach (chn => chn.nodes.ForEach (nd => nd.onStart.AddListener(value)));

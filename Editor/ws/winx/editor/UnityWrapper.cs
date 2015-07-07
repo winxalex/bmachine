@@ -2794,6 +2794,44 @@ namespace ws.winx.editor
 				return __UpdateAudio_MethodInfo;
 			}
 		}
+
+
+		private static MethodInfo __SetListenerTransform_MethodInfo;
+		
+		public static MethodInfo SetListenerTransform_MethodInfo {
+			get {
+				if (__SetListenerTransform_MethodInfo == null)
+					__SetListenerTransform_MethodInfo = GetWrappedType ().GetMethod ("SetListenerTransform",BindingFlags.Static | BindingFlags.Public);
+				return __SetListenerTransform_MethodInfo;
+			}
+		}
+
+
+	
+
+		private static MethodInfo __ClearWaveForm_MethodInfo;
+		
+		public static MethodInfo ClearWaveForm_MethodInfo {
+			get {
+				if (__ClearWaveForm_MethodInfo == null)
+					__ClearWaveForm_MethodInfo = GetWrappedType ().GetMethod ("ClearWaveForm",BindingFlags.Static | BindingFlags.Public);
+				return __ClearWaveForm_MethodInfo;
+			}
+		}
+
+
+
+
+
+		private static PropertyInfo __resetAllAudioClipPlayCountsOnPlay_PropertyInfo;
+		
+		public static PropertyInfo resetAllAudioClipPlayCountsOnPlay_PropertyInfo {
+			get {
+				if (__resetAllAudioClipPlayCountsOnPlay_PropertyInfo == null)
+					__resetAllAudioClipPlayCountsOnPlay_PropertyInfo = GetWrappedType ().GetProperty ("resetAllAudioClipPlayCountsOnPlay",BindingFlags.Static | BindingFlags.Public);
+				return __resetAllAudioClipPlayCountsOnPlay_PropertyInfo;
+			}
+		}
 		
 		/// <summary>
 		/// Gets the type of the wrapped.
@@ -2809,6 +2847,22 @@ namespace ws.winx.editor
 			return __RealType;
 			
 		}
+
+		public static  bool resetAllAudioClipPlayCountsOnPlay
+		{
+
+			get{
+				return (bool)resetAllAudioClipPlayCountsOnPlay_PropertyInfo.GetValue(null,null);
+			}
+
+			set{
+				resetAllAudioClipPlayCountsOnPlay_PropertyInfo.SetValue(null,value,null);
+			}
+		}
+
+
+
+
 
 		public static void ResumeClip (AudioClip clip){
 
@@ -2843,11 +2897,24 @@ namespace ws.winx.editor
 			UpdateAudio_MethodInfo.Invoke (null, null);
 		}
 
+
+		public static void SetListenerTransform (Transform t){
+			SetListenerTransform_MethodInfo.Invoke (null, new object[]{t});
+		}
+
 	
 
 		public static Texture2D GetWaveForm (AudioClip clip, AssetImporter importer, int channel, float width, float height){
 			return (Texture2D)GetWaveForm__MethodInfo.Invoke(null,new object[]{clip,importer,channel,width,height});
 		}
+
+		public static void ClearWaveForm (AudioClip clip){
+			ClearWaveForm_MethodInfo.Invoke (null, new object[]{clip});
+		}
+
+
+
+
 	}
 	
 	#endregion

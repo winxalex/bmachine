@@ -13,6 +13,8 @@ using System.IO;
 using ws.winx.editor.utilities;
 using ws.winx.editor.extensions;
 using ws.winx.unity.utilities;
+using UnityEditor.Animations;
+using ws.winx.unity;
 
 namespace VisualTween
 {
@@ -43,6 +45,7 @@ namespace VisualTween
 				private const float EVENT_PAD_HEIGHT = 20f;
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				string channelLabel;
+				bool testBool;
 		
 				private static SequenceNode __nodeSelected {
 						get {
@@ -274,7 +277,6 @@ namespace VisualTween
 				private void Update ()
 				{
 
-					
 
 
 						if (__sequenceGameObject != null) {
@@ -291,34 +293,77 @@ namespace VisualTween
 								//GetWindow<SceneView>().Repaint();
 								SceneView.RepaintAll ();
 
-				//AudioUtilW.UpdateAudio();
+								//AudioUtilW.UpdateAudio();
 						}
 
 				}
 
 				private void OnPlay ()
 				{
-						
 
+//			if (!testBool) {
+//								
+//
+//				foreach(SequenceChannel channel in __sequence.channels)
+//					foreach(SequenceNode node in channel.nodes)
+//						if(node.source is AudioClip)
+//							AudioUtilW.PlayClip(node.source as AudioClip);
+//
+//
+//						} else {
+//				foreach(SequenceChannel channel in __sequence.channels)
+//					foreach(SequenceNode node in channel.nodes)
+//						if(node.source is AudioClip){
+//						//AudioUtilW.PlayClip(node.source as AudioClip);
+//						AudioUtilW.SetClipSamplePosition(node.source as AudioClip,(node.source as AudioClip).samples-1);
+//						     // AudioUtilW.StopClip(node.source as AudioClip);
+//							//AudioUtilW.StopAllClips();
+//								//node.channel.target.GetComponent<AudioSource>().Stop();
+//				
+//						
+//					}
+//				//AudioListener.pause=true;
+//
+//						}
+//
+//			testBool = !testBool;
+			
 						if (!__sequence.isPlaying) {
 								
-								__sequence.Play (EditorApplication.timeSinceStartup);
+								
 
-								__sequence.SequenceNodeStart -= onSequenceNodeStart;
-								__sequence.SequenceNodeStart += onSequenceNodeStart;
+//								__sequence.SequenceNodeStart -= onSequenceNodeStart;
+//								__sequence.SequenceNodeStart += onSequenceNodeStart;
+//
+//								__sequence.SequenceNodeStop -= onSequenceNodeStop;
+//								__sequence.SequenceNodeStop += onSequenceNodeStop;
 
-								__sequence.SequenceNodeStop -= onSequenceNodeStop;
-								__sequence.SequenceNodeStop += onSequenceNodeStop;
+								//__sequence.Play (EditorApplication.timeSinceStartup);
+
+
+
+								//float sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
+								//  if(audioClip.       
+								//	AudioUtilW.StopClip(audioClip);
 				
+				
+								//AudioUtilW.PlayClip (audioSource.clip, 0, loop);//startSample doesn't work in this function????
+								//AudioUtilW.SetClipSamplePosition (audioSource.clip, sampleStart);
 				
 				
 						} else {
-								__sequence.Stop (__sequence.playForward);
+								//__sequence.Stop (__sequence.playForward);
 
-								__sequence.SequenceNodeStart -= onSequenceNodeStart;
+
+//				foreach(SequenceChannel channel in __sequence.channels)
+//					foreach(SequenceNode node in channel.nodes)
+//						if(node.source is AudioClip)
+//							AudioUtilW.StopClip(node.source as AudioClip);
+
+								//__sequence.SequenceNodeStart -= onSequenceNodeStart;
 			
 				
-								__sequence.SequenceNodeStop -= onSequenceNodeStop;
+								//__sequence.SequenceNodeStop -= onSequenceNodeStop;
 						}
 
 						
@@ -421,6 +466,11 @@ namespace VisualTween
 						GUI.backgroundColor = __isRecording ? Color.red : Color.white;
 						if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.Record"), EditorStyles.toolbarButton)) {
 								__isRecording = !__isRecording;
+
+								foreach (SequenceChannel channel in __sequence.channels)
+										foreach (SequenceNode node in channel.nodes)
+												if (node.source is AudioClip)
+														AudioUtilW.StopClip (node.source as AudioClip);
 //				if(onRecord != null){
 //					onRecord();
 //				}
@@ -722,6 +772,13 @@ namespace VisualTween
 						switch (ev.rawType) {
 
 						case EventType.MouseDrag:
+
+								//TODO don't allow resize bigger then sound.length 
+								//TODO don't allow any video resize as MovieTexture doesn't support it
+								//TODO sound can't be decreased not increased
+								//TODO AnimationClip can be resized removing frames
+
+
 								if (resizeNodeStart) {
 										//selectedNode.startTime = timeline.GUIToSeconds (Event.current.mousePosition.x);
 										float prevStartTime = __nodeSelected.startTime;
@@ -731,6 +788,15 @@ namespace VisualTween
 										if (startTime >= 0) {
 												__nodeSelected.startTime = TimeAreaW.SnapTimeToWholeFPS (startTime, __frameRate);
 												__nodeSelected.duration += TimeAreaW.SnapTimeToWholeFPS (prevStartTime - __nodeSelected.startTime, __frameRate);
+												
+												
+											
+//												if(__nodeSelected.source is AnimationClip)//if node is AnimationClip type
+//												if(__nodeSelected.channel.nodes.Count>0)	////sort by startTime if numNodes>1
+//												{
+//													//sequenceChannel.nodes.Sort(new Comparison<SequenceNode>(sequenceChannel.nodes,(
+//													RecreateTransitions(__nodeSelected.channel);
+//												}
 												
 												ev.Use ();
 										}
@@ -745,13 +811,65 @@ namespace VisualTween
 										ev.Use ();
 								}
 
+								//PAN of the node
 								if (dragNode && !resizeNodeStart && !resizeNodeEnd) {
 										
 										startTime = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) + timeClickOffset;
-										if (startTime >= 0)
-												__nodeSelected.startTime = TimeAreaW.SnapTimeToWholeFPS (startTime, __frameRate);
+
+										startTime = TimeAreaW.SnapTimeToWholeFPS (startTime, __frameRate);
+
+										if (startTime >= 0) {
+
+												
+														SequenceChannel channel = __nodeSelected.channel;
+
+														SequenceNode nodePrev = null;
+														SequenceNode nodeNext = null;
+
+													if(channel.nodes.Count>1){
+
+														if(__nodeSelected.index>0)
+															nodePrev=channel.nodes [__nodeSelected.index - 1];
+
+														if (__nodeSelected.index + 1 < channel.nodes.Count) //if next node exist
+															nodeNext = channel.nodes [__nodeSelected.index + 1];
+
+														if (__nodeSelected.source is AnimationClip) //nodes animation clips are allowed to overlap(transitions) 
+														{
+															
+															if(nodePrev!=null && nodeNext!=null)//if there is prev and next node of current	
+															{
+																if(nodePrev.startTime < startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration){
+																	__nodeSelected.startTime = startTime;
+																}
+															}else if ((nodePrev!=null && nodePrev.startTime < startTime) || (nodeNext!=null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration)){
+																__nodeSelected.startTime = startTime;
+															}
+									
+															
+														}else{
+																if(nodePrev!=null && nodeNext!=null)//if there is prev and next node of current	
+																{
+																	if(nodePrev.startTime+nodePrev.duration < startTime && startTime + __nodeSelected.duration < nodeNext.startTime){
+																		__nodeSelected.startTime = startTime;
+																	}
+
+																}else if ((nodePrev!=null && nodePrev.startTime+nodePrev.duration < startTime) || (nodeNext!=null && startTime + __nodeSelected.duration < nodeNext.startTime)){
+																	__nodeSelected.startTime = startTime;
+																}
+														}
+													}
+
+
+												
+							 
+
+
+												}// startTime>=0
+										}// if PAN
 										
 
+										
 										//change channel 
 //										if (Event.current.mousePosition.y > selectedNode.channel * __nodeRectHeight + 25) {
 //												selectedNode.channel += 1;
@@ -761,7 +879,7 @@ namespace VisualTween
 //										}
 //										selectedNode.channel = Mathf.Clamp (selectedNode.channel, 0, int.MaxValue);
 										ev.Use ();
-								}
+								
 								break;
 						case EventType.MouseUp:
 								dragNode = false;
@@ -790,6 +908,13 @@ namespace VisualTween
 						//remove node
 						sequenceChannel.nodes.Remove (node);
 
+						if (sequenceChannel.runtimeAnimatorController != null)//remove AnimatorState
+								(sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).RemoveStateWith (node.stateNameHash);
+						
+						int nodesCount = sequenceChannel.nodes.Count;
+
+						for (int i=node.index; i<nodesCount; i++)
+											sequenceChannel.nodes [i].index--;
 
 
 						//if this removed node was last node => remove channel and move channels up(reindex)
@@ -798,7 +923,7 @@ namespace VisualTween
 								//remove channel
 								__sequence.channels.Remove (sequenceChannel);
 
-
+							
 
 						}
 
@@ -867,7 +992,9 @@ namespace VisualTween
 																if (channel < __sequence.channels.Count) {
 																		sequenceChannel = __sequence.channels [channel];
 																} else {
-																		sequenceChannel = new SequenceChannel ();
+																		if ((sequenceChannel = CreateNewSequenceChannel ()) == null)
+																				continue;
+																		
 
 
 
@@ -895,8 +1022,82 @@ namespace VisualTween
 																//Vector2
 																SequenceNode node = CreateNewSequenceNode (Event.current.mousePosition, dragged_object, channel);
 														
+																
+																
+																if (sequenceChannel.nodes.Count == 0) {
+																		sequenceChannel.nodes.Add (node);
+																} else {
 
-																__sequence.channels [channel].nodes.Add (node);
+																		//find index of node with earliest startTime
+																		int startTimeEarliestIndex = sequenceChannel.nodes.FindIndex (itm => itm.startTime < node.startTime);
+
+																
+
+
+																		if (node.source is AnimationClip) {
+
+																				UnityEditor.Animations.AnimatorStateTransition transition = null;
+
+																				float endTimeNode=0f;
+
+																				UnityEditor.Animations.AnimatorState currentPrev= (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (node.stateNameHash);
+										
+
+
+																				if (startTimeEarliestIndex > 0) {
+																						SequenceNode nodePrev = sequenceChannel.nodes [startTimeEarliestIndex];
+																						UnityEditor.Animations.AnimatorState statePrev = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodePrev.stateNameHash);
+																																			
+
+																						if (statePrev.transitions.Length > 0)
+																								transition = statePrev.transitions [0];
+																						else
+																								transition = new AnimatorStateTransition ();
+											
+
+																						transition.destinationState = currentPrev;
+																						transition.duration = 0;
+
+																						endTimeNode = nodePrev.startTime + nodePrev.duration;
+
+																						if (node.startTime < endTimeNode)//there is intersection between current node and prev node
+																								transition.duration = endTimeNode - node.startTime;
+									
+
+
+																						statePrev.AddTransition (transition);
+																				}
+
+																				if (startTimeEarliestIndex + 1 < sequenceChannel.nodes.Count) {
+																						SequenceNode nodeNext = sequenceChannel.nodes [startTimeEarliestIndex + 1];
+																						UnityEditor.Animations.AnimatorState stateNext = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodeNext.stateNameHash);
+																						transition = new AnimatorStateTransition ();
+																						transition.destinationState = stateNext;
+																						endTimeNode = node.startTime + node.duration;
+																						if (nodeNext.startTime < endTimeNode)
+																								transition.duration = endTimeNode - nodeNext.startTime;
+
+																						nodeNext.index=startTimeEarliestIndex+2;
+
+																						currentPrev.AddTransition (transition);
+																				}
+
+
+
+
+																		}
+
+																		node.index=startTimeEarliestIndex+1;
+																		sequenceChannel.nodes.Insert (startTimeEarliestIndex + 1, node);
+																}
+																	
+
+																//sort by startTime if numNodes>1
+																//sequenceChannel.nodes.Sort(new Comparison<SequenceNode>(sequenceChannel.nodes,(
+
+																//remove all transitions and recreate transitions
+
+																
 																__nodeSelected = node;
 														}
 												}
@@ -907,7 +1108,14 @@ namespace VisualTween
 						}
 			
 				}
-				
+
+				private static void RecreateTransitions (SequenceChannel channel)
+				{
+						//UnityEditor.Animations.AnimatorStateTransition transition;
+
+						//UnityEditor.Animations.AnimatorState State;
+						throw new NotImplementedException ();
+				}				
 
 				/// <summary>
 				/// Creates the sequence node.
@@ -921,10 +1129,19 @@ namespace VisualTween
 						SequenceNode node = ScriptableObject.CreateInstance<SequenceNode> ();
 						
 						float duration = node.duration;
+
 						node.source = source;
+						node.channel = __sequence.channels [channelOrd];
+
+
 						if (source is AnimationClip) {
 								
 								duration = (source as AnimationClip).length;
+								//Guid.NewGuid ().ToString ();
+
+								UnityEditor.Animations.AnimatorState state = (node.channel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).AddMotion ((source as Motion));
+
+								node.stateNameHash = state.nameHash;
 						} else if (source is AudioClip) {
 								
 								duration = (source as AudioClip).length;
@@ -943,7 +1160,7 @@ namespace VisualTween
 						
 						//node.channelOrd = channelOrd;
 
-						node.channel = __sequence.channels [channelOrd];
+					
 					
 						node.startTime = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __frameRate);
 						node.duration = TimeAreaW.SnapTimeToWholeFPS (duration, __frameRate);
@@ -968,11 +1185,13 @@ namespace VisualTween
 
 										
 										sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
-					                  
-//										AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
-//					
-//										AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
-//					
+										//  if(audioClip.       
+										//	AudioUtilW.StopClip(audioClip);
+
+//					Debug.Log("onSequenceNodeStart " + node.source.name);
+//								AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
+//															AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+
 					
 					
 					
@@ -1032,9 +1251,10 @@ namespace VisualTween
 								if (source is AudioClip) {
 										audioClip = source as AudioClip;
 				
+										//AudioUtilW.PauseClip(audioClip);
 										//AudioUtilW.StopClip (audioClip);
-					//AudioUtilW.StopAllClips();
-					//AudioUtilW.SetClipSamplePosition(audioClip,audioClip.samples);
+										//AudioUtilW.StopAllClips();
+										//AudioUtilW.SetClipSamplePosition(audioClip,audioClip.samples);
 										Debug.Log (audioClip.name);
 			
 					
@@ -1069,6 +1289,26 @@ namespace VisualTween
 								}
 						}
 			
+				}
+
+				private static SequenceChannel CreateNewSequenceChannel ()
+				{
+						string path = EditorUtility.SaveFilePanel (
+				"Create AnimaitonController",
+				"Assets",
+				"",
+				"controller");
+			
+						if (!String.IsNullOrEmpty (path)) {
+								SequenceChannel channel = new SequenceChannel ();
+
+								//create Controller
+								channel.runtimeAnimatorController = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+								return channel;
+
+						}
+
+						return null;
 				}
 
 				private static void CreateNewReordableList ()
