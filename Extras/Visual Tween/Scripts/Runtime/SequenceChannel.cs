@@ -7,7 +7,7 @@ using System;
 namespace VisualTween
 {
 		[System.Serializable]
-		public class SequenceChannel
+		public class SequenceChannel:ScriptableObject
 		{
 		public string name;
 			

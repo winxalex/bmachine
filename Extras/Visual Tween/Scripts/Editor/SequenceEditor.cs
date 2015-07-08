@@ -821,52 +821,50 @@ namespace VisualTween
 										if (startTime >= 0) {
 
 												
-														SequenceChannel channel = __nodeSelected.channel;
+												SequenceChannel channel = __nodeSelected.channel;
 
-														SequenceNode nodePrev = null;
-														SequenceNode nodeNext = null;
+												SequenceNode nodePrev = null;
+												SequenceNode nodeNext = null;
 
-													if(channel.nodes.Count>1){
+												if (channel.nodes.Count > 1) {
 
-														if(__nodeSelected.index>0)
-															nodePrev=channel.nodes [__nodeSelected.index - 1];
+														if (__nodeSelected.index > 0)
+																nodePrev = channel.nodes [__nodeSelected.index - 1];
 
 														if (__nodeSelected.index + 1 < channel.nodes.Count) //if next node exist
-															nodeNext = channel.nodes [__nodeSelected.index + 1];
+																nodeNext = channel.nodes [__nodeSelected.index + 1];
 
-														if (__nodeSelected.source is AnimationClip) //nodes animation clips are allowed to overlap(transitions) 
-														{
+														if (__nodeSelected.source is AnimationClip) { //nodes animation clips are allowed to overlap(transitions)
 															
-															if(nodePrev!=null && nodeNext!=null)//if there is prev and next node of current	
-															{
-																if(nodePrev.startTime < startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration){
-																	__nodeSelected.startTime = startTime;
+																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
+																		if (nodePrev.startTime < startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration) {
+																				__nodeSelected.startTime = startTime;
+																		}
+																} else if ((nodePrev != null && nodePrev.startTime < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration)) {
+																		__nodeSelected.startTime = startTime;
 																}
-															}else if ((nodePrev!=null && nodePrev.startTime < startTime) || (nodeNext!=null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration)){
-																__nodeSelected.startTime = startTime;
-															}
 									
 															
-														}else{
-																if(nodePrev!=null && nodeNext!=null)//if there is prev and next node of current	
-																{
-																	if(nodePrev.startTime+nodePrev.duration < startTime && startTime + __nodeSelected.duration < nodeNext.startTime){
-																		__nodeSelected.startTime = startTime;
-																	}
+														} else {
+																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
+																		if (nodePrev.startTime + nodePrev.duration < startTime && startTime + __nodeSelected.duration < nodeNext.startTime) {
+																				__nodeSelected.startTime = startTime;
+																		}
 
-																}else if ((nodePrev!=null && nodePrev.startTime+nodePrev.duration < startTime) || (nodeNext!=null && startTime + __nodeSelected.duration < nodeNext.startTime)){
-																	__nodeSelected.startTime = startTime;
+																} else if ((nodePrev != null && nodePrev.startTime + nodePrev.duration < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime)) {
+																		__nodeSelected.startTime = startTime;
 																}
 														}
-													}
+												} else
+														__nodeSelected.startTime = startTime;
 
 
 												
 							 
 
 
-												}// startTime>=0
-										}// if PAN
+										}// startTime>=0
+								}// if PAN
 										
 
 										
@@ -878,7 +876,7 @@ namespace VisualTween
 //												selectedNode.channel -= 1;
 //										}
 //										selectedNode.channel = Mathf.Clamp (selectedNode.channel, 0, int.MaxValue);
-										ev.Use ();
+								ev.Use ();
 								
 								break;
 						case EventType.MouseUp:
@@ -905,16 +903,38 @@ namespace VisualTween
 
 						SequenceChannel sequenceChannel = __sequence.channels.Find (itm => itm.nodes.Exists (nd => nd.GetInstanceID () == node.GetInstanceID ()));
 
+			
+						//bypass transition
+						if (node.source is AnimationClip) {
+								if (node.index - 1 > -1 && node.index + 1 < sequenceChannel.nodes.Count) {
+										UnityEditor.Animations.AnimatorController animatorController = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController);
+										UnityEditor.Animations.AnimatorState statePrev = animatorController.GetStateBy (sequenceChannel.nodes [node.index - 1].stateNameHash);
+								
+										UnityEditor.Animations.AnimatorStateTransition transition = statePrev.transitions [0];
+										transition.destinationState = animatorController.GetStateBy (sequenceChannel.nodes [node.index + 1].stateNameHash);
+								
+								}
+						}
+
+
+
 						//remove node
 						sequenceChannel.nodes.Remove (node);
+						
+
 
 						if (sequenceChannel.runtimeAnimatorController != null)//remove AnimatorState
 								(sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).RemoveStateWith (node.stateNameHash);
 						
 						int nodesCount = sequenceChannel.nodes.Count;
 
+
+						//reindex nodes after remove
 						for (int i=node.index; i<nodesCount; i++)
-											sequenceChannel.nodes [i].index--;
+								sequenceChannel.nodes [i].index--;
+
+						
+						
 
 
 						//if this removed node was last node => remove channel and move channels up(reindex)
@@ -1024,78 +1044,11 @@ namespace VisualTween
 														
 																
 																
-																if (sequenceChannel.nodes.Count == 0) {
-																		sequenceChannel.nodes.Add (node);
-																} else {
-
-																		//find index of node with earliest startTime
-																		int startTimeEarliestIndex = sequenceChannel.nodes.FindIndex (itm => itm.startTime < node.startTime);
-
+																		sequenceChannel.nodes.Insert (node.index, node);
 																
-
-
-																		if (node.source is AnimationClip) {
-
-																				UnityEditor.Animations.AnimatorStateTransition transition = null;
-
-																				float endTimeNode=0f;
-
-																				UnityEditor.Animations.AnimatorState currentPrev= (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (node.stateNameHash);
-										
-
-
-																				if (startTimeEarliestIndex > 0) {
-																						SequenceNode nodePrev = sequenceChannel.nodes [startTimeEarliestIndex];
-																						UnityEditor.Animations.AnimatorState statePrev = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodePrev.stateNameHash);
-																																			
-
-																						if (statePrev.transitions.Length > 0)
-																								transition = statePrev.transitions [0];
-																						else
-																								transition = new AnimatorStateTransition ();
-											
-
-																						transition.destinationState = currentPrev;
-																						transition.duration = 0;
-
-																						endTimeNode = nodePrev.startTime + nodePrev.duration;
-
-																						if (node.startTime < endTimeNode)//there is intersection between current node and prev node
-																								transition.duration = endTimeNode - node.startTime;
-									
-
-
-																						statePrev.AddTransition (transition);
-																				}
-
-																				if (startTimeEarliestIndex + 1 < sequenceChannel.nodes.Count) {
-																						SequenceNode nodeNext = sequenceChannel.nodes [startTimeEarliestIndex + 1];
-																						UnityEditor.Animations.AnimatorState stateNext = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodeNext.stateNameHash);
-																						transition = new AnimatorStateTransition ();
-																						transition.destinationState = stateNext;
-																						endTimeNode = node.startTime + node.duration;
-																						if (nodeNext.startTime < endTimeNode)
-																								transition.duration = endTimeNode - nodeNext.startTime;
-
-																						nodeNext.index=startTimeEarliestIndex+2;
-
-																						currentPrev.AddTransition (transition);
-																				}
-
-
-
-
-																		}
-
-																		node.index=startTimeEarliestIndex+1;
-																		sequenceChannel.nodes.Insert (startTimeEarliestIndex + 1, node);
-																}
 																	
-
-																//sort by startTime if numNodes>1
-																//sequenceChannel.nodes.Sort(new Comparison<SequenceNode>(sequenceChannel.nodes,(
-
-																//remove all transitions and recreate transitions
+																//sequenceChannel.nodes.ForEach(itm=> EditorUtility.SetDirty(itm));
+																//EditorUtility.SetDirty(sequenceChannel);
 
 																
 																__nodeSelected = node;
@@ -1126,22 +1079,23 @@ namespace VisualTween
 				/// <param name="channel">Channel.</param>
 				private SequenceNode CreateNewSequenceNode (Vector2 pos, UnityEngine.Object source, int channelOrd)
 				{
-						SequenceNode node = ScriptableObject.CreateInstance<SequenceNode> ();
-						
-						float duration = node.duration;
 
-						node.source = source;
-						node.channel = __sequence.channels [channelOrd];
+
+
+
+
+
+						
+						float duration = 0f;
+
+
+						float startTime = 0f;
 
 
 						if (source is AnimationClip) {
 								
 								duration = (source as AnimationClip).length;
-								//Guid.NewGuid ().ToString ();
-
-								UnityEditor.Animations.AnimatorState state = (node.channel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).AddMotion ((source as Motion));
-
-								node.stateNameHash = state.nameHash;
+								
 						} else if (source is AudioClip) {
 								
 								duration = (source as AudioClip).length;
@@ -1152,18 +1106,116 @@ namespace VisualTween
 
 						}
 
-						//node.onStart = new UnityEngine.Events.UnityEvent ().AddListener (new UnityEngine.Events.UnityAction (this, this.GetType ().GetMethod ("fdsaffa").MethodHandle.GetFunctionPointer ()));
+						startTime=TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __frameRate);
+						duration=TimeAreaW.SnapTimeToWholeFPS (duration, __frameRate);
+
 						
+
+
+						
+
+
+						SequenceChannel sequenceChannel = __sequence.channels [channelOrd];
+
+						//prevent intersection on Drop
+						if (sequenceChannel.nodes.Exists (itm => (itm.startTime < startTime && startTime < itm.startTime + itm.duration) || (itm.startTime < startTime + duration && startTime + duration < itm.startTime + itm.duration)))
+								return null;
+
+						
+
+
+						SequenceNode node = ScriptableObject.CreateInstance<SequenceNode> ();			
+					
+						node.source = source;
+			
+			
+						node.channel = sequenceChannel;
+
 						
 					
 						node.name = source.name;
 						
-						//node.channelOrd = channelOrd;
+					
 
 					
 					
-						node.startTime = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __frameRate);
-						node.duration = TimeAreaW.SnapTimeToWholeFPS (duration, __frameRate);
+						node.startTime = startTime;
+						node.duration = duration;
+
+			
+						
+			
+			
+						int startTimeEarliestIndex = -1;
+
+						if (node.source is AnimationClip) {
+
+								//Guid.NewGuid ().ToString ();
+								
+								//create AnimatorState in controller
+								UnityEditor.Animations.AnimatorState currentState = (node.channel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).AddMotion ((source as Motion));
+								
+								node.stateNameHash = currentState.nameHash;
+				
+								UnityEditor.Animations.AnimatorStateTransition transition = null;
+				
+								float endTimeNode = 0f;
+
+								
+								if (sequenceChannel.nodes.Count > -1) {
+
+										//find index of node with earliest startTime
+										startTimeEarliestIndex=sequenceChannel.nodes.FindLastIndex (itm => itm.startTime < node.startTime);
+
+						
+										if (startTimeEarliestIndex > -1) {//=> prev node exists
+												SequenceNode nodePrev = sequenceChannel.nodes [startTimeEarliestIndex];
+												UnityEditor.Animations.AnimatorState statePrev = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodePrev.stateNameHash);
+							
+							
+												if (statePrev.transitions.Length > 0) {
+														transition = statePrev.transitions [0];
+														statePrev.RemoveTransition (transition);
+												}
+							
+							
+												transition = new AnimatorStateTransition ();
+							
+							
+												transition.destinationState = currentState;
+												transition.duration = 0;
+							
+												endTimeNode = nodePrev.startTime + nodePrev.duration;
+							
+												if (node.startTime < endTimeNode)//there is intersection between current node and prev node
+														transition.duration = endTimeNode - node.startTime;
+							
+							
+							
+												statePrev.AddTransition (transition);
+										}
+						
+										if (startTimeEarliestIndex + 1 < sequenceChannel.nodes.Count) {//=> next node exist
+												SequenceNode nodeNext = sequenceChannel.nodes [startTimeEarliestIndex + 1];
+												UnityEditor.Animations.AnimatorState stateNext = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodeNext.stateNameHash);
+												transition = new AnimatorStateTransition ();
+												transition.destinationState = stateNext;
+												endTimeNode = node.startTime + node.duration;
+												if (nodeNext.startTime < endTimeNode)
+														transition.duration = endTimeNode - nodeNext.startTime;
+							
+												nodeNext.index = startTimeEarliestIndex + 2;
+							
+												currentState.AddTransition (transition);
+										}
+						
+						
+						
+						
+								}
+						}
+					
+						node.index = startTimeEarliestIndex + 1;
 						
 			
 						return node;
