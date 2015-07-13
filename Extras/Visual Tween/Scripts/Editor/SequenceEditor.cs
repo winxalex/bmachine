@@ -44,6 +44,7 @@ namespace VisualTween
 				private const float TIME_LABEL_HEIGHT = 20f;
 				private const float EVENT_PAD_HEIGHT = 20f;
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
+				private static GUIContent __nodeLabelGUIContent = new GUIContent ();
 				string channelLabel;
 				bool testBool;
 		
@@ -111,6 +112,20 @@ namespace VisualTween
 						EditorApplication.playmodeStateChanged += OnPlayModeStateChange;
 				}
 
+//				private static void DoTransition (SequenceNode node, Rect rect, int channelOrd)
+//				{
+//					
+//						Color color = GUI.color;
+//						GUI.color = Color.red;
+//						float transitionPosStart = __timeAreaW.TimeToPixel (node.startTime + node.duration - node.transition, rect);
+//						float transitionPosEnd = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
+//						Rect boxRect = new Rect (transitionPosStart, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, transitionPosEnd - transitionPosStart, NODE_RECT_HEIGHT);
+//				
+//						GUI.Box (boxRect, "", "TL LogicBar 0");
+//						GUI.color = color;
+//					
+//				}
+
 
 
 				/// <summary>
@@ -128,17 +143,49 @@ namespace VisualTween
 
 			
 			
-						float x = __timeAreaW.TimeToPixel (node.startTime, rect);
-						Rect boxRect = new Rect (x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - x, NODE_RECT_HEIGHT);
+						float startTimePos = __timeAreaW.TimeToPixel (node.startTime, rect);
 
-						GUI.Box (boxRect, "", "TL LogicBar 0");
+						float endTimePos = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
 
-						boxRect.xMin += 5;
-						boxRect.xMax -= 5;
-						EditorGUIUtility.AddCursorRect (boxRect, MouseCursor.Pan);
+			float startTransitionTimePos = 0f;
+			SequenceNode nodePrev = null;
+
+						//if there is previous node with transition
+						if (node.index - 1 > -1 && (nodePrev=node.channel.nodes [node.index - 1]).transition > 0) {
+								
+								startTimePos=__timeAreaW.TimeToPixel (node.startTime+nodePrev.transition, rect);
+								
+						}
+
+						if (node.transition > 0) {
+								
+
+								Color colorSave = GUI.color;
+								GUI.color = Color.red;
+
+								startTransitionTimePos=__timeAreaW.TimeToPixel (node.startTime + node.duration-node.transition, rect);
+								
+								Rect transitionRect = new Rect (startTransitionTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, endTimePos-startTransitionTimePos, NODE_RECT_HEIGHT);
+				
+								GUI.Box (transitionRect, "", "TL LogicBar 0");
+
+								GUI.color = colorSave;
+
+								endTimePos = startTransitionTimePos;
+
+						}
+
+						Rect nodeRect = new Rect (startTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, endTimePos - startTimePos, NODE_RECT_HEIGHT);
+
+						GUI.Box (nodeRect, "", "TL LogicBar 0");
+
+						nodeRect.xMin += 5;
+						nodeRect.xMax -= 5;
+						EditorGUIUtility.AddCursorRect (nodeRect, MouseCursor.Pan);
 
 			
 						GUIStyle style = new GUIStyle ("Label");
+
 						style.fontSize = (__nodeSelected == node ? 12 : style.fontSize);
 						style.fontStyle = (__nodeSelected == node ? FontStyle.Bold : FontStyle.Normal);
 						Color color = style.normal.textColor;
@@ -146,9 +193,25 @@ namespace VisualTween
 						style.normal.textColor = color;
 						
 						//calc draw name of the node
-						Vector3 size = style.CalcSize (new GUIContent (node.name));
-						Rect rect1 = new Rect (boxRect.x + boxRect.width * 0.5f - size.x * 0.5f, boxRect.y + boxRect.height * 0.5f - size.y * 0.5f, size.x, size.y);
-						GUI.Label (rect1, node.name, style);
+						__nodeLabelGUIContent.text = node.name;
+
+						Vector3 size = style.CalcSize (__nodeLabelGUIContent);
+						
+							
+						int labelLength = node.name.Length;
+
+						//if labelWidth is greater then node box rect => remove chars
+						while (nodeRect.width < size.x && labelLength>0) {
+									
+								__nodeLabelGUIContent.text = node.name.Substring (0, labelLength);
+								size = style.CalcSize (__nodeLabelGUIContent);
+								labelLength--;
+						}
+
+						if (labelLength > 0) {
+								Rect rect1 = new Rect (nodeRect.x + nodeRect.width * 0.5f - size.x * 0.5f, nodeRect.y + nodeRect.height * 0.5f - size.y * 0.5f, size.x, size.y);
+								GUI.Label (rect1, __nodeLabelGUIContent, style);
+						}
 			
 
 			
@@ -648,6 +711,8 @@ namespace VisualTween
 
 										sequenceNodeClickEventHandler (node, rect, i);
 										DoNode (node, rect, i);
+
+										
 								}
 						}
 
@@ -729,6 +794,7 @@ namespace VisualTween
 												GenericMenu genericMenu = new GenericMenu ();
 												genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
 												genericMenu.ShowAsContext ();
+												__nodeSelected = node;
 										}
 										ev.Use ();
 								}
@@ -749,6 +815,7 @@ namespace VisualTween
 										GenericMenu genericMenu = new GenericMenu ();
 										genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
 										genericMenu.ShowAsContext ();
+										
 								}
 
 								break;
@@ -791,12 +858,7 @@ namespace VisualTween
 												
 												
 											
-//												if(__nodeSelected.source is AnimationClip)//if node is AnimationClip type
-//												if(__nodeSelected.channel.nodes.Count>0)	////sort by startTime if numNodes>1
-//												{
-//													//sequenceChannel.nodes.Sort(new Comparison<SequenceNode>(sequenceChannel.nodes,(
-//													RecreateTransitions(__nodeSelected.channel);
-//												}
+
 												
 												ev.Use ();
 										}
@@ -826,6 +888,8 @@ namespace VisualTween
 												SequenceNode nodePrev = null;
 												SequenceNode nodeNext = null;
 
+												float nodeEnd = 0f;
+
 												if (channel.nodes.Count > 1) {
 
 														if (__nodeSelected.index > 0)
@@ -835,15 +899,67 @@ namespace VisualTween
 																nodeNext = channel.nodes [__nodeSelected.index + 1];
 
 														if (__nodeSelected.source is AnimationClip) { //nodes animation clips are allowed to overlap(transitions)
+
+																__nodeSelected.transition = -1;
 															
 																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
 																		if (nodePrev.startTime < startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration) {
 																				__nodeSelected.startTime = startTime;
+
+																				//////////////////////////////////////
+																				//calc transition with prev node with selected
+																				nodePrev.transition = -1;
+																				nodeEnd = nodePrev.startTime + nodePrev.duration;
+																				if (startTime < nodeEnd) {
+																						nodePrev.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __frameRate);
+																						Debug.Log ("Transition Prev:" + __nodeSelected.transition);
+																				}
+
+																				/////////////////////////////
+																				//calc transition from selected to next node
+																				nodeNext.transition = -1;
+																				nodeEnd = startTime + __nodeSelected.duration;
+																				if (nodeEnd > nodeNext.startTime) {
+																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __frameRate);
+																						Debug.Log ("Transition Next:" + __nodeSelected.transition);
+																				}
+
+
 																		}
 																} else if ((nodePrev != null && nodePrev.startTime < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration)) {
 																		__nodeSelected.startTime = startTime;
+
+
+																		if (nodePrev != null) {
+																				//////////////////////////////////////
+																				//calc transition with prev node with selected
+																				nodePrev.transition = -1;
+																				nodeEnd = nodePrev.startTime + nodePrev.duration;
+																				if (startTime < nodeEnd) {
+																						nodePrev.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __frameRate);
+																						Debug.Log ("Transition Only Prev:" + nodePrev.transition);
+																				}
+																		}
+																		
+																		if (nodeNext != null) {
+																				/////////////////////////////
+																				//calc transition from selected to next node
+																				nodeNext.transition = -1;
+																				nodeEnd = startTime + __nodeSelected.duration;
+																				if (nodeEnd > nodeNext.startTime) {
+																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __frameRate);
+																						Debug.Log ("Transition Only Next:" + __nodeSelected.transition);
+																				}
+																		}
+
+
+
+
+
+																	    
 																}
 									
+																Repaint ();
 															
 														} else {
 																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
@@ -904,16 +1020,21 @@ namespace VisualTween
 						SequenceChannel sequenceChannel = __sequence.channels.Find (itm => itm.nodes.Exists (nd => nd.GetInstanceID () == node.GetInstanceID ()));
 
 			
-						//bypass transition
+						
 						if (node.source is AnimationClip) {
-								if (node.index - 1 > -1 && node.index + 1 < sequenceChannel.nodes.Count) {
-										UnityEditor.Animations.AnimatorController animatorController = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController);
-										UnityEditor.Animations.AnimatorState statePrev = animatorController.GetStateBy (sequenceChannel.nodes [node.index - 1].stateNameHash);
-								
-										UnityEditor.Animations.AnimatorStateTransition transition = statePrev.transitions [0];
-										transition.destinationState = animatorController.GetStateBy (sequenceChannel.nodes [node.index + 1].stateNameHash);
-								
-								}
+								if (node.index - 1 > -1)//if prev node exist reset its transition
+										sequenceChannel.nodes [node.index - 1].transition = -1;
+
+								//bypass transition
+//								if (node.index - 1 > -1 && node.index + 1 < sequenceChannel.nodes.Count) {
+										
+//										UnityEditor.Animations.AnimatorController animatorController = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController);
+//										UnityEditor.Animations.AnimatorState statePrev = animatorController.GetStateBy (sequenceChannel.nodes [node.index - 1].stateNameHash);
+//								
+//										UnityEditor.Animations.AnimatorStateTransition transition = statePrev.transitions [0];
+//										transition.destinationState = animatorController.GetStateBy (sequenceChannel.nodes [node.index + 1].stateNameHash);
+//								
+//								}
 						}
 
 
@@ -946,8 +1067,10 @@ namespace VisualTween
 							
 
 						}
-
 						
+						
+
+						__nodeSelected = null;
 
 						Repaint ();
 				}
@@ -1044,11 +1167,10 @@ namespace VisualTween
 														
 																
 																
-																		sequenceChannel.nodes.Insert (node.index, node);
+																sequenceChannel.nodes.Insert (node.index, node);
 																
 																	
-																//sequenceChannel.nodes.ForEach(itm=> EditorUtility.SetDirty(itm));
-																//EditorUtility.SetDirty(sequenceChannel);
+														
 
 																
 																__nodeSelected = node;
@@ -1062,13 +1184,7 @@ namespace VisualTween
 			
 				}
 
-				private static void RecreateTransitions (SequenceChannel channel)
-				{
-						//UnityEditor.Animations.AnimatorStateTransition transition;
-
-						//UnityEditor.Animations.AnimatorState State;
-						throw new NotImplementedException ();
-				}				
+							
 
 				/// <summary>
 				/// Creates the sequence node.
@@ -1106,8 +1222,8 @@ namespace VisualTween
 
 						}
 
-						startTime=TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __frameRate);
-						duration=TimeAreaW.SnapTimeToWholeFPS (duration, __frameRate);
+						startTime = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __frameRate);
+						duration = TimeAreaW.SnapTimeToWholeFPS (duration, __frameRate);
 
 						
 
@@ -1157,7 +1273,7 @@ namespace VisualTween
 								
 								node.stateNameHash = currentState.nameHash;
 				
-								UnityEditor.Animations.AnimatorStateTransition transition = null;
+								//UnityEditor.Animations.AnimatorStateTransition transition = null;
 				
 								float endTimeNode = 0f;
 
@@ -1165,7 +1281,7 @@ namespace VisualTween
 								if (sequenceChannel.nodes.Count > -1) {
 
 										//find index of node with earliest startTime
-										startTimeEarliestIndex=sequenceChannel.nodes.FindLastIndex (itm => itm.startTime < node.startTime);
+										startTimeEarliestIndex = sequenceChannel.nodes.FindLastIndex (itm => itm.startTime < node.startTime);
 
 						
 										if (startTimeEarliestIndex > -1) {//=> prev node exists
@@ -1173,40 +1289,43 @@ namespace VisualTween
 												UnityEditor.Animations.AnimatorState statePrev = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodePrev.stateNameHash);
 							
 							
-												if (statePrev.transitions.Length > 0) {
-														transition = statePrev.transitions [0];
-														statePrev.RemoveTransition (transition);
-												}
+//												if (statePrev.transitions.Length > 0) {
+//														transition = statePrev.transitions [0];
+//														statePrev.RemoveTransition (transition);
+//												}
 							
 							
-												transition = new AnimatorStateTransition ();
+												//transition = new AnimatorStateTransition ();
 							
 							
-												transition.destinationState = currentState;
-												transition.duration = 0;
+												//transition.destinationState = currentState;
+												//transition.duration = 0;
+												nodePrev.transition = -1;
 							
 												endTimeNode = nodePrev.startTime + nodePrev.duration;
 							
 												if (node.startTime < endTimeNode)//there is intersection between current node and prev node
-														transition.duration = endTimeNode - node.startTime;
+														nodePrev.transition = TimeAreaW.SnapTimeToWholeFPS (endTimeNode - node.startTime, __frameRate);
+												//transition.duration = endTimeNode - node.startTime;
 							
 							
 							
-												statePrev.AddTransition (transition);
+												//statePrev.AddTransition (transition);
 										}
 						
 										if (startTimeEarliestIndex + 1 < sequenceChannel.nodes.Count) {//=> next node exist
 												SequenceNode nodeNext = sequenceChannel.nodes [startTimeEarliestIndex + 1];
 												UnityEditor.Animations.AnimatorState stateNext = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodeNext.stateNameHash);
-												transition = new AnimatorStateTransition ();
-												transition.destinationState = stateNext;
+												//transition = new AnimatorStateTransition ();
+												//transition.destinationState = stateNext;
 												endTimeNode = node.startTime + node.duration;
 												if (nodeNext.startTime < endTimeNode)
-														transition.duration = endTimeNode - nodeNext.startTime;
+														node.transition = TimeAreaW.SnapTimeToWholeFPS (endTimeNode - nodeNext.startTime, __frameRate);
+												//transition.duration = endTimeNode - nodeNext.startTime;
 							
 												nodeNext.index = startTimeEarliestIndex + 2;
 							
-												currentState.AddTransition (transition);
+												//currentState.AddTransition (transition);
 										}
 						
 						
@@ -1408,6 +1527,7 @@ namespace VisualTween
 		
 				}
 
+	
 
 					
 		
