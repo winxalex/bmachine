@@ -143,35 +143,37 @@ namespace VisualTween
 
 			
 			
-						float startTimePos = __timeAreaW.TimeToPixel (node.startTime, rect);
+						float startTimePos = __timeAreaW.TimeToPixel (node.startTime+node.transition, rect);
 
 						float endTimePos = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
 
-			float startTransitionTimePos = 0f;
-			SequenceNode nodePrev = null;
+						float startTransitionTimePos = 0f;
+						SequenceNode nodePrev = null;
 
-						//if there is previous node with transition
-						if (node.index - 1 > -1 && (nodePrev=node.channel.nodes [node.index - 1]).transition > 0) {
-								
-								startTimePos=__timeAreaW.TimeToPixel (node.startTime+nodePrev.transition, rect);
-								
-						}
+						//if there is next node with transition
+//						if (node.index + 1< node.channel.nodes.Count && (nodePrev = node.channel.nodes [node.index - 1]).transition > 0) {
+//								
+//								startTimePos = __timeAreaW.TimeToPixel (node.startTime + nodePrev.transition, rect);
+//								
+//						}
 
+
+						//Draw Transtion rect
 						if (node.transition > 0) {
 								
 
 								Color colorSave = GUI.color;
 								GUI.color = Color.red;
 
-								startTransitionTimePos=__timeAreaW.TimeToPixel (node.startTime + node.duration-node.transition, rect);
+								startTransitionTimePos = __timeAreaW.TimeToPixel (node.startTime, rect);
 								
-								Rect transitionRect = new Rect (startTransitionTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, endTimePos-startTransitionTimePos, NODE_RECT_HEIGHT);
+								Rect transitionRect = new Rect (startTransitionTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, startTimePos - startTransitionTimePos, NODE_RECT_HEIGHT);
 				
 								GUI.Box (transitionRect, "", "TL LogicBar 0");
 
 								GUI.color = colorSave;
 
-								endTimePos = startTransitionTimePos;
+								
 
 						}
 
@@ -346,7 +348,7 @@ namespace VisualTween
 								__sequence = __sequenceGameObject.GetComponent<Sequence> ();
 						}
 				
-						if (__sequence != null && __sequence.isPlaying) {
+						if (!EditorApplication.isPlaying &&__sequence != null && __sequence.isPlaying) {
 								
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 
@@ -836,6 +838,9 @@ namespace VisualTween
 						Rect clickRect;
 
 						float startTime;
+						float leftOffset=0f;
+						float rightOffset=0f;
+
 						switch (ev.rawType) {
 
 						case EventType.MouseDrag:
@@ -892,63 +897,76 @@ namespace VisualTween
 
 												if (channel.nodes.Count > 1) {
 
-														if (__nodeSelected.index > 0)
+														//find if prev node from selected node exist
+														if (__nodeSelected.index > 0){
 																nodePrev = channel.nodes [__nodeSelected.index - 1];
 
-														if (__nodeSelected.index + 1 < channel.nodes.Count) //if next node exist
+															if(__nodeSelected.duration<nodePrev.duration)
+																leftOffset=nodePrev.duration-__nodeSelected.duration;
+														}
+
+														//find if next node from selected node exist
+														if (__nodeSelected.index + 1 < channel.nodes.Count){ //if next node exist
 																nodeNext = channel.nodes [__nodeSelected.index + 1];
+
+																if(__nodeSelected.duration<nodeNext.duration)
+																rightOffset=nodeNext.duration-__nodeSelected.duration;
+														}
 
 														if (__nodeSelected.source is AnimationClip) { //nodes animation clips are allowed to overlap(transitions)
 
-																__nodeSelected.transition = -1;
+																__nodeSelected.transition = 0f;
 															
-																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
-																		if (nodePrev.startTime < startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration) {
+																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current selected node
+	
+
+																		//restrict selected node draging 
+																		if (nodePrev.startTime +leftOffset< startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration-rightOffset) {
 																				__nodeSelected.startTime = startTime;
 
 																				//////////////////////////////////////
 																				//calc transition with prev node with selected
-																				nodePrev.transition = -1;
+																				__nodeSelected.transition = 0f;
 																				nodeEnd = nodePrev.startTime + nodePrev.duration;
 																				if (startTime < nodeEnd) {
-																						nodePrev.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __frameRate);
-																						Debug.Log ("Transition Prev:" + __nodeSelected.transition);
+																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __frameRate);
+																						//Debug.Log ("Transition Prev:" + __nodeSelected.transition);
 																				}
 
 																				/////////////////////////////
 																				//calc transition from selected to next node
-																				nodeNext.transition = -1;
+																				nodeNext.transition = 0f;//reset
 																				nodeEnd = startTime + __nodeSelected.duration;
 																				if (nodeEnd > nodeNext.startTime) {
-																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __frameRate);
-																						Debug.Log ("Transition Next:" + __nodeSelected.transition);
+																						nodeNext.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __frameRate);
+																						//Debug.Log ("Transition Next:" + nodeNext.transition);
 																				}
 
 
 																		}
-																} else if ((nodePrev != null && nodePrev.startTime < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration)) {
+																} else if ((nodePrev != null && nodePrev.startTime +leftOffset < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration - rightOffset)) {
 																		__nodeSelected.startTime = startTime;
 
 
 																		if (nodePrev != null) {
 																				//////////////////////////////////////
 																				//calc transition with prev node with selected
-																				nodePrev.transition = -1;
+																				__nodeSelected.transition = 0f;
 																				nodeEnd = nodePrev.startTime + nodePrev.duration;
 																				if (startTime < nodeEnd) {
-																						nodePrev.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __frameRate);
-																						Debug.Log ("Transition Only Prev:" + nodePrev.transition);
+																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __frameRate);
+																						//Debug.Log ("Transition Only Prev:" + __nodeSelected.transition);
 																				}
 																		}
 																		
 																		if (nodeNext != null) {
 																				/////////////////////////////
 																				//calc transition from selected to next node
-																				nodeNext.transition = -1;
+																				nodeNext.transition = 0f;
 																				nodeEnd = startTime + __nodeSelected.duration;
 																				if (nodeEnd > nodeNext.startTime) {
-																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __frameRate);
-																						Debug.Log ("Transition Only Next:" + __nodeSelected.transition);
+																						nodeNext.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __frameRate);
+																						//Debug.Log ("Transition Only Next:" + nodeNext.transition);
 																				}
 																		}
 
@@ -1023,7 +1041,7 @@ namespace VisualTween
 						
 						if (node.source is AnimationClip) {
 								if (node.index - 1 > -1)//if prev node exist reset its transition
-										sequenceChannel.nodes [node.index - 1].transition = -1;
+										sequenceChannel.nodes [node.index - 1].transition = 0;
 
 								//bypass transition
 //								if (node.index - 1 > -1 && node.index + 1 < sequenceChannel.nodes.Count) {
@@ -1300,7 +1318,7 @@ namespace VisualTween
 							
 												//transition.destinationState = currentState;
 												//transition.duration = 0;
-												nodePrev.transition = -1;
+												nodePrev.transition = 0;
 							
 												endTimeNode = nodePrev.startTime + nodePrev.duration;
 							

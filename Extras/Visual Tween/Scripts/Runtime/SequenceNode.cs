@@ -15,7 +15,7 @@ namespace VisualTween
 				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
 				public int index = -1;
-				public float transition = -1f;
+				public float transition = 0f;
 				public bool loop;
 				public float volume = 1f;
 
@@ -154,10 +154,16 @@ namespace VisualTween
 										animator.runtimeAnimatorController = this.channel.runtimeAnimatorController;
 										animator.enabled = true;
 
-										if (transition > 0)
-												animator.CrossFade (stateNameHash, transition,0,0f);
-										else
+									    
+											
+
+										if (transition > 0) {
+												Debug.Log("Crossfade "+this.name);
+												animator.CrossFade (stateNameHash, transition, 0, 0f);
+										} else {
+												Debug.Log("Play "+this.name);
 												animator.Play (stateNameHash, 0, 0f);
+										}
 										
 
 
@@ -206,10 +212,11 @@ namespace VisualTween
 										} else
 												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
 								} else if (source is AnimationClip) {
-										Animator animator = target.GetComponent<Animator> ();
-																				
-										if (animator != null)
-												animator.enabled = false;
+//										Animator animator = target.GetComponent<Animator> ();
+//															
+//										//
+//										if (animator != null && this.index+1==this.channel.nodes.Count)
+//												animator.enabled = false;
 
 																	
 								
