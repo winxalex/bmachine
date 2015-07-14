@@ -5,7 +5,7 @@ using VisualTween.Action;
 using System.Linq;
 using UnityEngine.Events;
 
-namespace VisualTween
+namespace ws.winx.unity.sequence
 {
 		public class Sequence : MonoBehaviour
 		{

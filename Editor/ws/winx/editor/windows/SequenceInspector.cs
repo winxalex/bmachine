@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
+using ws.winx.unity.sequence;
 
-namespace VisualTween{
+namespace ws.winx.editor.windows{
 	[CustomEditor(typeof(Sequence))]
 	public class SequenceInspector : Editor {
 

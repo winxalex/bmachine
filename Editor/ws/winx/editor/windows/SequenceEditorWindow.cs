@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using VisualTween.Action;
-using VisualTween.Action.Generic;
 using UnityEditorInternal;
 using ws.winx.editor;
 using System.IO;
@@ -15,10 +13,11 @@ using ws.winx.editor.extensions;
 using ws.winx.unity.utilities;
 using UnityEditor.Animations;
 using ws.winx.unity;
+using ws.winx.unity.sequence;
 
-namespace VisualTween
+namespace ws.winx.editor.windows
 {
-		public class SequenceEditor : EditorWindow
+		public class SequenceEditorWindow : EditorWindow
 		{
 				
 				private static Sequence __sequence;
@@ -63,7 +62,7 @@ namespace VisualTween
 				[MenuItem("Window/Visual Tween/Sequence", false)]
 				public static void ShowWindow ()
 				{
-						SequenceEditor window = EditorWindow.GetWindow<SequenceEditor> (false, "Sequence");
+						SequenceEditorWindow window = EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence");
 
 						__sequence = Selection.activeGameObject.GetComponent<Sequence> ();
 						__sequenceGameObject = Selection.activeGameObject;

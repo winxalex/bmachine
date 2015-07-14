@@ -5,7 +5,7 @@ using VisualTween.Action;
 using System;
 using UnityEngine.Events;
 
-namespace VisualTween
+namespace ws.winx.unity.sequence
 {
 		[System.Serializable]
 		public class SequenceNode:ScriptableObject
