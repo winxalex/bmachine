@@ -61,6 +61,14 @@ namespace ws.winx.unity.sequence
 				public bool playOnStart = true;
 
 
+				bool _isRecording;
+				
+				public bool isRecording {
+					get {
+						return _isRecording;
+					}
+				}
+
 				bool _isPlaying;
 
 				public bool isPlaying {
@@ -188,12 +196,18 @@ namespace ws.winx.unity.sequence
 				}
 
 
+				
+
+
 				/// <summary>
 				/// Play the sequence
 				/// </summary>
 				/// <param name="t">global "time"  (Time.time or EditorApplicaiton.timeSinceStartUp).</param>
 				public void Play (double t)
 				{
+						StopRecording ();
+
+				
 						__duration = calcDuration ();
 
 						//prevent
@@ -300,6 +314,22 @@ namespace ws.winx.unity.sequence
 				}
 
 
+				public void Record(){
+					_isRecording = true;
+
+					Stop (playForward);
+				}
+
+
+					public void StopRecording(){
+
+							_isRecording = false;
+
+
+
+						
+
+					}
 
 				/// <summary>
 				/// Value of Final Node end time in local sequence time space

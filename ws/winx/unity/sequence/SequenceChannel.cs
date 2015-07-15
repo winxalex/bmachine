@@ -4,12 +4,20 @@ using System.Collections.Generic;
 using VisualTween.Action;
 using System;
 
-namespace VisualTween
+namespace ws.winx.unity.sequence
 {
 		[System.Serializable]
 		public class SequenceChannel:ScriptableObject
 		{
-		public string name;
+
+				public enum SequenceChannelType{
+						Animation,
+						Video,
+						Audio
+				}
+
+				public string name;
+				public SequenceChannelType type;
 			
 				[SerializeField]
 				GameObject

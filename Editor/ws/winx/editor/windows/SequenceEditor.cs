@@ -5,7 +5,7 @@ using ws.winx.unity.sequence;
 
 namespace ws.winx.editor.windows{
 	[CustomEditor(typeof(Sequence))]
-	public class SequenceInspector : Editor {
+	public class SequenceEditor : Editor {
 
 		SequenceNodeEditor nodeEditor;
 
@@ -55,7 +55,7 @@ namespace ws.winx.editor.windows{
 				sequence.Restart();
 			}
 			if (GUILayout.Button ("Open Editor")) {
-				SequenceEditor.ShowWindow();
+				SequenceEditorWindow.ShowWindow();
 			}
 
 			if (selectedNode != null){

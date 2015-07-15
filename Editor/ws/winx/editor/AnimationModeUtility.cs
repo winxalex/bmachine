@@ -414,6 +414,37 @@ namespace ws.winx.editor
 				}
 
 
+				public static void SampleClipBindingAt (IList<GameObject> animatedObjects, IList<AnimationClip> animationClips, IList<float> times)
+				{
+					
+					
+					Undo.FlushUndoRecordObjects ();
+					
+					
+					AnimationMode.BeginSampling ();
+					
+					int len = animationClips.Count;
+					
+					if (len != animatedObjects.Count) {
+						len = 0;
+						Debug.LogError ("AnimaitonModeUtility.ResampleAnimation> Number of Animate Object should be same with Animation Clips");
+					}
+					
+					for (int i=0; i<len; i++) {
+						AnimationMode.SampleAnimationClip (animatedObjects [i], animationClips [i], times[i]);
+						
+						
+					}
+					
+					
+					
+					AnimationMode.EndSampling ();
+					
+					
+					
+				}
+
+
 
 				/// <summary>
 				/// Saves the binding boonRoot offset - position before animation from boonRoot position at time=0s

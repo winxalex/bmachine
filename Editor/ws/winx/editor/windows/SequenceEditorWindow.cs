@@ -142,7 +142,7 @@ namespace ws.winx.editor.windows
 
 			
 			
-						float startTimePos = __timeAreaW.TimeToPixel (node.startTime+node.transition, rect);
+						float startTimePos = __timeAreaW.TimeToPixel (node.startTime + node.transition, rect);
 
 						float endTimePos = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
 
@@ -318,24 +318,53 @@ namespace ws.winx.editor.windows
 			                            "Close");			
 				}
 
+
+				/// <summary>
+				/// Handles the editor to  play mode state change event.
+				/// </summary>
 				private void OnPlayModeStateChange ()
 				{
 						if (EditorApplication.isPlaying) {
 
+								///TODO check this if not blocking playmode
+								__sequence.Stop(__sequence.playForward);
+								__sequence.StopRecording();
 
-								//timeline.isRecording = true;
-								//__sequence.isPlaying = true;
-								//StartRecord ();
+								
 						} else {
-								//StopRecord ();
-								//OnPlay (false);
-								//timeline.isRecording = false;
-								//__sequence.isPlaying = false;
-
-								//List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
-								//sequences.ForEach (itm => itm.Stop (__sequence.playForward));
+								
 
 						}
+				}
+
+
+				/// <summary>
+				/// Postprocesses the animation recording and property modifications.
+				/// </summary>
+				/// <returns>The animation recording modifications.</returns>
+				/// <param name="modifications">Modifications.</param>
+				private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
+				{
+						List<UndoPropertyModification> propertyModificationList = new List<UndoPropertyModification> ();
+
+						//if__nodeSelected.channel.target!=
+//					EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
+//					
+//					List<EditorClipBinding> list = clipBindings.ToList ();
+//					list.Add (__nodeClipBinding);
+//					
+//					list.ForEach ((itm) => {
+//						
+//						
+//						
+//						if (itm.gameObject != null && itm.clip != null) 	
+//							propertyModificationList.Concat (AnimationModeUtility.Process (itm.gameObject, itm.clip, modifications, __timeCurrent));
+//						
+//						
+//					});
+					
+					
+						return propertyModificationList.ToArray ();
 				}
 
 				private void Update ()
@@ -347,7 +376,7 @@ namespace ws.winx.editor.windows
 								__sequence = __sequenceGameObject.GetComponent<Sequence> ();
 						}
 				
-						if (!EditorApplication.isPlaying &&__sequence != null && __sequence.isPlaying) {
+						if (!EditorApplication.isPlaying && __sequence != null && __sequence.isPlaying) {
 								
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 
@@ -395,6 +424,7 @@ namespace ws.winx.editor.windows
 						if (!__sequence.isPlaying) {
 								
 								
+								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 
 //								__sequence.SequenceNodeStart -= onSequenceNodeStart;
 //								__sequence.SequenceNodeStart += onSequenceNodeStart;
@@ -403,6 +433,13 @@ namespace ws.winx.editor.windows
 //								__sequence.SequenceNodeStop += onSequenceNodeStop;
 
 								//__sequence.Play (EditorApplication.timeSinceStartup);
+
+
+								if (!AnimationMode.InAnimationMode ()) {
+
+									
+									AnimationMode.StartAnimationMode ();
+								}
 
 
 
@@ -416,7 +453,9 @@ namespace ws.winx.editor.windows
 				
 				
 						} else {
-								//__sequence.Stop (__sequence.playForward);
+								__sequence.Stop (__sequence.playForward);
+
+								AnimationMode.StopAnimationMode ();
 
 
 //				foreach(SequenceChannel channel in __sequence.channels)
@@ -527,20 +566,32 @@ namespace ws.winx.editor.windows
 						GUILayout.BeginArea (rect, GUIContent.none, style);
 			
 						GUILayout.BeginHorizontal (EditorStyles.toolbar);
-						GUI.backgroundColor = __isRecording ? Color.red : Color.white;
-						if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.Record"), EditorStyles.toolbarButton)) {
-								__isRecording = !__isRecording;
 
-								foreach (SequenceChannel channel in __sequence.channels)
-										foreach (SequenceNode node in channel.nodes)
-												if (node.source is AudioClip)
-														AudioUtilW.StopClip (node.source as AudioClip);
-//				if(onRecord != null){
-//					onRecord();
-//				}
+						Color colorSave = GUI.backgroundColor;
+						GUI.backgroundColor = __sequence.isRecording ? Color.red : Color.white;
+
+						//Record
+						if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.Record"), EditorStyles.toolbarButton)) {
+								
+								if (__sequence.isRecording) {
+										__sequence.StopRecording ();
+								} else {
+										__sequence.Record ();
+
+
+										if (!AnimationMode.InAnimationMode ()) {
+
+							
+												AnimationMode.StartAnimationMode ();
+												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+										}
+								}
+
 						}
-						GUI.backgroundColor = Color.white;
-			
+
+						GUI.backgroundColor = colorSave;
+
+						//Play
 						if (GUILayout.Button (__sequence.isPlaying ? EditorGUIUtility.FindTexture ("d_PlayButton On") : EditorGUIUtility.FindTexture ("d_PlayButton"), EditorStyles.toolbarButton)) {
 								
 
@@ -665,6 +716,46 @@ namespace ws.winx.editor.windows
 				}
 
 
+				void onTimelineClick (Rect rect)
+				{
+					__sequence.timeCurrent = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+
+					
+					
+					__sequence.Record();
+
+
+					if (!AnimationMode.InAnimationMode ()) {
+							AnimationMode.StartAnimationMode();
+							Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+					}
+
+				
+
+			List<GameObject> targets=new List<GameObject> ();
+			List<AnimationClip> clips=new List<AnimationClip>();
+			List<float> times=new List<float>();
+
+			SequenceNode node;
+
+					foreach (SequenceChannel channel in __sequence.channels) {
+							if(channel.target!=null && channel.type==SequenceChannel.SequenceChannelType.Animation){
+									node=channel.nodes.FirstOrDefault(itm=>__sequence.timeCurrent-itm.startTime>=0 && __sequence.timeCurrent<=itm.startTime-itm.duration);
+									if(node!=null){
+											targets.Add(channel.target);
+											times.Add((float)(__sequence.timeCurrent-node.startTime));
+											clips.Add(node.source as AnimationClip);
+						         	 }
+
+							}
+					}
+
+				
+						AnimationModeUtility.SampleClipBindingAt (targets, clips, times);
+
+
+				}
+
 
 				/// <summary>
 				/// Raises the timeline GU event.
@@ -721,7 +812,7 @@ namespace ws.winx.editor.windows
 						//check timeline click
 						if (!__sequence.isPlaying && Event.current.type == EventType.MouseDown && Event.current.button == 0 && new Rect (rect.x, 0, rect.width, TIME_LABEL_HEIGHT).Contains (Event.current.mousePosition)) {
 								
-								__sequence.timeCurrent = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+								onTimelineClick(rect);
 								
 								Event.current.Use ();
 						}
@@ -837,8 +928,8 @@ namespace ws.winx.editor.windows
 						Rect clickRect;
 
 						float startTime;
-						float leftOffset=0f;
-						float rightOffset=0f;
+						float leftOffset = 0f;
+						float rightOffset = 0f;
 
 						switch (ev.rawType) {
 
@@ -897,19 +988,19 @@ namespace ws.winx.editor.windows
 												if (channel.nodes.Count > 1) {
 
 														//find if prev node from selected node exist
-														if (__nodeSelected.index > 0){
+														if (__nodeSelected.index > 0) {
 																nodePrev = channel.nodes [__nodeSelected.index - 1];
 
-															if(__nodeSelected.duration<nodePrev.duration)
-																leftOffset=nodePrev.duration-__nodeSelected.duration;
+																if (__nodeSelected.duration < nodePrev.duration)
+																		leftOffset = nodePrev.duration - __nodeSelected.duration;
 														}
 
 														//find if next node from selected node exist
-														if (__nodeSelected.index + 1 < channel.nodes.Count){ //if next node exist
+														if (__nodeSelected.index + 1 < channel.nodes.Count) { //if next node exist
 																nodeNext = channel.nodes [__nodeSelected.index + 1];
 
-																if(__nodeSelected.duration<nodeNext.duration)
-																rightOffset=nodeNext.duration-__nodeSelected.duration;
+																if (__nodeSelected.duration < nodeNext.duration)
+																		rightOffset = nodeNext.duration - __nodeSelected.duration;
 														}
 
 														if (__nodeSelected.source is AnimationClip) { //nodes animation clips are allowed to overlap(transitions)
@@ -920,7 +1011,7 @@ namespace ws.winx.editor.windows
 	
 
 																		//restrict selected node draging 
-																		if (nodePrev.startTime +leftOffset< startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration-rightOffset) {
+																		if (nodePrev.startTime + leftOffset < startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration - rightOffset) {
 																				__nodeSelected.startTime = startTime;
 
 																				//////////////////////////////////////
@@ -943,7 +1034,7 @@ namespace ws.winx.editor.windows
 
 
 																		}
-																} else if ((nodePrev != null && nodePrev.startTime +leftOffset < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration - rightOffset)) {
+																} else if ((nodePrev != null && nodePrev.startTime + leftOffset < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration - rightOffset)) {
 																		__nodeSelected.startTime = startTime;
 
 
@@ -1151,6 +1242,8 @@ namespace ws.winx.editor.windows
 																
 																if (channel < __sequence.channels.Count) {
 																		sequenceChannel = __sequence.channels [channel];
+
+																
 																} else {
 																		if ((sequenceChannel = CreateNewSequenceChannel ()) == null)
 																				continue;
@@ -1163,8 +1256,10 @@ namespace ws.winx.editor.windows
 																				sequenceChannel.name = "Animation";
 																		} else if (draggedType == typeof(AudioClip)) {
 																				sequenceChannel.name = "Audio";
+																				sequenceChannel.type=SequenceChannel.SequenceChannelType.Audio;
 																		} else if (draggedType == typeof(MovieTexture)) {
 																				sequenceChannel.name = "Video";
+																				sequenceChannel.type=SequenceChannel.SequenceChannelType.Video;
 																		}
 
 

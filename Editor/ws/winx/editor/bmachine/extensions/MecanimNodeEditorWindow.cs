@@ -70,7 +70,7 @@ namespace ws.winx.editor.bmachine.extensions
 				private static bool __isPlaying;
 				private static bool __isRecording;
 				private static float __timeCurrent;//in [seconds]
-				private static EditorClipBinding __nodeClipBinding;
+				private static EditorClipBinding __mecanimNodeClipBinding;
 				private static EditorClipBinding[] __clipBindingsToBeAnimated;
 				private static bool __timeNormalizedUpdate;
 				private static float[] keyframeTimeValues;
@@ -124,11 +124,11 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 			
-						if (__nodeClipBinding == null)
-								__nodeClipBinding = ScriptableObject.CreateInstance<EditorClipBinding> ();
+						if (__mecanimNodeClipBinding == null)
+								__mecanimNodeClipBinding = ScriptableObject.CreateInstance<EditorClipBinding> ();
 						
-						__nodeClipBinding.gameObject = __spaceGameObject;
-						__nodeClipBinding.clip = __spaceGameObjectAnimationClip;
+						__mecanimNodeClipBinding.gameObject = __spaceGameObject;
+						__mecanimNodeClipBinding.clip = __spaceGameObjectAnimationClip;
 						
 
 						
@@ -159,7 +159,7 @@ namespace ws.winx.editor.bmachine.extensions
 						variablesBindedToCurves = (UnityVariable[])variablesBindedToCurvesSerialized.value;
 						
 						AnimationModeUtility.ResetBindingsTransformPropertyModification (clipBindingsSerialized.value as EditorClipBinding[]);
-						AnimationModeUtility.ResetBindingTransformPropertyModification (__nodeClipBinding);
+						AnimationModeUtility.ResetBindingTransformPropertyModification (__mecanimNodeClipBinding);
 
 						
 
@@ -460,7 +460,7 @@ namespace ws.winx.editor.bmachine.extensions
 						EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
 
 						List<EditorClipBinding> list = clipBindings.ToList ();
-						list.Add (__nodeClipBinding);
+						list.Add (__mecanimNodeClipBinding);
 																	
 						list.ForEach ((itm) => {
 
@@ -1011,7 +1011,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 
-								__nodeClipBinding.clip = __spaceGameObjectAnimationClip;
+								__mecanimNodeClipBinding.clip = __spaceGameObjectAnimationClip;
 
 
 								/////////////   TIME CONTROL OF ANIMATION (SLIDER) /////////
@@ -1070,7 +1070,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 
 												List<EditorClipBinding> list = (clipBindingsSerialized.value as EditorClipBinding[]).ToList ();
-												list.Add (__nodeClipBinding);
+												list.Add (__mecanimNodeClipBinding);
 
 												__clipBindingsToBeAnimated = list.ToArray ();
 													
@@ -1082,7 +1082,7 @@ namespace ws.winx.editor.bmachine.extensions
 												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
 												AnimationModeUtility.SaveBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
 
-												AnimationModeUtility.SaveBindingStatus (__nodeClipBinding);
+												AnimationModeUtility.SaveBindingStatus (__mecanimNodeClipBinding);
 													
 												//calculate time in seconds from the current postion of time scrubber
 												__timeCurrent = __timeNormalized * __spaceGameObjectAnimationClip.length;
@@ -1108,7 +1108,7 @@ namespace ws.winx.editor.bmachine.extensions
 										AnimationModeUtility.ResetBindingsTransformPropertyModification (clipBindingsSerialized.value as EditorClipBinding[]);
 
 										//reset Node.self gameObject
-										AnimationModeUtility.ResetBindingTransformPropertyModification (__nodeClipBinding);
+										AnimationModeUtility.ResetBindingTransformPropertyModification (__mecanimNodeClipBinding);
 													
 										LockRootGameObject (false);
 						
@@ -1142,7 +1142,7 @@ namespace ws.winx.editor.bmachine.extensions
 												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
 												AnimationModeUtility.SaveBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
 
-												AnimationModeUtility.SaveBindingStatus (__nodeClipBinding);
+												AnimationModeUtility.SaveBindingStatus (__mecanimNodeClipBinding);
 
 
 												LockRootGameObject (true);
@@ -1156,7 +1156,7 @@ namespace ws.winx.editor.bmachine.extensions
 												Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
 												List<EditorClipBinding> list = (clipBindingsSerialized.value as EditorClipBinding[]).ToList ();
-												list.Add (__nodeClipBinding);
+												list.Add (__mecanimNodeClipBinding);
 						
 												__clipBindingsToBeAnimated = list.ToArray ();
 
