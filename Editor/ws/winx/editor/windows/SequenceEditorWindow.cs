@@ -330,6 +330,9 @@ namespace ws.winx.editor.windows
 								__sequence.Stop (__sequence.playForward);
 								__sequence.StopRecording ();
 
+								Stop ();
+								ResetChannelsTarget();
+
 								
 						} else {
 								
@@ -381,7 +384,7 @@ namespace ws.winx.editor.windows
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 
 
-								SampleClipNodesAt(__sequence.timeCurrent);
+								SampleClipNodesAt (__sequence.timeCurrent);
 
 								this.Repaint ();
 
@@ -396,33 +399,33 @@ namespace ws.winx.editor.windows
 
 				private static void ResetChannelsTarget ()
 				{
-					PrefabType prefabType = PrefabType.None;
+						PrefabType prefabType = PrefabType.None;
 					
-					foreach(SequenceChannel channel in __sequence.channels){
-						if (channel.type== SequenceChannel.SequenceChannelType.Animation && channel.target != null) {
-							prefabType = PrefabUtility.GetPrefabType (channel.target);
+						foreach (SequenceChannel channel in __sequence.channels) {
+								if (channel.type == SequenceChannel.SequenceChannelType.Animation && channel.target != null) {
+										prefabType = PrefabUtility.GetPrefabType (channel.target);
 							
-							if (prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance)
+										if (prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance)
 								//channel.target.ResetPropertyModification<Transform> ();
-								PrefabUtility.RevertPrefabInstance(channel.target);
+												PrefabUtility.RevertPrefabInstance (channel.target);
 							
 							
 							
 							
-							//rewind to start position
-							//clipBindingCurrent.ResetRoot ();
+										//rewind to start position
+										//clipBindingCurrent.ResetRoot ();
+								}
 						}
-					}
 				}
 
-
-				private static void Stop(){
-					__sequence.Stop(__sequence.playForward);
-					Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
-					__sequence.StopRecording ();
-					AnimationMode.StopAnimationMode ();
+				private static void Stop ()
+				{
+						__sequence.Stop (__sequence.playForward);
+						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+						__sequence.StopRecording ();
+						AnimationMode.StopAnimationMode ();
 					
-					ResetChannelsTarget();
+				
 
 				}
 
@@ -430,6 +433,8 @@ namespace ws.winx.editor.windows
 				{
 						if (__sequence.isRecording) {
 								Stop ();
+
+								ResetChannelsTarget();
 
 						} else {
 								__sequence.Record ();
@@ -439,7 +444,12 @@ namespace ws.winx.editor.windows
 							
 										AnimationMode.StartAnimationMode ();
 										Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+
+										SaveBonePositionOffset();
 								}
+
+
+								SampleClipNodesAt(__sequence.timeCurrent);
 						}
 				}
 
@@ -484,7 +494,9 @@ namespace ws.winx.editor.windows
 //								__sequence.SequenceNodeStop -= onSequenceNodeStop;
 //								__sequence.SequenceNodeStop += onSequenceNodeStop;
 
-								__sequence.timeCurrent=0f;
+								if(__sequence.timeCurrent>=__sequence.duration)
+								__sequence.timeCurrent = 0f;
+
 								__sequence.Play (EditorApplication.timeSinceStartup);
 
 								
@@ -513,7 +525,7 @@ namespace ws.winx.editor.windows
 
 								__sequence.Stop (__sequence.playForward);
 
-								AnimationMode.StopAnimationMode ();
+								Stop ();
 
 
 //				foreach(SequenceChannel channel in __sequence.channels)
@@ -578,6 +590,10 @@ namespace ws.winx.editor.windows
 				/// <param name="channel">Channel.</param>
 				static void sequenceDropChannelTargetEventHandler (Rect rect, int channel)
 				{
+						if (__sequence.isPlaying || __sequence.isRecording)
+								return;
+
+
 						Event evt = Event.current;
 
 
@@ -779,13 +795,13 @@ namespace ws.winx.editor.windows
 								AnimationMode.StartAnimationMode ();
 								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
-									SaveBonePositionOffset();
+								SaveBonePositionOffset ();
 				
 								//SceneView.RepaintAll();
 
-								SceneView.currentDrawingSceneView.Repaint();
+								SceneView.currentDrawingSceneView.Repaint ();
 								
-									Debug.Log("Animation mode:"+AnimationMode.InAnimationMode());
+								Debug.Log ("Animation mode:" + AnimationMode.InAnimationMode ());
 								
 								
 						}
@@ -797,71 +813,69 @@ namespace ws.winx.editor.windows
 
 				}
 
-		public static void SaveBonePositionOffset ()
-		{
-			Transform rootBoneTransform;
+				public static void SaveBonePositionOffset ()
+				{
+						Transform rootBoneTransform;
 
 
-			AnimationMode.BeginSampling ();
+						AnimationMode.BeginSampling ();
 			
-			//Save binding(gameobject-animationclip) status 
-			foreach (SequenceChannel channel in __sequence.channels) {
+						//Save binding(gameobject-animationclip) status 
+						foreach (SequenceChannel channel in __sequence.channels) {
 
 
 				
-				if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && (rootBoneTransform=channel.target.GetRootBone())!=null) {
+								if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && (rootBoneTransform = channel.target.GetRootBone ()) != null) {
 					
-					//save bone position
-					Vector3 positionPrev =Vector3.zero;
+										//save bone position
+										Vector3 positionPrev = Vector3.zero;
 
-					Animator animator=channel.target.GetComponent<Animator>();
+										Animator animator = channel.target.GetComponent<Animator> ();
 
-					//must have controller or sampling doesn't work(weird???)
-					animator.runtimeAnimatorController=channel.runtimeAnimatorController;
+										//must have controller or sampling doesn't work(weird???)
+										animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 
-					float timePointer=0f;
-					float boneOrginalPositionOffsetPrevNode=0f;
-					foreach(SequenceNode n in channel.nodes){
+										float timePointer = 0f;
+										float boneOrginalPositionOffsetPrevNode = 0f;
+										foreach (SequenceNode n in channel.nodes) {
 
 
 
 						
-						if(timePointer>0)
-						{
+												if (timePointer > 0) {
 							
 							
-							//get sample of animation clip of previous node at the end
-							AnimationMode.SampleAnimationClip (channel.target,channel.nodes[n.index-1].source as AnimationClip, timePointer);
+														//get sample of animation clip of previous node at the end
+														AnimationMode.SampleAnimationClip (channel.target, channel.nodes [n.index - 1].source as AnimationClip, timePointer);
 
 
-							positionPrev=rootBoneTransform.position+channel.nodes[n.index-1].boneOrginalPositionOffset;
-						}
-						else{
-							positionPrev=rootBoneTransform.position;
-						}
+														positionPrev = rootBoneTransform.position + channel.nodes [n.index - 1].boneOrginalPositionOffset;
+												} else {
+														positionPrev = rootBoneTransform.position;
+												}
 						
 					
 						
-						//get sample of animation clip of current node at start
-						AnimationMode.SampleAnimationClip (channel.target,(AnimationClip)n.source, 0f);
+												//get sample of animation clip of current node at start
+												AnimationMode.SampleAnimationClip (channel.target, (AnimationClip)n.source, 0f);
 
 
 						
-						Vector3 postionAfter=rootBoneTransform.transform.position;
+												Vector3 postionAfter = rootBoneTransform.transform.position;
 						
-						//calculate difference of bone position orginal - bone postion after clip effect
-						n.boneOrginalPositionOffset = positionPrev - postionAfter;
+												//calculate difference of bone position orginal - bone postion after clip effect
+												n.boneOrginalPositionOffset = positionPrev - postionAfter;
 						
-						timePointer=n.duration;
+												timePointer = n.duration;
 						
-					}
+										}
+								}
+						}
+
+
+
+						AnimationMode.EndSampling ();
 				}
-			}
-
-
-
-			AnimationMode.EndSampling ();
-		}
 
 
 
@@ -910,93 +924,97 @@ namespace ws.winx.editor.windows
 				/// Samples the clip nodes at time.
 				/// </summary>
 				/// <param name="time">Time.</param>
-				private static void SampleClipNodesAt(double time){
+				private static void SampleClipNodesAt (double time)
+				{
 
 
-					List<GameObject> targets = new List<GameObject> ();
-					List<AnimationClip> clips = new List<AnimationClip> ();
-					List<float> times = new List<float> ();
-					List<SequenceNode> nodes = new List<SequenceNode> ();
+						List<GameObject> targets = new List<GameObject> ();
+						List<AnimationClip> clips = new List<AnimationClip> ();
+						List<float> times = new List<float> ();
+						List<SequenceNode> nodes = new List<SequenceNode> ();
 					
-					SequenceNode node;
-					Animator animator;
+						SequenceNode node;
+						Animator animator;
 
 
 
 					
-					//find changels of type Animation and find first node in channel that is in time
-					foreach (SequenceChannel channel in __sequence.channels) {
-						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation) {
-							node = channel.nodes.FirstOrDefault (itm => time - itm.startTime >= 0 && time <= itm.startTime + itm.duration);
-							if (node != null) {
-								targets.Add (channel.target);
+						//find changels of type Animation and find first node in channel that is in time
+						foreach (SequenceChannel channel in __sequence.channels) {
+								if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation) {
+										node = channel.nodes.FirstOrDefault (itm => time - itm.startTime >= 0 && time <= itm.startTime + itm.duration);
+										if (node != null) {
+												targets.Add (channel.target);
 
-								animator=channel.target.GetComponent<Animator>();
+												animator = channel.target.GetComponent<Animator> ();
 
-								if(animator==null){
-									animator=channel.target.AddComponent<Animator>();
-								}
+												if (animator == null) {
+														animator = channel.target.AddComponent<Animator> ();
+												}
 
-									animator.runtimeAnimatorController=channel.runtimeAnimatorController;
+												animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 								
-								nodes.Add(node);
-								times.Add ((float)(time - node.startTime));
-								clips.Add (node.source as AnimationClip);
-							}
+												nodes.Add (node);
+												times.Add ((float)(time - node.startTime));
+												clips.Add (node.source as AnimationClip);
+										}
 							
+								}
 						}
-					}
 					
 
 
-				//save bone position
-				//Vector3 positionPrev = targets[0].GetRootBone().transform.position;
+						//save bone position
+						//Vector3 positionPrev = targets[0].GetRootBone().transform.position;
 
-			//AnimationClipSettings animationClipSettings = AnimationUtility.GetAnimationClipSettings (clips [0]);
+						//AnimationClipSettings animationClipSettings = AnimationUtility.GetAnimationClipSettings (clips [0]);
 
-			//Quaternion rotationPrev = targets [0].GetRootBone().rotation;
+						//Quaternion rotationPrev = targets [0].GetRootBone().rotation;
 
-			//Animator ani=targets [0].GetComponent<Animator> ();
-			//Debug.Log ("1:"+targets[0].transform.forward+" "+targets [0].GetRootBone().transform.forward);
+						//Animator ani=targets [0].GetComponent<Animator> ();
+						//Debug.Log ("1:"+targets[0].transform.forward+" "+targets [0].GetRootBone().transform.forward);
 			
 
 
 			
-				//make sample at 0f (sample would probably change bone position according to ani clip)
-				//AnimationMode.SampleAnimationClip (targets[0], clips[0], 0f);
+						//make sample at 0f (sample would probably change bone position according to ani clip)
+						//AnimationMode.SampleAnimationClip (targets[0], clips[0], 0f);
 				
 				
 				
-				//calculate difference of bone position orginal - bone postion after clip effect
-				//Vector3 boneOrginalPositionOffset = positionPrev - targets[0].GetRootBone().transform.position;
+						//calculate difference of bone position orginal - bone postion after clip effect
+						//Vector3 boneOrginalPositionOffset = positionPrev - targets[0].GetRootBone().transform.position;
 
 		
 
 			
 			
-			//save bone position
-			//Vector3 positionPrev = targets[0].GetRootBone().transform.position;
-			//AnimationMode.SampleAnimationClip (, clips[0], 0f);
+						//save bone position
+						//Vector3 positionPrev = targets[0].GetRootBone().transform.position;
+						//AnimationMode.SampleAnimationClip (, clips[0], 0f);
 
 
-			//Debug.Log ("2:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());
-			AnimationModeUtility.SampleClipBindingAt (targets, clips, times);
+						//Debug.Log ("2:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());
+						AnimationModeUtility.SampleClipBindingAt (targets, clips, times);
 
 
 
-			//Correction is needed for root bones as animation doesn't respect current GameObject transform position,rotation
-			//=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation
-			int targetsNum = targets.Count;
-			for (int i=0; i<targetsNum; i++) {
+						//Correction is needed for root bones as animation doesn't respect current GameObject transform position,rotation
+						//=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation
+						int targetsNum = targets.Count;
+						Transform rootBoneTransform;
+						for (int i=0; i<targetsNum; i++) {
 
-				targets[i].GetRootBone().transform.position=targets[i].GetRootBone().transform.position+nodes[i].boneOrginalPositionOffset;
-			}
+
+							if((rootBoneTransform=targets [i].GetRootBone ())!=null)
+								rootBoneTransform.position = rootBoneTransform.position + nodes [i].boneOrginalPositionOffset;
+						}
 		
 				
-			//Debug.Log ("3:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());	
-			//targets[0].GetRootBone().transform.position = boneOrginalPositionOffset + targets[0].GetRootBone().transform.position;
+						//Debug.Log ("3:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());	
+						//targets[0].GetRootBone().transform.position = boneOrginalPositionOffset + targets[0].GetRootBone().transform.position;
 				
-			//targets [0].GetRootBone ().rotation = rotationPrev;
+						//targets [0].GetRootBone ().rotation = rotationPrev;
 				
 
 
@@ -1060,10 +1078,11 @@ namespace ws.winx.editor.windows
 								}
 						}
 
+						Event e = Event.current;
 						
 						//check timeline click
-						if (!__sequence.isPlaying && Event.current.type!=EventType.Used && Event.current.type == EventType.MouseDown && Event.current.button == 0 && new Rect (rect.x, 0, rect.width, TIME_LABEL_HEIGHT).Contains (Event.current.mousePosition)) {
-								Event.current.Use ();	
+						if (!__sequence.isPlaying && e.type != EventType.Used && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0 && new Rect (rect.x, 0, rect.width, TIME_LABEL_HEIGHT).Contains (Event.current.mousePosition)) {
+								e.Use ();	
 
 
 								onTimelineClick (rect);
@@ -1148,7 +1167,11 @@ namespace ws.winx.editor.windows
 								break;
 				
 						case EventType.ContextClick:
-				
+
+								//don't allow removing right click when play or record
+								if (__sequence.isPlaying || __sequence.isRecording)
+										break;
+
 								clickRect = new Rect (0, 0, 0, NODE_RECT_HEIGHT);
 				
 
@@ -1377,7 +1400,7 @@ namespace ws.winx.editor.windows
 				{
 						SequenceNode node = data as SequenceNode;
 						
-						Stop ();
+					
 
 						SequenceChannel sequenceChannel = __sequence.channels.Find (itm => itm.nodes.Exists (nd => nd.GetInstanceID () == node.GetInstanceID ()));
 
@@ -1434,6 +1457,8 @@ namespace ws.winx.editor.windows
 
 						__nodeSelected = null;
 
+					
+			
 						Repaint ();
 				}
 
@@ -1459,6 +1484,9 @@ namespace ws.winx.editor.windows
 				/// <param name="channel">Channel.</param>
 				public void sequenceDropSourceEventHandler (Rect area, int channel)
 				{
+
+						if (__sequence.isPlaying || __sequence.isRecording)
+								return;
 			
 						Event evt = Event.current;
 			
@@ -1473,6 +1501,7 @@ namespace ws.winx.editor.windows
 				
 								if (evt.type == EventType.DragPerform) {
 										DragAndDrop.AcceptDrag ();
+
 										if (EditorApplication.isPlaying) {
 												Debug.Log ("Can't add tween object in play mode. Stop the play mode and readd it.");
 										} else {
@@ -1535,8 +1564,8 @@ namespace ws.winx.editor.windows
 																SequenceNode node = CreateNewSequenceNode (Event.current.mousePosition, dragged_object, channel);
 														
 																
-																if(node!=null)
-																sequenceChannel.nodes.Insert (node.index, node);
+																if (node != null)
+																		sequenceChannel.nodes.Insert (node.index, node);
 																
 																	
 														

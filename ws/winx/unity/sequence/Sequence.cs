@@ -150,7 +150,7 @@ namespace ws.winx.unity.sequence
 								return;			
 						}
 			
-						Debug.Log ("Time current:" + timeCurrent+"Time.time"+Time.time+" _timeAtEnd:"+_timeAtEnd);
+						//Debug.Log ("Time current:" + timeCurrent+"Time.time"+Time.time+" _timeAtEnd:"+_timeAtEnd);
 			
 						if (t > _timeAtEnd) {
 								switch (wrap) {
