@@ -349,7 +349,7 @@ namespace ws.winx.editor
 										AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, time);
 
 										//Correction is needed for root bones as animation doesn't respect current GameObject transform position,rotation
-										//=> shifting current boneTransform position as result of clip animaiton to offset of orginal position before animation
+										//=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation
 										if (clipBindingCurrent.boneTransform != null) {
 									
 									
@@ -419,6 +419,9 @@ namespace ws.winx.editor
 					
 					
 					Undo.FlushUndoRecordObjects ();
+
+
+					Vector3 pos = Vector3.zero;
 					
 					
 					AnimationMode.BeginSampling ();
@@ -431,6 +434,8 @@ namespace ws.winx.editor
 					}
 					
 					for (int i=0; i<len; i++) {
+
+						
 						AnimationMode.SampleAnimationClip (animatedObjects [i], animationClips [i], times[i]);
 						
 						
@@ -440,14 +445,14 @@ namespace ws.winx.editor
 					
 					AnimationMode.EndSampling ();
 					
-					
+					SceneView.RepaintAll ();
 					
 				}
 
 
 
 				/// <summary>
-				/// Saves the binding boonRoot offset - position before animation from boonRoot position at time=0s
+				/// Saves the binding boonRoot offset - position offset of boonRoot and gameObject holder  at animation time=0s
 				/// Saves current root position/rotation
 				/// </summary>
 				/// <param name="clipBindings">Clip bindings.</param>
@@ -464,7 +469,7 @@ namespace ws.winx.editor
 
 
 					
-								SaveBindingStatus (clipBindingCurrent);
+								SaveBindingOffset (clipBindingCurrent);
 								
 						
 						}
@@ -477,20 +482,20 @@ namespace ws.winx.editor
 				/// Saves current root position/rotation
 				/// </summary>
 				/// <param name="clipBindingCurrent">Clip binding current.</param>
-				public static void SaveBindingStatus (EditorClipBinding clipBindingCurrent)
+				public static void SaveBindingOffset (EditorClipBinding clipBindingCurrent)
 				{
 						if (clipBindingCurrent.gameObject != null) {
 							
 								if(clipBindingCurrent.boneTransform!=null){
 								//save bone position
-								Vector3 positionPrev = clipBindingCurrent.boneTransform.transform.position;
+								Vector3 positionPrev = clipBindingCurrent.boneTransform.position;
 							
 								//make sample at 0f (sample would probably change bone position according to ani clip)
 								AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, 0f);
 							
 							
 								//calculate difference of bone position orginal - bone postion after clip effect
-								clipBindingCurrent.boneOrginalPositionOffset = positionPrev - clipBindingCurrent.boneTransform.transform.position;
+								clipBindingCurrent.boneOrginalPositionOffset = positionPrev - clipBindingCurrent.boneTransform.position;
 								}
 
 
@@ -547,10 +552,7 @@ namespace ws.winx.editor
 								//rewind to start position
 								clipBindingCurrent.ResetRoot ();
 						}
-						
-						
-						
-						
+				
 					
 				}
 

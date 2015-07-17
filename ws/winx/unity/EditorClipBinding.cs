@@ -76,7 +76,8 @@ namespace ws.winx.unity
 		///////////////////////////////
 
 		/// <summary>
-		/// 
+		/// Resets position and rotation to previous saved values
+		/// This is nessery cos AnimationMode on stop, doesn't reset gameobject on which animation clip sampling is done
 		/// </summary>
 		public void ResetRoot ()
 		{

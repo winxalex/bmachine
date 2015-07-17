@@ -495,26 +495,30 @@ namespace ws.winx.unity
 
 						SkinnedMeshRenderer skinmeshRenderer = go.GetComponentInChildren<SkinnedMeshRenderer> ();
 
-						Transform boneRoot = null;
-			
-						if (skinmeshRenderer != null) {
-				
-								Transform[] bones = skinmeshRenderer.bones;
+						if (skinmeshRenderer != null) 
+							return  skinmeshRenderer.rootBone;
+						return null;
 
-								int bonesNum = bones.Length;
-
-								if (bonesNum > 0) {
-										boneRoot = bones [0];
-				
-										for (int j= 1; j < bonesNum; j++)
-												if (boneRoot.IsChildOf (bones [j]))
-														boneRoot = bones [j];
-				
-								}
-				
-						}
-
-						return boneRoot;
+//						Transform boneRoot = null;
+//			
+//						if (skinmeshRenderer != null) {
+//				
+//								Transform[] bones = skinmeshRenderer.bones;
+//
+//								int bonesNum = bones.Length;
+//
+//								if (bonesNum > 0) {
+//										boneRoot = bones [0];
+//				
+//										for (int j= 1; j < bonesNum; j++)
+//												if (boneRoot.IsChildOf (bones [j]))
+//														boneRoot = bones [j];
+//				
+//								}
+//				
+//						}
+//
+//						return boneRoot;
 				}
 
 				public static string GetPath (this GameObject obj)

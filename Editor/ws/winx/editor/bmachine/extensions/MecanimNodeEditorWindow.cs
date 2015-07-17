@@ -93,7 +93,7 @@ namespace ws.winx.editor.bmachine.extensions
 				public static void Show (GameObject space,AnimationClip clip, SerializedNode node, Rect? position)
 				{
 						
-						MecanimNodeEditorWindow.__spaceGameObject = space;
+						MecanimNodeEditorWindow.__spaceGameObject = space;//in this case is character
 						MecanimNodeEditorWindow.__spaceGameObjectAnimationClip = clip;
 						MecanimNodeEditorWindow.__serializedNode = node;
 
@@ -283,7 +283,7 @@ namespace ws.winx.editor.bmachine.extensions
 												
 												
 												
-														//clipBindingCurrent.gameObject.rotation has changed so recalcualte position offset
+														//clipBindingCurrent.gameObject.rotation has changed so recalcualte rotation offset
 														clipBindingCurrent.rotationOffset = Quaternion.Inverse (__spaceGameObject.transform.rotation) * clipBindingCurrent.gameObject.transform.rotation;
 												
 												}
@@ -1082,7 +1082,7 @@ namespace ws.winx.editor.bmachine.extensions
 												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
 												AnimationModeUtility.SaveBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
 
-												AnimationModeUtility.SaveBindingStatus (__mecanimNodeClipBinding);
+												AnimationModeUtility.SaveBindingOffset (__mecanimNodeClipBinding);
 													
 												//calculate time in seconds from the current postion of time scrubber
 												__timeCurrent = __timeNormalized * __spaceGameObjectAnimationClip.length;
@@ -1142,7 +1142,7 @@ namespace ws.winx.editor.bmachine.extensions
 												//calculate offset of boonRoot position before animation from boonRoot position at time=0s.
 												AnimationModeUtility.SaveBindingsOffset (clipBindingsSerialized.value as EditorClipBinding[]);
 
-												AnimationModeUtility.SaveBindingStatus (__mecanimNodeClipBinding);
+												AnimationModeUtility.SaveBindingOffset (__mecanimNodeClipBinding);
 
 
 												LockRootGameObject (true);

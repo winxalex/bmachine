@@ -14,6 +14,10 @@ namespace ws.winx.unity.sequence
 				public SequenceNodeEvent onStop = new SequenceNodeEvent ();
 				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
+
+
+		public Vector3 boneOrginalPositionOffset;
+
 				public int index = -1;
 				public float transition = 0f;
 				public bool loop;
