@@ -70,7 +70,7 @@ namespace ws.winx.editor.windows
 								__sequenceGameObject = Selection.activeGameObject;
 						
 
-								CreateNewReordableList ();
+							
 						}
 
 						window.wantsMouseMove = true;
@@ -109,7 +109,21 @@ namespace ws.winx.editor.windows
 			
 						}
 
+						if (__sequenceChannelsReordableList == null) {
+
+								__sequenceChannelsReordableList = new ReorderableList (new List<SequenceNode> (), typeof(SequenceNode), true, false, false, false);
+								__sequenceChannelsReordableList.elementHeight = NODE_RECT_HEIGHT;
+								__sequenceChannelsReordableList.headerHeight = 2f;
+							
+								__sequenceChannelsReordableList.drawElementCallback = onDrawSequenceChannelElement;
+							
+								__sequenceChannelsReordableList.onSelectCallback = onSelectSequenceChannelCallback;
+								__sequenceChannelsReordableList.onReorderCallback = onReorderSequenceChannelCallback;
 					
+					
+						}
+				
+				
 
 
 						EditorApplication.playmodeStateChanged -= OnPlayModeStateChange;
@@ -337,21 +351,14 @@ namespace ws.winx.editor.windows
 				
 								__isPlayMode = true;
 				 
-								if (__sequence != null) {
-										Stop ();
-										ResetChannelsTarget ();
-								}
-
-							
-
-								
+						
 						} else {
 								__isPlayMode = false;
 					
 						}
 
 
-						Debug.Log ("PlayModeStateChange" + __isPlayMode);
+						Debug.Log ("Play mode:" + __isPlayMode);
 				}
 
 
@@ -704,8 +711,9 @@ namespace ws.winx.editor.windows
 								rect.yMin = rectLastControl.yMax;
 
 								//Draw Channels
-								if (__sequenceChannelsReordableList != null)
-										__sequenceChannelsReordableList.DoLayoutList ();
+								__sequenceChannelsReordableList.list = __sequence.channels;
+					
+								__sequenceChannelsReordableList.DoLayoutList ();
 
 
 								rectLastControl = GUILayoutUtility.GetLastRect ();
@@ -1709,12 +1717,26 @@ namespace ws.winx.editor.windows
 
 						if (node.source is AnimationClip) {
 
-								//Guid.NewGuid ().ToString ();
 								
+					
+								UnityEditor.Animations.AnimatorController animatorController = node.channel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+
+
+					
 								//create AnimatorState in controller
-								UnityEditor.Animations.AnimatorState currentState = (node.channel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).AddMotion ((source as Motion));
+								UnityEditor.Animations.AnimatorState stateCurrent = animatorController.AddMotion ((source as Motion));
+
+								node.stateNameHash = stateCurrent.nameHash;
+				
+								//if stateCurren is first and default create empty state for default
+								if (animatorController.layers [0].stateMachine.defaultState == stateCurrent) {
+										stateCurrent = animatorController.layers [0].stateMachine.AddState ("DefaultState");
+										animatorController.layers [0].stateMachine.defaultState = stateCurrent;
+								}
+
+				
+
 								
-								node.stateNameHash = currentState.nameHash;
 				
 								//UnityEditor.Animations.AnimatorStateTransition transition = null;
 				
@@ -1934,7 +1956,7 @@ namespace ws.winx.editor.windows
 				"controller");
 			
 						if (!String.IsNullOrEmpty (path)) {
-								SequenceChannel channel = new SequenceChannel ();
+								SequenceChannel channel = (SequenceChannel)ScriptableObject.CreateInstance<SequenceChannel> ();
 
 								//create Controller
 								channel.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path), typeof(RuntimeAnimatorController)) as RuntimeAnimatorController;
@@ -1945,22 +1967,7 @@ namespace ws.winx.editor.windows
 						return null;
 				}
 
-				private static void CreateNewReordableList ()
-				{
-						if (__sequenceChannelsReordableList == null) {
-								__sequenceChannelsReordableList = new ReorderableList (__sequence.channels, typeof(SequenceNode), true, false, false, false);
-								__sequenceChannelsReordableList.elementHeight = NODE_RECT_HEIGHT;
-								__sequenceChannelsReordableList.headerHeight = 2f;
-				
-								__sequenceChannelsReordableList.drawElementCallback = onDrawSequenceChannelElement;
-
-								__sequenceChannelsReordableList.onSelectCallback = onSelectSequenceChannelCallback;
-								__sequenceChannelsReordableList.onReorderCallback = onReorderSequenceChannelCallback;
-						} else
-								__sequenceChannelsReordableList.list = __sequence.channels;
-								
-
-				}
+			
 				
 
 
@@ -2011,6 +2018,7 @@ namespace ws.winx.editor.windows
 
 						__sequenceGameObject = new GameObject ("Sequence " + count.ToString ());
 						__sequence = __sequenceGameObject.AddComponent<Sequence> ();
+
 
 						Selection.activeGameObject = __sequenceGameObject;
 				}
@@ -2071,12 +2079,12 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				private void OnSelectionChange ()
 				{
-						if (Selection.activeGameObject != null && Selection.activeGameObject != __sequenceGameObject) {
+						if (Selection.activeGameObject != null) {
 								Sequence sequence = Selection.activeGameObject.GetComponent<Sequence> ();
 								if (sequence != null) {
 										__sequenceGameObject = sequence.gameObject;
 										__sequence = sequence;
-										CreateNewReordableList ();
+										
 										Repaint ();
 								}
 						}
