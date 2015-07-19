@@ -21,6 +21,7 @@ namespace ws.winx.editor.windows
 		{
 				
 				private static Sequence __sequence;
+				private static bool __isPlayMode = false;
 				private Sequence.SequenceWrap wrap = Sequence.SequenceWrap.ClampForever;
 				private static GameObject __sequenceGameObject;
 				private Vector2 settingsScroll;
@@ -59,15 +60,19 @@ namespace ws.winx.editor.windows
 						}
 				}
 
-				[MenuItem("Window/Visual Tween/Sequence", false)]
+				[MenuItem("Window/Sequence", false)]
 				public static void ShowWindow ()
 				{
 						SequenceEditorWindow window = EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence");
 
-						__sequence = Selection.activeGameObject.GetComponent<Sequence> ();
-						__sequenceGameObject = Selection.activeGameObject;
+						if (__sequence != null) {
+								__sequence = Selection.activeGameObject.GetComponent<Sequence> ();
+								__sequenceGameObject = Selection.activeGameObject;
+						
 
-						CreateNewReordableList ();
+								CreateNewReordableList ();
+						}
+
 						window.wantsMouseMove = true;
 						UnityEngine.Object.DontDestroyOnLoad (window);
 
@@ -107,7 +112,7 @@ namespace ws.winx.editor.windows
 					
 
 
-
+						EditorApplication.playmodeStateChanged -= OnPlayModeStateChange;
 						EditorApplication.playmodeStateChanged += OnPlayModeStateChange;
 				}
 
@@ -324,20 +329,29 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				private void OnPlayModeStateChange ()
 				{
-						if (EditorApplication.isPlaying) {
+						if (!__isPlayMode && EditorApplication.isPlaying) {
 
 								///TODO check this if not blocking playmode
-								__sequence.Stop (__sequence.playForward);
-								__sequence.StopRecording ();
+				 
 
-								Stop ();
-								ResetChannelsTarget();
+				
+								__isPlayMode = true;
+				 
+								if (__sequence != null) {
+										Stop ();
+										ResetChannelsTarget ();
+								}
+
+							
 
 								
 						} else {
-								
-
+								__isPlayMode = false;
+					
 						}
+
+
+						Debug.Log ("PlayModeStateChange" + __isPlayMode);
 				}
 
 
@@ -434,7 +448,7 @@ namespace ws.winx.editor.windows
 						if (__sequence.isRecording) {
 								Stop ();
 
-								ResetChannelsTarget();
+								ResetChannelsTarget ();
 
 						} else {
 								__sequence.Record ();
@@ -445,11 +459,11 @@ namespace ws.winx.editor.windows
 										AnimationMode.StartAnimationMode ();
 										Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
-										SaveBonePositionOffset();
+										SaveBonePositionOffset ();
 								}
 
 
-								SampleClipNodesAt(__sequence.timeCurrent);
+								SampleClipNodesAt (__sequence.timeCurrent);
 						}
 				}
 
@@ -494,8 +508,8 @@ namespace ws.winx.editor.windows
 //								__sequence.SequenceNodeStop -= onSequenceNodeStop;
 //								__sequence.SequenceNodeStop += onSequenceNodeStop;
 
-								if(__sequence.timeCurrent>=__sequence.duration)
-								__sequence.timeCurrent = 0f;
+								if (__sequence.timeCurrent >= __sequence.duration)
+										__sequence.timeCurrent = 0f;
 
 								__sequence.Play (EditorApplication.timeSinceStartup);
 
@@ -555,8 +569,7 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				private void OnGUI ()
 				{
-						if (__sequence == null)
-								return;
+						
 						
 
 						Rect rect = this.position;
@@ -638,56 +651,70 @@ namespace ws.winx.editor.windows
 						style.padding = new RectOffset (0, 0, 0, 0);
 						
 						GUILayout.BeginArea (rect, GUIContent.none, style);
-			
-						GUILayout.BeginHorizontal (EditorStyles.toolbar);
 
-						Color colorSave = GUI.backgroundColor;
-						GUI.backgroundColor = __sequence.isRecording ? Color.red : Color.white;
+						if (__sequence != null) {
+								GUILayout.BeginHorizontal (EditorStyles.toolbar);
 
-						//Record
-						if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.Record"), EditorStyles.toolbarButton)) {
-								
-								OnRecord ();
+							
+								///DRAW PLAY,RECORD AND ADD EVENT BUTTON
+								Color colorSave = GUI.backgroundColor;
 
+
+								GUI.backgroundColor = __sequence.isRecording ? Color.red : Color.white;
+
+								//Record
+								if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.Record"), EditorStyles.toolbarButton)) {
+									
+										OnRecord ();
+
+								}
+
+								GUI.backgroundColor = colorSave;
+
+								//Play
+								if (GUILayout.Button (__sequence.isPlaying ? EditorGUIUtility.FindTexture ("d_PlayButton On") : EditorGUIUtility.FindTexture ("d_PlayButton"), EditorStyles.toolbarButton)) {
+									
+
+									
+										OnPlay ();
+
+								}
+								GUILayout.FlexibleSpace ();
+								if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.AddEvent"), EditorStyles.toolbarButton)) {
+										//				if(onAddEvent!= null){
+										//					onAddEvent();
+										//				}
+								}
+								GUILayout.EndHorizontal ();
 						}
-
-						GUI.backgroundColor = colorSave;
-
-						//Play
-						if (GUILayout.Button (__sequence.isPlaying ? EditorGUIUtility.FindTexture ("d_PlayButton On") : EditorGUIUtility.FindTexture ("d_PlayButton"), EditorStyles.toolbarButton)) {
-								
-
-								
-								OnPlay ();
-
-						}
-						GUILayout.FlexibleSpace ();
-						if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.AddEvent"), EditorStyles.toolbarButton)) {
-//				if(onAddEvent!= null){
-//					onAddEvent();
-//				}
-						}
-						GUILayout.EndHorizontal ();
 			
 						GUILayout.BeginHorizontal ();
 						GUILayout.BeginVertical ();
 
+
+
+
 						OnSettingsGUI (rect.width - 1.5f);
 
-						Rect rectLastControl = GUILayoutUtility.GetLastRect ();
 
-						rect.yMin = rectLastControl.yMax;
+						if (__sequence != null) {
 
-						//Draw Channels
-						if (__sequenceChannelsReordableList != null)
-								__sequenceChannelsReordableList.DoLayoutList ();
+								Rect rectLastControl = GUILayoutUtility.GetLastRect ();
+
+								rect.yMin = rectLastControl.yMax;
+
+								//Draw Channels
+								if (__sequenceChannelsReordableList != null)
+										__sequenceChannelsReordableList.DoLayoutList ();
 
 
-						rectLastControl = GUILayoutUtility.GetLastRect ();
-						rect.yMax = rectLastControl.yMax - 16f;//16f for +/- buttons
+								rectLastControl = GUILayoutUtility.GetLastRect ();
+								rect.yMax = rectLastControl.yMax - 16f;//16f for +/- buttons
 
 
-						sequenceDropChannelTargetEventHandler (rect, (int)((Event.current.mousePosition.y - rect.y) / NODE_RECT_HEIGHT));
+								sequenceDropChannelTargetEventHandler (rect, (int)((Event.current.mousePosition.y - rect.y) / NODE_RECT_HEIGHT));
+
+						}
 
 						GUILayout.EndVertical ();
 						GUILayout.Space (1.5f);
@@ -719,8 +746,13 @@ namespace ws.winx.editor.windows
 								}
 								toolsMenu.AddItem (new GUIContent ("[New Sequence]"), false, CreateNewSequence);
 								toolsMenu.AddItem (new GUIContent ("[New Animation Clip]"), false, CreateNewAnimationClip);
-				
-								toolsMenu.DropDown (new Rect (3, 37, 0, 0));
+								toolsMenu.AddItem (new GUIContent ("[New Animation Controller]"), false, CreateRuntimeAnimatorController);
+
+
+								
+
+								toolsMenu.DropDown (GUILayoutUtility.GetLastRect ());
+								//toolsMenu.DropDown (new Rect (3, 37, 0, 0));
 								EditorGUIUtility.ExitGUI ();
 						}
 			
@@ -732,34 +764,35 @@ namespace ws.winx.editor.windows
 								__sequence.wrap = wrap;			
 						}
 
+						if (__sequence != null) {
+								//Handle FRAMERATE input and changes		
+								EditorGUI.BeginChangeCheck ();
 
-						//Handle FRAMERATE input and changes		
-						EditorGUI.BeginChangeCheck ();
-
-						EditorGUILayout.LabelField (__frameRateGUIContent, GUILayout.Width (width * 0.1f));
-						__frameRate = Mathf.Max (EditorGUILayout.IntField (__frameRate, GUILayout.Width (width * 0.2f)), 1);
+								EditorGUILayout.LabelField (__frameRateGUIContent, GUILayout.Width (width * 0.1f));
+								__frameRate = Mathf.Max (EditorGUILayout.IntField (__frameRate, GUILayout.Width (width * 0.2f)), 1);
 			
-						if (EditorGUI.EndChangeCheck ()) {
+								if (EditorGUI.EndChangeCheck ()) {
 
-								float duration = 0f;
-								foreach (SequenceChannel channel in __sequence.channels)
-										foreach (SequenceNode n in channel.nodes) {
+										float duration = 0f;
+										foreach (SequenceChannel channel in __sequence.channels)
+												foreach (SequenceNode n in channel.nodes) {
 										
-												if (n.source is AnimationClip) {
+														if (n.source is AnimationClip) {
 									
 												
-														(n.source as AnimationClip).frameRate = __frameRate;
-												} 
+																(n.source as AnimationClip).frameRate = __frameRate;
+														} 
 
-												//resnap to new framerate
-												n.duration = TimeAreaW.SnapTimeToWholeFPS (n.duration, __frameRate);
+														//resnap to new framerate
+														n.duration = TimeAreaW.SnapTimeToWholeFPS (n.duration, __frameRate);
 
 					
-										}
+												}
 
-								//now tick drawn on new frame rate
-								__timeAreaW.hTicks.SetTickModulosForFrameRate (__frameRate);
+										//now tick drawn on new frame rate
+										__timeAreaW.hTicks.SetTickModulosForFrameRate (__frameRate);
 
+								}
 						}
 			
 
@@ -1006,8 +1039,8 @@ namespace ws.winx.editor.windows
 						for (int i=0; i<targetsNum; i++) {
 
 
-							if((rootBoneTransform=targets [i].GetRootBone ())!=null)
-								rootBoneTransform.position = rootBoneTransform.position + nodes [i].boneOrginalPositionOffset;
+								if ((rootBoneTransform = targets [i].GetRootBone ()) != null)
+										rootBoneTransform.position = rootBoneTransform.position + nodes [i].boneOrginalPositionOffset;
 						}
 		
 				
@@ -1036,24 +1069,27 @@ namespace ws.winx.editor.windows
 				{
 						Handles.color = new Color (0.5f, 0.5f, 0.5f, 0.2f);
 					
-
-						int rows = __sequence.channels.Count + 1;
-						int y = 0;
-						float lineY = 0f;
-						for (; y<rows; y++) {
-								//Handles.DrawLine (new Vector3 (0, y, 0), new Vector3 (rect.width, y, 0));	
-								lineY = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + y * NODE_RECT_HEIGHT;
-								Handles.DrawLine (new Vector3 (rect.xMin, lineY, 0), new Vector3 (rect.xMax, lineY, 0));	
+						if (__sequence != null) {
+								//Draw horizontal lines (rows)
+								int rows = __sequence.channels.Count + 1;
+								int y = 0;
+								float lineY = 0f;
+								for (; y<rows; y++) {
+								
+										lineY = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + y * NODE_RECT_HEIGHT;
+										Handles.DrawLine (new Vector3 (rect.xMin, lineY, 0), new Vector3 (rect.xMax, lineY, 0));	
 								
 								
-						}
+								}
 
 										
 
-						//make all area from end of label and Event pad to botton droppable
-						sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
+								//make all area from end of label and Event pad to botton droppable
+								sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
 			
-						Handles.color = Color.white;
+								Handles.color = Color.white;
+
+						}
 
 						//TimeArea
 						__timeAreaW.DoTimeArea (rect, __frameRate);
@@ -1062,49 +1098,58 @@ namespace ws.winx.editor.windows
 						if (Event.current.type == EventType.Repaint) 
 								EditorGUILayoutEx.ANIMATION_STYLES.eventBackground.Draw (new Rect (rect.x, EVENT_PAD_HEIGHT, rect.width, EVENT_PAD_HEIGHT), GUIContent.none, 0);
 
-						//DRAW NODES 
-						int channelNumber = __sequence.channels.Count;
-						SequenceChannel channel = null;
-						for (int i=0; i<channelNumber; i++) {
-								channel = __sequence.channels [i];
-								foreach (SequenceNode node in channel.nodes) {
+
+						if (__sequence != null) {
+								//DRAW NODES 
+								int channelNumber = __sequence.channels.Count;
+								SequenceChannel channel = null;
+								for (int i=0; i<channelNumber; i++) {
+										channel = __sequence.channels [i];
+										foreach (SequenceNode node in channel.nodes) {
 									
 										
 
-										sequenceNodeClickEventHandler (node, rect, i);
-										DoNode (node, rect, i);
+												sequenceNodeClickEventHandler (node, rect, i);
+												DoNode (node, rect, i);
 
 										
+										}
 								}
-						}
 
-						Event e = Event.current;
 						
+								timeScrubberEventHandler (rect);
+						
+
+								//draw time scrubber
+								Color colorSaved = GUI.color;
+						
+								float timeScrubberX = __timeAreaW.TimeToPixel ((float)__sequence.timeCurrent, rect);
+								GUI.color = Color.red;
+								Handles.DrawLine (new Vector3 (timeScrubberX, rect.y), new Vector3 (timeScrubberX, rect.height - 16f));//horizontal scroller
+								GUI.color = colorSaved;
+							
+
+								sequenceNodeDragEventHandler (rect);
+						}
+				}
+
+				private void timeScrubberEventHandler (Rect rect)
+				{
+						Event e = Event.current;
+					
 						//check timeline click
 						if (!__sequence.isPlaying && e.type != EventType.Used && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0 && new Rect (rect.x, 0, rect.width, TIME_LABEL_HEIGHT).Contains (Event.current.mousePosition)) {
 								e.Use ();	
-
-
+						
+						
 								onTimelineClick (rect);
-								
-								
+						
+						
 						}
-						
-
-						//draw time scrubber
-						Color colorSaved = GUI.color;
-						
-						float timeScrubberX = __timeAreaW.TimeToPixel ((float)__sequence.timeCurrent, rect);
-						GUI.color = Color.red;
-						Handles.DrawLine (new Vector3 (timeScrubberX, rect.y), new Vector3 (timeScrubberX, rect.height - 16f));//horizontal scroller
-						GUI.color = colorSaved;
-							
-
-						sequenceNodeDragEventHandler (rect);
+			
 				}
-
-
-
+		
+		
 				/// <summary>
 				/// Sequence's node click event handler.
 				/// </summary>
@@ -1860,19 +1905,39 @@ namespace ws.winx.editor.windows
 			
 				}
 
-				private static SequenceChannel CreateNewSequenceChannel ()
+				private static void CreateRuntimeAnimatorController ()
 				{
 						string path = EditorUtility.SaveFilePanel (
-				"Create AnimaitonController",
+							"Create AnimaitonController",
+							"Assets",
+							"",
+							"controller");
+						
+						if (!String.IsNullOrEmpty (path)) {
+							
+							
+								//create Controller
+								UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+							
+							
+						}
+						
+						
+				
+				}
+		
+				private static SequenceChannel CreateNewSequenceChannel ()
+				{
+						string path = EditorUtility.OpenFilePanel (
+				"Select AnimaitonController",
 				"Assets",
-				"",
 				"controller");
 			
 						if (!String.IsNullOrEmpty (path)) {
 								SequenceChannel channel = new SequenceChannel ();
 
 								//create Controller
-								channel.runtimeAnimatorController = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+								channel.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path), typeof(RuntimeAnimatorController)) as RuntimeAnimatorController;
 								return channel;
 
 						}
@@ -1946,10 +2011,6 @@ namespace ws.winx.editor.windows
 
 						__sequenceGameObject = new GameObject ("Sequence " + count.ToString ());
 						__sequence = __sequenceGameObject.AddComponent<Sequence> ();
-
-						//add Animator component
-						__sequenceGameObject.AddComponent<Animator> ();
-
 
 						Selection.activeGameObject = __sequenceGameObject;
 				}
