@@ -65,13 +65,20 @@ namespace ws.winx.editor.windows
 				{
 						SequenceEditorWindow window = EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence");
 
+						
+
 						if (__sequence != null) {
 								__sequence = Selection.activeGameObject.GetComponent<Sequence> ();
 								__sequenceGameObject = Selection.activeGameObject;
 						
 
 							
+						} else {
+								OnSelectionChange ();
+
 						}
+
+						
 
 						window.wantsMouseMove = true;
 						UnityEngine.Object.DontDestroyOnLoad (window);
@@ -825,7 +832,14 @@ namespace ws.winx.editor.windows
 				/// <param name="rect">Rect.</param>
 				private static void onTimelineClick (Rect rect)
 				{
-						__sequence.timeCurrent = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+
+						double time = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+
+						if (time > __sequence.duration)
+								return;
+
+
+						__sequence.timeCurrent = time;
 
 					
 					
@@ -2077,7 +2091,7 @@ namespace ws.winx.editor.windows
 				/// <summary>
 				/// Handle the selection(gameobject) change event.
 				/// </summary>
-				private void OnSelectionChange ()
+				private static void OnSelectionChange ()
 				{
 						if (Selection.activeGameObject != null) {
 								Sequence sequence = Selection.activeGameObject.GetComponent<Sequence> ();
@@ -2085,7 +2099,7 @@ namespace ws.winx.editor.windows
 										__sequenceGameObject = sequence.gameObject;
 										__sequence = sequence;
 										
-										Repaint ();
+										SceneView.currentDrawingSceneView.Repaint();
 								}
 						}
 				}
