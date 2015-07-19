@@ -102,7 +102,7 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
-				float __duration;
+				float __duration=float.NaN;
 
 				/// <summary>
 				/// Gets the duration.
@@ -110,6 +110,10 @@ namespace ws.winx.unity.sequence
 				/// <value>The duration.</value>
 				public float duration {
 						get {
+								if(!float.IsNaN(__duration))
+									__duration=calcDuration();
+
+
 								return __duration;
 						}
 				}

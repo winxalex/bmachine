@@ -74,7 +74,7 @@ namespace ws.winx.editor.windows
 
 							
 						} else {
-								OnSelectionChange ();
+								selectionChangeEventHandler ();
 
 						}
 
@@ -376,26 +376,18 @@ namespace ws.winx.editor.windows
 				/// <param name="modifications">Modifications.</param>
 				private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
 				{
-						List<UndoPropertyModification> propertyModificationList = new List<UndoPropertyModification> ();
 
-						//if__nodeSelected.channel.target!=
-//					EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
-//					
-//					List<EditorClipBinding> list = clipBindings.ToList ();
-//					list.Add (__nodeClipBinding);
-//					
-//					list.ForEach ((itm) => {
-//						
-//						
-//						
-//						if (itm.gameObject != null && itm.clip != null) 	
-//							propertyModificationList.Concat (AnimationModeUtility.Process (itm.gameObject, itm.clip, modifications, __timeCurrent));
-//						
-//						
-//					});
+						SequenceNode node = __sequence.selectedNode;
+
+						if (node != null && node.channel.target != null && node.channel.type == SequenceChannel.SequenceChannelType.Animation) {
+
+								modifications.Concat(AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications,(float)( __sequence.timeCurrent - node.startTime)));
+
+
+						}
 					
 					
-						return propertyModificationList.ToArray ();
+						return modifications;
 				}
 
 				private void Update ()
@@ -2090,20 +2082,30 @@ namespace ws.winx.editor.windows
 
 				/// <summary>
 				/// Handle the selection(gameobject) change event.
+				/// this is EditorWindow function and its autobindend by name
 				/// </summary>
-				private static void OnSelectionChange ()
+				void OnSelectionChange ()
 				{
+						selectionChangeEventHandler ();
+				}
+
+				private static void selectionChangeEventHandler ()
+				{
+
+
 						if (Selection.activeGameObject != null) {
 								Sequence sequence = Selection.activeGameObject.GetComponent<Sequence> ();
 								if (sequence != null) {
 										__sequenceGameObject = sequence.gameObject;
 										__sequence = sequence;
-										
-										SceneView.currentDrawingSceneView.Repaint();
+					
+										SceneView.currentDrawingSceneView.Repaint ();
+									
+										EditorWindow.GetWindow<SequenceEditorWindow> ().Repaint ();
 								}
 						}
 				}
-
-				
+		
+		
 		}
 }
