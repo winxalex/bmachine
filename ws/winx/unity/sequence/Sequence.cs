@@ -10,6 +10,8 @@ namespace ws.winx.unity.sequence
 		public class Sequence : MonoBehaviour
 		{
 
+
+
 				//events 
 
 

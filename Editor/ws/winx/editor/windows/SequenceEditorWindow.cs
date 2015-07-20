@@ -381,7 +381,7 @@ namespace ws.winx.editor.windows
 
 						if (node != null && node.channel.target != null && node.channel.type == SequenceChannel.SequenceChannelType.Animation) {
 
-								modifications.Concat(AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications,(float)( __sequence.timeCurrent - node.startTime)));
+								modifications.Concat (AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, (float)(__sequence.timeCurrent - node.startTime)));
 
 
 						}
@@ -390,6 +390,11 @@ namespace ws.winx.editor.windows
 						return modifications;
 				}
 
+
+
+				/// <summary>
+				/// Update this instance.
+				/// </summary>
 				private void Update ()
 				{
 
@@ -448,20 +453,31 @@ namespace ws.winx.editor.windows
 						AudioUtilW.StopAllClips ();
 					
 				
+//						foreach (SequenceChannel ch in __sequence.channels) {
+//								if (ch.type == SequenceChannel.SequenceChannelType.Video) {
+//										ch.nodes.ForEach (itm => {
+//												(itm.source as MovieTexture).Stop ();
+//												if ((itm.source as MovieTexture).audioClip) {
+//														AudioUtilW.StopClip ((itm.source as MovieTexture).audioClip);
+//												}});
+//					
+//								}
+//						}
 
 				}
 
 				private static void OnRecord ()
 				{
-						if (__sequence.isRecording) {
+						if (__sequence.isRecording) {//STOP RECORD
 								Stop ();
 
 								ResetChannelsTarget ();
 
-						} else {
+						} else {//START RECORD
+
 								__sequence.Record ();
 
-								AudioUtilW.StopAllClips();
+								
 						
 						
 								if (!AnimationMode.InAnimationMode ()) {
@@ -472,8 +488,11 @@ namespace ws.winx.editor.windows
 										SaveBonePositionOffset ();
 								}
 
+								AudioUtilW.StopAllClips ();
 
 								SampleClipNodesAt (__sequence.timeCurrent);
+
+								
 						}
 				}
 
@@ -487,11 +506,11 @@ namespace ws.winx.editor.windows
 								
 								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 
-//								__sequence.SequenceNodeStart -= onSequenceNodeStart;
-//								__sequence.SequenceNodeStart += onSequenceNodeStart;
+								__sequence.SequenceNodeStart -= onSequenceNodeStart;
+								__sequence.SequenceNodeStart += onSequenceNodeStart;
 //
-//								__sequence.SequenceNodeStop -= onSequenceNodeStop;
-//								__sequence.SequenceNodeStop += onSequenceNodeStop;
+								__sequence.SequenceNodeStop -= onSequenceNodeStop;
+								__sequence.SequenceNodeStop += onSequenceNodeStop;
 
 								if (__sequence.timeCurrent >= __sequence.duration)
 										__sequence.timeCurrent = 0f;
@@ -516,15 +535,16 @@ namespace ws.winx.editor.windows
 
 								__sequence.Stop (__sequence.playForward);
 
+
 								Stop ();
 
 
 
 
-								//__sequence.SequenceNodeStart -= onSequenceNodeStart;
+								__sequence.SequenceNodeStart -= onSequenceNodeStart;
 			
 				
-								//__sequence.SequenceNodeStop -= onSequenceNodeStop;
+								__sequence.SequenceNodeStop -= onSequenceNodeStop;
 						}
 
 						
@@ -824,6 +844,8 @@ namespace ws.winx.editor.windows
 				
 
 						SampleClipNodesAt (__sequence.timeCurrent);
+
+						//stop all movietextures
 						
 						AudioUtilW.StopAllClips ();
 
@@ -984,12 +1006,22 @@ namespace ws.winx.editor.windows
 														AudioClip audioClip = node.source as AudioClip;
 
 														
-															int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
+														int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
 												     
-															AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
-															AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+														AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
 														
 										
+												} else if (channel.type == SequenceChannel.SequenceChannelType.Video) {
+//seem sound is faster this way need more reasearch							
+//														MovieTexture texture = node.source as MovieTexture;
+//														if(texture.audioClip){
+//								AudioClip audioClip=texture.audioClip;
+//														int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
+//							
+//														AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+//							}
+							
+							
 												}
 										}
 								}
@@ -1360,7 +1392,7 @@ namespace ws.winx.editor.windows
 									
 																Repaint ();
 
-														//ANY OTHER CHANNEL TYPE	
+																//ANY OTHER CHANNEL TYPE	
 														} else {
 																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
 																		if (nodePrev.startTime + nodePrev.duration < startTime && startTime + __nodeSelected.duration < nodeNext.startTime) {
@@ -1558,7 +1590,7 @@ namespace ws.winx.editor.windows
 																				
 																				if (!String.IsNullOrEmpty (path)) {
 																					
-																					continue;
+																						continue;
 																				}
 
 																				sequenceChannel.name = "Animation";
@@ -1571,7 +1603,7 @@ namespace ws.winx.editor.windows
 																				sequenceChannel.type = SequenceChannel.SequenceChannelType.Video;
 																		}
 
-
+																		sequenceChannel.sequence=__sequence;
 																		__sequence.channels.Add (sequenceChannel);
 																}
 
@@ -1589,14 +1621,14 @@ namespace ws.winx.editor.windows
 																SequenceNode node = CreateNewSequenceNode (Event.current.mousePosition, dragged_object, channel);
 														
 																
-																if (node != null){
+																if (node != null) {
 																		sequenceChannel.nodes.Insert (node.index, node);
 																		
-																		int nodesCount=sequenceChannel.nodes.Count;
+																		int nodesCount = sequenceChannel.nodes.Count;
 
 																		//reindex nodes after insert
 																		for (int i=node.index+1; i<nodesCount; i++)
-																			sequenceChannel.nodes [i].index++;
+																				sequenceChannel.nodes [i].index++;
 																		
 																}
 																
@@ -1628,11 +1660,6 @@ namespace ws.winx.editor.windows
 				{
 
 
-
-
-
-
-						
 						float duration = 0f;
 
 
@@ -1719,17 +1746,17 @@ namespace ws.winx.editor.windows
 
 								
 				
-								//UnityEditor.Animations.AnimatorStateTransition transition = null;
+						//UnityEditor.Animations.AnimatorStateTransition transition = null;
 				
-								float endTimeNode = 0f;
+						float endTimeNode = 0f;
 
 								
-								if (sequenceChannel.nodes.Count > -1) {
+						if (sequenceChannel.nodes.Count > -1) {
 
-										//find index of node with earliest startTime
-										startTimeEarliestIndex = sequenceChannel.nodes.FindLastIndex (itm => itm.startTime < node.startTime);
+								//find index of node with earliest startTime
+								startTimeEarliestIndex = sequenceChannel.nodes.FindLastIndex (itm => itm.startTime < node.startTime);
 
-								}
+						}
 						
 					
 						node.index = startTimeEarliestIndex + 1;
@@ -1740,13 +1767,42 @@ namespace ws.winx.editor.windows
 
 				public static void onSequenceNodeStart (SequenceNode node)
 				{
-						
+						if (node.source is AudioClip) {
+								AudioUtilW.PlayClip (node.source as AudioClip, 0, node.loop);//startSample doesn't work in this function????
+						} else if (node.source is MovieTexture) {
+								MovieTexture movieTexture = node.source as MovieTexture;
+								if (node.channel.target == Camera.main) {
+										RenderSettings.skybox.mainTexture = node.source as MovieTexture;
+								} else {
 
+										Renderer renderer = node.channel.target.GetComponent<Renderer> ();
+										if (renderer != null) {
+																			
+							
+												renderer.sharedMaterial.mainTexture = movieTexture;
+
+												if (movieTexture.audioClip != null)
+														AudioUtilW.PlayClip (movieTexture.audioClip, 0);//startSample doesn't work in this function????
+												
+												movieTexture.Play ();
+										}
+								}
+
+
+
+						}
 				}
 
 				public static void onSequenceNodeStop (SequenceNode node)
 				{
-						
+						 if (node.source is MovieTexture) {
+								double timeCurrent = node.channel.sequence.timeCurrent;
+
+								if (timeCurrent > node.startTime && timeCurrent < node.startTime + node.duration) {
+									(node.source as MovieTexture).Pause();
+								}else
+									(node.source as MovieTexture).Stop();
+						}
 			
 				}
 

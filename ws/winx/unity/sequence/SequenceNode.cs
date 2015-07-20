@@ -14,10 +14,7 @@ namespace ws.winx.unity.sequence
 				public SequenceNodeEvent onStop = new SequenceNodeEvent ();
 				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
-
-
-		public Vector3 boneOrginalPositionOffset;
-
+				public Vector3 boneOrginalPositionOffset;
 				public int index = -1;
 				public float transition = 0f;
 				public bool loop;
@@ -27,10 +24,7 @@ namespace ws.winx.unity.sequence
 				/// The start time in Frames
 				/// </summary>
 				public float startTime;
-
-				
 				float _timeLocal;
-
 				float _timeNormalized;
 
 
@@ -70,66 +64,69 @@ namespace ws.winx.unity.sequence
 
 						Debug.Log ("StartNode " + source.name);
 
+						
+
 						GameObject target = channel.target;
 
 						_isRunning = true;
 
 						if (target != null) {
-								if (source is AudioClip) {
+								if (Application.isPlaying) {
+										if (source is AudioClip) {
 											
 											
-										AudioSource audioSource = target.GetComponent<AudioSource> ();
+												AudioSource audioSource = target.GetComponent<AudioSource> ();
 
-										if (audioSource == null)
-												audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
+												if (audioSource == null)
+														audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
 											
-										audioSource.playOnAwake = false;
-										audioSource.clip = source as AudioClip;
+												audioSource.playOnAwake = false;
+												audioSource.clip = source as AudioClip;
 
-											audioSource.time=_timeLocal;
-											audioSource.volume=volume;
-											audioSource.Play();
+												audioSource.time = _timeLocal;
+												audioSource.volume = volume;
+												audioSource.Play ();
 					                        
 
 
-								} else if (source is MovieTexture) {
-										MovieTexture movieTexture = (source as MovieTexture);
-										if (target == Camera.main) {
-												RenderSettings.skybox.mainTexture = (source as MovieTexture);
-										} else {
+										} else if (source is MovieTexture) {
+												MovieTexture movieTexture = (source as MovieTexture);
+												if (target == Camera.main) {
+														RenderSettings.skybox.mainTexture = (source as MovieTexture);
+												} else {
 
-												Renderer renderer = channel.target.GetComponent<Renderer> ();
-												if (renderer != null) {
+														Renderer renderer = channel.target.GetComponent<Renderer> ();
+														if (renderer != null) {
 														
 
-														movieTexture.Stop ();
+																movieTexture.Stop ();
 
-														if (Application.isPlaying)
+														
 																renderer.material.mainTexture = movieTexture;
-														else
-																renderer.sharedMaterial.mainTexture = movieTexture;
-												} else
-														Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
-										}
+														
+														} else
+																Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
+												}
 
 
-										AudioSource audioSource = null;
-										if (movieTexture.audioClip != null) {
+												AudioSource audioSource = null;
+												if (movieTexture.audioClip != null) {
 													
-												audioSource = target.GetComponent<AudioSource> ();
+														audioSource = target.GetComponent<AudioSource> ();
 													
-												if (audioSource == null)
-														audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
+														if (audioSource == null)
+																audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
 													
-												audioSource.clip = movieTexture.audioClip;
-												audioSource.PlayOneShot (audioSource.clip);
+														audioSource.clip = movieTexture.audioClip;
+														//audioSource.PlayOneShot (audioSource.clip);
+														audioSource.Play();
 
 															
-										}
+												}
 
 
 
-										movieTexture.Play ();
+												movieTexture.Play ();
 
 
 														
@@ -138,36 +135,38 @@ namespace ws.winx.unity.sequence
 					
 												 
 										
-								} else if (source is  AnimationClip) {
+										} else if (source is  AnimationClip) {
 
-										Animator animator = target.GetComponent<Animator> ();
+												Animator animator = target.GetComponent<Animator> ();
 										
-										if (animator == null) {
-												animator = target.AddComponent<Animator> ();
-										}
-										animator.runtimeAnimatorController = this.channel.runtimeAnimatorController;
-										animator.enabled = true;
+												if (animator == null) {
+														animator = target.AddComponent<Animator> ();
+												}
+												animator.runtimeAnimatorController = this.channel.runtimeAnimatorController;
+												animator.enabled = true;
 
 									   
-										animator.Update(_timeNormalized);
+												animator.Update (_timeNormalized);
 
-										if (transition > 0) {
-												Debug.Log("Crossfade "+this.name);
-												animator.CrossFade (stateNameHash, transition, 0, 0f);
-										} else {
-												Debug.Log("Play "+this.name);
-												animator.Play (stateNameHash, 0, 0f);
+												if (transition > 0) {
+														Debug.Log ("Crossfade " + this.name);
+														animator.CrossFade (stateNameHash, transition, 0, 0f);
+												} else {
+														Debug.Log ("Play " + this.name);
+														animator.Play (stateNameHash, 0, 0f);
+												}
+										
+
+
+										
 										}
-										
 
-
-										
 								}
-
-
 
 								onStart.Invoke (this);
 				
+						} else {
+								Debug.LogWarning ("No target set on channel " + this.channel.name);
 						}
 
 //TODO put events with drag and drop handlers
@@ -186,28 +185,29 @@ namespace ws.winx.unity.sequence
 						
 
 						if (target != null) {
-								if (source is AudioClip) {
-										AudioSource audioSource = target.GetComponent<AudioSource> ();
+								if (Application.isPlaying) {
+										if (source is AudioClip) {
+												AudioSource audioSource = target.GetComponent<AudioSource> ();
 										
-										if (audioSource != null)
-												audioSource.Stop (); 
+												if (audioSource != null)
+														audioSource.Stop (); 
 								
-								} else if (source is MovieTexture) {
-										Renderer renderer = target.GetComponent<Renderer> ();
-										if (renderer != null) {
-												MovieTexture movieTexture = (source as MovieTexture);
+										} else if (source is MovieTexture) {
+												Renderer renderer = target.GetComponent<Renderer> ();
+												if (renderer != null) {
+														MovieTexture movieTexture = (source as MovieTexture);
 								
-												movieTexture.Stop ();
+														movieTexture.Stop ();
 //
-												AudioSource audioSource = null;
-												if (movieTexture.audioClip != null && (audioSource = target.GetComponent<AudioSource> ()) != null)
-														audioSource.Stop ();
+														AudioSource audioSource = null;
+														if (movieTexture.audioClip != null && (audioSource = target.GetComponent<AudioSource> ()) != null)
+																audioSource.Stop ();
 									
-										} else
-												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
-								} else if (source is AnimationClip) {
+												} else
+														Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
+										} else if (source is AnimationClip) {
 
-					//hard stop
+												//hard stop
 //										Animator animator = target.GetComponent<Animator> ();
 //															
 //										//
@@ -218,9 +218,10 @@ namespace ws.winx.unity.sequence
 								
 							
 								
+										}
+							
+							
 								}
-							
-							
 						}
 
 
@@ -254,13 +255,13 @@ namespace ws.winx.unity.sequence
 
 				public virtual void DoUpdate ()
 				{
-						if(onUpdate!=null)
-						onUpdate.Invoke (this);
+						if (onUpdate != null)
+								onUpdate.Invoke (this);
 				}
 
 				public void UpdateNode (double time)
 				{
-						_timeLocal=((float)time - startTime);
+						_timeLocal = ((float)time - startTime);
 						_timeNormalized = (_timeLocal / _duration);
 
 			              

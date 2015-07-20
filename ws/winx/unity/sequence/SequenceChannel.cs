@@ -9,6 +9,7 @@ namespace ws.winx.unity.sequence
 		[System.Serializable]
 		public class SequenceChannel:ScriptableObject
 		{
+				public Sequence sequence;
 
 				public enum SequenceChannelType{
 						Animation,
