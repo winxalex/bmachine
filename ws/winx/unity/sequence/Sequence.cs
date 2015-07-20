@@ -307,12 +307,7 @@ namespace ws.winx.unity.sequence
 //												node.UpdateNode (_passedTime);		
 //										}
 				
-//				foreach (var kvp in GetGroupTargets()) {
-//					SequenceNode mNode=kvp.Value.OrderBy(x=>x.startTime).ToList().Find(y=>((passedTime-y.startTime)/y.duration)<0.0f);
-//					if(mNode != null)
-//						mNode.UndoAction();
-//				}			
-//						}
+
 
 						_isPlaying = false;
 				}

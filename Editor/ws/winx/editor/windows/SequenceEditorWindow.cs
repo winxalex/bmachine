@@ -444,6 +444,8 @@ namespace ws.winx.editor.windows
 						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 						__sequence.StopRecording ();
 						AnimationMode.StopAnimationMode ();
+
+						AudioUtilW.StopAllClips ();
 					
 				
 
@@ -458,6 +460,8 @@ namespace ws.winx.editor.windows
 
 						} else {
 								__sequence.Record ();
+
+								AudioUtilW.StopAllClips();
 						
 						
 								if (!AnimationMode.InAnimationMode ()) {
@@ -476,32 +480,7 @@ namespace ws.winx.editor.windows
 				private void OnPlay ()
 				{
 
-//			if (!testBool) {
-//								
-//
-//				foreach(SequenceChannel channel in __sequence.channels)
-//					foreach(SequenceNode node in channel.nodes)
-//						if(node.source is AudioClip)
-//							AudioUtilW.PlayClip(node.source as AudioClip);
-//
-//
-//						} else {
-//				foreach(SequenceChannel channel in __sequence.channels)
-//					foreach(SequenceNode node in channel.nodes)
-//						if(node.source is AudioClip){
-//						//AudioUtilW.PlayClip(node.source as AudioClip);
-//						AudioUtilW.SetClipSamplePosition(node.source as AudioClip,(node.source as AudioClip).samples-1);
-//						     // AudioUtilW.StopClip(node.source as AudioClip);
-//							//AudioUtilW.StopAllClips();
-//								//node.channel.target.GetComponent<AudioSource>().Stop();
-//				
-//						
-//					}
-//				//AudioListener.pause=true;
-//
-//						}
-//
-//			testBool = !testBool;
+
 			
 						if (!__sequence.isPlaying) {
 								
@@ -530,14 +509,6 @@ namespace ws.winx.editor.windows
 
 
 
-								//float sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
-								//  if(audioClip.       
-								//	AudioUtilW.StopClip(audioClip);
-				
-				
-								//AudioUtilW.PlayClip (audioSource.clip, 0, loop);//startSample doesn't work in this function????
-								//AudioUtilW.SetClipSamplePosition (audioSource.clip, sampleStart);
-				
 				
 						} else {
 
@@ -548,10 +519,7 @@ namespace ws.winx.editor.windows
 								Stop ();
 
 
-//				foreach(SequenceChannel channel in __sequence.channels)
-//					foreach(SequenceNode node in channel.nodes)
-//						if(node.source is AudioClip)
-//							AudioUtilW.StopClip(node.source as AudioClip);
+
 
 								//__sequence.SequenceNodeStart -= onSequenceNodeStart;
 			
@@ -856,7 +824,8 @@ namespace ws.winx.editor.windows
 				
 
 						SampleClipNodesAt (__sequence.timeCurrent);
-
+						
+						AudioUtilW.StopAllClips ();
 
 				}
 
@@ -988,57 +957,46 @@ namespace ws.winx.editor.windows
 					
 						//find changels of type Animation and find first node in channel that is in time
 						foreach (SequenceChannel channel in __sequence.channels) {
-								if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation) {
+								if (channel.target != null) {
+
 										node = channel.nodes.FirstOrDefault (itm => time - itm.startTime >= 0 && time <= itm.startTime + itm.duration);
 										if (node != null) {
-												targets.Add (channel.target);
+												if (channel.type == SequenceChannel.SequenceChannelType.Animation) {
+											
+											
+														targets.Add (channel.target);
 
-												animator = channel.target.GetComponent<Animator> ();
+														animator = channel.target.GetComponent<Animator> ();
 
-												if (animator == null) {
-														animator = channel.target.AddComponent<Animator> ();
-												}
+														if (animator == null) {
+																animator = channel.target.AddComponent<Animator> ();
+														}
 
-												animator.runtimeAnimatorController = channel.runtimeAnimatorController;
+														animator.runtimeAnimatorController = channel.runtimeAnimatorController;
+									
+														nodes.Add (node);
+														times.Add ((float)(time - node.startTime));
+														clips.Add (node.source as AnimationClip);
+											
 								
-												nodes.Add (node);
-												times.Add ((float)(time - node.startTime));
-												clips.Add (node.source as AnimationClip);
+												} else if (channel.type == SequenceChannel.SequenceChannelType.Audio) {
+										
+														AudioClip audioClip = node.source as AudioClip;
+
+														
+															int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
+												     
+															AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
+															AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+														
+										
+												}
 										}
-							
 								}
 						}
-					
 
 
-						//save bone position
-						//Vector3 positionPrev = targets[0].GetRootBone().transform.position;
-
-						//AnimationClipSettings animationClipSettings = AnimationUtility.GetAnimationClipSettings (clips [0]);
-
-						//Quaternion rotationPrev = targets [0].GetRootBone().rotation;
-
-						//Animator ani=targets [0].GetComponent<Animator> ();
-						//Debug.Log ("1:"+targets[0].transform.forward+" "+targets [0].GetRootBone().transform.forward);
-			
-
-
-			
-						//make sample at 0f (sample would probably change bone position according to ani clip)
-						//AnimationMode.SampleAnimationClip (targets[0], clips[0], 0f);
-				
-				
-				
-						//calculate difference of bone position orginal - bone postion after clip effect
-						//Vector3 boneOrginalPositionOffset = positionPrev - targets[0].GetRootBone().transform.position;
-
-		
-
-			
-			
-						//save bone position
-						//Vector3 positionPrev = targets[0].GetRootBone().transform.position;
-						//AnimationMode.SampleAnimationClip (, clips[0], 0f);
+						
 
 
 						//Debug.Log ("2:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());
@@ -1058,10 +1016,7 @@ namespace ws.winx.editor.windows
 						}
 		
 				
-						//Debug.Log ("3:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());	
-						//targets[0].GetRootBone().transform.position = boneOrginalPositionOffset + targets[0].GetRootBone().transform.position;
-				
-						//targets [0].GetRootBone ().rotation = rotationPrev;
+						
 				
 
 
@@ -1404,7 +1359,8 @@ namespace ws.winx.editor.windows
 																}
 									
 																Repaint ();
-															
+
+														//ANY OTHER CHANNEL TYPE	
 														} else {
 																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
 																		if (nodePrev.startTime + nodePrev.duration < startTime && startTime + __nodeSelected.duration < nodeNext.startTime) {
@@ -1589,15 +1545,24 @@ namespace ws.winx.editor.windows
 
 																
 																} else {
-																		if ((sequenceChannel = CreateNewSequenceChannel ()) == null)
-																				continue;
-																		
-
-
+																		sequenceChannel = (SequenceChannel)ScriptableObject.CreateInstance<SequenceChannel> ();
 
 										
 																		if (draggedType == typeof(AnimationClip)) {
+
+																				//open Animation controller for the channel
+																				string path = EditorUtility.OpenFilePanel (
+																					"Select AnimaitonController",
+																					"Assets",
+																					"controller");
+																				
+																				if (!String.IsNullOrEmpty (path)) {
+																					
+																					continue;
+																				}
+
 																				sequenceChannel.name = "Animation";
+
 																		} else if (draggedType == typeof(AudioClip)) {
 																				sequenceChannel.name = "Audio";
 																				sequenceChannel.type = SequenceChannel.SequenceChannelType.Audio;
@@ -1620,11 +1585,20 @@ namespace ws.winx.editor.windows
 
 																//Vector2
 																//TODO current logic prevents overlapping on drop (might be ehnaced to allow transition overlap in Animation's node to some meassure)
+																//and if they overlapp move start time to fit
 																SequenceNode node = CreateNewSequenceNode (Event.current.mousePosition, dragged_object, channel);
 														
 																
-																if (node != null)
+																if (node != null){
 																		sequenceChannel.nodes.Insert (node.index, node);
+																		
+																		int nodesCount=sequenceChannel.nodes.Count;
+
+																		//reindex nodes after insert
+																		for (int i=node.index+1; i<nodesCount; i++)
+																			sequenceChannel.nodes [i].index++;
+																		
+																}
 																
 																	
 														
@@ -1729,17 +1703,18 @@ namespace ws.winx.editor.windows
 
 
 					
-								//create AnimatorState in controller
+								//create and add AnimatorState in controller from node.source
 								UnityEditor.Animations.AnimatorState stateCurrent = animatorController.AddMotion ((source as Motion));
 
+								//save AnimatorState ID hase
 								node.stateNameHash = stateCurrent.nameHash;
 				
-								//if stateCurren is first and default create empty state for default
+								//if stateCurrent is first and default create empty state for default
 								if (animatorController.layers [0].stateMachine.defaultState == stateCurrent) {
 										stateCurrent = animatorController.layers [0].stateMachine.AddState ("DefaultState");
 										animatorController.layers [0].stateMachine.defaultState = stateCurrent;
 								}
-
+						}
 				
 
 								
@@ -1754,56 +1729,8 @@ namespace ws.winx.editor.windows
 										//find index of node with earliest startTime
 										startTimeEarliestIndex = sequenceChannel.nodes.FindLastIndex (itm => itm.startTime < node.startTime);
 
-						
-										if (startTimeEarliestIndex > -1) {//=> prev node exists
-												SequenceNode nodePrev = sequenceChannel.nodes [startTimeEarliestIndex];
-												UnityEditor.Animations.AnimatorState statePrev = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodePrev.stateNameHash);
-							
-							
-//												if (statePrev.transitions.Length > 0) {
-//														transition = statePrev.transitions [0];
-//														statePrev.RemoveTransition (transition);
-//												}
-							
-							
-												//transition = new AnimatorStateTransition ();
-							
-							
-												//transition.destinationState = currentState;
-												//transition.duration = 0;
-												nodePrev.transition = 0;
-							
-												endTimeNode = nodePrev.startTime + nodePrev.duration;
-							
-												if (node.startTime < endTimeNode)//there is intersection between current node and prev node
-														nodePrev.transition = TimeAreaW.SnapTimeToWholeFPS (endTimeNode - node.startTime, __frameRate);
-												//transition.duration = endTimeNode - node.startTime;
-							
-							
-							
-												//statePrev.AddTransition (transition);
-										}
-						
-										if (startTimeEarliestIndex + 1 < sequenceChannel.nodes.Count) {//=> next node exist
-												SequenceNode nodeNext = sequenceChannel.nodes [startTimeEarliestIndex + 1];
-												UnityEditor.Animations.AnimatorState stateNext = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).GetStateBy (nodeNext.stateNameHash);
-												//transition = new AnimatorStateTransition ();
-												//transition.destinationState = stateNext;
-												endTimeNode = node.startTime + node.duration;
-												if (nodeNext.startTime < endTimeNode)
-														node.transition = TimeAreaW.SnapTimeToWholeFPS (endTimeNode - nodeNext.startTime, __frameRate);
-												//transition.duration = endTimeNode - nodeNext.startTime;
-							
-												nodeNext.index = startTimeEarliestIndex + 2;
-							
-												//currentState.AddTransition (transition);
-										}
-						
-						
-						
-						
 								}
-						}
+						
 					
 						node.index = startTimeEarliestIndex + 1;
 						
@@ -1813,123 +1740,13 @@ namespace ws.winx.editor.windows
 
 				public static void onSequenceNodeStart (SequenceNode node)
 				{
-						GameObject target = node.channel.target;
-						UnityEngine.Object source = node.source;
-						AudioClip audioClip;
-					
-			
-						if (target != null) {
-
-								int sampleStart = 0;
-
-								if (source is AudioClip) {
-										audioClip = source as AudioClip;
-
-										
-										sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
-										//  if(audioClip.       
-										//	AudioUtilW.StopClip(audioClip);
-
-//					Debug.Log("onSequenceNodeStart " + node.source.name);
-//								AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
-//															AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
-
-					
-					
-					
-								} else if (source is MovieTexture) {
-										Renderer renderer = target.GetComponent<Renderer> ();
-										if (renderer != null) {
-												MovieTexture movieTexture = (source as MovieTexture);
 						
-
-
-							
-												audioClip = movieTexture.audioClip;
-							
-												if (audioClip != null) {
-														//sampleStart=(int)Math.Ceiling(audioClip.samples * ((__sequence.timeCurrent-node.startTime)/audioClip.length));
-													
-														AudioUtilW.PlayClip (audioClip, 0, node.loop);//startSample doesn't work in this function????
-													
-														//AudioUtilW.SetClipSamplePosition(audioClip,sampleStart);
-												}
-						
-										}
-					
-					
-					
-					
-					
-						
-								} else
-										Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
-						} else if (source is  AnimationClip) {
-								//										Animator animator = target.GetComponent<Animator> ();
-								//										
-								//										if (animator){
-								//												animator.enabled=true;
-								//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
-								//				}
-					
-					
-					
-						}
 
 				}
 
 				public static void onSequenceNodeStop (SequenceNode node)
 				{
-						GameObject target = node.channel.target;
-						UnityEngine.Object source = node.source;
-						AudioClip audioClip;
-
-
-						Debug.Log (node.channel.target.name);
-			
-			
-						if (target != null) {
-				
-								if (source is AudioClip) {
-										audioClip = source as AudioClip;
-				
-										//AudioUtilW.PauseClip(audioClip);
-										//AudioUtilW.StopClip (audioClip);
-										//AudioUtilW.StopAllClips();
-										//AudioUtilW.SetClipSamplePosition(audioClip,audioClip.samples);
-										Debug.Log (audioClip.name);
-			
-					
-								} else if (source is MovieTexture) {
-										Renderer renderer = target.GetComponent<Renderer> ();
-										if (renderer != null) {
-												MovieTexture movieTexture = (source as MovieTexture);
 						
-						
-						
-						
-												audioClip = movieTexture.audioClip;
-						
-												if (audioClip != null)
-														AudioUtilW.StopClip (audioClip);
-						
-										} else {
-												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
-							
-										}
-								
-								} else if (source is  AnimationClip) {
-										//										Animator animator = target.GetComponent<Animator> ();
-										//										
-										//										if (animator){
-										//												animator.enabled=true;
-										//												animator.CrossFade (stateNameHash, 0f, 0, 0f);
-										//				}
-				
-				
-				
-								}
-						}
 			
 				}
 
@@ -1954,24 +1771,7 @@ namespace ws.winx.editor.windows
 				
 				}
 		
-				private static SequenceChannel CreateNewSequenceChannel ()
-				{
-						string path = EditorUtility.OpenFilePanel (
-				"Select AnimaitonController",
-				"Assets",
-				"controller");
 			
-						if (!String.IsNullOrEmpty (path)) {
-								SequenceChannel channel = (SequenceChannel)ScriptableObject.CreateInstance<SequenceChannel> ();
-
-								//create Controller
-								channel.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path), typeof(RuntimeAnimatorController)) as RuntimeAnimatorController;
-								return channel;
-
-						}
-
-						return null;
-				}
 
 			
 				

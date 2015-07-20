@@ -28,6 +28,12 @@ namespace ws.winx.unity.sequence
 				/// </summary>
 				public float startTime;
 
+				
+				float _timeLocal;
+
+				float _timeNormalized;
+
+
 				/// <summary>
 				/// The duration in [s] 
 				/// </summary>
@@ -80,25 +86,9 @@ namespace ws.winx.unity.sequence
 										audioSource.playOnAwake = false;
 										audioSource.clip = source as AudioClip;
 
-
-										//audioSource.clip.LoadAudioData();
-
-										//if(Application.isPlaying)
-
-//					audio.timeSamples = audio.clip.samples - 1;
-//					audio.pitch = -1;
-//					audio.Play();
-
-
-//					audioSource.time=20;
-//									audioSource.PlayOneShot(audioSource.clip);
-//					audioSource.Stop();
-//					audioSource.Play();
-//
-//					audioSource.time=20;
-//										audioSource.volume=this.volume;
-
-										//audioSource.timeSamples=audioSource.clip.samples-10000;
+											audioSource.time=_timeLocal;
+											audioSource.volume=volume;
+											audioSource.Play();
 					                        
 
 
@@ -158,8 +148,8 @@ namespace ws.winx.unity.sequence
 										animator.runtimeAnimatorController = this.channel.runtimeAnimatorController;
 										animator.enabled = true;
 
-									    
-											
+									   
+										animator.Update(_timeNormalized);
 
 										if (transition > 0) {
 												Debug.Log("Crossfade "+this.name);
@@ -216,6 +206,8 @@ namespace ws.winx.unity.sequence
 										} else
 												Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
 								} else if (source is AnimationClip) {
+
+					//hard stop
 //										Animator animator = target.GetComponent<Animator> ();
 //															
 //										//
@@ -262,42 +254,24 @@ namespace ws.winx.unity.sequence
 
 				public virtual void DoUpdate ()
 				{
-
-
-						GameObject target = channel.target;
-
-			
-			
-			
-//			if (target != null) {
-//								if (source is AudioClip) {
-//										AudioSource audioSource = target.GetComponent<AudioSource> ();
-//
-//										audioSource.clip.LoadAudioData ();
-//					//audioSource.Play();
-//
-//					Debug.Log ("DoUpadate" + audioSource.time+" "+audioSource.timeSamples);
-//					audioSource.timeSamples=audioSource.timeSamples+1000;
-//								}
-//						}
-					
+						if(onUpdate!=null)
 						onUpdate.Invoke (this);
 				}
 
 				public void UpdateNode (double time)
 				{
-
-						float timeNormalized = (((float)time - startTime) / _duration);
+						_timeLocal=((float)time - startTime);
+						_timeNormalized = (_timeLocal / _duration);
 
 			              
 						// 
 						if (_isRunning) {
-								if (timeNormalized <= 0.0f || timeNormalized > 1.0f) 
+								if (_timeNormalized <= 0.0f || _timeNormalized > 1.0f) 
 										Stop ();
 								else
 										DoUpdate ();
 						} else {
-								if (timeNormalized > 0.0f && timeNormalized <= 1.0f) {
+								if (_timeNormalized > 0.0f && _timeNormalized <= 1.0f) {
 										StartNode ();
 								
 								
