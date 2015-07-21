@@ -353,7 +353,7 @@ namespace ws.winx.editor
 										if (clipBindingCurrent.boneTransform != null) {
 									
 									
-												clipBindingCurrent.boneTransform.transform.position = clipBindingCurrent.boneOrginalPositionOffset + clipBindingCurrent.boneTransform.transform.position;
+												clipBindingCurrent.boneTransform.transform.position = clipBindingCurrent.boneRootPositionOffset + clipBindingCurrent.boneTransform.transform.position;
 									
 									
 									
@@ -495,7 +495,7 @@ namespace ws.winx.editor
 							
 							
 								//calculate difference of bone position orginal - bone postion after clip effect
-								clipBindingCurrent.boneOrginalPositionOffset = positionPrev - clipBindingCurrent.boneTransform.position;
+								clipBindingCurrent.boneRootPositionOffset = positionPrev - clipBindingCurrent.boneTransform.position;
 								}
 
 

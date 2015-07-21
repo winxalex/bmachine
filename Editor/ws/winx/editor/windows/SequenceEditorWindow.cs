@@ -19,7 +19,8 @@ namespace ws.winx.editor.windows
 {
 		public class SequenceEditorWindow : EditorWindow
 		{
-				
+
+				private static Dictionary<SequenceChannel,AnimationData[]> __animationDataDict;
 				private static Sequence __sequence;
 				private static bool __isPlayMode = false;
 				private Sequence.SequenceWrap wrap = Sequence.SequenceWrap.ClampForever;
@@ -39,14 +40,11 @@ namespace ws.winx.editor.windows
 				private static bool __isRecording;
 				private static int __frameRate = 30;
 				private const float NODE_RECT_HEIGHT = 40f;
-
 				//20f for timer ruller + 20f for Events Pad
 				private const float TIME_LABEL_HEIGHT = 20f;
 				private const float EVENT_PAD_HEIGHT = 20f;
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				private static GUIContent __nodeLabelGUIContent = new GUIContent ();
-				string channelLabel;
-				bool testBool;
 		
 				private static SequenceNode __nodeSelected {
 						get {
@@ -58,6 +56,39 @@ namespace ws.winx.editor.windows
 						set {
 								__sequence.selectedNode = value;
 						}
+				}
+
+
+				struct AnimationData
+				{
+
+						/// <summary>
+						/// The position of the root gameObject before animation is applied
+						/// </summary>
+						public Vector3 positionOriginalRoot;
+						
+						
+						
+						/// <summary>
+						/// The root bone position offset.
+						/// Offset between root bone position before applying animation on gameobject and 
+						/// animation applied at time t=0s
+						/// </summary>
+						public Vector3 boneRootPositionOffset;
+						
+						/// <summary>
+						/// The bone root rotation offset.
+						/// </summary>
+						public Quaternion boneRootRotationOffset;
+						
+						
+						/// <summary>
+						/// The rotation of the root gameObject before binding is applied
+						/// </summary>
+						public Quaternion rotationOriginalRoot;
+
+
+
 				}
 
 				[MenuItem("Window/Sequence", false)]
@@ -431,14 +462,16 @@ namespace ws.winx.editor.windows
 										prefabType = PrefabUtility.GetPrefabType (channel.target);
 							
 										if (prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance)
-								//channel.target.ResetPropertyModification<Transform> ();
-												PrefabUtility.RevertPrefabInstance (channel.target);
+												channel.target.ResetPropertyModification<Transform> ();
+										//PrefabUtility.RevertPrefabInstance (channel.target);
 							
 							
 							
 							
-										//rewind to start position
-										//clipBindingCurrent.ResetRoot ();
+										//rewind to start position and rotation (before Animation sampling)
+										channel.target.transform.position = __animationDataDict [channel] [0].positionOriginalRoot;
+										channel.target.transform.rotation = __animationDataDict [channel] [0].rotationOriginalRoot;
+
 								}
 						}
 				}
@@ -531,6 +564,9 @@ namespace ws.winx.editor.windows
 
 									
 										AnimationMode.StartAnimationMode ();
+
+
+										SaveBonePositionOffset ();
 								}
 
 
@@ -862,6 +898,9 @@ namespace ws.winx.editor.windows
 				{
 						Transform rootBoneTransform;
 
+					
+						__animationDataDict = new Dictionary<SequenceChannel, AnimationData[]> ();
+			                    
 
 						AnimationMode.BeginSampling ();
 			
@@ -880,13 +919,21 @@ namespace ws.winx.editor.windows
 										//must have controller or sampling doesn't work(weird???)
 										animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 
+										AnimationData[] animationDataArray = new AnimationData[channel.nodes.Count];
+										__animationDataDict [channel] = animationDataArray;
+						
 										float timePointer = 0f;
-										float boneOrginalPositionOffsetPrevNode = 0f;
+										
+										AnimationData animationDataCurrent;
 										foreach (SequenceNode n in channel.nodes) {
 
-
-
-						
+												animationDataCurrent = new AnimationData ();
+												
+												
+												animationDataCurrent.positionOriginalRoot = channel.target.transform.position;
+												animationDataCurrent.rotationOriginalRoot = channel.target.transform.rotation;
+							
+							
 												if (timePointer > 0) {
 							
 							
@@ -894,7 +941,7 @@ namespace ws.winx.editor.windows
 														AnimationMode.SampleAnimationClip (channel.target, channel.nodes [n.index - 1].source as AnimationClip, timePointer);
 
 
-														positionPrev = rootBoneTransform.position + channel.nodes [n.index - 1].boneOrginalPositionOffset;
+														positionPrev = rootBoneTransform.position + animationDataArray [n.index - 1].boneRootPositionOffset;
 												} else {
 														positionPrev = rootBoneTransform.position;
 												}
@@ -909,9 +956,12 @@ namespace ws.winx.editor.windows
 												Vector3 postionAfter = rootBoneTransform.transform.position;
 						
 												//calculate difference of bone position orginal - bone postion after clip effect
-												n.boneOrginalPositionOffset = positionPrev - postionAfter;
+												animationDataCurrent.boneRootPositionOffset = positionPrev - postionAfter;
 						
 												timePointer = n.duration;
+
+
+												animationDataArray [n.index] = animationDataCurrent;
 						
 										}
 								}
@@ -973,17 +1023,17 @@ namespace ws.winx.editor.windows
 				{
 
 
-						List<GameObject> targets = new List<GameObject> ();
-						List<AnimationClip> clips = new List<AnimationClip> ();
-						List<float> times = new List<float> ();
-						List<SequenceNode> nodes = new List<SequenceNode> ();
+						Transform rootBoneTransform;
+					
 					
 						SequenceNode node;
 						Animator animator;
 
 
+						Undo.FlushUndoRecordObjects ();
 
-					
+						AnimationMode.BeginSampling ();
+			
 						//find changels of type Animation and find first node in channel that is in time
 						foreach (SequenceChannel channel in __sequence.channels) {
 								if (channel.target != null) {
@@ -993,7 +1043,7 @@ namespace ws.winx.editor.windows
 												if (channel.type == SequenceChannel.SequenceChannelType.Animation) {
 											
 											
-														targets.Add (channel.target);
+													
 
 														animator = channel.target.GetComponent<Animator> ();
 
@@ -1003,9 +1053,16 @@ namespace ws.winx.editor.windows
 
 														animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 									
-														nodes.Add (node);
-														times.Add ((float)(time - node.startTime));
-														clips.Add (node.source as AnimationClip);
+													
+
+														AnimationMode.SampleAnimationClip (channel.target, node.source as AnimationClip, (float)(time - node.startTime));
+						
+														//						Correction is needed for root bones as Animation Mode doesn't respect current GameObject transform position,rotation
+														//						=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation(alerady saved)
+														if ((rootBoneTransform = channel.target.GetRootBone ()) != null)
+																rootBoneTransform.position = rootBoneTransform.position + __animationDataDict [channel] [node.index].boneRootPositionOffset;
+						
+													
 											
 								
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Audio) {
@@ -1019,14 +1076,7 @@ namespace ws.winx.editor.windows
 														
 										
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Video) {
-//seem sound is faster this way need more reasearch							
-//														MovieTexture texture = node.source as MovieTexture;
-//														if(texture.audioClip){
-//								AudioClip audioClip=texture.audioClip;
-//														int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
-//							
-//														AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
-//							}
+														///!!!I don't know the way of  Sampling or timeshifting of MovieTexture 
 							
 							
 												}
@@ -1036,23 +1086,22 @@ namespace ws.winx.editor.windows
 
 
 						
+						AnimationMode.EndSampling ();
 
-
-						//Debug.Log ("2:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());
-						AnimationModeUtility.SampleClipBindingAt (targets, clips, times);
-
-
-
-						//Correction is needed for root bones as animation doesn't respect current GameObject transform position,rotation
-						//=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation
-						int targetsNum = targets.Count;
-						Transform rootBoneTransform;
-						for (int i=0; i<targetsNum; i++) {
-
-
-								if ((rootBoneTransform = targets [i].GetRootBone ()) != null)
-										rootBoneTransform.position = rootBoneTransform.position + nodes [i].boneOrginalPositionOffset;
-						}
+//						//Debug.Log ("2:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());
+//						AnimationModeUtility.SampleClipBindingAt (targets, clips, times);
+//
+//
+//
+//						
+//						int targetsNum = targets.Count;
+//						Transform rootBoneTransform;
+//						for (int i=0; i<targetsNum; i++) {
+//
+//
+//								if ((rootBoneTransform = targets [i].GetRootBone ()) != null)
+//										rootBoneTransform.position = rootBoneTransform.position + nodes [i].boneOrginalPositionOffset;
+//						}
 		
 				
 						
@@ -1595,11 +1644,11 @@ namespace ws.winx.editor.windows
 																					"Assets",
 																					"controller");
 																				
-																				if (!String.IsNullOrEmpty (path)) {
-																					
+																				if (String.IsNullOrEmpty (path))
 																						continue;
-																				}
-
+																					
+																				sequenceChannel.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path), typeof(RuntimeAnimatorController)) as RuntimeAnimatorController;
+										                                                                        
 																				sequenceChannel.name = "Animation";
 
 																		} else if (draggedType == typeof(AudioClip)) {
@@ -1903,37 +1952,13 @@ namespace ws.winx.editor.windows
 					height / (float)clip.channels
 								);
 						}
-						return CombineWaveForms (array);
+
+
+						return AudioClipInspectorW.CombineWaveForms (array);
 				}
 
 
-				/// <summary>
-				/// TODO reflect this function from AudioClip
-				/// </summary>
-				/// <returns>The wave forms.</returns>
-				/// <param name="waveForms">Wave forms.</param>
-				public static Texture2D CombineWaveForms (Texture2D[] waveForms)
-				{
-						if (waveForms.Length == 1) {
-								return waveForms [0];
-						}
-						int width = waveForms [0].width;
-						int num = 0;
-						for (int i = 0; i < waveForms.Length; i++) {
-								Texture2D texture2D = waveForms [i];
-								num += texture2D.height;
-						}
-						Texture2D texture2D2 = new Texture2D (width, num, TextureFormat.ARGB32, false);
-						int num2 = 0;
-						for (int j = 0; j < waveForms.Length; j++) {
-								Texture2D texture2D3 = waveForms [j];
-								num2 += texture2D3.height;
-								texture2D2.SetPixels (0, num - num2, width, texture2D3.height, texture2D3.GetPixels ());
-								GameObject.DestroyImmediate (texture2D3);
-						}
-						texture2D2.Apply ();
-						return texture2D2;
-				}
+		
 
 
 				/// <summary>

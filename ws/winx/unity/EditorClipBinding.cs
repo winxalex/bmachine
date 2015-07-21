@@ -60,9 +60,16 @@ namespace ws.winx.unity
 
 
 		/// <summary>
-		/// The bone orginal position offset.
+		/// The root bone position offset.
+		/// Offset between root bone position before applying animation on gameobject and 
+		/// animation applied at time t=0s
 		/// </summary>
-		public Vector3 boneOrginalPositionOffset=Vector3.zero;
+		public Vector3 boneRootPositionOffset=Vector3.zero;
+
+		/// <summary>
+		/// The bone root rotation offset.
+		/// </summary>
+		public Quaternion boneRootRotationOffset=Quaternion.identity;
 
 
 		/// <summary>
@@ -76,7 +83,7 @@ namespace ws.winx.unity
 		///////////////////////////////
 
 		/// <summary>
-		/// Resets position and rotation to previous saved values
+		/// Resets position and rotation values before animation is applied to gameobject
 		/// This is nessery cos AnimationMode on stop, doesn't reset gameobject on which animation clip sampling is done
 		/// </summary>
 		public void ResetRoot ()

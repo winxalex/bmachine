@@ -14,7 +14,7 @@ namespace ws.winx.unity.sequence
 				public SequenceNodeEvent onStop = new SequenceNodeEvent ();
 				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
-				public Vector3 boneOrginalPositionOffset;
+				
 				public int index = -1;
 				public float transition = 0f;
 				public bool loop;
@@ -236,28 +236,7 @@ namespace ws.winx.unity.sequence
 
 				}
 		
-//				public void End ()
-//				{
-////						foreach (BaseAction action in actions) {
-////								action.OnExit (target);		
-////						}
-//						isRunning = false;
-//
-//						Stop ();
-//				}
 
-//				public void End (bool forward)
-//				{
-//						if (!isRunning) {
-//								StartNode ();
-//						}
-//
-////						foreach (BaseAction action in actions) {
-////								action.OnUpdate (target, forward ? 1.0f : 0.0f);		
-////						}	
-//
-//						End ();
-//				}
 
 
 				public virtual void DoUpdate ()

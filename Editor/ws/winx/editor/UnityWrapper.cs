@@ -2919,6 +2919,37 @@ namespace ws.winx.editor
 	
 	#endregion
 
+	#region AudioClipInspectorW
+	public class AudioClipInspectorW{
+
+		private static Type __RealType;
+
+
+		/// <summary>
+		/// Gets the type of the wrapped.
+		/// </summary>
+		/// <returns>The wrapped type.</returns>
+		public static Type GetWrappedType ()
+		{
+
+
+
+			if (__RealType == null) {
+				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+				__RealType = assembly.GetType ("UnityEditor.AudioClipInspector");
+			}
+			
+			return __RealType;
+			
+		}
+
+		public static Texture2D CombineWaveForms(Texture2D[] waveForms)
+		{
+			throw new NotImplementedException ();
+		}
+
+	}
+	#endregion
 
 
 
