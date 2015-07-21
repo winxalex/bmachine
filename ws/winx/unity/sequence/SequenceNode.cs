@@ -197,7 +197,14 @@ namespace ws.winx.unity.sequence
 												if (renderer != null) {
 														MovieTexture movieTexture = (source as MovieTexture);
 								
-														movieTexture.Stop ();
+														if(_timeLocal>0){
+															movieTexture.Pause();
+															Debug.Log("SequenceNode>Video paused");
+														}
+														else{
+															movieTexture.Stop ();
+															Debug.Log("SequenceNode>Video stopped");
+														}
 //
 														AudioSource audioSource = null;
 														if (movieTexture.audioClip != null && (audioSource = target.GetComponent<AudioSource> ()) != null)

@@ -453,17 +453,24 @@ namespace ws.winx.editor.windows
 						AudioUtilW.StopAllClips ();
 					
 				
-//						foreach (SequenceChannel ch in __sequence.channels) {
-//								if (ch.type == SequenceChannel.SequenceChannelType.Video) {
-//										ch.nodes.ForEach (itm => {
-//												(itm.source as MovieTexture).Stop ();
-//												if ((itm.source as MovieTexture).audioClip) {
-//														AudioUtilW.StopClip ((itm.source as MovieTexture).audioClip);
-//												}});
-//					
-//								}
-//						}
+						StopAllVideo ();
 
+				}
+
+				private static void StopAllVideo ()
+				{
+						double timeCurrent = __sequence.timeCurrent;
+						foreach (SequenceChannel ch in __sequence.channels) 
+								if (ch.type == SequenceChannel.SequenceChannelType.Video) {
+										ch.nodes.ForEach (itm => {
+
+												if (timeCurrent > itm.startTime && timeCurrent < itm.startTime + itm.duration) 
+														(itm.source as MovieTexture).Pause ();
+												else
+														(itm.source as MovieTexture).Stop ();
+						
+										});
+								}
 				}
 
 				private static void OnRecord ()
@@ -1603,7 +1610,7 @@ namespace ws.winx.editor.windows
 																				sequenceChannel.type = SequenceChannel.SequenceChannelType.Video;
 																		}
 
-																		sequenceChannel.sequence=__sequence;
+																		sequenceChannel.sequence = __sequence;
 																		__sequence.channels.Add (sequenceChannel);
 																}
 
@@ -1795,14 +1802,7 @@ namespace ws.winx.editor.windows
 
 				public static void onSequenceNodeStop (SequenceNode node)
 				{
-						 if (node.source is MovieTexture) {
-								double timeCurrent = node.channel.sequence.timeCurrent;
-
-								if (timeCurrent > node.startTime && timeCurrent < node.startTime + node.duration) {
-									(node.source as MovieTexture).Pause();
-								}else
-									(node.source as MovieTexture).Stop();
-						}
+						 
 			
 				}
 
