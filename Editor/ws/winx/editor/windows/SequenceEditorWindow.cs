@@ -161,8 +161,8 @@ namespace ws.winx.editor.windows
 					
 						}
 				
-						if(__animationDataDict==null)
-						__animationDataDict = new Dictionary<SequenceChannel, AnimationData[]> ();
+						if (__animationDataDict == null)
+								__animationDataDict = new Dictionary<SequenceChannel, AnimationData[]> ();
 			
 			
 						EditorApplication.playmodeStateChanged -= OnPlayModeStateChange;
@@ -172,23 +172,26 @@ namespace ws.winx.editor.windows
 						SceneView.onSceneGUIDelegate += OnSceneGUI;
 				}
 
-		/// <summary>
-		/// Handles the scene GUI event.
-		/// </summary>
-		/// <param name="sceneView">Scene view.</param>
-		private static void OnSceneGUI (SceneView sceneView)
-		{
+				/// <summary>
+				/// Handles the scene GUI event.
+				/// </summary>
+				/// <param name="sceneView">Scene view.</param>
+				private static void OnSceneGUI (SceneView sceneView)
+				{
 
-			if (__sequence!=null && __sequence.timeCurrent>0f && Selection.activeGameObject != null && __sequence.channels.Exists(itm=>itm.type==SequenceChannel.SequenceChannelType.Animation && itm.target==Selection.activeGameObject)) {//TODO should be target of some channel too
-				if (!__sequence.isPlaying && !__sequence.isRecording && (Tools.current == Tool.Move || Tools.current == Tool.Rotate)) {
+						if (__sequence != null && __sequence.timeCurrent > 0f && Selection.activeGameObject != null && __sequence.channels.Exists (itm => itm.type == SequenceChannel.SequenceChannelType.Animation && itm.target == Selection.activeGameObject)) {//TODO should be target of some channel too
+								if (!__sequence.isPlaying && !__sequence.isRecording && (Tools.current == Tool.Move || Tools.current == Tool.Rotate)
+				   
+										&& currentlyDragging
+				    ) {
 					
-									__sequence.timeCurrent=0f;
-									ResetChannelsTarget();
+										__sequence.timeCurrent = 0f;
+										ResetChannelsTarget ();
 								}
-		   }
+						}
 
 
-
+		
 
 
 //			if (clipBindingsSerialized.value == null)
@@ -320,16 +323,16 @@ namespace ws.winx.editor.windows
 //			//Debug.Log ("hot"+GUIUtility.hotControl);
 //			
 //			SceneView.RepaintAll ();
-		}
+				}
 
 		
-		//				private static void DoTransition (SequenceNode node, Rect rect, int channelOrd)
-		//				{
-		//					
-		//						Color color = GUI.color;
-		//						GUI.color = Color.red;
-		//						float transitionPosStart = __timeAreaW.TimeToPixel (node.startTime + node.duration - node.transition, rect);
-		//						float transitionPosEnd = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
+				//				private static void DoTransition (SequenceNode node, Rect rect, int channelOrd)
+				//				{
+				//					
+				//						Color color = GUI.color;
+				//						GUI.color = Color.red;
+				//						float transitionPosStart = __timeAreaW.TimeToPixel (node.startTime + node.duration - node.transition, rect);
+				//						float transitionPosEnd = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
 //						Rect boxRect = new Rect (transitionPosStart, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, transitionPosEnd - transitionPosStart, NODE_RECT_HEIGHT);
 //				
 //						GUI.Box (boxRect, "", "TL LogicBar 0");
@@ -339,6 +342,13 @@ namespace ws.winx.editor.windows
 
 
 
+				private static bool currentlyDragging {
+						get {
+								return GUIUtility.hotControl != 0;
+						}
+				}
+		
+		
 				/// <summary>
 				/// Dos the node.
 				/// </summary>
@@ -682,7 +692,7 @@ namespace ws.winx.editor.windows
 										AnimationMode.StartAnimationMode ();
 										Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
-										SaveBonePositionOffset ();
+										SaveAnimationData ();
 								}
 
 								AudioUtilW.StopAllClips ();
@@ -714,10 +724,10 @@ namespace ws.winx.editor.windows
 
 				
 				
-							if (__sequence.timeCurrent >= __sequence.duration) {
-								__sequence.timeCurrent = 0f;
-								ResetChannelsTarget ();
-							}
+								if (__sequence.timeCurrent >= __sequence.duration) {
+										__sequence.timeCurrent = 0f;
+										ResetChannelsTarget ();
+								}
 				
 							
 				
@@ -727,7 +737,7 @@ namespace ws.winx.editor.windows
 										AnimationMode.StartAnimationMode ();
 
 
-										SaveBonePositionOffset ();
+										SaveAnimationData ();
 
 										
 								}
@@ -1043,7 +1053,7 @@ namespace ws.winx.editor.windows
 								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 								
 								
-								SaveBonePositionOffset ();
+								SaveAnimationData ();
 				
 								//SceneView.RepaintAll();
 
@@ -1064,7 +1074,13 @@ namespace ws.winx.editor.windows
 
 				}
 
-				public static void SaveBonePositionOffset ()
+
+				/// <summary>
+				/// Saves the AnimationData from nodes's Animations.
+				/// AnimationData contains target.rootBone.position offset before animation applied and and at animation t=0s
+				/// also contains data of channel.target position and rotation
+				/// </summary>
+				public static void SaveAnimationData ()
 				{
 						Transform rootBoneTransform;
 
@@ -1089,30 +1105,43 @@ namespace ws.winx.editor.windows
 										//must have controller or sampling doesn't work(weird???)
 										animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 
-										AnimationData[] animationDataArray;
+										AnimationData[] animationDataArray = null;
 
-										if(!__animationDataDict.ContainsKey(channel)){
-											animationDataArray= new AnimationData[channel.nodes.Count];
-									
-											__animationDataDict [channel] = animationDataArray;
-										}else
-											animationDataArray=__animationDataDict[channel];
+										if (!__animationDataDict.ContainsKey (channel)) {
+											
+												animationDataArray = new AnimationData[channel.nodes.Count];
+												__animationDataDict [channel] = animationDataArray;
+										} else
+												animationDataArray = __animationDataDict [channel];
+
+										bool needResave = false;
+
+										//if null or new node is added/removed we need new array and resave
+										if (animationDataArray.Length != channel.nodes.Count) {
+												animationDataArray = new AnimationData[channel.nodes.Count];
+												__animationDataDict [channel] = animationDataArray;
+												needResave = true;
+										}
+
+										
 						
 										float timePointer = 0f;
 
 										AnimationData animationDataCurrent;
 
-										animationDataCurrent=animationDataArray[0];
+										animationDataCurrent = animationDataArray [0];
 
-					//check first node if exist and if no change was done to channel.target => no need to resave
-					if(animationDataCurrent.positionOriginalRoot == channel.target.transform.position
-					  && animationDataCurrent.rotationOriginalRoot == channel.target.transform.rotation)
-							continue;
+										//check first node if exist and if no change was done to channel.target => no need to resave
+										if (!needResave && animationDataCurrent.positionOriginalRoot == channel.target.transform.position
+												&& animationDataCurrent.rotationOriginalRoot == channel.target.transform.rotation)
+												continue;
+
+										Debug.Log ("SaveBonePositionOffset> resaving...");
 					   
 										
 										foreach (SequenceNode n in channel.nodes) {
 
-												animationDataCurrent =animationDataArray[n.index];//this makes copy cos struct
+												animationDataCurrent = animationDataArray [n.index];//this makes copy cos struct
 												
 												
 												animationDataCurrent.positionOriginalRoot = channel.target.transform.position;
@@ -1746,7 +1775,12 @@ namespace ws.winx.editor.windows
 
 						__nodeSelected = null;
 
+						__sequence.timeCurrent = 0f;
 					
+						ResetChannelsTarget ();
+
+
+
 			
 						Repaint ();
 				}
@@ -1871,6 +1905,9 @@ namespace ws.winx.editor.windows
 																		//reindex nodes after insert
 																		for (int i=node.index+1; i<nodesCount; i++)
 																				sequenceChannel.nodes [i].index++;
+
+																		__sequence.timeCurrent = 0f;
+																		ResetChannelsTarget ();
 																		
 																}
 																
