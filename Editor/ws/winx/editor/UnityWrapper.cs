@@ -2147,7 +2147,7 @@ namespace ws.winx.editor
 				private static Type __RealType;
 				private static ConstructorInfo method_ctor;
 				private	static MethodInfo EndViewGUI_MethodInfo;
-				private	static MethodInfo TimeRuler_MethodInfo;
+			
 				private	static MethodInfo BeginViewGUI_MethodInfo;
 				private static MethodInfo __FrameToPixel_MethodInfo;
 
@@ -2429,7 +2429,7 @@ namespace ws.winx.editor
 
 								EndViewGUI_MethodInfo = __RealType.GetMethod ("EndViewGUI");
 								BeginViewGUI_MethodInfo = __RealType.GetMethod ("BeginViewGUI");
-								TimeRuler_MethodInfo = __RealType.GetMethod ("TimeRuler");
+								
 
 							
 						}

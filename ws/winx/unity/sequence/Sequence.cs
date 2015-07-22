@@ -13,8 +13,10 @@ namespace ws.winx.unity.sequence
 
 
 				//events 
-		public ws.winx.unity.sequence.SequenceEvent OnStart;
-		public ws.winx.unity.sequence.SequenceEvent OnEnd;
+				public ws.winx.unity.sequence.SequenceEvent OnStart=new ws.winx.unity.sequence.SequenceEvent();
+				public ws.winx.unity.sequence.SequenceEvent OnEnd=new ws.winx.unity.sequence.SequenceEvent();
+
+
 
 
 				public event UnityAction<SequenceNode> SequenceNodeStart {
@@ -162,19 +164,23 @@ namespace ws.winx.unity.sequence
 						if (t > _timeAtEnd) {
 								switch (wrap) {
 								case SequenceWrap.PingPong:
-										_timeAtEnd = t + __duration;
-										playForward = !playForward;
+										//_timeAtEnd = t + __duration;
+										//playForward = !playForward;
+										Debug.Log("Sequence>SequenceWrap.PingPong not tested, not finished");
 										break;
 								case SequenceWrap.Once:
+										Debug.Log("Sequence>SequenceWrap.Once not tested, not finished");
 										Stop (false);
-										break;
+										
+								break;
 								case SequenceWrap.ClampForever:
 										Stop (true);
 										OnEnd.Invoke(this);
 										break;
 								case SequenceWrap.Loop:
-										Restart (t);
-										break;
+										//Restart (t);
+										Debug.Log("Sequence>SequenceWrap.Loop not tested, not finished");
+								break;
 								}			
 						}
 			
@@ -299,11 +305,7 @@ namespace ws.winx.unity.sequence
 						_stop = true;
 
 
-//			nodes=nodes.OrderBy(x=>x.startTime).ToList();
-//			if (!forward) {
-//				nodes.Reverse ();
-//				passedTime=0;
-//			}
+
 
 						foreach (SequenceChannel channel in channels)
 								foreach (SequenceNode node in channel.nodes) {
@@ -311,17 +313,13 @@ namespace ws.winx.unity.sequence
 											node.Stop ();
 								}	
 
-//						if (!forward) {
-//								foreach (SequenceChannel channel in channels)
-//										foreach (SequenceNode node in channel.nodes) {
-//												node.UpdateNode (_passedTime);		
-//										}
+					//TODO handle forward=false loop and stuff
 				
 
 
 						_isPlaying = false;
 
-						//dispatch Stop
+						
 				}
 
 

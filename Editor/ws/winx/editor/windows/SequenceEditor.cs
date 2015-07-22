@@ -14,24 +14,37 @@ namespace ws.winx.editor.windows{
 		SequenceNode selectedNodePrev;
 
 		SerializedProperty selectedNodeSerializedProperty;
+		SerializedProperty wrapSerializedProperty;
+		SerializedProperty playOnStartSerializedProperty;
+		SerializedProperty OnStartSerializedProperty;
+		SerializedProperty OnEndSerializedProperty;
 
 		void OnEnable(){
 			selectedNodeSerializedProperty = serializedObject.FindProperty ("selectedNode");
-			
+			OnStartSerializedProperty=serializedObject.FindProperty ("OnStart");
+			OnEndSerializedProperty=serializedObject.FindProperty ("OnEnd");
+			wrapSerializedProperty=serializedObject.FindProperty ("wrap");
+			playOnStartSerializedProperty=serializedObject.FindProperty ("playOnStart");
 		}
 
 		public override void OnInspectorGUI ()
 		{
 			serializedObject.Update ();
-			EditorGUILayout.PropertyField (serializedObject.FindProperty ("wrap"), new GUIContent("Wrap Mode"));
-			EditorGUILayout.PropertyField (serializedObject.FindProperty ("playOnStart"), new GUIContent("Play On Start"));
+
+
+			EditorGUILayout.PropertyField (OnStartSerializedProperty, new GUIContent("OnStart"));
+			EditorGUILayout.PropertyField (OnEndSerializedProperty, new GUIContent("OnEnd"));
+
+
+			EditorGUILayout.PropertyField (wrapSerializedProperty, new GUIContent("Wrap Mode"));
+			EditorGUILayout.PropertyField (playOnStartSerializedProperty, new GUIContent("Play On Start"));
 
 			SequenceNode selectedNode=selectedNodeSerializedProperty.objectReferenceValue as SequenceNode;
 			serializedObject.ApplyModifiedProperties ();
 			Sequence sequence = target as Sequence;
 
 		
-
+			EditorGUILayout.BeginHorizontal ();
 			if (GUILayout.Button ("Play")) {
 				sequence.PlayAt();
 
@@ -42,21 +55,27 @@ namespace ws.winx.editor.windows{
 			}
 
 			if (GUILayout.Button ("Stop Reset")) {
-				sequence.Stop(false);
+				//sequence.Stop(false);
+				Debug.Log("Not yet tested, not finished");
 			}
 
 			if (GUILayout.Button ("Pause")) {
-				sequence.Pause();
+				//sequence.Pause();
+				Debug.Log("Not yet tested, not finished");
 			}
 			if (GUILayout.Button ("UnPause")) {
-				sequence.UnPause();
+				Debug.Log("Not yet tested, not finished");
+				//sequence.UnPause();
 			}
 			if (GUILayout.Button ("Restart")) {
-				sequence.Restart();
+				//sequence.Restart();
+				Debug.Log("Not yet tested, not finished");
 			}
 			if (GUILayout.Button ("Open Editor")) {
 				SequenceEditorWindow.ShowWindow();
 			}
+
+			EditorGUILayout.EndHorizontal ();
 
 			if (selectedNode != null){
 

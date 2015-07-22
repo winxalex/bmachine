@@ -10,10 +10,13 @@ namespace ws.winx.unity.sequence
 		[System.Serializable]
 		public class SequenceNode:ScriptableObject
 		{
+
 				public SequenceNodeEvent onStart = new SequenceNodeEvent ();
 				public SequenceNodeEvent onStop = new SequenceNodeEvent ();
 				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
+
+
 				
 				public int index = -1;
 				public float transition = 0f;

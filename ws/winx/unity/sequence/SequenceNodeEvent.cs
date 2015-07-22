@@ -7,7 +7,7 @@ using UnityEngine.Events;
 
 namespace ws.winx.unity.sequence
 {
-		
+	[Serializable]
 		public class SequenceNodeEvent:UnityEvent<SequenceNode>
 		{
 			

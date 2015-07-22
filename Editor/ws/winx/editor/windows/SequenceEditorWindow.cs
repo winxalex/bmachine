@@ -161,20 +161,175 @@ namespace ws.winx.editor.windows
 					
 						}
 				
-				
-
-
+						if(__animationDataDict==null)
+						__animationDataDict = new Dictionary<SequenceChannel, AnimationData[]> ();
+			
+			
 						EditorApplication.playmodeStateChanged -= OnPlayModeStateChange;
 						EditorApplication.playmodeStateChanged += OnPlayModeStateChange;
+
+						SceneView.onSceneGUIDelegate -= OnSceneGUI;
+						SceneView.onSceneGUIDelegate += OnSceneGUI;
 				}
 
-//				private static void DoTransition (SequenceNode node, Rect rect, int channelOrd)
-//				{
+		/// <summary>
+		/// Handles the scene GUI event.
+		/// </summary>
+		/// <param name="sceneView">Scene view.</param>
+		private static void OnSceneGUI (SceneView sceneView)
+		{
+
+			if (__sequence!=null && __sequence.timeCurrent>0f && Selection.activeGameObject != null && __sequence.channels.Exists(itm=>itm.type==SequenceChannel.SequenceChannelType.Animation && itm.target==Selection.activeGameObject)) {//TODO should be target of some channel too
+				if (!__sequence.isPlaying && !__sequence.isRecording && (Tools.current == Tool.Move || Tools.current == Tool.Rotate)) {
+					
+									__sequence.timeCurrent=0f;
+									ResetChannelsTarget();
+								}
+		   }
+
+
+
+
+
+//			if (clipBindingsSerialized.value == null)
+//				return;
+//			
+//			EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
+//			int bindingsLength = clipBindings.Length;
+//			Color clr = Color.red;
+//			Vector3[] positionsInKeyframe = null;
+//			AnimationClip clip = null;
+//			
+//			EditorClipBinding clipBindingCurrent = null;
+//			
+//			long indexListAndindexFramePacked = 0;
+//			
+//			Transform transformRoot = null;
+//			
+//			
+//			Transform transformFirstChild = null;
+//			
+//			bool gameObjectCharacterSelected = false;
+//			
+//			if (Selection.activeGameObject != null) {
+//				if (Tools.current == Tool.Move) {
 //					
-//						Color color = GUI.color;
-//						GUI.color = Color.red;
-//						float transitionPosStart = __timeAreaW.TimeToPixel (node.startTime + node.duration - node.transition, rect);
-//						float transitionPosEnd = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
+//					
+//					if (Selection.activeGameObject == __spaceGameObject) {
+//						gameObjectCharacterSelected = true;
+//						
+//					} else {
+//						
+//						clipBindingCurrent = clipBindings.FirstOrDefault ((itm) => itm.gameObject == Selection.activeGameObject);
+//						// && clipBindingCurrent.gameObject.transform.position!=Tools.handlePosition
+//						if (clipBindingCurrent != null) {
+//							
+//							//clipBindingCurrent.gameObject.position has changed so recalcualte position offset
+//							clipBindingCurrent.positionOffset = Quaternion.Inverse (__spaceGameObject.transform.rotation) * (clipBindingCurrent.gameObject.transform.position - __spaceGameObject.transform.position);
+//							
+//							
+//							
+//						}
+//					}
+//					
+//				} else if (Tools.current == Tool.Rotate) {
+//					
+//					if (Selection.activeGameObject == __spaceGameObject) {
+//						gameObjectCharacterSelected = true;
+//						
+//					} else {
+//						
+//						clipBindingCurrent = clipBindings.FirstOrDefault ((itm) => itm.gameObject == Selection.activeGameObject);
+//						// && clipBindingCurrent.gameObject.transform.position!=Tools.handleRotation
+//						if (clipBindingCurrent != null) {
+//							
+//							
+//							
+//							//clipBindingCurrent.gameObject.rotation has changed so recalcualte rotation offset
+//							clipBindingCurrent.rotationOffset = Quaternion.Inverse (__spaceGameObject.transform.rotation) * clipBindingCurrent.gameObject.transform.rotation;
+//							
+//						}
+//					}
+//					
+//				}
+//			}
+//			
+//			
+//			for (int i=0; i<bindingsLength; i++) {
+//				
+//				clipBindingCurrent = clipBindings [i];
+//				
+//				if (clipBindingCurrent.visible) {
+//					
+//					
+//					clip = clipBindingCurrent.clip;
+//					
+//					if (clip != null && clipBindingCurrent.gameObject != null && clipBindingCurrent.gameObject.transform.childCount>0 && (transformFirstChild = clipBindingCurrent.gameObject.transform.GetChild (0)) != null) {
+//						
+//						
+//						if (gameObjectCharacterSelected) {//=> move and/or rotate clip binding's gameobjects
+//							GameObject gameObjectBinded = clipBindingCurrent.gameObject;
+//							gameObjectBinded.transform.rotation = __spaceGameObject.transform.rotation * clipBindingCurrent.rotationOffset;
+//							gameObjectBinded.transform.position = __spaceGameObject.transform.position + __spaceGameObject.transform.rotation * clipBindingCurrent.positionOffset;
+//							
+//							
+//						}
+//						
+//						
+//						
+//						transformRoot = clipBindingCurrent.gameObject.transform;
+//						
+//						
+//						
+//						positionsInKeyframe = AnimationUtilityEx.GetPositions (clip, AnimationUtility.CalculateTransformPath (transformFirstChild, transformRoot), transformRoot);
+//						
+//						
+//						
+//						
+//						if (positionsInKeyframe != null) {			
+//							for (int j=0; j<positionsInKeyframe.Length; j++) {
+//								
+//								indexListAndindexFramePacked = i;//put index of clipBinding in list/array
+//								indexListAndindexFramePacked = indexListAndindexFramePacked << 32 | (uint)j;//pack together with keyframe index
+//								
+//								//actualy this is static handle
+//								HandlesEx.DragHandle (positionsInKeyframe [j], 0.1f, Handles.SphereCap, Color.red, "(" + j + ")" + " " + Decimal.Round (Convert.ToDecimal (AnimationUtilityEx.GetTimeAt (clip, j, AnimationUtilityEx.EditorCurveBinding_PosX)), 2).ToString (), indexListAndindexFramePacked, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new long[]{j}, null);
+//								
+//								
+//								
+//							}
+//							//save color
+//							clr = Handles.color;
+//							
+//							
+//							clipBindingCurrent.color.a = 1;
+//							Handles.color = clipBindingCurrent.color;
+//							
+//							
+//							Handles.DrawPolyLine (positionsInKeyframe);
+//							//restore color
+//							Handles.color = clr;
+//						}
+//						
+//						
+//					}
+//				}
+//			}
+//			
+//			
+//			//Debug.Log ("hot"+GUIUtility.hotControl);
+//			
+//			SceneView.RepaintAll ();
+		}
+
+		
+		//				private static void DoTransition (SequenceNode node, Rect rect, int channelOrd)
+		//				{
+		//					
+		//						Color color = GUI.color;
+		//						GUI.color = Color.red;
+		//						float transitionPosStart = __timeAreaW.TimeToPixel (node.startTime + node.duration - node.transition, rect);
+		//						float transitionPosEnd = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
 //						Rect boxRect = new Rect (transitionPosStart, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, transitionPosEnd - transitionPosStart, NODE_RECT_HEIGHT);
 //				
 //						GUI.Box (boxRect, "", "TL LogicBar 0");
@@ -481,6 +636,8 @@ namespace ws.winx.editor.windows
 						__sequence.Stop (__sequence.playForward);
 						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 						__sequence.StopRecording ();
+
+
 						AnimationMode.StopAnimationMode ();
 
 						AudioUtilW.StopAllClips ();
@@ -541,7 +698,7 @@ namespace ws.winx.editor.windows
 
 
 			
-						if (!__sequence.isPlaying) {
+						if (!__sequence.isPlaying) {//PLAY
 								
 								
 								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
@@ -552,11 +709,18 @@ namespace ws.winx.editor.windows
 								__sequence.SequenceNodeStop -= onSequenceNodeStop;
 								__sequence.SequenceNodeStop += onSequenceNodeStop;
 
+								__sequence.OnEnd.RemoveListener (onSequenceEnd);
+								__sequence.OnEnd.AddListener (onSequenceEnd);
+
+				
+				
+							if (__sequence.timeCurrent >= __sequence.duration) {
+								__sequence.timeCurrent = 0f;
+								ResetChannelsTarget ();
+							}
+				
 							
-
-								
-
-
+				
 								if (!AnimationMode.InAnimationMode ()) {
 
 									
@@ -564,13 +728,12 @@ namespace ws.winx.editor.windows
 
 
 										SaveBonePositionOffset ();
+
+										
 								}
 
 
-								if (__sequence.timeCurrent >= __sequence.duration) {
-										__sequence.timeCurrent = 0f;
-										ResetChannelsTarget ();
-								}
+								
 								
 								__sequence.Play (EditorApplication.timeSinceStartup);
 
@@ -579,10 +742,9 @@ namespace ws.winx.editor.windows
 				
 				
 				
-						} else {
+						} else {//STOP
 
-								//Reset transform property modification
-
+								
 								__sequence.Stop (__sequence.playForward);
 
 
@@ -879,7 +1041,8 @@ namespace ws.winx.editor.windows
 						if (!AnimationMode.InAnimationMode ()) {
 								AnimationMode.StartAnimationMode ();
 								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
-
+								
+								
 								SaveBonePositionOffset ();
 				
 								//SceneView.RepaintAll();
@@ -906,7 +1069,7 @@ namespace ws.winx.editor.windows
 						Transform rootBoneTransform;
 
 					
-						__animationDataDict = new Dictionary<SequenceChannel, AnimationData[]> ();
+						
 			                    
 
 						AnimationMode.BeginSampling ();
@@ -926,15 +1089,30 @@ namespace ws.winx.editor.windows
 										//must have controller or sampling doesn't work(weird???)
 										animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 
-										AnimationData[] animationDataArray = new AnimationData[channel.nodes.Count];
-										__animationDataDict [channel] = animationDataArray;
+										AnimationData[] animationDataArray;
+
+										if(!__animationDataDict.ContainsKey(channel)){
+											animationDataArray= new AnimationData[channel.nodes.Count];
+									
+											__animationDataDict [channel] = animationDataArray;
+										}else
+											animationDataArray=__animationDataDict[channel];
 						
 										float timePointer = 0f;
-										
+
 										AnimationData animationDataCurrent;
+
+										animationDataCurrent=animationDataArray[0];
+
+					//check first node if exist and if no change was done to channel.target => no need to resave
+					if(animationDataCurrent.positionOriginalRoot == channel.target.transform.position
+					  && animationDataCurrent.rotationOriginalRoot == channel.target.transform.rotation)
+							continue;
+					   
+										
 										foreach (SequenceNode n in channel.nodes) {
 
-												animationDataCurrent = new AnimationData ();
+												animationDataCurrent =animationDataArray[n.index];//this makes copy cos struct
 												
 												
 												animationDataCurrent.positionOriginalRoot = channel.target.transform.position;
@@ -1855,6 +2033,11 @@ namespace ws.winx.editor.windows
 
 
 						}
+				}
+
+				public static void onSequenceEnd (Sequence sequence)
+				{
+						Stop ();
 				}
 
 				public static void onSequenceNodeStop (SequenceNode node)
