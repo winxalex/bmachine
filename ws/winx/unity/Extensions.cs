@@ -495,11 +495,10 @@ namespace ws.winx.unity
 
 						SkinnedMeshRenderer skinmeshRenderer = go.GetComponentInChildren<SkinnedMeshRenderer> ();
 
-						if (skinmeshRenderer != null) 
-							return  skinmeshRenderer.rootBone;
-						return null;
+//						if (skinmeshRenderer != null) 
+//							return  skinmeshRenderer.rootBone;
+//						return null;
 
-//						Transform boneRoot = null;
 //			
 //						if (skinmeshRenderer != null) {
 //				
@@ -519,6 +518,30 @@ namespace ws.winx.unity
 //						}
 //
 //						return boneRoot;
+
+
+//			Transform[] bones = go.transform.childCount;
+//			
+//											int bonesNum = bones.Length;
+//			
+//											if (bonesNum > 0) {
+//													boneRoot = bones [0];
+//							
+//													for (int j= 1; j < bonesNum; j++)
+//															if (boneRoot.IsChildOf (bones [j]))
+//																	boneRoot = bones [j];
+//							
+//											}
+//							
+//									
+//			
+//									return boneRoot;
+
+						return go.GetComponent<Animator> ().GetBoneTransform (HumanBodyBones.Hips);
+
+
+
+
 				}
 
 				public static string GetPath (this GameObject obj)

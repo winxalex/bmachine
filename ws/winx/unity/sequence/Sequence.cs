@@ -13,7 +13,8 @@ namespace ws.winx.unity.sequence
 
 
 				//events 
-
+		public ws.winx.unity.sequence.SequenceEvent OnStart;
+		public ws.winx.unity.sequence.SequenceEvent OnEnd;
 
 
 				public event UnityAction<SequenceNode> SequenceNodeStart {
@@ -169,6 +170,7 @@ namespace ws.winx.unity.sequence
 										break;
 								case SequenceWrap.ClampForever:
 										Stop (true);
+										OnEnd.Invoke(this);
 										break;
 								case SequenceWrap.Loop:
 										Restart (t);
@@ -226,6 +228,10 @@ namespace ws.winx.unity.sequence
 
 						this._timeLast = t;
 						this._timeAtEnd = t + __duration - timeCurrent;
+
+					//dispatch Start
+				
+			  			 OnStart.Invoke(this);
 				}
 
 
@@ -291,6 +297,8 @@ namespace ws.winx.unity.sequence
 				public void Stop (bool forward)
 				{
 						_stop = true;
+
+
 //			nodes=nodes.OrderBy(x=>x.startTime).ToList();
 //			if (!forward) {
 //				nodes.Reverse ();
@@ -312,6 +320,8 @@ namespace ws.winx.unity.sequence
 
 
 						_isPlaying = false;
+
+						//dispatch Stop
 				}
 
 

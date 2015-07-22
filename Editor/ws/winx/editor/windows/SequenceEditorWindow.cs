@@ -458,7 +458,7 @@ namespace ws.winx.editor.windows
 						PrefabType prefabType = PrefabType.None;
 					
 						foreach (SequenceChannel channel in __sequence.channels) {
-								if (channel.type == SequenceChannel.SequenceChannelType.Animation && channel.target != null) {
+								if (channel.type == SequenceChannel.SequenceChannelType.Animation && channel.target != null && __animationDataDict != null && __animationDataDict.ContainsKey (channel)) {
 										prefabType = PrefabUtility.GetPrefabType (channel.target);
 							
 										if (prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance)
@@ -552,10 +552,7 @@ namespace ws.winx.editor.windows
 								__sequence.SequenceNodeStop -= onSequenceNodeStop;
 								__sequence.SequenceNodeStop += onSequenceNodeStop;
 
-								if (__sequence.timeCurrent >= __sequence.duration)
-										__sequence.timeCurrent = 0f;
-
-								__sequence.Play (EditorApplication.timeSinceStartup);
+							
 
 								
 
@@ -570,7 +567,17 @@ namespace ws.winx.editor.windows
 								}
 
 
+								if (__sequence.timeCurrent >= __sequence.duration) {
+										__sequence.timeCurrent = 0f;
+										ResetChannelsTarget ();
+								}
+								
+								__sequence.Play (EditorApplication.timeSinceStartup);
 
+								
+				
+				
+				
 				
 						} else {
 
@@ -1552,7 +1559,8 @@ namespace ws.winx.editor.windows
 								//remove channel
 								__sequence.channels.Remove (sequenceChannel);
 
-							
+								if (__animationDataDict != null && __animationDataDict.ContainsKey (sequenceChannel))
+										__animationDataDict.Remove (sequenceChannel);
 
 						}
 						
