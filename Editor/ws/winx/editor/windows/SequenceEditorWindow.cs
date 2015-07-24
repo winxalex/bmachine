@@ -17,12 +17,25 @@ using ws.winx.unity.sequence;
 
 namespace ws.winx.editor.windows
 {
+
+
+
+
+
+		/// <summary>
+		/// Sequence editor window.
+	/// !!! IMPORTANT
+	/// Can't mix vidoe sound and audio=> crazyness happening
+	/// Can't stop all the channels with sounds
+	/// 
+		/// </summary>
 		public class SequenceEditorWindow : EditorWindow
 		{
 
 				private static Dictionary<SequenceChannel,AnimationData[]> __animationDataDict;
 				private static Sequence __sequence;
 				private static bool __isPlayMode = false;
+				private static bool __needSave = false;
 				private Sequence.SequenceWrap wrap = Sequence.SequenceWrap.ClampForever;
 				private static GameObject __sequenceGameObject;
 				private Vector2 settingsScroll;
@@ -643,17 +656,20 @@ namespace ws.winx.editor.windows
 
 				private static void Stop ()
 				{
-						__sequence.Stop (__sequence.playForward);
+						if (__sequence != null) {
+								__sequence.Stop (__sequence.playForward);
+						
+								__sequence.StopRecording ();
+								StopAllVideo ();
+						}
+
 						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
-						__sequence.StopRecording ();
-
-
 						AnimationMode.StopAnimationMode ();
 
 						AudioUtilW.StopAllClips ();
 					
 				
-						StopAllVideo ();
+					
 
 				}
 
@@ -693,8 +709,11 @@ namespace ws.winx.editor.windows
 										Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
 										SaveAnimationData ();
-								}
+								} else if (__needSave) {
+										SaveAnimationData ();
 
+								}
+				         
 								AudioUtilW.StopAllClips ();
 
 								SampleClipNodesAt (__sequence.timeCurrent);
@@ -740,10 +759,14 @@ namespace ws.winx.editor.windows
 										SaveAnimationData ();
 
 										
+								} else if (__needSave) {
+
+										SaveAnimationData ();
+
 								}
-
-
-								
+				         
+				         
+				         
 								
 								__sequence.Play (EditorApplication.timeSinceStartup);
 
@@ -1037,7 +1060,7 @@ namespace ws.winx.editor.windows
 
 						double time = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
 
-						if (time > __sequence.duration)
+						if (time > __sequence.duration || time < 0)
 								return;
 
 
@@ -1062,10 +1085,9 @@ namespace ws.winx.editor.windows
 								Debug.Log ("Animation mode:" + AnimationMode.InAnimationMode ());
 								
 								
-						}
-
-				
-
+						} else if (__needSave)
+								SaveAnimationData ();
+			
 						SampleClipNodesAt (__sequence.timeCurrent);
 
 						//stop all movietextures
@@ -1086,7 +1108,7 @@ namespace ws.winx.editor.windows
 
 					
 						
-			                    
+						__needSave = false;   
 
 						AnimationMode.BeginSampling ();
 			
@@ -1240,7 +1262,7 @@ namespace ws.winx.editor.windows
 						Transform rootBoneTransform;
 					
 					
-						SequenceNode node;
+						SequenceNode node = null;
 						Animator animator;
 
 
@@ -1248,11 +1270,38 @@ namespace ws.winx.editor.windows
 
 						AnimationMode.BeginSampling ();
 			
-						//find changels of type Animation and find first node in channel that is in time
+						//find changels of type Animation and find first node in channel that is in time or nearest node left of time
 						foreach (SequenceChannel channel in __sequence.channels) {
 								if (channel.target != null) {
 
-										node = channel.nodes.FirstOrDefault (itm => time - itm.startTime >= 0 && time <= itm.startTime + itm.duration);
+
+										//node = channel.nodes.FirstOrDefault (itm => time - itm.startTime >= 0 && time <= itm.startTime + itm.duration);
+
+										node = null;
+
+
+										foreach (SequenceNode n in channel.nodes) {
+												if (time - n.startTime >= 0) {
+														if (time <= n.startTime + n.duration) {
+																node = n;
+																break;
+														} else { 
+																if (channel.type == SequenceChannel.SequenceChannelType.Animation && time > n.startTime + n.duration) {
+																		if (n.index + 1 < channel.nodes.Count && time - channel.nodes [n.index + 1].startTime >= 0) {
+																				continue;
+																		} else {
+																				node = n;
+																				time = n.startTime + n.duration;
+																				break;
+																		}
+																}
+
+														}
+												}
+
+										}
+
+
 										if (node != null) {
 												if (channel.type == SequenceChannel.SequenceChannelType.Animation) {
 											
@@ -1779,9 +1828,9 @@ namespace ws.winx.editor.windows
 					
 						ResetChannelsTarget ();
 
-
-
-			
+						__needSave = true;
+				
+				
 						Repaint ();
 				}
 
@@ -1908,7 +1957,9 @@ namespace ws.winx.editor.windows
 
 																		__sequence.timeCurrent = 0f;
 																		ResetChannelsTarget ();
-																		
+
+																		__needSave = true;
+										
 																}
 																
 																	
@@ -2046,32 +2097,65 @@ namespace ws.winx.editor.windows
 
 				public static void onSequenceNodeStart (SequenceNode node)
 				{
+
+						Debug.Log ("onSequenceNodeStart " + node.name);
+			          
 						if (node.source is AudioClip) {
 								AudioUtilW.PlayClip (node.source as AudioClip, 0, node.loop);//startSample doesn't work in this function????
 						} else if (node.source is MovieTexture) {
 								MovieTexture movieTexture = node.source as MovieTexture;
-								if (node.channel.target == Camera.main) {
-										RenderSettings.skybox.mainTexture = node.source as MovieTexture;
+								if (node.channel.target.tag == Tags.MAIN_CAMERA) {//==Camera.main
+
+										Debug.Log (node.name + " RenderSettings.skybox isn't supported in EditMode");
+										//RenderSettings.skybox.mainTexture = movieTexture;
+										
+										
 								} else {
 
 										Renderer renderer = node.channel.target.GetComponent<Renderer> ();
 										if (renderer != null) {
 																			
-							
-												renderer.sharedMaterial.mainTexture = movieTexture;
+												renderer.material.mainTexture = movieTexture;
+												//renderer.material.shader=Shader.Find("Unlit/Texture");
 
-												if (movieTexture.audioClip != null)
-														AudioUtilW.PlayClip (movieTexture.audioClip, 0);//startSample doesn't work in this function????
+												//remapp uv so it is not upsidedown
+
+
+												//renderer.sharedMaterial.mainTexture = movieTexture;
+
+															
 												
-												movieTexture.Play ();
 										}
 								}
 
 
+								if (movieTexture.audioClip != null)
+										AudioUtilW.PlayClip (movieTexture.audioClip, 0);//startSample doesn't work in this function????
 
+				
+				
+				
+								AudioSource audioSource = null;
+//										if (movieTexture.audioClip != null) {
+//											
+//											audioSource = node.channel.target.GetComponent<AudioSource> ();
+//											
+//											if (audioSource == null)
+//												audioSource = (AudioSource)node.channel.target.AddComponent (typeof(AudioSource));
+//											
+//											audioSource.clip = movieTexture.audioClip;
+//					                        
+//											audioSource.PlayOneShot (audioSource.clip);
+//											//audioSource.Play();
+//											
+//											
+//										}
+				
+								movieTexture.Play ();
+				
 						}
 				}
-
+		
 				public static void onSequenceEnd (Sequence sequence)
 				{
 						Stop ();
@@ -2203,6 +2287,10 @@ namespace ws.winx.editor.windows
 
 
 						if (Selection.activeGameObject != null) {
+
+
+								Stop ();
+
 								Sequence sequence = Selection.activeGameObject.GetComponent<Sequence> ();
 								if (sequence != null) {
 										__sequenceGameObject = sequence.gameObject;

@@ -15,9 +15,6 @@ namespace ws.winx.unity.sequence
 				public SequenceNodeEvent onStop = new SequenceNodeEvent ();
 				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
-
-
-				
 				public int index = -1;
 				public float transition = 0f;
 				public bool loop;
@@ -94,8 +91,8 @@ namespace ws.winx.unity.sequence
 
 										} else if (source is MovieTexture) {
 												MovieTexture movieTexture = (source as MovieTexture);
-												if (target == Camera.main) {
-														RenderSettings.skybox.mainTexture = (source as MovieTexture);
+												if (target.tag == "MainCamera") {//==Camera.main
+														RenderSettings.skybox.mainTexture = movieTexture;
 												} else {
 
 														Renderer renderer = channel.target.GetComponent<Renderer> ();
@@ -121,8 +118,9 @@ namespace ws.winx.unity.sequence
 																audioSource = (AudioSource)target.AddComponent (typeof(AudioSource));
 													
 														audioSource.clip = movieTexture.audioClip;
+														audioSource.playOnAwake = false;
 														//audioSource.PlayOneShot (audioSource.clip);
-														audioSource.Play();
+														audioSource.Play ();
 
 															
 												}
@@ -200,13 +198,12 @@ namespace ws.winx.unity.sequence
 												if (renderer != null) {
 														MovieTexture movieTexture = (source as MovieTexture);
 								
-														if(_timeLocal>0){
-															movieTexture.Pause();
-															Debug.Log("SequenceNode>Video paused");
-														}
-														else{
-															movieTexture.Stop ();
-															Debug.Log("SequenceNode>Video stopped");
+														if (_timeLocal > 0) {
+																movieTexture.Pause ();
+																Debug.Log ("SequenceNode>Video paused");
+														} else {
+																movieTexture.Stop ();
+																Debug.Log ("SequenceNode>Video stopped");
 														}
 //
 														AudioSource audioSource = null;
@@ -238,9 +235,6 @@ namespace ws.winx.unity.sequence
 						onStop.Invoke (this);
 
 				}
-		
-
-
 
 				public virtual void DoUpdate ()
 				{
