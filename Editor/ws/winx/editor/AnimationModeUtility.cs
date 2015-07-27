@@ -421,7 +421,7 @@ namespace ws.winx.editor
 					Undo.FlushUndoRecordObjects ();
 
 
-					Vector3 pos = Vector3.zero;
+					
 					
 					
 					AnimationMode.BeginSampling ();

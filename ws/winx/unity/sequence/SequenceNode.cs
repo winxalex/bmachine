@@ -19,31 +19,56 @@ namespace ws.winx.unity.sequence
 				public float transition = 0f;
 				public bool loop;
 				public float volume = 1f;
+				
 
 				/// <summary>
 				/// The start time in Frames
 				/// </summary>
 				public float startTime;
+
 				float _timeLocal;
 				float _timeNormalized;
 
+				//TODO use them for resize
+				public float startOffset;
+				public float endOffset;
+
+				public EditorClipBinding clipBinding;
 
 				/// <summary>
 				/// The duration in [s] 
 				/// </summary>
-				[SerializeField]
-				float
-						_duration;
-				float _durationInv = 0.2f;// 1/5
+				
 
 				public float duration {
 						get {
-								return _duration;
+
+							float d=5f;//default 5s
+
+								//return _duration;
+							if (source is AnimationClip) {
+
+								
+
+								d= (source as AnimationClip).length;
+								
+							} else if (source is AudioClip) {
+								
+								d= (source as AudioClip).length;
+							} else if (source is MovieTexture) {
+								
+								d=(source as MovieTexture).duration;
+								
+								
+							}
+
+							float frameRate=this.channel.sequence.frameRate;
+
+							d=Mathf.Round (d * frameRate) / frameRate;
+
+							return d;
 						}
-						set {
-								_duration = value;
-								_durationInv = 1 / _duration;
-						}
+						
 				}
 
 				//public int channelOrd;
@@ -245,7 +270,7 @@ namespace ws.winx.unity.sequence
 				public void UpdateNode (double time)
 				{
 						_timeLocal = ((float)time - startTime);
-						_timeNormalized = (_timeLocal / _duration);
+						_timeNormalized = (_timeLocal / duration);
 
 			              
 						// 

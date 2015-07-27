@@ -11,7 +11,8 @@ namespace ws.winx.unity.sequence
 		{
 				public Sequence sequence;
 
-				public enum SequenceChannelType{
+				public enum SequenceChannelType
+				{
 						Animation,
 						Video,
 						Audio
@@ -19,7 +20,6 @@ namespace ws.winx.unity.sequence
 
 				public string name;
 				public SequenceChannelType type;
-			
 				[SerializeField]
 				GameObject
 						_target;
@@ -33,22 +33,34 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
+				/// <summary>
+				/// The position of the target before animation is applied.
+				/// </summary>
+				public Vector3 positionOriginalRoot;
+
+				/// <summary>
+				/// The rotation of the target before animation is applied.
+				/// </summary>
+				public Quaternion rotationOriginalRoot;
+				
 
 				[SerializeField]
-				List<SequenceNode> _nodes;
+				List<SequenceNode>
+						_nodes;
 				
 				public List<SequenceNode> nodes {
-					get {
-						if(_nodes==null) _nodes=new List<SequenceNode>();
-						return _nodes;
-					}
+						get {
+								if (_nodes == null)
+										_nodes = new List<SequenceNode> ();
+								return _nodes;
+						}
 				}
 
-		public RuntimeAnimatorController runtimeAnimatorController;
+				public RuntimeAnimatorController runtimeAnimatorController;
 
 
 
-	    }
+		}
 
 				
 }

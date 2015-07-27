@@ -13,11 +13,8 @@ namespace ws.winx.unity.sequence
 
 
 				//events 
-				public ws.winx.unity.sequence.SequenceEvent OnStart=new ws.winx.unity.sequence.SequenceEvent();
-				public ws.winx.unity.sequence.SequenceEvent OnEnd=new ws.winx.unity.sequence.SequenceEvent();
-
-
-
+				public ws.winx.unity.sequence.SequenceEvent OnStart = new ws.winx.unity.sequence.SequenceEvent ();
+				public ws.winx.unity.sequence.SequenceEvent OnEnd = new ws.winx.unity.sequence.SequenceEvent ();
 
 				public event UnityAction<SequenceNode> SequenceNodeStart {
 						add {
@@ -64,22 +61,21 @@ namespace ws.winx.unity.sequence
 				public SequenceNode selectedNode;
 				public SequenceWrap wrap = SequenceWrap.ClampForever;
 				public bool playOnStart = true;
-
-
+				public int frameRate = 30;
 				bool _isRecording;
 				
 				public bool isRecording {
-					get {
-						return _isRecording;
-					}
+						get {
+								return _isRecording;
+						}
 				}
 
 				bool _isPlaying;
 
 				public bool isPlaying {
-					get {
-						return _isPlaying;
-					}
+						get {
+								return _isPlaying;
+						}
 				}
 
 				
@@ -107,7 +103,7 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
-				float __duration=float.NaN;
+				float __duration = float.NaN;
 
 				/// <summary>
 				/// Gets the duration.
@@ -115,8 +111,8 @@ namespace ws.winx.unity.sequence
 				/// <value>The duration.</value>
 				public float duration {
 						get {
-								if(!float.IsNaN(__duration))
-									__duration=calcDuration();
+								if (float.IsNaN (__duration))
+										__duration = calcDuration ();
 
 
 								return __duration;
@@ -124,11 +120,9 @@ namespace ws.winx.unity.sequence
 				}
 				
 				public bool playForward;
-				 bool _stop = true;
-				 bool _pause;
-
+				bool _stop = true;
+				bool _pause;
 				double _timeLast;
-
 				private float _timeAtPause;
 				public double timeCurrent;
 
@@ -166,34 +160,40 @@ namespace ws.winx.unity.sequence
 								case SequenceWrap.PingPong:
 										//_timeAtEnd = t + __duration;
 										//playForward = !playForward;
-										Debug.Log("Sequence>SequenceWrap.PingPong not tested, not finished");
+										Debug.Log ("Sequence>SequenceWrap.PingPong not tested, not finished");
 										break;
 								case SequenceWrap.Once:
-										Debug.Log("Sequence>SequenceWrap.Once not tested, not finished");
+										Debug.Log ("Sequence>SequenceWrap.Once not tested, not finished");
 										Stop (false);
 										
-								break;
+										
+										
+										break;
 								case SequenceWrap.ClampForever:
 										Stop (true);
-										OnEnd.Invoke(this);
+										OnEnd.Invoke (this);
 										break;
 								case SequenceWrap.Loop:
 										//Restart (t);
-										Debug.Log("Sequence>SequenceWrap.Loop not tested, not finished");
-								break;
-								}			
-						}
-			
-						timeCurrent+= t - _timeLast;//dt
+										Debug.Log ("Sequence>SequenceWrap.Loop not tested, not finished");
+										break;
+								}	
 
+								timeCurrent = this.duration;
+						} else {
+			
+								timeCurrent += t - _timeLast;//dt
+								
+								
+							
+
+								_timeLast = t;
 					
-
-						_timeLast = t;
-			
-						foreach (SequenceChannel channel in this.channels)
-								foreach (SequenceNode node in channel.nodes) {
-										node.UpdateNode (timeCurrent);		
-								}
+								foreach (SequenceChannel channel in this.channels)
+										foreach (SequenceNode node in channel.nodes) {
+												node.UpdateNode (timeCurrent);		
+										}
+						}
 				}
 
 				void Update ()
@@ -235,9 +235,9 @@ namespace ws.winx.unity.sequence
 						this._timeLast = t;
 						this._timeAtEnd = t + __duration - timeCurrent;
 
-					//dispatch Start
+						//dispatch Start
 				
-			  			 OnStart.Invoke(this);
+						OnStart.Invoke (this);
 				}
 
 
@@ -245,7 +245,7 @@ namespace ws.winx.unity.sequence
 				/// Play the  sequence  at specified time.
 				/// </summary>
 				/// <param name="t">T is local sequence time.</param>
-				public void PlayAt(double t=0)
+				public void PlayAt (double t=0)
 				{
 						
 
@@ -257,7 +257,7 @@ namespace ws.winx.unity.sequence
 
 				public void Pause ()
 				{
-					Pause (Time.time);
+						Pause (Time.time);
 				}
 
 				public void Pause (float t)
@@ -273,7 +273,7 @@ namespace ws.winx.unity.sequence
 								//extend endTime cos of time in pause
 								double pauseDuration = t - _timeLast;
 								this._timeAtEnd += pauseDuration; //shift endTime for pauseDuration
-								_timeLast=t;
+								_timeLast = t;
 								
 						}
 
@@ -284,7 +284,7 @@ namespace ws.winx.unity.sequence
 
 				public void UnPause ()
 				{
-					UnPause (Time.time);
+						UnPause (Time.time);
 
 				}
 
@@ -304,41 +304,45 @@ namespace ws.winx.unity.sequence
 				{
 						_stop = true;
 
-
+						_isPlaying = false;
 
 
 						foreach (SequenceChannel channel in channels)
 								foreach (SequenceNode node in channel.nodes) {
-										if(node.isRunning)
-											node.Stop ();
+										if (node.isRunning)
+												node.Stop ();
 								}	
 
-					//TODO handle forward=false loop and stuff
+						//TODO handle forward=false loop and stuff
 				
 
 
-						_isPlaying = false;
+					
+
+						Debug.Log ("Sequence>Stop " + _isPlaying);
 
 						
 				}
 
+				public void Record ()
+				{
+						_isRecording = true;
 
-				public void Record(){
-					_isRecording = true;
+						__duration = calcDuration ();
 
-					Stop (playForward);
+						Stop (playForward);
 				}
 
+				public void StopRecording ()
+				{
 
-					public void StopRecording(){
-
-							_isRecording = false;
+						_isRecording = false;
 
 
 
 						
 
-					}
+				}
 
 				/// <summary>
 				/// Value of Final Node end time in local sequence time space
