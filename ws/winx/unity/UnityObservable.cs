@@ -363,7 +363,7 @@ namespace ws.winx.unity{
 			
 			subject = new Subject<Tuple<T1,T2,T3,GameObject>> ();
 			
-			__disposer==new CompositeDisposable();
+			__disposer=new CompositeDisposable();
 			
 			//num of persistent is 0 here, so why SubscibeToPersistent is called in Invoke
 		}
