@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using VisualTween.Action;
 using System;
 using UnityEngine.Events;
+using ws.winx.ik;
 
 namespace ws.winx.unity.sequence
 {
@@ -28,6 +29,10 @@ namespace ws.winx.unity.sequence
 
 				float _timeLocal;
 				float _timeNormalized;
+				
+				FBBIKAnimatedValues fbbikAnimatedValues;
+				
+
 
 				//TODO use them for resize
 				public float startOffset;
@@ -84,6 +89,11 @@ namespace ws.winx.unity.sequence
 				public UnityEngine.Object source;
 				public int stateNameHash;
 
+
+
+				/// <summary>
+				/// Starts the node.
+				/// </summary>
 				public void StartNode ()
 				{
 
@@ -163,6 +173,12 @@ namespace ws.winx.unity.sequence
 										
 										} else if (source is  AnimationClip) {
 
+												if(source is AnimationClip && (this.fbbikAnimatedValues=target.GetComponent<FBBIKAnimatedValues>())!=null){
+													
+													this.fbbikAnimatedValues.Initate();
+												}
+											
+
 												Animator animator = target.GetComponent<Animator> ();
 										
 												if (animator == null) {
@@ -188,6 +204,10 @@ namespace ws.winx.unity.sequence
 										}
 
 								}
+
+				if(this.fbbikAnimatedValues!=null)
+					this.fbbikAnimatedValues.Initate();
+								
 
 								onStart.Invoke (this);
 				
@@ -240,11 +260,11 @@ namespace ws.winx.unity.sequence
 										} else if (source is AnimationClip) {
 
 												//hard stop
-//										Animator animator = target.GetComponent<Animator> ();
-//															
-//										//
-//										if (animator != null && this.index+1==this.channel.nodes.Count)
-//												animator.enabled = false;
+										Animator animator = target.GetComponent<Animator> ();
+															
+										//
+										if (animator != null && this.index+1==this.channel.nodes.Count)
+												animator.enabled = false;
 
 																	
 								
@@ -256,6 +276,9 @@ namespace ws.winx.unity.sequence
 								}
 						}
 
+			if(this.fbbikAnimatedValues!=null)
+				this.fbbikAnimatedValues.Initate();
+
 
 						onStop.Invoke (this);
 
@@ -265,6 +288,18 @@ namespace ws.winx.unity.sequence
 				{
 						if (onUpdate != null)
 								onUpdate.Invoke (this);
+				}
+
+				public void LateUpdateNode (double timeCurrent)
+				{
+					if (channel.type == SequenceChannel.SequenceChannelType.Animation && this.fbbikAnimatedValues != null) {
+							
+							this.fbbikAnimatedValues.LateUpdate();
+							
+
+
+					}
+					
 				}
 
 				public void UpdateNode (double time)

@@ -42,6 +42,9 @@ namespace ws.winx.unity.sequence
 				/// The rotation of the target before animation is applied.
 				/// </summary>
 				public Quaternion rotationOriginalRoot;
+
+
+				public Transform boneRoot;
 				
 
 				[SerializeField]

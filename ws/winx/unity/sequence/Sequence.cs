@@ -196,6 +196,22 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
+
+				public void LateUpdateSequence(){
+
+					///
+					foreach (SequenceChannel channel in this.channels)
+					foreach (SequenceNode node in channel.nodes) {
+						node.LateUpdateNode (timeCurrent);		
+					}
+
+				}
+
+
+				/// <summary>
+				/// Update this instance.
+				/// !!! Maybe move to Fixed update
+				/// </summary>
 				void Update ()
 				{
 						if (_pause || _stop) {
@@ -205,12 +221,18 @@ namespace ws.winx.unity.sequence
 
 					
 						UpdateSequence (Time.time);
-			
+			LateUpdateSequence ();
 
 				}
 
 
-				
+				void LateUpdate(){
+					//LateUpdateSequence ();
+				}
+
+
+
+	
 
 
 				/// <summary>
@@ -319,7 +341,7 @@ namespace ws.winx.unity.sequence
 
 					
 
-						Debug.Log ("Sequence>Stop " + _isPlaying);
+						//Debug.Log ("Sequence>Stop " + _isPlaying);
 
 						
 				}
