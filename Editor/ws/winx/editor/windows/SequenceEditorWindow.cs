@@ -184,15 +184,15 @@ namespace ws.winx.editor.windows
 								}
 
 								//if change has been made to pos or rotation of the target => change orginal and save nodes animation position offest
-								if (channel.positionOriginalRoot != channel.target.transform.position
-										|| channel.rotationOriginalRoot != channel.target.transform.rotation) {
+								if (channel.targetPositionOriginal != channel.target.transform.position
+										|| channel.targetRotationOriginal != channel.target.transform.rotation) {
 
 								
 								
 										Debug.Log ("Target object position have been changed");
 
-										channel.positionOriginalRoot = channel.target.transform.position;
-										channel.rotationOriginalRoot = channel.target.transform.rotation;
+										channel.targetPositionOriginal = channel.target.transform.position;
+										channel.targetRotationOriginal = channel.target.transform.rotation;
 
 
 										if (!AnimationMode.InAnimationMode ())
@@ -645,57 +645,6 @@ namespace ws.winx.editor.windows
 
 				}
 
-
-
-				/// <summary>
-				/// Resets the channel target position and rotation (as before Animation sampling is applied)
-				/// </summary>
-				private static void ResetChannelTarget (SequenceChannel channel)
-				{
-						
-
-						PrefabType prefabType = PrefabType.None;
-					
-						
-						if (channel.type == SequenceChannel.SequenceChannelType.Animation && channel.target != null) {
-								prefabType = PrefabUtility.GetPrefabType (channel.target);
-							
-								if (prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance)
-										channel.target.ResetPropertyModification<Transform> ();
-								//PrefabUtility.RevertPrefabInstance (channel.target);
-							
-							
-							
-							
-								//rewind to start position and rotation (before Animation sampling)
-								channel.target.transform.position = channel.positionOriginalRoot;
-								channel.target.transform.rotation = channel.rotationOriginalRoot;
-
-						}
-						
-				}
-
-				private static void Stop ()
-				{
-						//Debug.Log ("Stop() ThreadID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
-
-						if (__sequence != null) {
-								__sequence.Stop (__sequence.playForward);
-						
-								__sequence.StopRecording ();
-								StopAllVideo ();
-						}
-
-						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
-						AnimationMode.StopAnimationMode ();
-
-						AudioUtilW.StopAllClips ();
-					
-				
-					
-
-				}
-
 				private static void StopAllVideo ()
 				{
 						double timeCurrent = __sequence.timeCurrent;
@@ -744,6 +693,25 @@ namespace ws.winx.editor.windows
 
 				private void OnPlay ()
 				{
+//						AnimationMode.StartAnimationMode ();
+//						MethodInfo SetIKPositionWeight = typeof(Animator).GetMethod ("SetIKPositionWeightInternal", BindingFlags.NonPublic | BindingFlags.Instance);
+//						MethodInfo SetIKPosition = typeof(Animator).GetMethod ("SetIKPositionInternal", BindingFlags.NonPublic | BindingFlags.Instance);
+//						//this.SetIKPositionWeightInternal (goal, value);
+//
+//						GameObject target = GameObject.Find ("Sphere");
+//						SequenceChannel channel1 = __sequence.channels [0];
+//						Animator animator = channel1.target.GetComponent<Animator> ();
+//						SetIKPosition.Invoke (animator, new object[] {
+//								AvatarIKGoal.LeftHand,
+//								target.transform.position
+//						});
+//						SetIKPositionWeight.Invoke (animator, new object[]{AvatarIKGoal.LeftHand,1f});
+//		
+//
+//						//channel1.target.GetComponent<Animator>().SetIKPosition(AvatarIKGoal.LeftHand,target.transform.position);
+//						//channel1.target.GetComponent<Animator>().SetIKPositionWeight(AvatarIKGoal.LeftHand,1f);
+//						AnimationMode.StopAnimationMode ();
+//						return;
 
 
 			
@@ -808,6 +776,12 @@ namespace ws.winx.editor.windows
 								StopAllVideo ();
 								
 								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+
+								foreach (SequenceChannel channel in __sequence.channels) {
+										PreserveTransformAtPause (channel);
+								}
+
+
 								AnimationMode.StopAnimationMode ();
 								
 								AudioUtilW.StopAllClips ();
@@ -819,14 +793,40 @@ namespace ws.winx.editor.windows
 			
 				
 								__sequence.SequenceNodeStop -= onSequenceNodeStop;
+
+								foreach (SequenceChannel channel in __sequence.channels) {
+										ApplyTransformAtPause (channel);
+								}
 						}
 
 						
 
 				}
-
 			
 
+				/// <summary>
+				/// Stop Sequence playing.
+				/// </summary>
+				private static void Stop ()
+				{
+						//Debug.Log ("Stop() ThreadID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+			
+						if (__sequence != null) {
+								__sequence.Stop (__sequence.playForward);
+				
+								__sequence.StopRecording ();
+								StopAllVideo ();
+						}
+			
+						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+						AnimationMode.StopAnimationMode ();
+			
+						AudioUtilW.StopAllClips ();
+			
+			
+			
+			
+				}
 			
 
 			
@@ -901,9 +901,9 @@ namespace ws.winx.editor.windows
 														SequenceChannel channel = null;
 														channel = __sequence.channels [channelInx];
 														channel.target = target;
-														channel.positionOriginalRoot = target.transform.position;
-														channel.rotationOriginalRoot = target.transform.rotation;
-														channel.boneRoot=target.GetRootBone();
+														channel.targetPositionOriginal = target.transform.position;
+														channel.targetRotationOriginal = target.transform.rotation;
+														channel.boneRoot = target.GetRootBone ();
 
 														//AnimationMode
 
@@ -1139,6 +1139,52 @@ namespace ws.winx.editor.windows
 
 				}
 
+				private static void PreserveTransformAtPause (SequenceChannel channel)
+				{
+					if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.boneRoot == null) {
+						channel.targetPositionCurrent=channel.target.transform.position;
+						channel.targetRotationCurrent=channel.target.transform.rotation;
+						
+					}
+				}
+		
+		
+				/// <summary>
+				/// Resets the channel target position and rotation (as before Animation sampling is applied)
+				/// </summary>
+				private static void ResetChannelTarget (SequenceChannel channel)
+				{
+			
+			
+						PrefabType prefabType = PrefabType.None;
+			
+			
+						if (channel.type == SequenceChannel.SequenceChannelType.Animation && channel.target != null) {
+								prefabType = PrefabUtility.GetPrefabType (channel.target);
+				
+								if (prefabType == PrefabType.ModelPrefabInstance || prefabType == PrefabType.PrefabInstance)
+										channel.target.ResetPropertyModification<Transform> ();
+								//PrefabUtility.RevertPrefabInstance (channel.target);
+				
+				
+				
+				
+								//rewind to start position and rotation (before Animation sampling)
+								channel.target.transform.position = channel.targetPositionOriginal;
+								channel.target.transform.rotation = channel.targetRotationOriginal;
+				
+						}
+			
+				}
+
+				private static void ApplyTransformAtPause (SequenceChannel channel)
+				{
+						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.boneRoot == null) {
+								channel.target.transform.position = channel.targetPositionCurrent;
+								channel.target.transform.rotation = channel.targetRotationCurrent;
+
+						}
+				}
 
 				/// <summary>
 				/// Saves the AnimationData from nodes's Animations.
@@ -1226,7 +1272,7 @@ namespace ws.winx.editor.windows
 										//calculate difference of bone position orginal - bone postion after clip effect at AnimationClip time t=0
 										n.clipBinding.boneRootPositionOffset = positionPrev - positionAfter;
 
-									//	Debug.Log ("node:" + n.name + "offset" + n.clipBinding.boneRootPositionOffset);
+										//	Debug.Log ("node:" + n.name + "offset" + n.clipBinding.boneRootPositionOffset);
 						
 										timePointer = n.duration;
 
@@ -1362,16 +1408,19 @@ namespace ws.winx.editor.windows
 														//						Correction is needed for root bones as Animation Mode doesn't respect current GameObject transform position,rotation
 														//						=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation(alerady saved)
 														if ((rootBoneTransform = channel.boneRoot) != null) {
-															//	Debug.Log ("node:" + node.name + " time:" + time + " pos:" + rootBoneTransform.position);
+																//	Debug.Log ("node:" + node.name + " time:" + time + " pos:" + rootBoneTransform.position);
 																rootBoneTransform.position = rootBoneTransform.position + node.clipBinding.boneRootPositionOffset;
-															//	Debug.Log ("node:" + node.name + " time:" + time + "After pos:" + rootBoneTransform.position);
-														} else
-																Debug.LogWarning ("CAn't find Root bone Hips");
-						
-														//TODO Uncommnet
-//														var ik = channel.target.GetComponent<FBBIKAnimatedValues> ();
-//														if (ik != null)
-//																ik.LateUpdate ();
+																//	Debug.Log ("node:" + node.name + " time:" + time + "After pos:" + rootBoneTransform.position);
+														} 
+
+
+														
+
+														var ik = channel.target.GetComponent<FBBIKAnimatedValues> ();
+														if (ik != null) {
+																ik.Initate ();//didn't found soultuion when is not initated
+																ik.LateUpdate ();
+														}
 								
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Audio) {
 										
@@ -1902,7 +1951,7 @@ namespace ws.winx.editor.windows
 
 
 				/// <summary>
-				/// Raises the game object selection changed event.
+				/// Handles the game object selection changed event thru menu.
 				/// </summary>
 				/// <param name="data">Data.</param>
 				private void OnGameObjectSelectionChanged (object data)
@@ -1911,6 +1960,12 @@ namespace ws.winx.editor.windows
 						Selection.activeGameObject = sequence.gameObject;
 						__sequenceGameObject = sequence.gameObject;
 						__sequence = sequence;
+				}
+
+				private void OnFocus ()
+				{
+						//Debug.Log ("Focus");
+						selectionChangeEventHandler ();
 				}
 
 
@@ -2360,6 +2415,7 @@ namespace ws.winx.editor.windows
 
 
 				/// <summary>
+				/// MonoBehavior binding
 				/// Handle the selection(gameobject) change event.
 				/// this is EditorWindow function and its autobindend by name
 				/// </summary>

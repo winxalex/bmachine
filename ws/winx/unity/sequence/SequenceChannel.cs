@@ -36,12 +36,23 @@ namespace ws.winx.unity.sequence
 				/// <summary>
 				/// The position of the target before animation is applied.
 				/// </summary>
-				public Vector3 positionOriginalRoot;
+				public Vector3 targetPositionOriginal;
 
 				/// <summary>
 				/// The rotation of the target before animation is applied.
 				/// </summary>
-				public Quaternion rotationOriginalRoot;
+				public Quaternion targetRotationOriginal;
+
+
+				/// <summary>
+				/// The position of the target - current.
+				/// </summary>
+				public Vector3 targetPositionCurrent;
+				
+				/// <summary>
+				/// The rotation of the target - current.
+				/// </summary>
+				public Quaternion targetRotationCurrent;
 
 
 				public Transform boneRoot;

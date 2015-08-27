@@ -492,52 +492,48 @@ namespace ws.winx.unity
 
 				public static Transform GetRootBone (this GameObject go)
 				{
+						Animator animator = go.GetComponent<Animator> ();
+						Transform boneTransform = null;
 
-						SkinnedMeshRenderer skinmeshRenderer = go.GetComponentInChildren<SkinnedMeshRenderer> ();
+						if (animator != null)
+			
+								boneTransform = animator.GetBoneTransform (HumanBodyBones.Hips);
+			//op1
+						if (boneTransform != null)
+								return boneTransform;
 
-//						if (skinmeshRenderer != null) 
-//							return  skinmeshRenderer.rootBone;
-//						return null;
+						//op2
+						SkinnedMeshRenderer[] skinmeshRenderers = go.GetComponentsInChildren<SkinnedMeshRenderer> ();
+						int numRenderers = skinmeshRenderers.Length;
+						
+						if (numRenderers == 1)
+								boneTransform = skinmeshRenderers [0].rootBone;
+						else
+								for (int i=0; i<numRenderers; i++) {
 
-//			
-//						if (skinmeshRenderer != null) {
-//				
-//								Transform[] bones = skinmeshRenderer.bones;
-//
-//								int bonesNum = bones.Length;
-//
-//								if (bonesNum > 0) {
-//										boneRoot = bones [0];
-//				
-//										for (int j= 1; j < bonesNum; j++)
-//												if (boneRoot.IsChildOf (bones [j]))
-//														boneRoot = bones [j];
-//				
-//								}
-//				
-//						}
-//
-//						return boneRoot;
+										boneTransform = skinmeshRenderers [i].rootBone;
+
+										if (boneTransform != null && (boneTransform.name.ToLower ().Contains ("hip") || boneTransform.name.ToLower ().Contains ("pelvis"))) {
+												return boneTransform;
+										}
+											
+								}
+						
 
 
-//			Transform[] bones = go.transform.childCount;
-//			
-//											int bonesNum = bones.Length;
-//			
-//											if (bonesNum > 0) {
-//													boneRoot = bones [0];
-//							
-//													for (int j= 1; j < bonesNum; j++)
-//															if (boneRoot.IsChildOf (bones [j]))
-//																	boneRoot = bones [j];
-//							
-//											}
-//							
-//									
-//			
-//									return boneRoot;
+					//op3
+						Transform[] bones = go.transform.GetComponentsInChildren<Transform> ();
+							
+						boneTransform = bones.FirstOrDefault (itm => itm.name.ToLower ().Contains ("pelvis") || itm.name.ToLower ().Contains ("hip"));
 
-						return go.GetComponent<Animator> ().GetBoneTransform (HumanBodyBones.Hips);
+										
+						
+							
+									
+			
+									
+
+						return boneTransform;
 
 
 
