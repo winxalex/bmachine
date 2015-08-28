@@ -498,7 +498,7 @@ namespace ws.winx.unity
 						if (animator != null)
 			
 								boneTransform = animator.GetBoneTransform (HumanBodyBones.Hips);
-			//op1
+						//op1
 						if (boneTransform != null)
 								return boneTransform;
 
@@ -521,7 +521,7 @@ namespace ws.winx.unity
 						
 
 
-					//op3
+						//op3
 						Transform[] bones = go.transform.GetComponentsInChildren<Transform> ();
 							
 						boneTransform = bones.FirstOrDefault (itm => itm.name.ToLower ().Contains ("pelvis") || itm.name.ToLower ().Contains ("hip"));

@@ -277,9 +277,10 @@ namespace ws.winx.editor
 								Type type = AnimationUtility.PropertyModificationToEditorCurveBinding (propertyModification, rootGameObject, out binding);
 								if (type != null) {
 				
-										if (component != null && component.isHuman && binding.type == typeof(Transform) && component.IsBoneTransform (propertyModification.target as Transform)) {
-												Debug.LogWarning ("Keyframing for humanoid rig is not supported!", propertyModification.target as Transform);
-										} else {
+//										if (component != null && component.isHuman && binding.type == typeof(Transform) && component.IsBoneTransform (propertyModification.target as Transform)) {
+//												Debug.LogWarning ("Keyframing for humanoid rig is not supported!", propertyModification.target as Transform);
+//										} else 
+//										{
 												AnimationMode.AddPropertyModification (binding, propertyModification, modifications [i].keepPrefabOverride);
 												EditorCurveBinding[] array = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, activeAnimationClip);
 												if (array != null) {
@@ -289,7 +290,7 @@ namespace ws.winx.editor
 												} else {
 														AddKey (time, rootGameObject, activeAnimationClip, binding, type, propertyModification);
 												}
-										}
+										//}
 								} else {
 										list.Add (modifications [i]);
 								}

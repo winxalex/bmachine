@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System;
 using System.Reflection;
@@ -59,6 +59,12 @@ namespace ws.winx.editor.windows
 				private const float EVENT_PAD_HEIGHT = 20f;
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				private static GUIContent __nodeLabelGUIContent = new GUIContent ();
+				private static float[] keyframeTimeValues;
+				private static float[] keyframTimeValuesPrev;
+				private static bool eventTimeLineInitalized;
+				private static bool[] keyframeTimeValuesSelected;
+				private static string[] keyframesDisplayNames;
+				private static GUIContent _keyframeMarker;
 		
 				private static SequenceNode __nodeSelected {
 						get {
@@ -415,6 +421,9 @@ namespace ws.winx.editor.windows
 
 						GUI.Box (nodeRect, "", "TL LogicBar 0");
 
+						DoKeyFrames(nodeRect);
+
+						//add offset for cursor
 						nodeRect.xMin += 5;
 						nodeRect.xMax -= 5;
 						EditorGUIUtility.AddCursorRect (nodeRect, MouseCursor.Pan);
@@ -448,6 +457,10 @@ namespace ws.winx.editor.windows
 								Rect rect1 = new Rect (nodeRect.x + nodeRect.width * 0.5f - size.x * 0.5f, nodeRect.y + nodeRect.height * 0.5f - size.y * 0.5f, size.x, size.y);
 								GUI.Label (rect1, __nodeLabelGUIContent, style);
 						}
+
+
+
+						
 			
 
 			
@@ -838,7 +851,8 @@ namespace ws.winx.editor.windows
 				private void OnGUI ()
 				{
 						
-						
+						if (_keyframeMarker == null)
+								_keyframeMarker = new GUIContent (EditorGUILayoutEx.ANIMATION_STYLES.pointIcon);
 
 						Rect rect = this.position;
 
@@ -864,6 +878,104 @@ namespace ws.winx.editor.windows
 						
 				}
 
+
+
+
+				/////////////  HANDLING KEYFRAMES ROTATION/SCALE Events ////////////////
+					
+				/// <summary>
+				/// Ons the mecanim event edit.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				static void onKeyframeEdit (TimeLineArgs<float> args)
+				{
+						//__timeNormalized = args.selectedValue;
+						//__timeNormalizedUpdate = true;	
+						
+				}
+					
+				/// <summary>
+				/// Ons the keyframe delete.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				static void onKeyframeDelete (TimeLineArgs<float> args)
+				{
+						
+						//EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
+						
+						
+						AnimationUtilityEx.RemoveKeyframeFrom (__sequence.selectedNode.source as AnimationClip, args.selectedIndex);
+				}
+
+		private static void DoKeyFrames (Rect keyframesRect)
+				{
+						/////////////  ROTATION/SCALE KEYFRAMES  /////////////////////////
+						
+			
+			
+						//Show rotation or scale keyframes if Rotation or Scale tools are selected
+						if (Selection.activeGameObject != null && __sequence.selectedNode != null 
+								&& __sequence.selectedNode.channel.target != null
+								&& __sequence.selectedNode.channel.type == SequenceChannel.SequenceChannelType.Animation
+								&& Selection.activeGameObject == __sequence.selectedNode.channel.target || Selection.activeGameObject.transform.IsChildOf (__sequence.selectedNode.channel.target.transform)
+
+
+			   			 ) {
+
+
+				//Rect keyframesRect = GUILayoutUtility.GetRect (Screen.width - 16f, 16f);
+				
+				keyframesRect.xMax += _keyframeMarker.image.width * 0.5f;
+				keyframesRect.xMin -= _keyframeMarker.image.width*0.5f;
+
+
+								EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;//we assume there is 3 same keyframes for X,Y,Z
+
+
+								AnimationClip clip = __sequence.selectedNode.source as AnimationClip;
+				
+								if (Tools.current == Tool.Rotate || Tools.current == Tool.Move) {
+					
+
+										//EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
+										if (Tools.current == Tool.Move)
+												curveBinding = AnimationUtilityEx.EditorCurveBinding_PosX;
+
+
+										if (__sequence.selectedNode.channel.target != null) {
+												
+												curveBinding.path = AnimationUtility.CalculateTransformPath (Selection.activeGameObject.transform, __sequence.selectedNode.channel.target.transform);
+												keyframeTimeValues = AnimationUtilityEx.GetTimes (clip, curveBinding, clip.length);
+												
+												int numKeys=keyframeTimeValues.Length;
+												
+												//for(int i=0;i<numKeys;i++)
+												//keyframeTimeValues[i]=TimeAreaW.SnapTimeToWholeFPS(keyframeTimeValues[i],__frameRate);
+						
+										} 
+
+					
+										keyframesDisplayNames = keyframeTimeValues.Select ((itm) => {
+						return itm+".s";}).ToArray ();
+												//return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
+					
+										keyframeTimeValuesSelected = new bool[keyframeTimeValues.Length];// for multiselection option not used here
+					
+										//create custom timeline showing rotation or scale keyframes
+										EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, _keyframeMarker, ref keyframeTimeValues, ref keyframTimeValuesPrev, ref keyframesDisplayNames, ref keyframeTimeValuesSelected, -1f,
+					                                  null, onKeyframeDelete, null, onKeyframeEdit, null
+										);
+					
+					
+					
+								} 
+				
+				
+						} 
+			
+			
+
+				}
 
 
 				/// <summary>
@@ -1141,11 +1253,11 @@ namespace ws.winx.editor.windows
 
 				private static void PreserveTransformAtPause (SequenceChannel channel)
 				{
-					if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.boneRoot == null) {
-						channel.targetPositionCurrent=channel.target.transform.position;
-						channel.targetRotationCurrent=channel.target.transform.rotation;
+						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.boneRoot == null) {
+								channel.targetPositionCurrent = channel.target.transform.position;
+								channel.targetRotationCurrent = channel.target.transform.rotation;
 						
-					}
+						}
 				}
 		
 		
@@ -1419,7 +1531,7 @@ namespace ws.winx.editor.windows
 														var ik = channel.target.GetComponent<FBBIKAnimatedValues> ();
 														if (ik != null) {
 																ik.Initate ();//didn't found soultuion when is not initated
-																ik.LateUpdate ();
+																ik.UpdateSolver ();
 														}
 								
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Audio) {
@@ -1531,6 +1643,8 @@ namespace ws.winx.editor.windows
 										
 										}
 								}
+
+								
 
 						
 								timeScrubberEventHandler (rect);
@@ -2437,7 +2551,8 @@ namespace ws.winx.editor.windows
 								if (sequence != null) {
 										__sequenceGameObject = sequence.gameObject;
 										__sequence = sequence;
-					
+
+										if(SceneView.currentDrawingSceneView!=null)
 										SceneView.currentDrawingSceneView.Repaint ();
 									
 										EditorWindow.GetWindow<SequenceEditorWindow> ().Repaint ();

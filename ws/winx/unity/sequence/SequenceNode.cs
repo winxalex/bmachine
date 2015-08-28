@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using VisualTween.Action;
@@ -294,7 +294,7 @@ namespace ws.winx.unity.sequence
 				{
 					if (channel.type == SequenceChannel.SequenceChannelType.Animation && this.fbbikAnimatedValues != null) {
 							
-							this.fbbikAnimatedValues.LateUpdate();
+							this.fbbikAnimatedValues.UpdateSolver();
 							
 
 
