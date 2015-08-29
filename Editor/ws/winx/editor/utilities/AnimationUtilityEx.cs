@@ -28,6 +28,26 @@ namespace ws.winx.editor.utilities
 				public static EditorCurveBinding EditorCurveBinding_SclY = EditorCurveBinding.FloatCurve ("", TransformType, "m_LocalScale.y");
 				public static EditorCurveBinding EditorCurveBinding_SclZ = EditorCurveBinding.FloatCurve ("", TransformType, "m_LocalScale.z");
 
+					
+
+//					public static void AddKeyframeFrom (AnimationClip clip, float f,)
+//					{
+//						EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
+//						AnimationCurve curve;
+//						int curveBindingsNum = curveBindings.Length;
+//						EditorCurveBinding curveBindingCurrent;
+//						
+//						for (int i=0; i<curveBindingsNum; i++) {
+//							
+//							curveBindingCurrent = curveBindings [i];
+//							curve = AnimationUtility.GetEditorCurve (clip, curveBindingCurrent);
+//							
+//							if (curve != null && curve.length > keyframeInx) {
+//								curve.AddKey( ();
+//								AnimationUtility.SetEditorCurve (clip, curveBindingCurrent, curve);
+//							}
+//						}
+//					}
 				
 		
 		

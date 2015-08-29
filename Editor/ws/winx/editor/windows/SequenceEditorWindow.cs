@@ -376,10 +376,13 @@ namespace ws.winx.editor.windows
 				/// <param name="channelOrd">Channel ord.</param>
 				private static void DoNode (SequenceNode node, Rect rect, int channelOrd)
 				{
+						float keyFramesRectHeight = __nodeSelected == node ? _keyframeMarker.image.height : 0f;
+
+						
 						
 
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);			
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT), MouseCursor.ResizeHorizontal);
+			EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT+keyFramesRectHeight, 10, NODE_RECT_HEIGHT-keyFramesRectHeight ), MouseCursor.ResizeHorizontal);			
+			EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT +channelOrd * NODE_RECT_HEIGHT+keyFramesRectHeight, 10, NODE_RECT_HEIGHT-keyFramesRectHeight), MouseCursor.ResizeHorizontal);
 
 			
 			
@@ -419,9 +422,21 @@ namespace ws.winx.editor.windows
 
 						Rect nodeRect = new Rect (startTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, endTimePos - startTimePos, NODE_RECT_HEIGHT);
 
-						GUI.Box (nodeRect, "", "TL LogicBar 0");
+						if (__nodeSelected == node) {
+								nodeRect.yMax = nodeRect.yMin + _keyframeMarker.image.height;
+								DoKeyFrames (nodeRect);
+								
+								
+								nodeRect.yMax = nodeRect.yMin + NODE_RECT_HEIGHT;
+								nodeRect.yMin += _keyframeMarker.image.height;
+								GUI.Box (nodeRect, "", "TL LogicBar 0");
+								
+								
+						} else {
+								GUI.Box (nodeRect, "", "TL LogicBar 0");
+						}
 
-						DoKeyFrames(nodeRect);
+						
 
 						//add offset for cursor
 						nodeRect.xMin += 5;
@@ -650,6 +665,7 @@ namespace ws.winx.editor.windows
 								this.Repaint ();
 
 								//this ensure update of MovieTexture (it its bottle neck do some reflection and force render call)
+								if(SceneView.currentDrawingSceneView!=null)				
 								SceneView.currentDrawingSceneView.Repaint ();//TODO test this
 								//SceneView.RepaintAll ();
 
@@ -886,12 +902,27 @@ namespace ws.winx.editor.windows
 				/// <summary>
 				/// Ons the mecanim event edit.
 				/// </summary>
-				/// <param name="args">Arguments.</param>
+				/// <param name="args">Arguments.(return normalized value)</param>
 				static void onKeyframeEdit (TimeLineArgs<float> args)
 				{
-						//__timeNormalized = args.selectedValue;
-						//__timeNormalizedUpdate = true;	
+						if (__sequence != null && __sequence.selectedNode != null) {
+								__sequence.timeCurrent= __sequence.selectedNode.startTime +args.selectedValue * __sequence.selectedNode.duration;
+								
+						}
 						
+						
+				}
+
+				/// <summary>
+				/// Ons the keyframe add.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				static void onKeyframeAdd (TimeLineArgs<float> args)
+				{
+					Debug.LogWarning("Just set timescrubber to desired time and change value of desired property, new keyframe will be inserted automatically");
+					
+					//if(__sequence!=null && __sequence.selectedNode!=null)
+						//AnimationUtilityEx.AddKeyframeFrom (__sequence.selectedNode.source as AnimationClip, args.selectedValue * __sequence.selectedNode.duration  );
 				}
 					
 				/// <summary>
@@ -901,20 +932,19 @@ namespace ws.winx.editor.windows
 				static void onKeyframeDelete (TimeLineArgs<float> args)
 				{
 						
-						//EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
 						
-						
+						if(__sequence!=null && __sequence.selectedNode!=null)
 						AnimationUtilityEx.RemoveKeyframeFrom (__sequence.selectedNode.source as AnimationClip, args.selectedIndex);
 				}
 
-		private static void DoKeyFrames (Rect keyframesRect)
+				private static void DoKeyFrames (Rect keyframesRect)
 				{
 						/////////////  ROTATION/SCALE KEYFRAMES  /////////////////////////
 						
 			
 			
 						//Show rotation or scale keyframes if Rotation or Scale tools are selected
-						if (Selection.activeGameObject != null && __sequence.selectedNode != null 
+						if (Selection.activeGameObject != null && __sequence != null && __sequence.selectedNode!=null
 								&& __sequence.selectedNode.channel.target != null
 								&& __sequence.selectedNode.channel.type == SequenceChannel.SequenceChannelType.Animation
 								&& Selection.activeGameObject == __sequence.selectedNode.channel.target || Selection.activeGameObject.transform.IsChildOf (__sequence.selectedNode.channel.target.transform)
@@ -923,10 +953,10 @@ namespace ws.winx.editor.windows
 			   			 ) {
 
 
-				//Rect keyframesRect = GUILayoutUtility.GetRect (Screen.width - 16f, 16f);
+								//Rect keyframesRect = GUILayoutUtility.GetRect (Screen.width - 16f, 16f);
 				
-				keyframesRect.xMax += _keyframeMarker.image.width * 0.5f;
-				keyframesRect.xMin -= _keyframeMarker.image.width*0.5f;
+								keyframesRect.xMax += _keyframeMarker.image.width * 0.5f;
+								keyframesRect.xMin -= _keyframeMarker.image.width * 0.5f;
 
 
 								EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;//we assume there is 3 same keyframes for X,Y,Z
@@ -947,26 +977,29 @@ namespace ws.winx.editor.windows
 												curveBinding.path = AnimationUtility.CalculateTransformPath (Selection.activeGameObject.transform, __sequence.selectedNode.channel.target.transform);
 												keyframeTimeValues = AnimationUtilityEx.GetTimes (clip, curveBinding, clip.length);
 												
-												int numKeys=keyframeTimeValues.Length;
+												int numKeys = keyframeTimeValues.Length;
 												
 												//for(int i=0;i<numKeys;i++)
 												//keyframeTimeValues[i]=TimeAreaW.SnapTimeToWholeFPS(keyframeTimeValues[i],__frameRate);
 						
-										} 
+										} else{
+
+												keyframeTimeValues=new float[0];
+										}
 
 					
 										keyframesDisplayNames = keyframeTimeValues.Select ((itm) => {
-						return itm+".s";}).ToArray ();
-												//return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
+												return itm + ".s";}).ToArray ();
+										//return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
 					
 										keyframeTimeValuesSelected = new bool[keyframeTimeValues.Length];// for multiselection option not used here
 					
 										//create custom timeline showing rotation or scale keyframes
-										EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, _keyframeMarker, ref keyframeTimeValues, ref keyframTimeValuesPrev, ref keyframesDisplayNames, ref keyframeTimeValuesSelected, -1f,
-					                                  null, onKeyframeDelete, null, onKeyframeEdit, null
+										EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, _keyframeMarker, ref keyframeTimeValues, ref keyframTimeValuesPrev, ref keyframesDisplayNames, ref keyframeTimeValuesSelected, -1f,onKeyframeAdd
+					                                   ,onKeyframeDelete, null, onKeyframeEdit, null
 										);
 					
-					
+										
 					
 								} 
 				
@@ -1234,6 +1267,7 @@ namespace ws.winx.editor.windows
 				
 								//SceneView.RepaintAll();
 
+								if(SceneView.currentDrawingSceneView!=null)
 								SceneView.currentDrawingSceneView.Repaint ();
 								
 								//Debug.Log ("Animation mode:" + AnimationMode.InAnimationMode ());
@@ -1635,7 +1669,7 @@ namespace ws.winx.editor.windows
 										channel = __sequence.channels [i];
 										foreach (SequenceNode node in channel.nodes) {
 									
-										
+												
 
 												sequenceNodeClickEventHandler (node, rect, i);
 												DoNode (node, rect, i);
@@ -1660,7 +1694,7 @@ namespace ws.winx.editor.windows
 								Handles.DrawLine (new Vector3 (timeScrubberX, rect.y), new Vector3 (timeScrubberX, rect.height - 16f));//horizontal scroller
 								Handles.color = colorSaved;
 							
-
+								
 								sequenceNodeDragEventHandler (rect);
 						}
 				}
@@ -1707,6 +1741,11 @@ namespace ws.winx.editor.windows
 					
 								clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
 					
+								if(__nodeSelected==node)//resize mouse interaction only on blue rect area (not key frames area)
+									clickRect.yMin+=_keyframeMarker.image.height;
+
+
+
 								//check start of the node rect width=5
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										
@@ -2552,8 +2591,8 @@ namespace ws.winx.editor.windows
 										__sequenceGameObject = sequence.gameObject;
 										__sequence = sequence;
 
-										if(SceneView.currentDrawingSceneView!=null)
-										SceneView.currentDrawingSceneView.Repaint ();
+										if (SceneView.currentDrawingSceneView != null)
+												SceneView.currentDrawingSceneView.Repaint ();
 									
 										EditorWindow.GetWindow<SequenceEditorWindow> ().Repaint ();
 
