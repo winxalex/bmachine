@@ -46,7 +46,7 @@ namespace ws.winx.unity.sequence
 				public ws.winx.unity.sequence.SequenceEvent OnEnd = new ws.winx.unity.sequence.SequenceEvent ();
 
 				[NonSerialized]
-				public ws.winx.unity.sequence.SequenceEvent selectedEvent;
+				public ws.winx.unity.sequence.SequenceEvent eventSelected;
 
 				public event UnityAction<SequenceNode> SequenceNodeStart {
 						add {
@@ -108,7 +108,7 @@ namespace ws.winx.unity.sequence
 				}
 
 				[NonSerialized]
-				public SequenceNode selectedNode;
+				public SequenceNode nodeSelected;
 				public SequenceWrap wrap = SequenceWrap.ClampForever;
 				public bool playOnStart = true;
 				public int frameRate = 30;

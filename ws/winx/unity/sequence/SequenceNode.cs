@@ -12,16 +12,17 @@ namespace ws.winx.unity.sequence
 		public class SequenceNode:ScriptableObject
 		{
 				[HideInInspector]
-				public SequenceNodeEvent onStart = new SequenceNodeEvent ();
-
-		[HideInInspector]
-				public SequenceNodeEvent onStop = new SequenceNodeEvent ();
-
-		[HideInInspector]
-				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
-
-		[HideInInspector]
-				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
+				public SequenceNodeEvent
+						onStart = new SequenceNodeEvent ();
+				[HideInInspector]
+				public SequenceNodeEvent
+						onStop = new SequenceNodeEvent ();
+				[HideInInspector]
+				public SequenceNodeEvent
+						onPause = new SequenceNodeEvent ();
+				[HideInInspector]
+				public SequenceNodeEvent
+						onUpdate = new SequenceNodeEvent ();
 				public int index = -1;
 				public float transition = 0f;
 				public bool loop;
@@ -32,10 +33,8 @@ namespace ws.winx.unity.sequence
 				/// The start time in Frames
 				/// </summary>
 				public float startTime;
-
 				float _timeLocal;
 				float _timeNormalized;
-				
 				FBBIKAnimatedValues fbbikAnimatedValues;
 				
 
@@ -43,7 +42,6 @@ namespace ws.winx.unity.sequence
 				//TODO use them for resize
 				public float startOffset;
 				public float endOffset;
-
 				public EditorClipBinding clipBinding;
 
 				/// <summary>
@@ -54,30 +52,30 @@ namespace ws.winx.unity.sequence
 				public float duration {
 						get {
 
-							float d=5f;//default 5s
+								float d = 5f;//default 5s
 
 								//return _duration;
-							if (source is AnimationClip) {
+								if (source is AnimationClip) {
 
 								
 
-								d= (source as AnimationClip).length;
+										d = (source as AnimationClip).length;
 								
-							} else if (source is AudioClip) {
+								} else if (source is AudioClip) {
 								
-								d= (source as AudioClip).length;
-							} else if (source is MovieTexture) {
+										d = (source as AudioClip).length;
+								} else if (source is MovieTexture) {
 								
-								d=(source as MovieTexture).duration;
+										d = (source as MovieTexture).duration;
 								
 								
-							}
+								}
 
-							float frameRate=this.channel.sequence.frameRate;
+								float frameRate = this.channel.sequence.frameRate;
 
-							d=Mathf.Round (d * frameRate) / frameRate;
+								d = Mathf.Round (d * frameRate) / frameRate;
 
-							return d;
+								return d;
 						}
 						
 				}
@@ -179,9 +177,9 @@ namespace ws.winx.unity.sequence
 										
 										} else if (source is  AnimationClip) {
 
-												if(source is AnimationClip && (this.fbbikAnimatedValues=target.GetComponent<FBBIKAnimatedValues>())!=null){
+												if (source is AnimationClip && (this.fbbikAnimatedValues = target.GetComponent<FBBIKAnimatedValues> ()) != null) {
 													
-													this.fbbikAnimatedValues.Initate();
+														this.fbbikAnimatedValues.Initate ();
 												}
 											
 
@@ -211,8 +209,8 @@ namespace ws.winx.unity.sequence
 
 								}
 
-				if(this.fbbikAnimatedValues!=null)
-					this.fbbikAnimatedValues.Initate();
+								if (this.fbbikAnimatedValues != null)
+										this.fbbikAnimatedValues.Initate ();
 								
 
 								onStart.Invoke (this);
@@ -266,11 +264,11 @@ namespace ws.winx.unity.sequence
 										} else if (source is AnimationClip) {
 
 												//hard stop
-										Animator animator = target.GetComponent<Animator> ();
+												Animator animator = target.GetComponent<Animator> ();
 															
-										//
-										if (animator != null && this.index+1==this.channel.nodes.Count)
-												animator.enabled = false;
+												//
+												if (animator != null && this.index + 1 == this.channel.nodes.Count)
+														animator.enabled = false;
 
 																	
 								
@@ -282,8 +280,8 @@ namespace ws.winx.unity.sequence
 								}
 						}
 
-			if(this.fbbikAnimatedValues!=null)
-				this.fbbikAnimatedValues.Initate();
+						if (this.fbbikAnimatedValues != null)
+								this.fbbikAnimatedValues.Initate ();
 
 
 						onStop.Invoke (this);
@@ -298,13 +296,13 @@ namespace ws.winx.unity.sequence
 
 				public void LateUpdateNode (double timeCurrent)
 				{
-					if (channel.type == SequenceChannel.SequenceChannelType.Animation && this.fbbikAnimatedValues != null) {
+						if (channel.type == SequenceChannel.SequenceChannelType.Animation && this.fbbikAnimatedValues != null) {
 							
-							this.fbbikAnimatedValues.UpdateSolver();
+								this.fbbikAnimatedValues.UpdateSolver ();
 							
 
 
-					}
+						}
 					
 				}
 

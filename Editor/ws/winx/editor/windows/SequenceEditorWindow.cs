@@ -36,7 +36,6 @@ namespace ws.winx.editor.windows
 				
 				private static Sequence __sequence;
 				private static bool __isPlayMode = false;
-				
 				private Sequence.SequenceWrap wrap = Sequence.SequenceWrap.ClampForever;
 				private static GameObject __sequenceGameObject;
 				
@@ -53,9 +52,6 @@ namespace ws.winx.editor.windows
 				private static TimeAreaW __timeAreaW;
 				private static SequenceNode __testNode;
 				private static ReorderableList __sequenceChannelsReordableList;
-				//private static bool __isPlaying;
-				private static bool __isRecording;
-				
 				private const float NODE_RECT_HEIGHT = 40f;
 				//20f for timer ruller + 20f for Events Pad
 				private const float TIME_LABEL_HEIGHT = 20f;
@@ -78,13 +74,13 @@ namespace ws.winx.editor.windows
 				private static SequenceNode __nodeSelected {
 						get {
 								if (__sequence != null) {
-										return __sequence.selectedNode;
+										return __sequence.nodeSelected;
 								}
 								return null;
 						}
 						set {
-								__sequence.selectedNode = value;
-								EditorUtility.SetDirty(__sequence);
+								__sequence.nodeSelected = value;
+								EditorUtility.SetDirty (__sequence);
 						}
 				}
 
@@ -112,10 +108,20 @@ namespace ws.winx.editor.windows
 						}
 				}
 
+				private static SequenceEditorWindow __window;
+
+				public static SequenceEditorWindow window {
+						get {
+								if (__window == null)
+										__window = EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence");
+								return __window;
+						}
+				}
+			
 				[MenuItem("Window/Sequence", false)]
 				public static void ShowWindow ()
 				{
-						SequenceEditorWindow window = EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence");
+						__window = EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence");
 
 						
 
@@ -135,18 +141,23 @@ namespace ws.winx.editor.windows
 
 						
 
-						window.wantsMouseMove = true;
-						UnityEngine.Object.DontDestroyOnLoad (window);
+						__window.wantsMouseMove = true;
+						UnityEngine.Object.DontDestroyOnLoad (__window);
 
 
 	
 				}
 
+
+
+				/// <summary>
+				/// FDragRaises the enable event.
+				/// </summary>
 				private void OnEnable ()
 				{
 
 
-
+						
 
 						if (__timeAreaW == null) {
 								__timeAreaW = new TimeAreaW (false);
@@ -197,6 +208,65 @@ namespace ws.winx.editor.windows
 						SceneView.onSceneGUIDelegate += OnSceneGUI;
 				}
 
+
+
+
+
+				/// <summary>
+				/// Ons the DragHandle event.
+				/// </summary>
+				/// <param name="controlID">Control I.</param>
+				/// <param name="e">E.</param>
+				/// <param name="userData">User data.</param>
+				private static void onDragHandleEvent (int controlID, Event e, int keyframeInx)
+				{
+						if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace)) {
+
+								AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
+				
+				
+				
+								AnimationUtilityEx.RemoveKeyframeFrom (clip, keyframeInx);
+				
+								window.Repaint ();
+				
+								//Debug.Log ("remove:" + bindingInx + " " + keyframeInx);
+				
+				
+								if (SceneView.currentDrawingSceneView != null)
+										SceneView.currentDrawingSceneView.Repaint ();
+				
+						} else if (e.type == EventType.MouseDown && e.button == 0 && e.clickCount == 1) {
+
+
+			
+								AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
+
+				
+								//Debug.Log ("bind:" + bindingInx + " " + keyframeInx);
+				
+				
+								//make animation jump to selected keyframe represented by Handle
+								__sequence.timeCurrent = __sequence.nodeSelected.startTime + AnimationUtilityEx.GetTimeAt (clip, keyframeInx, AnimationUtilityEx.EditorCurveBinding_PosX);
+
+
+								if (!__sequence.isRecording) { 
+										StartRecording ();
+				
+					
+									
+								}
+
+								SampleClipNodesAt (__sequence.timeCurrent);
+								
+								if (SceneView.currentDrawingSceneView != null)
+										SceneView.currentDrawingSceneView.Repaint ();
+				
+								window.Repaint ();
+						}
+			
+				}
+		
 				/// <summary>
 				/// Handles the scene GUI event.
 				/// </summary>
@@ -247,153 +317,67 @@ namespace ws.winx.editor.windows
 		
 
 
-//			if (clipBindingsSerialized.value == null)
-//				return;
-//			
-//			EditorClipBinding[] clipBindings = clipBindingsSerialized.value as EditorClipBinding[];
-//			int bindingsLength = clipBindings.Length;
-//			Color clr = Color.red;
-//			Vector3[] positionsInKeyframe = null;
-//			AnimationClip clip = null;
-//			
-//			EditorClipBinding clipBindingCurrent = null;
-//			
-//			long indexListAndindexFramePacked = 0;
-//			
-//			Transform transformRoot = null;
-//			
-//			
-//			Transform transformFirstChild = null;
-//			
-//			bool gameObjectCharacterSelected = false;
-//			
-//			if (Selection.activeGameObject != null) {
-//				if (Tools.current == Tool.Move) {
-//					
-//					
-//					if (Selection.activeGameObject == __spaceGameObject) {
-//						gameObjectCharacterSelected = true;
-//						
-//					} else {
-//						
-//						clipBindingCurrent = clipBindings.FirstOrDefault ((itm) => itm.gameObject == Selection.activeGameObject);
-//						// && clipBindingCurrent.gameObject.transform.position!=Tools.handlePosition
-//						if (clipBindingCurrent != null) {
-//							
-//							//clipBindingCurrent.gameObject.position has changed so recalcualte position offset
-//							clipBindingCurrent.positionOffset = Quaternion.Inverse (__spaceGameObject.transform.rotation) * (clipBindingCurrent.gameObject.transform.position - __spaceGameObject.transform.position);
-//							
-//							
-//							
-//						}
-//					}
-//					
-//				} else if (Tools.current == Tool.Rotate) {
-//					
-//					if (Selection.activeGameObject == __spaceGameObject) {
-//						gameObjectCharacterSelected = true;
-//						
-//					} else {
-//						
-//						clipBindingCurrent = clipBindings.FirstOrDefault ((itm) => itm.gameObject == Selection.activeGameObject);
-//						// && clipBindingCurrent.gameObject.transform.position!=Tools.handleRotation
-//						if (clipBindingCurrent != null) {
-//							
-//							
-//							
-//							//clipBindingCurrent.gameObject.rotation has changed so recalcualte rotation offset
-//							clipBindingCurrent.rotationOffset = Quaternion.Inverse (__spaceGameObject.transform.rotation) * clipBindingCurrent.gameObject.transform.rotation;
-//							
-//						}
-//					}
-//					
-//				}
-//			}
-//			
-//			
-//			for (int i=0; i<bindingsLength; i++) {
-//				
-//				clipBindingCurrent = clipBindings [i];
-//				
-//				if (clipBindingCurrent.visible) {
-//					
-//					
-//					clip = clipBindingCurrent.clip;
-//					
-//					if (clip != null && clipBindingCurrent.gameObject != null && clipBindingCurrent.gameObject.transform.childCount>0 && (transformFirstChild = clipBindingCurrent.gameObject.transform.GetChild (0)) != null) {
-//						
-//						
-//						if (gameObjectCharacterSelected) {//=> move and/or rotate clip binding's gameobjects
-//							GameObject gameObjectBinded = clipBindingCurrent.gameObject;
-//							gameObjectBinded.transform.rotation = __spaceGameObject.transform.rotation * clipBindingCurrent.rotationOffset;
-//							gameObjectBinded.transform.position = __spaceGameObject.transform.position + __spaceGameObject.transform.rotation * clipBindingCurrent.positionOffset;
-//							
-//							
-//						}
-//						
-//						
-//						
-//						transformRoot = clipBindingCurrent.gameObject.transform;
-//						
-//						
-//						
-//						positionsInKeyframe = AnimationUtilityEx.GetPositions (clip, AnimationUtility.CalculateTransformPath (transformFirstChild, transformRoot), transformRoot);
-//						
-//						
-//						
-//						
-//						if (positionsInKeyframe != null) {			
-//							for (int j=0; j<positionsInKeyframe.Length; j++) {
-//								
-//								indexListAndindexFramePacked = i;//put index of clipBinding in list/array
-//								indexListAndindexFramePacked = indexListAndindexFramePacked << 32 | (uint)j;//pack together with keyframe index
-//								
-//								//actualy this is static handle
-//								HandlesEx.DragHandle (positionsInKeyframe [j], 0.1f, Handles.SphereCap, Color.red, "(" + j + ")" + " " + Decimal.Round (Convert.ToDecimal (AnimationUtilityEx.GetTimeAt (clip, j, AnimationUtilityEx.EditorCurveBinding_PosX)), 2).ToString (), indexListAndindexFramePacked, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new long[]{j}, null);
-//								
-//								
-//								
-//							}
-//							//save color
-//							clr = Handles.color;
-//							
-//							
-//							clipBindingCurrent.color.a = 1;
-//							Handles.color = clipBindingCurrent.color;
-//							
-//							
-//							Handles.DrawPolyLine (positionsInKeyframe);
-//							//restore color
-//							Handles.color = clr;
-//						}
-//						
-//						
-//					}
-//				}
-//			}
-//			
+
+						Color clr = Color.red;
+						Vector3[] positionsInKeyframe = null;
+						
+
+
+						if (Tools.current == Tool.Move && Selection.activeGameObject != null && __sequence != null 
+								&& !__sequence.isPlaying
+								&& __sequence.nodeSelected != null
+								&& __sequence.nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation
+								&& __sequence.nodeSelected.channel.target != null 
+								&& (Selection.activeGameObject == __sequence.nodeSelected.channel.target || Selection.activeGameObject.transform.IsChildOf (__sequence.nodeSelected.channel.target.transform))
+
+			    ) {
+					
+								Transform transformFirstChild = Selection.activeGameObject.transform;
+
+								Transform transformRoot = __sequence.nodeSelected.channel.target.transform;
+
+
+								Transform transformSpace=transformRoot;
+
+
+								if(transformRoot==transformFirstChild) transformSpace=null;//no need of transform from local to space defined with transformSpace
+
+				 			   AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
+
+				positionsInKeyframe = AnimationUtilityEx.GetPositions (clip, AnimationUtility.CalculateTransformPath (transformFirstChild, transformRoot), transformSpace);
+				
+						
+						
+						
+								if (positionsInKeyframe != null) {			
+										for (int j=0; j<positionsInKeyframe.Length; j++) {
+								
+										
+								
+												//actualy this is static handle
+												HandlesEx.DragHandle (positionsInKeyframe [j], 0.1f, Handles.SphereCap, Color.red, "(" + j + ")" + " " + Decimal.Round (Convert.ToDecimal (AnimationUtilityEx.GetTimeAt (clip, j, AnimationUtilityEx.EditorCurveBinding_PosX)), 2).ToString (), j, onDragHandleEvent, new GUIContent[]{new GUIContent ("Delete")}, new int[]{j}, null);
+								
+								
+								
+										}
+										//save color
+										clr = Handles.color;
+							
+							
+								
+							
+										Handles.DrawPolyLine (positionsInKeyframe);
+										//restore color
+										Handles.color = clr;
+								}
+						
+						}
+
 //			
 //			//Debug.Log ("hot"+GUIUtility.hotControl);
 //			
 //			SceneView.RepaintAll ();
 				}
-
-		
-				//				private static void DoTransition (SequenceNode node, Rect rect, int channelOrd)
-				//				{
-				//					
-				//						Color color = GUI.color;
-				//						GUI.color = Color.red;
-				//						float transitionPosStart = __timeAreaW.TimeToPixel (node.startTime + node.duration - node.transition, rect);
-				//						float transitionPosEnd = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
-//						Rect boxRect = new Rect (transitionPosStart, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, transitionPosEnd - transitionPosStart, NODE_RECT_HEIGHT);
-//				
-//						GUI.Box (boxRect, "", "TL LogicBar 0");
-//						GUI.color = color;
-//					
-//				}
-
-
 
 				private static bool currentlyDragging {
 						get {
@@ -456,7 +440,7 @@ namespace ws.winx.editor.windows
 
 						Rect nodeRect = new Rect (startTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, endTimePos - startTimePos, NODE_RECT_HEIGHT);
 
-						if (__nodeSelected == node) {
+						if (!__sequence.isPlaying && __nodeSelected == node) {
 								nodeRect.yMax = nodeRect.yMin + __keyframeMarker.image.height;
 								DoKeyFrames (nodeRect);
 								
@@ -648,11 +632,11 @@ namespace ws.winx.editor.windows
 				private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
 				{
 
-						SequenceNode node = __sequence.selectedNode;
+						SequenceNode node = __sequence.nodeSelected;
 
 						if (node != null && node.channel.target != null && node.channel.type == SequenceChannel.SequenceChannelType.Animation) {
 
-								modifications.Concat (AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, (float)(__sequence.timeCurrent - node.startTime)));
+								modifications.Concat (AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, TimeAreaW.SnapTimeToWholeFPS ((float)(__sequence.timeCurrent - node.startTime), __sequence.frameRate)));
 
 
 						}
@@ -726,6 +710,9 @@ namespace ws.winx.editor.windows
 
 				private static void OnRecord ()
 				{
+
+						Debug.Log (" OnRecord:" + __sequence.isRecording);
+			          
 						if (__sequence.isRecording) {//STOP RECORD
 								Stop ();
 									
@@ -734,29 +721,40 @@ namespace ws.winx.editor.windows
 
 						} else {//START RECORD
 
-								__sequence.Record ();
+								StartRecording ();
 
-								
-						
-						
-								if (!AnimationMode.InAnimationMode ()) {
-							
-										AnimationMode.StartAnimationMode ();
-										Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
 
-								} 
-				         
 								AudioUtilW.StopAllClips ();
-
+								
 								SampleClipNodesAt (__sequence.timeCurrent);
-
+				
 								
 						}
 				}
 
+				private static void StartRecording ()
+				{
+						__sequence.Record ();
+			
+			
+			
+			
+						if (!AnimationMode.InAnimationMode ()) {
+				
+								AnimationMode.StartAnimationMode ();
+								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+				
+						} 
+			
+						
+			
+			
+				}
+		
 				private void OnPlay ()
 				{
-//						AnimationMode.StartAnimationMode ();
+						//						AnimationMode.StartAnimationMode ();
 //						MethodInfo SetIKPositionWeight = typeof(Animator).GetMethod ("SetIKPositionWeightInternal", BindingFlags.NonPublic | BindingFlags.Instance);
 //						MethodInfo SetIKPosition = typeof(Animator).GetMethod ("SetIKPositionInternal", BindingFlags.NonPublic | BindingFlags.Instance);
 //						//this.SetIKPositionWeightInternal (goal, value);
@@ -927,7 +925,7 @@ namespace ws.winx.editor.windows
 			
 						DoChannelsGUI (rect);
 
-					//	Debug.Log ("Scale:" + __timeAreaW.scale);
+						//	Debug.Log ("Scale:" + __timeAreaW.scale);
 
 						
 				}
@@ -943,8 +941,19 @@ namespace ws.winx.editor.windows
 				/// <param name="args">Arguments.(return normalized value)</param>
 				static void onKeyframeEdit (TimeLineArgs<float> args)
 				{
-						if (__sequence != null && __sequence.selectedNode != null) {
-								__sequence.timeCurrent = __sequence.selectedNode.startTime + args.selectedValue * __sequence.selectedNode.duration;
+						if (__sequence != null && __sequence.nodeSelected != null) {
+								__sequence.timeCurrent = __sequence.nodeSelected.startTime + args.selectedValue * __sequence.nodeSelected.duration;
+								if (!__sequence.isRecording) {
+										StartRecording ();
+
+					
+										
+
+										
+								}
+
+
+								SampleClipNodesAt (__sequence.timeCurrent);
 								
 						}
 						
@@ -971,8 +980,8 @@ namespace ws.winx.editor.windows
 				{
 						
 						
-						if (__sequence != null && __sequence.selectedNode != null)
-								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.selectedNode.source as AnimationClip, args.selectedIndex);
+						if (__sequence != null && __sequence.nodeSelected != null)
+								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.nodeSelected.source as AnimationClip, args.selectedIndex);
 				}
 
 				private static void DoKeyFrames (Rect keyframesRect)
@@ -982,10 +991,10 @@ namespace ws.winx.editor.windows
 			
 			
 						//Show rotation or scale keyframes if Rotation or Scale tools are selected
-						if (Selection.activeGameObject != null && __sequence != null && __sequence.selectedNode != null
-								&& __sequence.selectedNode.channel.target != null
-								&& __sequence.selectedNode.channel.type == SequenceChannel.SequenceChannelType.Animation
-								&& (Selection.activeGameObject == __sequence.selectedNode.channel.target || Selection.activeGameObject.transform.IsChildOf (__sequence.selectedNode.channel.target.transform))
+						if (Selection.activeGameObject != null && __sequence != null && __sequence.nodeSelected != null
+								&& __sequence.nodeSelected.channel.target != null
+								&& __sequence.nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation
+								&& (Selection.activeGameObject == __sequence.nodeSelected.channel.target || Selection.activeGameObject.transform.IsChildOf (__sequence.nodeSelected.channel.target.transform))
 
 
 			   			 ) {
@@ -1000,7 +1009,7 @@ namespace ws.winx.editor.windows
 								EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;//we assume there is 3 same keyframes for X,Y,Z
 
 
-								AnimationClip clip = __sequence.selectedNode.source as AnimationClip;
+								AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
 				
 								if (Tools.current == Tool.Rotate || Tools.current == Tool.Move) {
 					
@@ -1010,9 +1019,9 @@ namespace ws.winx.editor.windows
 												curveBinding = AnimationUtilityEx.EditorCurveBinding_PosX;
 
 
-										if (__sequence.selectedNode.channel.target != null) {
+										if (__sequence.nodeSelected.channel.target != null) {
 												
-												curveBinding.path = AnimationUtility.CalculateTransformPath (Selection.activeGameObject.transform, __sequence.selectedNode.channel.target.transform);
+												curveBinding.path = AnimationUtility.CalculateTransformPath (Selection.activeGameObject.transform, __sequence.nodeSelected.channel.target.transform);
 												
 
 												keyframeTimeValues = AnimationUtilityEx.GetTimes (clip, curveBinding, clip.length);
@@ -1421,7 +1430,7 @@ namespace ws.winx.editor.windows
 						switch (ev.rawType) {
 						
 						case EventType.MouseDrag:
-								if (__isEventDragged && __sequence.selectedEvent==evt) {
+								if (__isEventDragged && __sequence.eventSelected == evt) {
 
 										float time = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) + __clickDelta;
 					
@@ -1429,7 +1438,7 @@ namespace ws.winx.editor.windows
 					
 										if (time >= 0) {
 												evt.time = time;
-												__sequence.timeCurrent=evt.time;
+												__sequence.timeCurrent = evt.time;
 										}
 
 								}
@@ -1443,7 +1452,7 @@ namespace ws.winx.editor.windows
 
 						case EventType.MouseDown:
 
-								if (!__isEventDragged &&  eventMarkerRect.Contains (ev.mousePosition)) {
+								if (!__isEventDragged && eventMarkerRect.Contains (ev.mousePosition)) {
 										if (ev.button == 1) {//show add,remove,edit
 												
 												createEventMenu (evt).ShowAsContext ();
@@ -1451,8 +1460,8 @@ namespace ws.winx.editor.windows
 										} else if (ev.button == 0) {
 												__clickDelta = (float)evt.time - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
 												__isEventDragged = true;
-												__sequence.selectedEvent=evt;
-												__sequence.timeCurrent=evt.time;
+												__sequence.eventSelected = evt;
+												__sequence.timeCurrent = evt.time;
 												//EditorUtility.SetDirty(__sequence);//Repaint Inspector
 
 
@@ -1495,26 +1504,26 @@ namespace ws.winx.editor.windows
 
 					
 					
-						__sequence.Record ();
+						StartRecording ();
 
 
-						if (!AnimationMode.InAnimationMode ()) {
-								AnimationMode.StartAnimationMode ();
-								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
-								
-//								foreach (SequenceChannel channel in __sequence.channels) {
-//										ReOffsetNodesAnimation (channel);
-//								}
-				
-								//SceneView.RepaintAll();
-
-								if (SceneView.currentDrawingSceneView != null)
-										SceneView.currentDrawingSceneView.Repaint ();
-								
-								//Debug.Log ("Animation mode:" + AnimationMode.InAnimationMode ());
-								
-								
-						} 
+//						if (!AnimationMode.InAnimationMode ()) {
+//								AnimationMode.StartAnimationMode ();
+//								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+//								
+////								foreach (SequenceChannel channel in __sequence.channels) {
+////										ReOffsetNodesAnimation (channel);
+////								}
+//				
+//								//SceneView.RepaintAll();
+//
+//								if (SceneView.currentDrawingSceneView != null)
+//										SceneView.currentDrawingSceneView.Repaint ();
+//								
+//								//Debug.Log ("Animation mode:" + AnimationMode.InAnimationMode ());
+//								
+//								
+//						} 
 			
 						SampleClipNodesAt (__sequence.timeCurrent);
 
@@ -1731,7 +1740,7 @@ namespace ws.winx.editor.windows
 					
 						SequenceNode node = null;
 						Animator animator;
-
+						double timeCurrent = 0f;
 
 						Undo.FlushUndoRecordObjects ();
 
@@ -1739,6 +1748,10 @@ namespace ws.winx.editor.windows
 			
 						//find changels of type Animation and find first node in channel that is in time or nearest node left of time
 						foreach (SequenceChannel channel in __sequence.channels) {
+
+								timeCurrent = time;
+
+
 								if (channel.target != null) {
 
 
@@ -1746,21 +1759,28 @@ namespace ws.winx.editor.windows
 
 										node = null;
 
+										
 
+										//find node in time (node in which time is in range between nodeStartTime and nodeEndTime)
 										foreach (SequenceNode n in channel.nodes) {
-												if (time - n.startTime >= 0) {
-														if (time <= n.startTime + n.duration) {
+
+												//find first node which has n.startTime >= then current time
+												if (timeCurrent - n.startTime >= 0) {
+														//check if time comply to upper boundary
+														if (timeCurrent <= n.startTime + n.duration) {
 																node = n;
 																break;
 														} else { 
-																if (channel.type == SequenceChannel.SequenceChannelType.Animation && time > n.startTime + n.duration) {
-																		if (n.index + 1 < channel.nodes.Count && time - channel.nodes [n.index + 1].startTime >= 0) {
-																				continue;
-																		} else {
-																				node = n;
-																				time = n.startTime + n.duration;
-																				break;
-																		}
+																//if channel is of animation type and there is next node by time is between prev and next => snap time to prev node endTime
+																if (channel.type == SequenceChannel.SequenceChannelType.Animation 
+																		&& n.index + 1 < channel.nodes.Count && timeCurrent < channel.nodes [n.index + 1].startTime
+								    
+								    							) {
+
+																		node = n;
+																		timeCurrent = n.startTime + n.duration;
+																		break;
+																		
 																}
 
 														}
@@ -1785,7 +1805,7 @@ namespace ws.winx.editor.windows
 									
 													
 
-														AnimationMode.SampleAnimationClip (channel.target, node.source as AnimationClip, (float)(time - node.startTime));
+														AnimationMode.SampleAnimationClip (channel.target, node.source as AnimationClip, (float)(timeCurrent - node.startTime));
 
 						
 														///!!! It happen that Unity change the ID of channel or something happen and channal as key not to be found
@@ -2352,7 +2372,7 @@ namespace ws.winx.editor.windows
 			
 						ResetChannelTarget (sequenceChannel);
 			
-						EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence").Repaint ();
+						window.Repaint ();
 				}
 
 

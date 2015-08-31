@@ -50,7 +50,7 @@ namespace ws.winx.editor.windows
 				
 
 						//
-						int eventIndex = sequence.events.FindIndex (itm => itm == sequence.selectedEvent);
+						int eventIndex = sequence.events.FindIndex (itm => itm == sequence.eventSelected);
 						
 						if (eventIndex < 0) {
 								EditorGUILayout.LabelField ("No Event selected");
@@ -116,7 +116,7 @@ namespace ws.winx.editor.windows
 
 						EditorGUILayout.EndHorizontal ();
 
-						SequenceNode selectedNode = sequence.selectedNode;
+						SequenceNode selectedNode = sequence.nodeSelected;
 						if (selectedNode != null) {
 
 								EditorGUILayout.LabelField ("Selected Node");

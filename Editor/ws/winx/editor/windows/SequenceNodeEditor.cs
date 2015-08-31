@@ -30,8 +30,8 @@ namespace ws.winx.editor.windows{
 			if (showHideSequenceEvents) {
 				EditorGUILayout.PropertyField (onStartSerializedProperty, new GUIContent ("OnStart"));
 				EditorGUILayout.PropertyField (onStopSerializedProperty, new GUIContent ("OnStop"));
-				EditorGUILayout.PropertyField (onStopSerializedProperty, new GUIContent ("OnUpdate"));
-				EditorGUILayout.PropertyField (onStopSerializedProperty, new GUIContent ("OnPause"));
+				EditorGUILayout.PropertyField (onUpdateSerializedProperty, new GUIContent ("OnUpdate"));
+				EditorGUILayout.PropertyField (onPauseSerializedProperty, new GUIContent ("OnPause"));
 			}
 
 			this.DrawDefaultInspector ();
