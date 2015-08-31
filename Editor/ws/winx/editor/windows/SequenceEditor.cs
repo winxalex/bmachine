@@ -53,11 +53,11 @@ namespace ws.winx.editor.windows
 						int eventIndex = sequence.events.FindIndex (itm => itm == sequence.selectedEvent);
 						
 						if (eventIndex < 0) {
-							EditorGUILayout.LabelField ("No Event selected");
+								EditorGUILayout.LabelField ("No Event selected");
 						} else {
 								SerializedProperty eventAtIndex = eventsSerializedProperty.GetArrayElementAtIndex (eventIndex);
 							
-							EditorGUILayout.PropertyField (eventAtIndex, new GUIContent ("Selected Event"));
+								EditorGUILayout.PropertyField (eventAtIndex, new GUIContent ("Selected Event"));
 						}
 
 													
@@ -99,12 +99,12 @@ namespace ws.winx.editor.windows
 						}
 
 						if (GUILayout.Button ("Pause")) {
-								//sequence.Pause();
+								sequence.Pause ();
 								Debug.Log ("Not yet tested, not finished");
 						}
 						if (GUILayout.Button ("UnPause")) {
 								Debug.Log ("Not yet tested, not finished");
-								//sequence.UnPause();
+								sequence.UnPause ();
 						}
 						if (GUILayout.Button ("Restart")) {
 								//sequence.Restart();
@@ -119,12 +119,17 @@ namespace ws.winx.editor.windows
 						SequenceNode selectedNode = sequence.selectedNode;
 						if (selectedNode != null) {
 
+								EditorGUILayout.LabelField ("Selected Node");
+
 								if (selectedNode != selectedNodePrev)
 										nodeEditor = Editor.CreateEditor (selectedNode, typeof(SequenceNodeEditor)) as SequenceNodeEditor;
 
 								selectedNodePrev = selectedNode;
 
 								nodeEditor.OnInspectorGUI ();
+						} else {
+								EditorGUILayout.LabelField ("No Node selected");
+
 						}
 
 

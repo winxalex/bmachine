@@ -11,10 +11,16 @@ namespace ws.winx.unity.sequence
 		[System.Serializable]
 		public class SequenceNode:ScriptableObject
 		{
-
+				[HideInInspector]
 				public SequenceNodeEvent onStart = new SequenceNodeEvent ();
+
+		[HideInInspector]
 				public SequenceNodeEvent onStop = new SequenceNodeEvent ();
+
+		[HideInInspector]
 				public SequenceNodeEvent onPause = new SequenceNodeEvent ();
+
+		[HideInInspector]
 				public SequenceNodeEvent onUpdate = new SequenceNodeEvent ();
 				public int index = -1;
 				public float transition = 0f;
