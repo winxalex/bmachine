@@ -36,15 +36,18 @@ namespace ws.winx.editor.windows
 				
 				private static Sequence __sequence;
 				private static bool __isPlayMode = false;
-				private static bool __needSave = false;
+				
 				private Sequence.SequenceWrap wrap = Sequence.SequenceWrap.ClampForever;
 				private static GameObject __sequenceGameObject;
-				private Vector2 settingsScroll;
-				private bool dragNode;
-				private float timeClickOffset;
-				private bool resizeNodeStart;
-				private bool resizeNodeEnd;
-				private bool stop;
+				
+
+				// Node interactivity
+				private static bool __isDragged;
+				private static bool __isEventDragged;
+				private static float __clickDelta;
+				private bool __wasResizingNodeStart;
+				private bool __wasResizingNodeEnd;
+			
 				//private bool playForward;
 				//private float time;
 				private static TimeAreaW __timeAreaW;
@@ -52,20 +55,26 @@ namespace ws.winx.editor.windows
 				private static ReorderableList __sequenceChannelsReordableList;
 				//private static bool __isPlaying;
 				private static bool __isRecording;
-				private static int __frameRate = 30;
+				
 				private const float NODE_RECT_HEIGHT = 40f;
 				//20f for timer ruller + 20f for Events Pad
 				private const float TIME_LABEL_HEIGHT = 20f;
 				private const float EVENT_PAD_HEIGHT = 20f;
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				private static GUIContent __nodeLabelGUIContent = new GUIContent ();
+
+				//Keyframe
 				private static float[] keyframeTimeValues;
 				private static float[] keyframTimeValuesPrev;
-				private static bool eventTimeLineInitalized;
 				private static bool[] keyframeTimeValuesSelected;
 				private static string[] keyframesDisplayNames;
-				private static GUIContent _keyframeMarker;
-		
+				private static GUIContent __keyframeMarker;
+
+				//Event
+				
+				private static GUIContent __eventMarker;
+				private static EventComparer __eventComparer;
+				
 				private static SequenceNode __nodeSelected {
 						get {
 								if (__sequence != null) {
@@ -75,6 +84,31 @@ namespace ws.winx.editor.windows
 						}
 						set {
 								__sequence.selectedNode = value;
+								EditorUtility.SetDirty(__sequence);
+						}
+				}
+
+
+				//
+				// Nested Types
+				//
+				public class EventComparer : IComparer
+				{
+						int IComparer.Compare (object objX, object objY)
+						{
+								SequenceEvent animationEvent = (SequenceEvent)objX;
+								SequenceEvent animationEvent2 = (SequenceEvent)objY;
+								//float time = (float)animationEvent.timeNormalized.Value;
+								//float time2 = (float)animationEvent2.timeNormalized.Value;
+						
+								float time = (float)animationEvent.time;
+								float time2 = (float)animationEvent2.time;
+								if (time != time2) {
+										return (int)Mathf.Sign (time - time2);
+								}
+								int hashCode = animationEvent.GetHashCode ();
+								int hashCode2 = animationEvent2.GetHashCode ();
+								return hashCode - hashCode2;
 						}
 				}
 
@@ -376,13 +410,13 @@ namespace ws.winx.editor.windows
 				/// <param name="channelOrd">Channel ord.</param>
 				private static void DoNode (SequenceNode node, Rect rect, int channelOrd)
 				{
-						float keyFramesRectHeight = __nodeSelected == node ? _keyframeMarker.image.height : 0f;
+						float keyFramesRectHeight = __nodeSelected == node ? __keyframeMarker.image.height : 0f;
 
 						
 						
 
-			EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT+keyFramesRectHeight, 10, NODE_RECT_HEIGHT-keyFramesRectHeight ), MouseCursor.ResizeHorizontal);			
-			EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT +channelOrd * NODE_RECT_HEIGHT+keyFramesRectHeight, 10, NODE_RECT_HEIGHT-keyFramesRectHeight), MouseCursor.ResizeHorizontal);
+						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);			
+						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);
 
 			
 			
@@ -391,7 +425,7 @@ namespace ws.winx.editor.windows
 						float endTimePos = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
 
 						float startTransitionTimePos = 0f;
-						SequenceNode nodePrev = null;
+//						SequenceNode nodePrev = null;
 
 						//if there is next node with transition
 //						if (node.index + 1< node.channel.nodes.Count && (nodePrev = node.channel.nodes [node.index - 1]).transition > 0) {
@@ -423,12 +457,12 @@ namespace ws.winx.editor.windows
 						Rect nodeRect = new Rect (startTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, endTimePos - startTimePos, NODE_RECT_HEIGHT);
 
 						if (__nodeSelected == node) {
-								nodeRect.yMax = nodeRect.yMin + _keyframeMarker.image.height;
+								nodeRect.yMax = nodeRect.yMin + __keyframeMarker.image.height;
 								DoKeyFrames (nodeRect);
 								
 								
 								nodeRect.yMax = nodeRect.yMin + NODE_RECT_HEIGHT;
-								nodeRect.yMin += _keyframeMarker.image.height;
+								nodeRect.yMin += __keyframeMarker.image.height;
 								GUI.Box (nodeRect, "", "TL LogicBar 0");
 								
 								
@@ -665,8 +699,8 @@ namespace ws.winx.editor.windows
 								this.Repaint ();
 
 								//this ensure update of MovieTexture (it its bottle neck do some reflection and force render call)
-								if(SceneView.currentDrawingSceneView!=null)				
-								SceneView.currentDrawingSceneView.Repaint ();//TODO test this
+								if (SceneView.currentDrawingSceneView != null)				
+										SceneView.currentDrawingSceneView.Repaint ();//TODO test this
 								//SceneView.RepaintAll ();
 
 								
@@ -866,9 +900,11 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				private void OnGUI ()
 				{
+						if (__eventMarker == null)
+								__eventMarker = EditorGUILayoutEx.ANIMATION_STYLES.eventMarker;
 						
-						if (_keyframeMarker == null)
-								_keyframeMarker = new GUIContent (EditorGUILayoutEx.ANIMATION_STYLES.pointIcon);
+						if (__keyframeMarker == null)
+								__keyframeMarker = new GUIContent (EditorGUILayoutEx.ANIMATION_STYLES.pointIcon);
 
 						Rect rect = this.position;
 
@@ -891,6 +927,8 @@ namespace ws.winx.editor.windows
 			
 						DoChannelsGUI (rect);
 
+					//	Debug.Log ("Scale:" + __timeAreaW.scale);
+
 						
 				}
 
@@ -906,7 +944,7 @@ namespace ws.winx.editor.windows
 				static void onKeyframeEdit (TimeLineArgs<float> args)
 				{
 						if (__sequence != null && __sequence.selectedNode != null) {
-								__sequence.timeCurrent= __sequence.selectedNode.startTime +args.selectedValue * __sequence.selectedNode.duration;
+								__sequence.timeCurrent = __sequence.selectedNode.startTime + args.selectedValue * __sequence.selectedNode.duration;
 								
 						}
 						
@@ -919,9 +957,9 @@ namespace ws.winx.editor.windows
 				/// <param name="args">Arguments.</param>
 				static void onKeyframeAdd (TimeLineArgs<float> args)
 				{
-					Debug.LogWarning("Just set timescrubber to desired time and change value of desired property, new keyframe will be inserted automatically");
+						Debug.LogWarning ("Just set timescrubber to desired time and change value of desired property, new keyframe will be inserted automatically");
 					
-					//if(__sequence!=null && __sequence.selectedNode!=null)
+						//if(__sequence!=null && __sequence.selectedNode!=null)
 						//AnimationUtilityEx.AddKeyframeFrom (__sequence.selectedNode.source as AnimationClip, args.selectedValue * __sequence.selectedNode.duration  );
 				}
 					
@@ -933,8 +971,8 @@ namespace ws.winx.editor.windows
 				{
 						
 						
-						if(__sequence!=null && __sequence.selectedNode!=null)
-						AnimationUtilityEx.RemoveKeyframeFrom (__sequence.selectedNode.source as AnimationClip, args.selectedIndex);
+						if (__sequence != null && __sequence.selectedNode != null)
+								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.selectedNode.source as AnimationClip, args.selectedIndex);
 				}
 
 				private static void DoKeyFrames (Rect keyframesRect)
@@ -944,19 +982,19 @@ namespace ws.winx.editor.windows
 			
 			
 						//Show rotation or scale keyframes if Rotation or Scale tools are selected
-						if (Selection.activeGameObject != null && __sequence != null && __sequence.selectedNode!=null
+						if (Selection.activeGameObject != null && __sequence != null && __sequence.selectedNode != null
 								&& __sequence.selectedNode.channel.target != null
 								&& __sequence.selectedNode.channel.type == SequenceChannel.SequenceChannelType.Animation
-								&& Selection.activeGameObject == __sequence.selectedNode.channel.target || Selection.activeGameObject.transform.IsChildOf (__sequence.selectedNode.channel.target.transform)
+								&& (Selection.activeGameObject == __sequence.selectedNode.channel.target || Selection.activeGameObject.transform.IsChildOf (__sequence.selectedNode.channel.target.transform))
 
 
 			   			 ) {
 
 
-								//Rect keyframesRect = GUILayoutUtility.GetRect (Screen.width - 16f, 16f);
+								
 				
-								keyframesRect.xMax += _keyframeMarker.image.width * 0.5f;
-								keyframesRect.xMin -= _keyframeMarker.image.width * 0.5f;
+								keyframesRect.xMax += __keyframeMarker.image.width * 0.5f;
+								keyframesRect.xMin -= __keyframeMarker.image.width * 0.5f;
 
 
 								EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;//we assume there is 3 same keyframes for X,Y,Z
@@ -975,28 +1013,27 @@ namespace ws.winx.editor.windows
 										if (__sequence.selectedNode.channel.target != null) {
 												
 												curveBinding.path = AnimationUtility.CalculateTransformPath (Selection.activeGameObject.transform, __sequence.selectedNode.channel.target.transform);
+												
+
 												keyframeTimeValues = AnimationUtilityEx.GetTimes (clip, curveBinding, clip.length);
 												
-												int numKeys = keyframeTimeValues.Length;
 												
-												//for(int i=0;i<numKeys;i++)
-												//keyframeTimeValues[i]=TimeAreaW.SnapTimeToWholeFPS(keyframeTimeValues[i],__frameRate);
 						
-										} else{
+										} else {
 
-												keyframeTimeValues=new float[0];
+												keyframeTimeValues = new float[0];
 										}
 
 					
 										keyframesDisplayNames = keyframeTimeValues.Select ((itm) => {
-												return itm + ".s";}).ToArray ();
-										//return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
+												
+												return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
 					
 										keyframeTimeValuesSelected = new bool[keyframeTimeValues.Length];// for multiselection option not used here
 					
 										//create custom timeline showing rotation or scale keyframes
-										EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, _keyframeMarker, ref keyframeTimeValues, ref keyframTimeValuesPrev, ref keyframesDisplayNames, ref keyframeTimeValuesSelected, -1f,onKeyframeAdd
-					                                   ,onKeyframeDelete, null, onKeyframeEdit, null
+										EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, __keyframeMarker, ref keyframeTimeValues, ref keyframTimeValuesPrev, ref keyframesDisplayNames, ref keyframeTimeValuesSelected, -1f, onKeyframeAdd
+					                                   , onKeyframeDelete, null, onKeyframeEdit, null
 										);
 					
 										
@@ -1033,7 +1070,7 @@ namespace ws.winx.editor.windows
 										return;
 								DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
 							
-								Type draggedType;
+								
 							
 								if (evt.type == EventType.DragPerform) {
 										DragAndDrop.AcceptDrag ();
@@ -1107,9 +1144,9 @@ namespace ws.winx.editor.windows
 								}
 								GUILayout.FlexibleSpace ();
 								if (GUILayout.Button (EditorGUIUtility.FindTexture ("d_Animation.AddEvent"), EditorStyles.toolbarButton)) {
-										//				if(onAddEvent!= null){
-										//					onAddEvent();
-										//				}
+														
+										onEventAdd ();
+														
 								}
 								GUILayout.EndHorizontal ();
 						}
@@ -1120,7 +1157,7 @@ namespace ws.winx.editor.windows
 
 
 
-						OnSettingsGUI (rect.width - 1.5f);
+						DoSettingsGUI (rect.width - 1.5f);
 
 
 						if (__sequence != null) {
@@ -1161,7 +1198,7 @@ namespace ws.winx.editor.windows
 				/// Handles drawing settings OnGUI .
 				/// </summary>
 				/// <param name="width">Width.</param>
-				private void OnSettingsGUI (float width)
+				private void DoSettingsGUI (float width)
 				{
 						GUILayout.BeginHorizontal ();
 						if (GUILayout.Button (__sequence != null ? __sequence.name : "[None Selected]", EditorStyles.toolbarDropDown, GUILayout.Width (width * 0.3f))) {
@@ -1232,9 +1269,213 @@ namespace ws.winx.editor.windows
 
 				}
 
-				private void OnEventGUI (Rect rect)
+
+				//////////////////////////////////////////////
+				///     	Event timeline Handler        ///
+				/// 
+
+
+				/// <summary>
+				/// Ons the event drag end.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				void onEventDragEnd (TimeLineArgs<float> args)
 				{
+//			int[] indexArray = new int[mecanimNode.children.Length];
+//			for (int l = 0; l < indexArray.Length; l++) {
+//				indexArray [l] = l;
+//			}
+
+						if (__eventComparer == null)
+								__eventComparer = new EventComparer ();
+//			
+//			Array.Sort (mecanimNode.children, indexArray, eventTimeComparer);
+//			
+//			bool[] cloneOfSelected = (bool[])eventTimeValuesSelected.Clone ();
+//			int inx = -1;
+//			SendEventNormalizedNode ev;
+//			for (int m = 0; m < indexArray.Length; m++) {
+//				
+//				inx = indexArray [m];
+//				ev = ((SendEventNormalizedNode)mecanimNode.children [m]);	
+//				this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
+//				//this.eventTimeValues [m] = (float)ev.timeNormalized.Value; 
+//				this.eventTimeValues [m] = (float)ev.timeNormalized.serializedProperty.floatValue; 
+//				this.eventDisplayNames [m] = ev.name;
+//				
+//			}
+			
+			
+
+				}
+
+				/// <summary>
+				/// Ons the mecanim event edit.
+				/// </summary>
+				/// <param name="args">Arguments.(return normalized value)</param>
+				static void onEventEdit (object userData)
+				{
+						//EditorWindow popup
+				}
+		
+				/// <summary>
+				/// Ons the keyframe add.
+				/// </summary>
+				/// <param name="args">Arguments.</param>
+				static void onEventAdd ()
+				{
+						
+
+						if (__sequence != null) {
+								SequenceEvent ev = new SequenceEvent ();
+								ev.time = TimeAreaW.SnapTimeToWholeFPS ((float)__sequence.timeCurrent, __sequence.frameRate);
+								__sequence.events.Add (ev);
+						}
+				}
+		
+				/// <summary>
+				/// Ons the keyframe delete.
+				/// </summary>
+			
+				static void onEventDelete (object userData)
+				{
+					
+
+						if (__sequence != null) {
+						
+						
+								__sequence.events.Remove (userData as SequenceEvent);
+						}
+
+				}
+
+
+				/// <summary>
+				/// Dos the event GUI.
+				/// </summary>
+				/// <param name="eventRect">Event rect.</param>
+				private void DoEventGUI (Rect eventRect)
+				{
+						eventRect.y = EVENT_PAD_HEIGHT;
+						eventRect.height = EVENT_PAD_HEIGHT;
+
+					
+
+						if (Event.current.type == EventType.Repaint) 
+								EditorGUILayoutEx.ANIMATION_STYLES.eventBackground.Draw (eventRect, GUIContent.none, 0);
+
+						SequenceEvent evt = null;
+						int numEvents = __sequence.events.Count;
+						Rect eventMarkerRect = new Rect (0, eventRect.y, __eventMarker.image.width, __eventMarker.image.height);
+						float eventMarkerRectHalfW = __eventMarker.image.width * 0.5f;
+
+
+						for (int i=0; i<numEvents; i++) {
+								evt = __sequence.events [i];
+								eventMarkerRect.x = __timeAreaW.TimeToPixel ((float)evt.time, eventRect) - eventMarkerRectHalfW;
+
+
+				 
+								GUI.DrawTexture (eventMarkerRect, __eventMarker.image);
+								sequenceEventInteractiveHandler (eventRect, eventMarkerRect, evt);
+						}
+			
+			
+
+
+
+				}
+
+
+				/// <summary>
+				/// Creates the events menu.
+				/// </summary>
+				/// <returns>The event menu.</returns>
+				/// <param name="evt">Evt.</param>
+				private static GenericMenu createEventMenu (SequenceEvent evt)
+				{
+
+						GenericMenu menu = new GenericMenu ();
+								
+						//menu.AddItem (new GUIContent ("Edit"), false, onEventEdit, evt);
+						menu.AddItem (new GUIContent ("Delete"), false, onEventDelete, evt);
+								
+						
+
+						return menu;
+				}
 				
+
+				/// <summary>
+				/// Sequences the event interactive handler.
+				/// </summary>
+				/// <param name="rect">Rect.</param>
+				/// <param name="eventMarkerRect">Event marker rect.</param>
+				/// <param name="evt">Evt.</param>
+				private static void sequenceEventInteractiveHandler (Rect rect, Rect eventMarkerRect, SequenceEvent evt)
+				{
+
+						Event ev = Event.current;
+			
+					
+						switch (ev.rawType) {
+						
+						case EventType.MouseDrag:
+								if (__isEventDragged && __sequence.selectedEvent==evt) {
+
+										float time = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) + __clickDelta;
+					
+										time = TimeAreaW.SnapTimeToWholeFPS (time, __sequence.frameRate);
+					
+										if (time >= 0) {
+												evt.time = time;
+												__sequence.timeCurrent=evt.time;
+										}
+
+								}
+
+
+								break;
+						case EventType.ContextClick:
+							//show add,remove,edit
+								createEventMenu (evt).ShowAsContext ();
+								break;
+
+						case EventType.MouseDown:
+
+								if (!__isEventDragged &&  eventMarkerRect.Contains (ev.mousePosition)) {
+										if (ev.button == 1) {//show add,remove,edit
+												
+												createEventMenu (evt).ShowAsContext ();
+
+										} else if (ev.button == 0) {
+												__clickDelta = (float)evt.time - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+												__isEventDragged = true;
+												__sequence.selectedEvent=evt;
+												__sequence.timeCurrent=evt.time;
+												//EditorUtility.SetDirty(__sequence);//Repaint Inspector
+
+
+
+										}
+
+										ev.Use ();
+								}
+
+
+
+								break;
+
+						case EventType.MouseUp:
+								
+								__isEventDragged = false;
+								break;
+
+						}
+						
+
+
+
 				}
 
 
@@ -1267,8 +1508,8 @@ namespace ws.winx.editor.windows
 				
 								//SceneView.RepaintAll();
 
-								if(SceneView.currentDrawingSceneView!=null)
-								SceneView.currentDrawingSceneView.Repaint ();
+								if (SceneView.currentDrawingSceneView != null)
+										SceneView.currentDrawingSceneView.Repaint ();
 								
 								//Debug.Log ("Animation mode:" + AnimationMode.InAnimationMode ());
 								
@@ -1630,6 +1871,9 @@ namespace ws.winx.editor.windows
 						Handles.color = new Color (0.5f, 0.5f, 0.5f, 0.2f);
 					
 						if (__sequence != null) {
+
+								
+
 								//Draw horizontal lines (rows)
 								int rows = __sequence.channels.Count + 1;
 								int y = 0;
@@ -1657,11 +1901,15 @@ namespace ws.winx.editor.windows
 						else
 								__timeAreaW.DoTimeArea (rect, 3);
 					
-						if (Event.current.type == EventType.Repaint) 
-								EditorGUILayoutEx.ANIMATION_STYLES.eventBackground.Draw (new Rect (rect.x, EVENT_PAD_HEIGHT, rect.width, EVENT_PAD_HEIGHT), GUIContent.none, 0);
-
+						
+						
 
 						if (__sequence != null) {
+
+								//DRAW EVENTS GUI
+								DoEventGUI (rect);
+
+
 								//DRAW NODES 
 								int channelNumber = __sequence.channels.Count;
 								SequenceChannel channel = null;
@@ -1719,6 +1967,13 @@ namespace ws.winx.editor.windows
 						}
 			
 				}
+
+				private static GenericMenu createNodeMenu (SequenceNode node)
+				{
+						GenericMenu genericMenu = new GenericMenu ();
+						genericMenu.AddItem (new GUIContent ("Remove"), false, RemoveNode, node);
+						return genericMenu;
+				}
 		
 		
 				/// <summary>
@@ -1733,16 +1988,16 @@ namespace ws.winx.editor.windows
 						Event ev = Event.current;
 						Rect clickRect;
 			
-						float startTime;
+						
 						switch (ev.rawType) {
 						case EventType.MouseDown:
 				
 			
-					
+								//resize rect at start of the node rect width=5px
 								clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
 					
-								if(__nodeSelected==node)//resize mouse interaction only on blue rect area (not key frames area)
-									clickRect.yMin+=_keyframeMarker.image.height;
+								if (__nodeSelected == node)//resize mouse interaction only on blue rect area (not key frames area)
+										clickRect.yMin += __keyframeMarker.image.height;
 
 
 
@@ -1750,17 +2005,18 @@ namespace ws.winx.editor.windows
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										
 										__nodeSelected = node;
-										resizeNodeStart = true;
+										__wasResizingNodeStart = true;
 										ev.Use ();
 								}
 					
+								//resize rect at the end of rect width=5x;
 								clickRect.x = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5;
 					
 					
 								//check the end of node rect width=5
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										__nodeSelected = node;
-										resizeNodeEnd = true;
+										__wasResizingNodeEnd = true;
 										ev.Use ();
 								}
 					
@@ -1772,14 +2028,13 @@ namespace ws.winx.editor.windows
 										
 										if (ev.button == 0) {
 												
-												timeClickOffset = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
-												dragNode = true;
+												__clickDelta = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+												__isDragged = true;
 												__nodeSelected = node;
-										} 
+										} else
 										if (ev.button == 1) {
-												GenericMenu genericMenu = new GenericMenu ();
-												genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
-												genericMenu.ShowAsContext ();
+												
+												createNodeMenu (node).ShowAsContext ();
 												__nodeSelected = node;
 										}
 										ev.Use ();
@@ -1802,9 +2057,8 @@ namespace ws.winx.editor.windows
 								clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x;
 					
 								if (clickRect.Contains (Event.current.mousePosition)) {
-										GenericMenu genericMenu = new GenericMenu ();
-										genericMenu.AddItem (new GUIContent ("Remove"), false, this.RemoveNode, node);
-										genericMenu.ShowAsContext ();
+										
+										createNodeMenu (node).ShowAsContext ();
 										
 								}
 
@@ -1839,7 +2093,7 @@ namespace ws.winx.editor.windows
 								
 
 
-								if (resizeNodeStart) {
+								if (__wasResizingNodeStart) {
 										
 										//float prevStartTime = __nodeSelected.startTime;
 										startTime = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
@@ -1847,7 +2101,7 @@ namespace ws.winx.editor.windows
 
 										if (startTime >= 0) {
 												//__nodeSelected.startTime = TimeAreaW.SnapTimeToWholeFPS (startTime, __frameRate);
-												//__nodeSelected.duration += TimeAreaW.SnapTimeToWholeFPS (prevStartTime - __nodeSelected.startTime, __frameRate);
+												//__nodeSelected.duration += TimeAreaW.SnapTimeToWholeFPS (prevStartTime - __nodeSelected.startTime, __sequence.frameRate);
 												
 												
 											
@@ -1860,16 +2114,16 @@ namespace ws.winx.editor.windows
 										
 								}
 
-								if (resizeNodeEnd) {
+								if (__wasResizingNodeEnd) {
 										
-										//__nodeSelected.duration = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) - __nodeSelected.startTime, __frameRate);
+										//__nodeSelected.duration = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) - __nodeSelected.startTime, __sequence.frameRate);
 										ev.Use ();
 								}
 
 								//PAN of the node
-								if (dragNode && !resizeNodeStart && !resizeNodeEnd) {
+								if (__isDragged && !__wasResizingNodeStart && !__wasResizingNodeEnd) {
 										
-										startTime = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) + timeClickOffset;
+										startTime = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) + __clickDelta;
 
 										startTime = TimeAreaW.SnapTimeToWholeFPS (startTime, __sequence.frameRate);
 
@@ -2003,9 +2257,9 @@ namespace ws.winx.editor.windows
 								
 								break;
 						case EventType.MouseUp:
-								dragNode = false;
-								resizeNodeStart = false;
-								resizeNodeEnd = false;
+								__isDragged = false;
+								__wasResizingNodeStart = false;
+								__wasResizingNodeEnd = false;
 								break;
 						}
 				}
@@ -2018,7 +2272,7 @@ namespace ws.winx.editor.windows
 				/// Removes the node.
 				/// </summary>
 				/// <param name="data">Data.</param>
-				private void RemoveNode (object data)
+				private static void RemoveNode (object data)
 				{
 						SequenceNode node = data as SequenceNode;
 						
@@ -2098,7 +2352,7 @@ namespace ws.winx.editor.windows
 			
 						ResetChannelTarget (sequenceChannel);
 			
-						Repaint ();
+						EditorWindow.GetWindow<SequenceEditorWindow> (false, "Sequence").Repaint ();
 				}
 
 
@@ -2113,6 +2367,8 @@ namespace ws.winx.editor.windows
 						Selection.activeGameObject = sequence.gameObject;
 						__sequenceGameObject = sequence.gameObject;
 						__sequence = sequence;
+
+						
 				}
 
 				private void OnFocus ()
@@ -2282,7 +2538,7 @@ namespace ws.winx.editor.windows
 
 
 						startTime = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __sequence.frameRate);
-						duration = TimeAreaW.SnapTimeToWholeFPS (duration, __frameRate);
+						duration = TimeAreaW.SnapTimeToWholeFPS (duration, __sequence.frameRate);
 
 						SequenceChannel sequenceChannel = __sequence.channels [channelOrd];
 
@@ -2343,7 +2599,7 @@ namespace ws.winx.editor.windows
 				
 						//UnityEditor.Animations.AnimatorStateTransition transition = null;
 				
-						float endTimeNode = 0f;
+						
 
 								
 						if (sequenceChannel.nodes.Count > -1) {

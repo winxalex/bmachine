@@ -10,7 +10,6 @@ using System.Runtime.Serialization;
 using System.Linq;
 using ws.winx.editor.extensions;
 
-
 namespace ws.winx.editor
 {
 		public enum HighLevelEvent
@@ -2147,7 +2146,6 @@ namespace ws.winx.editor
 				private static Type __RealType;
 				private static ConstructorInfo method_ctor;
 				private	static MethodInfo EndViewGUI_MethodInfo;
-			
 				private	static MethodInfo BeginViewGUI_MethodInfo;
 				private static MethodInfo __FrameToPixel_MethodInfo;
 
@@ -2235,9 +2233,21 @@ namespace ws.winx.editor
 				static PropertyInfo PropertyInfo_vRangeMin;
 				static PropertyInfo PropertyInfo_vRangeLocked;
 				static PropertyInfo PropertyInfo_hRangeLocked;
+				static PropertyInfo __PropertyInfo_scale;
+
+				static PropertyInfo PropertyInfo_scale {
+						get {
+								if (__PropertyInfo_scale == null)
+										__PropertyInfo_scale = __RealType.GetProperty ("scale");
+						
+						
+								return __PropertyInfo_scale;
+						}
+				}
+
 				static PropertyInfo __PropertyInfo_hTicks;
 
-				public static PropertyInfo PropertyInfo_hTicks {
+				static PropertyInfo PropertyInfo_hTicks {
 						get {
 								if (__PropertyInfo_hTicks == null)
 										__PropertyInfo_hTicks = __RealType.GetProperty ("hTicks");
@@ -2249,7 +2259,7 @@ namespace ws.winx.editor
 
 				static PropertyInfo __PropertyInfo_vTicks;
 
-				public static PropertyInfo PropertyInfo_vTicks {
+				static PropertyInfo PropertyInfo_vTicks {
 						get {
 								if (__PropertyInfo_vTicks == null)
 										__PropertyInfo_vTicks = __RealType.GetProperty ("vTicks");
@@ -2258,7 +2268,7 @@ namespace ws.winx.editor
 						}
 				}
 
-				private static MethodInfo __DrawMajorTicks_MethodInfo;
+				static MethodInfo __DrawMajorTicks_MethodInfo;
 
 				static MethodInfo DrawMajorTicks_MethodInfo {
 						get {
@@ -2304,6 +2314,11 @@ namespace ws.winx.editor
 								_vTicks = value;
 								PropertyInfo_vTicks.SetValue (__instance, _vTicks.wrapped, null);
 						}
+				}
+
+				public Vector2 scale {
+					get{ return (Vector2)PropertyInfo_scale.GetValue (__instance, null);}
+					
 				}
 		
 				public Rect rect {
@@ -2470,11 +2485,10 @@ namespace ws.winx.editor
 
 				public static float SnapTimeToWholeFPS (float time, float frameRate)
 				{
-					if (frameRate == 0f)
-					{
-						return time;
-					}
-					return Mathf.Round (time * frameRate) / frameRate;
+						if (frameRate == 0f) {
+								return time;
+						}
+						return Mathf.Round (time * frameRate) / frameRate;
 				}
 
 				public float TimeToPixel (float time, Rect rect)
@@ -2496,7 +2510,7 @@ namespace ws.winx.editor
 
 				public int PixelToFrame (float pixelX, int frameRate, Rect rect)
 				{
-						return (int)Mathf.Ceil(PixelToTime (pixelX, rect) * frameRate);
+						return (int)Mathf.Ceil (PixelToTime (pixelX, rect) * frameRate);
 				}
 		
 				public float FrameToPixel (float frame, float frameRate, Rect rect)
@@ -2537,8 +2551,7 @@ namespace ws.winx.editor
 						Handles.color = textColor;
 						for (int i = 0; i < this.hTicks.tickLevels; i++) {
 								float num = this.hTicks.GetStrengthOfLevel (i) * 0.9f;
-								if (num > 0.1f)//if (num > 0.5f) 
-								{
+								if (num > 0.1f) {//if (num > 0.5f)
 					
 										float[] ticksAtLevel = this.hTicks.GetTicksAtLevel (i, true);
 										for (int j = 0; j < ticksAtLevel.Length; j++) {
@@ -2705,250 +2718,249 @@ namespace ws.winx.editor
 
 
 	#region AudioUtilW
-	public class AudioUtilW
-	{
-
-		private static Type __RealType;
-
-
-
-		private static MethodInfo __PlayClip_MethodInfo;
-		
-		public static MethodInfo PlayClip_MethodInfo {
-			get {
-				if (__PlayClip_MethodInfo == null)
-					__PlayClip_MethodInfo = GetWrappedType ().GetMethod ("PlayClip",BindingFlags.Static | BindingFlags.Public,null,new Type[]{typeof(AudioClip),typeof(int),typeof(bool)},null);
-				return __PlayClip_MethodInfo;
-			}
-		}
-
-		private static MethodInfo __StopClip__MethodInfo;
-		
-		public static MethodInfo StopClip__MethodInfo {
-			get {
-				if (__StopClip__MethodInfo == null)
-					__StopClip__MethodInfo = GetWrappedType ().GetMethod ("StopClip",BindingFlags.Static | BindingFlags.Public);
-				return __StopClip__MethodInfo;
-			}
-		}
-
-		private static MethodInfo __PauseClip__MethodInfo;
-		
-		public static MethodInfo PauseClip__MethodInfo {
-			get {
-				if (__PauseClip__MethodInfo == null)
-					__PauseClip__MethodInfo = GetWrappedType ().GetMethod ("PauseClip",BindingFlags.Static | BindingFlags.Public);
-				return __PauseClip__MethodInfo;
-			}
-		}
-
-
-		private static MethodInfo __ResumeClip__MethodInfo;
-		
-		public static MethodInfo ResumeClip__MethodInfo {
-			get {
-				if (__ResumeClip__MethodInfo == null)
-					__ResumeClip__MethodInfo = GetWrappedType ().GetMethod ("ResumeClip",BindingFlags.Static | BindingFlags.Public);
-				return __ResumeClip__MethodInfo;
-			}
-		}
-
-
-		private static MethodInfo __GetWaveForm_MethodInfo;
-		
-		public static MethodInfo GetWaveForm__MethodInfo {
-			get {
-				if (__GetWaveForm_MethodInfo == null)
-					__GetWaveForm_MethodInfo = GetWrappedType ().GetMethod ("GetWaveForm",BindingFlags.Static | BindingFlags.Public);
-				return __GetWaveForm_MethodInfo;
-			}
-		}
-
-
-		private static MethodInfo __SetClipSamplePosition_MethodInfo;
-		
-		public static MethodInfo SetClipSamplePosition_MethodInfo {
-			get {
-				if (__SetClipSamplePosition_MethodInfo == null)
-					__SetClipSamplePosition_MethodInfo = GetWrappedType ().GetMethod ("SetClipSamplePosition",BindingFlags.Static | BindingFlags.Public);
-				return __SetClipSamplePosition_MethodInfo;
-			}
-		}
-
-		private static MethodInfo __StopAllClips_MethodInfo;
-		
-		public static MethodInfo StopAllClips_MethodInfo {
-			get {
-				if (__StopAllClips_MethodInfo == null)
-					__StopAllClips_MethodInfo = GetWrappedType ().GetMethod ("StopAllClips",BindingFlags.Static | BindingFlags.Public);
-				return __StopAllClips_MethodInfo;
-			}
-		}
-
-		private static MethodInfo __UpdateAudio_MethodInfo;
-		
-		public static MethodInfo UpdateAudio_MethodInfo {
-			get {
-				if (__UpdateAudio_MethodInfo == null)
-					__UpdateAudio_MethodInfo = GetWrappedType ().GetMethod ("StopAllClips",BindingFlags.Static | BindingFlags.Public);
-				return __UpdateAudio_MethodInfo;
-			}
-		}
-
-
-		private static MethodInfo __SetListenerTransform_MethodInfo;
-		
-		public static MethodInfo SetListenerTransform_MethodInfo {
-			get {
-				if (__SetListenerTransform_MethodInfo == null)
-					__SetListenerTransform_MethodInfo = GetWrappedType ().GetMethod ("SetListenerTransform",BindingFlags.Static | BindingFlags.Public);
-				return __SetListenerTransform_MethodInfo;
-			}
-		}
-
-
-	
-
-		private static MethodInfo __ClearWaveForm_MethodInfo;
-		
-		public static MethodInfo ClearWaveForm_MethodInfo {
-			get {
-				if (__ClearWaveForm_MethodInfo == null)
-					__ClearWaveForm_MethodInfo = GetWrappedType ().GetMethod ("ClearWaveForm",BindingFlags.Static | BindingFlags.Public);
-				return __ClearWaveForm_MethodInfo;
-			}
-		}
-
-
-
-
-
-		private static PropertyInfo __resetAllAudioClipPlayCountsOnPlay_PropertyInfo;
-		
-		public static PropertyInfo resetAllAudioClipPlayCountsOnPlay_PropertyInfo {
-			get {
-				if (__resetAllAudioClipPlayCountsOnPlay_PropertyInfo == null)
-					__resetAllAudioClipPlayCountsOnPlay_PropertyInfo = GetWrappedType ().GetProperty ("resetAllAudioClipPlayCountsOnPlay",BindingFlags.Static | BindingFlags.Public);
-				return __resetAllAudioClipPlayCountsOnPlay_PropertyInfo;
-			}
-		}
-		
-		/// <summary>
-		/// Gets the type of the wrapped.
-		/// </summary>
-		/// <returns>The wrapped type.</returns>
-		public static Type GetWrappedType ()
+		public class AudioUtilW
 		{
-			if (__RealType == null) {
-				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-				__RealType = assembly.GetType ("UnityEditor.AudioUtil");
-			}
+
+				private static Type __RealType;
+				private static MethodInfo __PlayClip_MethodInfo;
+		
+				public static MethodInfo PlayClip_MethodInfo {
+						get {
+								if (__PlayClip_MethodInfo == null)
+										__PlayClip_MethodInfo = GetWrappedType ().GetMethod ("PlayClip", BindingFlags.Static | BindingFlags.Public, null, new Type[] {
+												typeof(AudioClip),
+												typeof(int),
+												typeof(bool)
+										}, null);
+								return __PlayClip_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __StopClip__MethodInfo;
+		
+				public static MethodInfo StopClip__MethodInfo {
+						get {
+								if (__StopClip__MethodInfo == null)
+										__StopClip__MethodInfo = GetWrappedType ().GetMethod ("StopClip", BindingFlags.Static | BindingFlags.Public);
+								return __StopClip__MethodInfo;
+						}
+				}
+
+				private static MethodInfo __PauseClip__MethodInfo;
+		
+				public static MethodInfo PauseClip__MethodInfo {
+						get {
+								if (__PauseClip__MethodInfo == null)
+										__PauseClip__MethodInfo = GetWrappedType ().GetMethod ("PauseClip", BindingFlags.Static | BindingFlags.Public);
+								return __PauseClip__MethodInfo;
+						}
+				}
+
+				private static MethodInfo __ResumeClip__MethodInfo;
+		
+				public static MethodInfo ResumeClip__MethodInfo {
+						get {
+								if (__ResumeClip__MethodInfo == null)
+										__ResumeClip__MethodInfo = GetWrappedType ().GetMethod ("ResumeClip", BindingFlags.Static | BindingFlags.Public);
+								return __ResumeClip__MethodInfo;
+						}
+				}
+
+				private static MethodInfo __GetWaveForm_MethodInfo;
+		
+				public static MethodInfo GetWaveForm__MethodInfo {
+						get {
+								if (__GetWaveForm_MethodInfo == null)
+										__GetWaveForm_MethodInfo = GetWrappedType ().GetMethod ("GetWaveForm", BindingFlags.Static | BindingFlags.Public);
+								return __GetWaveForm_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __SetClipSamplePosition_MethodInfo;
+		
+				public static MethodInfo SetClipSamplePosition_MethodInfo {
+						get {
+								if (__SetClipSamplePosition_MethodInfo == null)
+										__SetClipSamplePosition_MethodInfo = GetWrappedType ().GetMethod ("SetClipSamplePosition", BindingFlags.Static | BindingFlags.Public);
+								return __SetClipSamplePosition_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __StopAllClips_MethodInfo;
+		
+				public static MethodInfo StopAllClips_MethodInfo {
+						get {
+								if (__StopAllClips_MethodInfo == null)
+										__StopAllClips_MethodInfo = GetWrappedType ().GetMethod ("StopAllClips", BindingFlags.Static | BindingFlags.Public);
+								return __StopAllClips_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __UpdateAudio_MethodInfo;
+		
+				public static MethodInfo UpdateAudio_MethodInfo {
+						get {
+								if (__UpdateAudio_MethodInfo == null)
+										__UpdateAudio_MethodInfo = GetWrappedType ().GetMethod ("StopAllClips", BindingFlags.Static | BindingFlags.Public);
+								return __UpdateAudio_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __SetListenerTransform_MethodInfo;
+		
+				public static MethodInfo SetListenerTransform_MethodInfo {
+						get {
+								if (__SetListenerTransform_MethodInfo == null)
+										__SetListenerTransform_MethodInfo = GetWrappedType ().GetMethod ("SetListenerTransform", BindingFlags.Static | BindingFlags.Public);
+								return __SetListenerTransform_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __ClearWaveForm_MethodInfo;
+		
+				public static MethodInfo ClearWaveForm_MethodInfo {
+						get {
+								if (__ClearWaveForm_MethodInfo == null)
+										__ClearWaveForm_MethodInfo = GetWrappedType ().GetMethod ("ClearWaveForm", BindingFlags.Static | BindingFlags.Public);
+								return __ClearWaveForm_MethodInfo;
+						}
+				}
+
+				private static PropertyInfo __resetAllAudioClipPlayCountsOnPlay_PropertyInfo;
+		
+				public static PropertyInfo resetAllAudioClipPlayCountsOnPlay_PropertyInfo {
+						get {
+								if (__resetAllAudioClipPlayCountsOnPlay_PropertyInfo == null)
+										__resetAllAudioClipPlayCountsOnPlay_PropertyInfo = GetWrappedType ().GetProperty ("resetAllAudioClipPlayCountsOnPlay", BindingFlags.Static | BindingFlags.Public);
+								return __resetAllAudioClipPlayCountsOnPlay_PropertyInfo;
+						}
+				}
+		
+				/// <summary>
+				/// Gets the type of the wrapped.
+				/// </summary>
+				/// <returns>The wrapped type.</returns>
+				public static Type GetWrappedType ()
+				{
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.AudioUtil");
+						}
 			
-			return __RealType;
+						return __RealType;
 			
-		}
+				}
 
-		public static  bool resetAllAudioClipPlayCountsOnPlay
-		{
+				public static  bool resetAllAudioClipPlayCountsOnPlay {
 
-			get{
-				return (bool)resetAllAudioClipPlayCountsOnPlay_PropertyInfo.GetValue(null,null);
-			}
+						get {
+								return (bool)resetAllAudioClipPlayCountsOnPlay_PropertyInfo.GetValue (null, null);
+						}
 
-			set{
-				resetAllAudioClipPlayCountsOnPlay_PropertyInfo.SetValue(null,value,null);
-			}
-		}
+						set {
+								resetAllAudioClipPlayCountsOnPlay_PropertyInfo.SetValue (null, value, null);
+						}
+				}
 
+				public static void ResumeClip (AudioClip clip)
+				{
 
+						ResumeClip__MethodInfo.Invoke (null, new object[]{clip});
+				}
 
+				public static void PauseClip (AudioClip clip)
+				{
+						PauseClip__MethodInfo.Invoke (null, new object[]{clip});
+				}
 
+				public static void StopClip (AudioClip clip)
+				{
+						StopClip__MethodInfo.Invoke (null, new object[]{clip});
 
-		public static void ResumeClip (AudioClip clip){
-
-			ResumeClip__MethodInfo.Invoke (null, new object[]{clip});
-		}
-
-
-		public static void PauseClip (AudioClip clip){
-			PauseClip__MethodInfo.Invoke (null, new object[]{clip});
-		}
-
-		public static void StopClip (AudioClip clip){
-			StopClip__MethodInfo.Invoke (null, new object[]{clip});
-
-		}
+				}
 		
-		public static void PlayClip (AudioClip clip,  int startSample=0, bool loop=false)
-		{
-			PlayClip_MethodInfo.Invoke (null, new object[]{clip,startSample,loop});
+				public static void PlayClip (AudioClip clip, int startSample=0, bool loop=false)
+				{
+						PlayClip_MethodInfo.Invoke (null, new object[]{clip,startSample,loop});
+				}
+
+				public static void SetClipSamplePosition (AudioClip clip, int iSamplePosition)
+				{
+						SetClipSamplePosition_MethodInfo.Invoke (null, new object[] {
+								clip,
+								iSamplePosition
+						});
+				}
+
+				public static void StopAllClips ()
+				{
+						StopAllClips_MethodInfo.Invoke (null, null);
+				}
+
+				public static void UpdateAudio ()
+				{
+						UpdateAudio_MethodInfo.Invoke (null, null);
+				}
+
+				public static void SetListenerTransform (Transform t)
+				{
+						SetListenerTransform_MethodInfo.Invoke (null, new object[]{t});
+				}
+
+				public static Texture2D GetWaveForm (AudioClip clip, AssetImporter importer, int channel, float width, float height)
+				{
+						return (Texture2D)GetWaveForm__MethodInfo.Invoke (null, new object[] {
+								clip,
+								importer,
+								channel,
+								width,
+								height
+						});
+				}
+
+				public static void ClearWaveForm (AudioClip clip)
+				{
+						ClearWaveForm_MethodInfo.Invoke (null, new object[]{clip});
+				}
+
+
+
+
 		}
-
-
-		public static void SetClipSamplePosition (AudioClip clip, int iSamplePosition){
-			SetClipSamplePosition_MethodInfo.Invoke (null, new object[]{clip,iSamplePosition});
-		}
-
-		public static void StopAllClips (){
-			StopAllClips_MethodInfo.Invoke (null, null);
-		}
-
-		public static void UpdateAudio (){
-			UpdateAudio_MethodInfo.Invoke (null, null);
-		}
-
-
-		public static void SetListenerTransform (Transform t){
-			SetListenerTransform_MethodInfo.Invoke (null, new object[]{t});
-		}
-
-	
-
-		public static Texture2D GetWaveForm (AudioClip clip, AssetImporter importer, int channel, float width, float height){
-			return (Texture2D)GetWaveForm__MethodInfo.Invoke(null,new object[]{clip,importer,channel,width,height});
-		}
-
-		public static void ClearWaveForm (AudioClip clip){
-			ClearWaveForm_MethodInfo.Invoke (null, new object[]{clip});
-		}
-
-
-
-
-	}
 	
 	#endregion
 
 	#region AudioClipInspectorW
-	public class AudioClipInspectorW{
-
-		private static Type __RealType;
-
-
-		/// <summary>
-		/// Gets the type of the wrapped.
-		/// </summary>
-		/// <returns>The wrapped type.</returns>
-		public static Type GetWrappedType ()
+		public class AudioClipInspectorW
 		{
 
+				private static Type __RealType;
 
 
-			if (__RealType == null) {
-				Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-				__RealType = assembly.GetType ("UnityEditor.AudioClipInspector");
-			}
+				/// <summary>
+				/// Gets the type of the wrapped.
+				/// </summary>
+				/// <returns>The wrapped type.</returns>
+				public static Type GetWrappedType ()
+				{
+
+
+
+						if (__RealType == null) {
+								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
+								__RealType = assembly.GetType ("UnityEditor.AudioClipInspector");
+						}
 			
-			return __RealType;
+						return __RealType;
 			
-		}
+				}
 
-		public static Texture2D CombineWaveForms(Texture2D[] waveForms)
-		{
-			throw new NotImplementedException ();
-		}
+				public static Texture2D CombineWaveForms (Texture2D[] waveForms)
+				{
+						throw new NotImplementedException ();
+				}
 
-	}
+		}
 	#endregion
 
 

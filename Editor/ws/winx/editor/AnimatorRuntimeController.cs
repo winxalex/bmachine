@@ -77,7 +77,7 @@ namespace ws.winx.editor.extensions
 				
 
 								timeDelta = timeNormalized - animatorStateInfo.normalizedTime;
-								animator.Update (timeNormalized - animatorStateInfo.normalizedTime);
+								animator.Update (timeDelta);
 	
 				
 								_timeNormalizedPrev = timeNormalized;

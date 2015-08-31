@@ -1086,7 +1086,7 @@ namespace ws.winx.editor.extensions
 								positionRect.x += rectGlobal.x;
 				
 				
-				
+								if(displayNames!=null && displayNames.Length>hoverInx)
 								EditorGUILayoutEx.CustomTooltip (positionRect, displayNames [hoverInx] + "[" + Decimal.Round(Convert.ToDecimal(timeValues [hoverInx]),2) + "]");
 				
 						}

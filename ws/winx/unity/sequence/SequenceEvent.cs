@@ -10,7 +10,10 @@ namespace ws.winx.unity.sequence
 		[Serializable]
 		public class SequenceEvent:UnityEvent<Sequence>
 		{
-			
+				public double time;
+
+				
+
 
 
 		}

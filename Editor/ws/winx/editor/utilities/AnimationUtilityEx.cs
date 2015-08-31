@@ -99,7 +99,7 @@ namespace ws.winx.editor.utilities
 				}
 
 				/// <summary>
-				/// Gets the times.
+				/// Gets the times.(normalized 0-1)
 				/// </summary>
 				/// <returns>The times.</returns>
 				/// <param name="clip">Clip.</param>
