@@ -109,6 +109,10 @@ namespace ws.winx.unity.sequence
 
 				[NonSerialized]
 				public SequenceNode nodeSelected;
+
+				[NonSerialized]
+				public SequenceChannel channelSelected;
+
 				public SequenceWrap wrap = SequenceWrap.ClampForever;
 				public bool playOnStart = true;
 				public int frameRate = 30;

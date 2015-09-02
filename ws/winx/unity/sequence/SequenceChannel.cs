@@ -15,7 +15,8 @@ namespace ws.winx.unity.sequence
 				{
 						Animation,
 						Video,
-						Audio
+						Audio,
+						Particle
 				}
 
 				public string name;

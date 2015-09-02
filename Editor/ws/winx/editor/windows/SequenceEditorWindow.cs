@@ -187,7 +187,7 @@ namespace ws.winx.editor.windows
 
 						if (__sequenceChannelsReordableList == null) {
 
-								__sequenceChannelsReordableList = new ReorderableList (new List<SequenceNode> (), typeof(SequenceNode), true, false, false, false);
+								__sequenceChannelsReordableList = new ReorderableList (new List<SequenceChannel> (), typeof(SequenceChannel), true, false, false, false);
 								__sequenceChannelsReordableList.elementHeight = NODE_RECT_HEIGHT;
 								__sequenceChannelsReordableList.headerHeight = 2f;
 							
@@ -337,14 +337,15 @@ namespace ws.winx.editor.windows
 								Transform transformRoot = __sequence.nodeSelected.channel.target.transform;
 
 
-								Transform transformSpace=transformRoot;
+								Transform transformSpace = transformRoot;
 
 
-								if(transformRoot==transformFirstChild) transformSpace=null;//no need of transform from local to space defined with transformSpace
+								if (transformRoot == transformFirstChild)
+										transformSpace = null;//no need of transform from local to space defined with transformSpace
 
-				 			   AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
+								AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
 
-				positionsInKeyframe = AnimationUtilityEx.GetPositions (clip, AnimationUtility.CalculateTransformPath (transformFirstChild, transformRoot), transformSpace);
+								positionsInKeyframe = AnimationUtilityEx.GetPositions (clip, AnimationUtility.CalculateTransformPath (transformFirstChild, transformRoot), transformSpace);
 				
 						
 						
@@ -578,16 +579,9 @@ namespace ws.winx.editor.windows
 				static void onSelectSequenceChannelCallback (ReorderableList list)
 				{
 
-						//Debug.Log ("Select " + list.index);
-//			GameObject rootGameObject = (list.list as EditorClipBinding[]) [list.index].gameObject;
-//			GameObject rootFirstChildGameObject;
-//			
-//			if (rootGameObject != null && rootGameObject.transform.childCount>0 && (rootFirstChildGameObject = rootGameObject.transform.GetChild (0).gameObject) != null) {
-//				Selection.activeGameObject = rootFirstChildGameObject;
-//				
-//				
-//				EditorWindow.GetWindow<SearchableEditorWindow> ().Focus ();
-//			}
+						Debug.Log ("Select " + list.index);
+						__sequence.channelSelected = (list.list [list.index] as SequenceChannel);
+
 				}
 		
 				/// /////////////////////////////////////////////////////////////////////
@@ -1220,6 +1214,7 @@ namespace ws.winx.editor.windows
 								toolsMenu.AddItem (new GUIContent ("[New Sequence]"), false, CreateNewSequence);
 								toolsMenu.AddItem (new GUIContent ("[New Animation Clip]"), false, CreateNewAnimationClip);
 								toolsMenu.AddItem (new GUIContent ("[New Animation Controller]"), false, CreateRuntimeAnimatorController);
+								//toolsMenu.AddItem (new GUIContent ("[New Particle]"), false, CreateNewParticleSystemNode);
 
 
 								
@@ -1843,6 +1838,9 @@ namespace ws.winx.editor.windows
 														///!!!I don't know the way of  Sampling or timeshifting of MovieTexture 
 							
 							
+												} else if (channel.type == SequenceChannel.SequenceChannelType.Particle) {
+														ParticleSystem particleSystem = node.source as ParticleSystem;
+														particleSystem.Simulate ((float)__sequence.timeCurrent - node.startTime, true);
 												}
 										}
 								}
@@ -2345,6 +2343,8 @@ namespace ws.winx.editor.windows
 								//remove channel
 								__sequence.channels.Remove (sequenceChannel);
 								
+								if (sequenceChannel == __sequence.channelSelected)
+										__sequence.channelSelected = null;
 							
 								DestroyImmediate (sequenceChannel);
 
@@ -2418,7 +2418,8 @@ namespace ws.winx.editor.windows
 										return;
 								DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
 
-								Type draggedType;
+								Type type;
+								UnityEngine.Object component;
 				
 								if (evt.type == EventType.DragPerform) {
 										DragAndDrop.AcceptDrag ();
@@ -2426,116 +2427,143 @@ namespace ws.winx.editor.windows
 										if (EditorApplication.isPlaying) {
 												Debug.Log ("Can't add tween object in play mode. Stop the play mode and readd it.");
 										} else {
-												foreach (UnityEngine.Object dragged_object in DragAndDrop.objectReferences) {
+												foreach (UnityEngine.Object droppedObject in DragAndDrop.objectReferences) {
 
 														//Debug.Log ("Dropped object of type:" + dragged_object);
 														
 														//handle sound, video, animation clip
-														draggedType = dragged_object.GetType ();
+														type = droppedObject.GetType ();
 
 
 
-														if (draggedType == typeof(UnityEngine.AnimationClip) || 
-																draggedType == typeof(UnityEngine.AudioClip) ||
-																draggedType == typeof(UnityEngine.MovieTexture)) {
+														if (type == typeof(UnityEngine.AnimationClip) || 
+																type == typeof(UnityEngine.AudioClip) ||
+																type == typeof(UnityEngine.MovieTexture) ||
+																type == typeof(GameObject) && (component = ((GameObject)droppedObject).GetComponent<ParticleSystem> ()) != null) {
 
 																
 																Stop ();
 
-																//allow only dropping multiply items of same type in same channel
-																SequenceChannel sequenceChannel = null;
+								AddDropToNewOrExistingChannel (component != null ? component : droppedObject,component != null? component.GetType() : type, channel, Event.current.mousePosition);
+														}//draggedType check
+														else
+																Debug.LogWarning ("Unsuppored type. Audio,Video,Animaiton Clip or GameObject with ParticleSystem supported.");
+												}//
 
-																
-																if (channel < __sequence.channels.Count) {
-																		sequenceChannel = __sequence.channels [channel];
-
-																
-																} else {
-																		sequenceChannel = (SequenceChannel)ScriptableObject.CreateInstance<SequenceChannel> ();
-
-										
-																		if (draggedType == typeof(AnimationClip)) {
-
-																				//open Animation controller for the channel
-																				string path = EditorUtility.OpenFilePanel (
-																					"Select AnimaitonController",
-																					"Assets",
-																					"controller");
-																				
-																				if (String.IsNullOrEmpty (path))
-																						continue;
-																					
-																				sequenceChannel.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path), typeof(RuntimeAnimatorController)) as RuntimeAnimatorController;
-										                                                                        
-																				sequenceChannel.name = "Animation";
-
-																		} else if (draggedType == typeof(AudioClip)) {
-																				sequenceChannel.name = "Audio";
-																				sequenceChannel.type = SequenceChannel.SequenceChannelType.Audio;
-																		} else if (draggedType == typeof(MovieTexture)) {
-																				sequenceChannel.name = "Video";
-																				sequenceChannel.type = SequenceChannel.SequenceChannelType.Video;
-																		}
-
-																		sequenceChannel.sequence = __sequence;
-																		__sequence.channels.Add (sequenceChannel);
-																}
-
-																if (sequenceChannel.nodes.Count > 0) {
-																		if (sequenceChannel.nodes [0].source.GetType () != draggedType) {
-																				Debug.LogWarning ("You can have only same type nodes in same channel");	
-																				continue;
-																		}
-																}
-
-
-																//Vector2
-																//TODO current logic prevents overlapping on drop (might be ehnaced to allow transition overlap in Animation's node to some meassure)
-																//and if they overlapp move start time to fit
-																SequenceNode node = CreateNewSequenceNode (Event.current.mousePosition, dragged_object, channel);
-														
-																
-																if (node != null) {
-																		sequenceChannel.nodes.Insert (node.index, node);
-																		
-																		int nodesCount = sequenceChannel.nodes.Count;
-
-																		//reindex nodes after insert
-																		for (int i=node.index+1; i<nodesCount; i++)
-																				sequenceChannel.nodes [i].index++;
-
-
-
-																		Stop ();
-																		//AnimationMode.StopAnimationMode ();//stop animation mode cos target can be "paused" in some point in time
-																		///and Reset channel will fail
-																		__sequence.timeCurrent = 0f;
-
-																		//be sure that while droping new node paused target is reseted to Orginal position
-																		ResetChannelTarget (sequenceChannel);
-
-																		if (!AnimationMode.InAnimationMode ())
-																				AnimationMode.StartAnimationMode ();
-																		ReOffsetNodesAnimation (sequenceChannel);//Now with new node added
-																		AnimationMode.StopAnimationMode ();
-
-																		ResetChannelTarget (sequenceChannel);
-									
-																}
-								
-																	
-														
-
-																
-																__nodeSelected = node;
-														}
-												}
 												EditorUtility.SetDirty (__sequence);
 										}
 								}
 								break;
 						}
 			
+				}
+
+
+				
+				/// <summary>
+				/// Adds the source(drop object) to new or existing channel.
+				/// //allow only dropping multiply items of same type in channel
+				/// </summary>
+				/// <param name="source">Source.</param>
+				/// <param name="type">Type.</param>
+				/// <param name="channel">Channel ord</param>
+				/// <param name="pos">Position.</param>
+				private static void AddDropToNewOrExistingChannel (UnityEngine.Object droppedObject, Type type, int channel, Vector2 pos)
+				{
+						SequenceChannel sequenceChannel = null;
+						if (__sequence.channels.Count > channel)
+								sequenceChannel = __sequence.channels [channel];
+
+						AddDropToNewOrExistingChannel (droppedObject, type, sequenceChannel, pos);
+				}
+
+				private static void AddDropToNewOrExistingChannel (UnityEngine.Object droppedObject, Type type, SequenceChannel sequenceChannel, Vector2 pos)
+				{
+
+
+						if (sequenceChannel == null) {
+								sequenceChannel = (SequenceChannel)ScriptableObject.CreateInstance<SequenceChannel> ();
+				
+				
+								if (type == typeof(AnimationClip)) {
+					
+										//open Animation controller for the channel
+										string path = EditorUtility.OpenFilePanel (
+						"Select AnimaitonController",
+						"Assets",
+						"controller");
+					
+										if (String.IsNullOrEmpty (path))
+												return;
+					
+										sequenceChannel.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path), typeof(RuntimeAnimatorController)) as RuntimeAnimatorController;
+					
+										sequenceChannel.name = "Animation";
+					
+								} else if (type == typeof(AudioClip)) {
+										sequenceChannel.name = "Audio";
+										sequenceChannel.type = SequenceChannel.SequenceChannelType.Audio;
+								} else if (type == typeof(MovieTexture)) {
+										sequenceChannel.name = "Video";
+										sequenceChannel.type = SequenceChannel.SequenceChannelType.Video;
+								} else if (type == typeof(ParticleSystem)) {
+										sequenceChannel.name = "Particle";
+										sequenceChannel.type = SequenceChannel.SequenceChannelType.Particle;
+								}
+				
+								sequenceChannel.sequence = __sequence;
+								__sequence.channels.Add (sequenceChannel);
+						} else
+			
+			if (sequenceChannel.nodes.Count > 0) {
+								if (sequenceChannel.nodes [0].source.GetType () != type) {
+										Debug.LogWarning ("You can have only same type nodes in same channel");	
+										return;
+								}
+						}
+			
+			
+						//Vector2
+						//TODO current logic prevents overlapping on drop (might be ehnaced to allow transition overlap in Animation's node to some meassure)
+						//and if they overlapp move start time to fit
+						SequenceNode node = CreateNewSequenceNode (pos, droppedObject, sequenceChannel);
+			
+			
+						if (node != null) {
+								sequenceChannel.nodes.Insert (node.index, node);
+				
+								int nodesCount = sequenceChannel.nodes.Count;
+				
+								//reindex nodes after insert
+								for (int i=node.index+1; i<nodesCount; i++)
+										sequenceChannel.nodes [i].index++;
+				
+				
+				
+								Stop ();
+								//AnimationMode.StopAnimationMode ();//stop animation mode cos target can be "paused" in some point in time
+								///and Reset channel will fail
+								__sequence.timeCurrent = 0f;
+				
+								//be sure that while droping new node paused target is reseted to Orginal position
+								ResetChannelTarget (sequenceChannel);
+				
+								if (!AnimationMode.InAnimationMode ())
+										AnimationMode.StartAnimationMode ();
+								ReOffsetNodesAnimation (sequenceChannel);//Now with new node added
+								AnimationMode.StopAnimationMode ();
+				
+								ResetChannelTarget (sequenceChannel);
+				
+						}
+			
+			
+			
+			
+			
+						__nodeSelected = node;
+
+
 				}
 
 							
@@ -2547,7 +2575,7 @@ namespace ws.winx.editor.windows
 				/// <param name="pos">Position.</param>
 				/// <param name="source">Source.</param>
 				/// <param name="channel">Channel.</param>
-				private SequenceNode CreateNewSequenceNode (Vector2 pos, UnityEngine.Object source, int channelOrd)
+				private static SequenceNode CreateNewSequenceNode (Vector2 pos, UnityEngine.Object source, SequenceChannel sequenceChannel)
 				{
 
 
@@ -2560,7 +2588,7 @@ namespace ws.winx.editor.windows
 						startTime = TimeAreaW.SnapTimeToWholeFPS (__timeAreaW.PixelToTime (pos.x, __timeAreaW.rect), __sequence.frameRate);
 						duration = TimeAreaW.SnapTimeToWholeFPS (duration, __sequence.frameRate);
 
-						SequenceChannel sequenceChannel = __sequence.channels [channelOrd];
+						
 
 						//prevent intersection on Drop
 						if (sequenceChannel.nodes.Exists (itm => (itm.startTime < startTime && startTime < itm.startTime + itm.duration) || (itm.startTime < startTime + duration && startTime + duration < itm.startTime + itm.duration)))
@@ -2636,7 +2664,103 @@ namespace ws.winx.editor.windows
 						return node;
 				}
 
+				private static void CreateRuntimeAnimatorController ()
+				{
+						string path = EditorUtility.SaveFilePanel (
+				"Create AnimaitonController",
+				"Assets",
+				"",
+				"controller");
+			
+						if (!String.IsNullOrEmpty (path)) {
+				
+				
+								//create Controller
+								UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+				
+				
+						}
+			
+			
+			
+				}
+		
+		
+		
+		
+				
+					
+					
+					
+				/// <summary>
+				/// Creates the new animation clip.
+				/// </summary>
+				private static void CreateNewAnimationClip ()
+				{
+					
+						string path = EditorUtility.SaveFilePanel (
+						"Create New Clip",
+						"Assets",
+						"",
+						"anim");
+					
+						if (!String.IsNullOrEmpty (path)) {
+						
+								AnimationClip clip = new AnimationClip ();//UnityEditor.Animations.AnimatorController.AllocateAnimatorClip ();
+								clip.name = Path.GetFileNameWithoutExtension (path);		
+								AssetDatabase.CreateAsset (clip, AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+								AssetDatabase.SaveAssets ();
+								clip.frameRate = __sequence.frameRate;
 
+
+								//add to current channel after last node
+								Vector2 pos = Vector2.zero;
+								if (__sequence.channelSelected != null && __sequence.channelSelected.type == SequenceChannel.SequenceChannelType.Animation) {
+										SequenceNode node = __sequence.channelSelected.nodes [__sequence.channelSelected.nodes.Count - 1];
+										pos.x = __timeAreaW.TimeToPixel (node.startTime + node.duration + 1, __timeAreaW.rect);
+									
+								} else {
+										pos.x = __timeAreaW.TimeToPixel (1f, __timeAreaW.rect);
+								}
+								
+								AddDropToNewOrExistingChannel (clip, typeof(AnimationClip), __sequence.channelSelected, pos);
+
+						
+						}
+					
+				}
+				
+				
+				
+				
+				
+				
+				////   CREATE NEW SEQUENCE GAME OBJECT WITH SEQUENCE BEHAVIOUR ////
+				/// <summary>
+				/// Creates the new sequence.
+				/// </summary>
+				private void CreateNewSequence ()
+				{
+					
+						List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
+						int count = 0;
+					
+						while (sequences.Find(x=>x.name == "Sequence "+count.ToString())!=null) {
+								count++;
+						}
+					
+						__sequenceGameObject = new GameObject ("Sequence " + count.ToString ());
+						__sequence = __sequenceGameObject.AddComponent<Sequence> ();
+					
+					
+						Selection.activeGameObject = __sequenceGameObject;
+				}
+				
+
+
+
+
+				///////////////// SEQUENCE NODE START/END HANDLES /////////////////
 
 
 				/// <summary>
@@ -2707,6 +2831,10 @@ namespace ws.winx.editor.windows
 				}
 
 
+
+
+
+
 				/// <summary>
 				/// Ons the sequence end.
 				/// </summary>
@@ -2728,86 +2856,7 @@ namespace ws.winx.editor.windows
 			
 				}
 
-				private static void CreateRuntimeAnimatorController ()
-				{
-						string path = EditorUtility.SaveFilePanel (
-							"Create AnimaitonController",
-							"Assets",
-							"",
-							"controller");
-						
-						if (!String.IsNullOrEmpty (path)) {
-							
-							
-								//create Controller
-								UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
-							
-							
-						}
-						
-						
-				
-				}
-		
 			
-
-			
-				
-
-
-
-
-				/// <summary>
-				/// Creates the new animation clip.
-				/// </summary>
-				private static void CreateNewAnimationClip ()
-				{
-
-						string path = EditorUtility.SaveFilePanel (
-					"Create New Clip",
-					"Assets",
-					"",
-					"anim");
-
-						if (!String.IsNullOrEmpty (path)) {
-				
-								AnimationClip clip = new AnimationClip ();//UnityEditor.Animations.AnimatorController.AllocateAnimatorClip ();
-								clip.name = Path.GetFileNameWithoutExtension (path);		
-								AssetDatabase.CreateAsset (clip, AssetDatabaseUtility.AbsoluteUrlToAssets (path));
-								AssetDatabase.SaveAssets ();
-								clip.frameRate = __sequence.frameRate;
-					
-						}
-		
-				}
-
-	
-
-					
-		
-		
-				////   CREATE NEW SEQUENCE GAME OBJECT WITH SEQUENCE BEHAVIOUR ////
-				/// <summary>
-				/// Creates the new sequence.
-				/// </summary>
-				private void CreateNewSequence ()
-				{
-						
-						List<Sequence> sequences = GameObjectUtilityEx.FindAllContainComponentOfType<Sequence> ();
-						int count = 0;
-
-						while (sequences.Find(x=>x.name == "Sequence "+count.ToString())!=null) {
-								count++;
-						}
-
-						__sequenceGameObject = new GameObject ("Sequence " + count.ToString ());
-						__sequence = __sequenceGameObject.AddComponent<Sequence> ();
-
-
-						Selection.activeGameObject = __sequenceGameObject;
-				}
-
-
 
 				/// <summary>
 				/// Gets the audio clip texture.

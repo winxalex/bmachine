@@ -69,6 +69,29 @@ namespace ws.winx.unity.sequence
 										d = (source as MovieTexture).duration;
 								
 								
+								} else if (source is ParticleSystem) {
+										ParticleSystem particleSystemRoot = (source as ParticleSystem);
+										particleSystemRoot.loop = false;
+										//particleSystemRoot.enableEmission = false;
+										particleSystemRoot.playOnAwake = false;
+										particleSystemRoot.Stop ();
+										Transform ts = particleSystemRoot.transform;
+										ParticleSystem[] particleSystems = ts.GetComponentsInChildren<ParticleSystem> ();
+										int particleSystemsNum = particleSystems.Length;
+										float maxDuration = particleSystemRoot.duration + (particleSystemRoot.startDelay + particleSystemRoot.startLifetime);
+										float currentParticleSystemDuration = 0f;
+										for (int i=0; i<particleSystemsNum; i++) {
+												//reuse particleSystemRoot variable
+												particleSystemRoot = particleSystems [i];
+												particleSystemRoot.loop = false;
+												//particleSystemRoot.enableEmission = false;
+												particleSystemRoot.playOnAwake = false;
+												particleSystemRoot.Stop ();
+												currentParticleSystemDuration = particleSystemRoot.duration + (particleSystemRoot.startDelay + particleSystemRoot.startLifetime);
+												if (currentParticleSystemDuration > maxDuration)
+														maxDuration = currentParticleSystemDuration;
+										}
+										d = maxDuration;
 								}
 
 								float frameRate = this.channel.sequence.frameRate;
@@ -205,10 +228,13 @@ namespace ws.winx.unity.sequence
 
 
 										
+										}else if(source is ParticleSystem){
+											(source as ParticleSystem).Play();
 										}
 
 								}
-
+						
+								//TODO Check if this is nessery
 								if (this.fbbikAnimatedValues != null)
 										this.fbbikAnimatedValues.Initate ();
 								
@@ -219,7 +245,7 @@ namespace ws.winx.unity.sequence
 								Debug.LogWarning ("No target set on channel " + this.channel.name);
 						}
 
-//TODO put events with drag and drop handlers
+
 
 						
 				}
@@ -274,6 +300,8 @@ namespace ws.winx.unity.sequence
 								
 							
 								
+										}else if(source is ParticleSystem){
+											(source as ParticleSystem).Stop();
 										}
 							
 							
