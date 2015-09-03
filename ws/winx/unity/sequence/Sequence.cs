@@ -136,7 +136,7 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
-				
+		public bool testBool;
 
 
 				/// <summary>
@@ -207,9 +207,17 @@ namespace ws.winx.unity.sequence
 				/// <param name="t">/// The "time" in global time space (Time.time or EditorApplication.timeSinceStartup)</param>
 				public void UpdateSequence (double t)
 				{
+
+		
+
+
+
 						if (_pause || _stop) {
 								return;			
 						}
+
+
+						
 			
 						//Debug.Log ("Time current:" + timeCurrent+"Time.time"+Time.time+" _timeAtEnd:"+_timeAtEnd);
 			
@@ -261,15 +269,24 @@ namespace ws.winx.unity.sequence
 						_eventCurrentIndex=i;
 					}
 				}
-
+				/////////////////////////////////////////
 				
 				_timeLast = t;
 					
+
+				///////////////////////////// Update Nodes ////////////////////////
 								foreach (SequenceChannel channel in this.channels)
 										foreach (SequenceNode node in channel.nodes) {
 												node.UpdateNode (timeCurrent);		
 										}
 						}
+				///////////////////////////////////////////////////////////////////
+
+
+			
+
+
+
 				}
 
 
@@ -283,6 +300,27 @@ namespace ws.winx.unity.sequence
 
 				}
 
+		void UpdateMe ()
+		{
+			
+			SequenceChannel channel1 = this.channels[0];
+			GameObject target = GameObject.Find ("emitter");// channel1.target;
+			
+			ParticleSystem system = target.GetComponent<ParticleSystem> ();
+			if (testBool && !system.isPlaying
+			    
+			    ) {
+				
+				//system.Stop();
+				system.Simulate(0f);
+				system.Play ();
+				Debug.Log("play "+system.isPlaying+
+				          " "+system.IsAlive()
+				          );
+			}else Debug.Log("Update"+system.isPlaying+
+			                " "+system.IsAlive()
+			                );
+		}
 
 				/// <summary>
 				/// Update this instance.
@@ -290,9 +328,18 @@ namespace ws.winx.unity.sequence
 				/// </summary>
 				void Update ()
 				{
+
+
+			//UpdateMe ();
+		
+
+
 						if (_pause || _stop) {
-								return;			
+							return;			
 						}
+
+
+
 
 
 					

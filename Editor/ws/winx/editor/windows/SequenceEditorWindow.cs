@@ -151,7 +151,7 @@ namespace ws.winx.editor.windows
 
 
 				/// <summary>
-				/// FDragRaises the enable event.
+				/// Hanlde the enable event raized by Mono.
 				/// </summary>
 				private void OnEnable ()
 				{
@@ -603,7 +603,7 @@ namespace ws.winx.editor.windows
 
 								///TODO check this if not blocking playmode
 				 
-
+								Stop();
 				
 								__isPlayMode = true;
 				 
@@ -641,6 +641,7 @@ namespace ws.winx.editor.windows
 
 				void LateUpdate ()
 				{
+						if(!EditorApplication.isPlaying && __sequence!=null && __sequence.isPlaying)
 						__sequence.LateUpdateSequence ();
 
 				}
@@ -661,7 +662,7 @@ namespace ws.winx.editor.windows
 		
 						if (!EditorApplication.isPlaying && (__sequence != null) && SequenceEditorWindow.__sequence.isPlaying) {//?TODO ?? enters here even isPlaying is false		
 							
-								
+				Debug.Log("Update sequence from editor");
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 
 
@@ -892,6 +893,10 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				private void OnGUI ()
 				{
+
+						if (EditorApplication.isPlaying)
+								return;
+
 						if (__eventMarker == null)
 								__eventMarker = EditorGUILayoutEx.ANIMATION_STYLES.eventMarker;
 						

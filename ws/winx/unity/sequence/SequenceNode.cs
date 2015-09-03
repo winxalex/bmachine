@@ -35,6 +35,9 @@ namespace ws.winx.unity.sequence
 				public float startTime;
 				float _timeLocal;
 				float _timeNormalized;
+				float[] _particleEmitTimeCurrent;
+				float[] _particleEmitTime;
+				ParticleSystem[] _particleSystems;
 				FBBIKAnimatedValues fbbikAnimatedValues;
 				
 
@@ -47,58 +50,66 @@ namespace ws.winx.unity.sequence
 				/// <summary>
 				/// The duration in [s] 
 				/// </summary>
-				
+				float _duration = float.NaN;
 
 				public float duration {
 						get {
 
-								float d = 5f;//default 5s
+								
 
 								//return _duration;
 								if (source is AnimationClip) {
 
 								
 
-										d = (source as AnimationClip).length;
+										_duration = (source as AnimationClip).length;
 								
 								} else if (source is AudioClip) {
 								
-										d = (source as AudioClip).length;
+										_duration = (source as AudioClip).length;
 								} else if (source is MovieTexture) {
 								
-										d = (source as MovieTexture).duration;
+										_duration = (source as MovieTexture).duration;
 								
 								
 								} else if (source is ParticleSystem) {
-										ParticleSystem particleSystemRoot = (source as ParticleSystem);
-										particleSystemRoot.loop = false;
-										//particleSystemRoot.enableEmission = false;
-										particleSystemRoot.playOnAwake = false;
-										particleSystemRoot.Stop ();
-										Transform ts = particleSystemRoot.transform;
-										ParticleSystem[] particleSystems = ts.GetComponentsInChildren<ParticleSystem> ();
-										int particleSystemsNum = particleSystems.Length;
-										float maxDuration = particleSystemRoot.duration + (particleSystemRoot.startDelay + particleSystemRoot.startLifetime);
-										float currentParticleSystemDuration = 0f;
-										for (int i=0; i<particleSystemsNum; i++) {
-												//reuse particleSystemRoot variable
-												particleSystemRoot = particleSystems [i];
-												particleSystemRoot.loop = false;
-												//particleSystemRoot.enableEmission = false;
-												particleSystemRoot.playOnAwake = false;
-												particleSystemRoot.Stop ();
-												currentParticleSystemDuration = particleSystemRoot.duration + (particleSystemRoot.startDelay + particleSystemRoot.startLifetime);
-												if (currentParticleSystemDuration > maxDuration)
-														maxDuration = currentParticleSystemDuration;
+
+										//enable update in editor or if not initialized
+										if (!Application.isPlaying || float.IsNaN (_duration)) {
+												ParticleSystem particleSystemCurrent = (source as ParticleSystem);
+										
+												Transform ts = particleSystemCurrent.transform;
+												_particleSystems = ts.GetComponentsInChildren<ParticleSystem> ();
+										
+												int particleSystemsNum = _particleSystems.Length;
+												_particleEmitTime = new float[particleSystemsNum];
+												_particleEmitTimeCurrent = new float[particleSystemsNum];
+
+												float maxDuration = 0f;
+												float particleSystemCurrentDuration = 0f;
+												for (int i=0; i<particleSystemsNum; i++) {
+												
+														//reuse particleSystemRoot variable
+														particleSystemCurrent = _particleSystems [i];
+														_particleEmitTime [i] = 1f / particleSystemCurrent.emissionRate;
+														particleSystemCurrent.loop = false;
+														//particleSystemRoot.enableEmission = false;
+														particleSystemCurrent.playOnAwake = false;
+														particleSystemCurrent.Stop ();
+														particleSystemCurrentDuration = particleSystemCurrent.duration + (particleSystemCurrent.startDelay + particleSystemCurrent.startLifetime);
+														if (particleSystemCurrentDuration > maxDuration)
+																maxDuration = particleSystemCurrentDuration;
+												}
+												_duration = maxDuration;
 										}
-										d = maxDuration;
+										
 								}
 
 								float frameRate = this.channel.sequence.frameRate;
 
-								d = Mathf.Round (d * frameRate) / frameRate;
+								_duration = Mathf.Round (_duration * frameRate) / frameRate;
 
-								return d;
+								return _duration;
 						}
 						
 				}
@@ -115,7 +126,21 @@ namespace ws.winx.unity.sequence
 
 				public UnityEngine.Object source;
 				public int stateNameHash;
+				
+				void Emit (float time)
+				{
+						int particelSystemsNum = _particleSystems.Length;
+						ParticleSystem particleSystemCurrent = null;
+						for (int i=0; i<particelSystemsNum; i++) {
+								particleSystemCurrent = _particleSystems [i];
 
+								if (time < particleSystemCurrent.duration + particleSystemCurrent.startDelay + particleSystemCurrent.startLifetime && _particleEmitTimeCurrent [i] < time) {				
+										//Debug.Log("time:"+time+" emit>"+_particleEmitTimeCurrent[i]);		
+										_particleSystems [i].Emit (1);
+										_particleEmitTimeCurrent [i] += _particleEmitTime [i];//increase the emit time (ex. rate=1[sec]/10particles => every 0.1s emit
+								}
+						}
+				}
 
 
 				/// <summary>
@@ -228,9 +253,24 @@ namespace ws.winx.unity.sequence
 
 
 										
-										}else if(source is ParticleSystem){
-											(source as ParticleSystem).Play();
+										} else if (source is ParticleSystem) {
+
+
+												ParticleSystem particalSystem = (source as ParticleSystem);
+
+												if (!particalSystem.isPlaying) {
+
+														//int d=this.duration;
+														particalSystem.Stop ();
+
+														//Emit (0f);
+														//(source as ParticleSystem).Play();//doens't work
+
+
+														Debug.Log ("try to run particles");
+												}
 										}
+					
 
 								}
 						
@@ -300,8 +340,13 @@ namespace ws.winx.unity.sequence
 								
 							
 								
-										}else if(source is ParticleSystem){
-											(source as ParticleSystem).Stop();
+										} else if (source is ParticleSystem) {
+												int particleSystemNum = _particleSystems.Length;
+												for (int i=0; i<particleSystemNum; i++) {
+														_particleSystems [i].Stop ();
+														_particleEmitTimeCurrent [i] = _particleEmitTime [i];
+												}
+												//(source as ParticleSystem).Stop();
 										}
 							
 							
@@ -320,6 +365,15 @@ namespace ws.winx.unity.sequence
 				{
 						if (onUpdate != null)
 								onUpdate.Invoke (this);
+
+
+						if (source is ParticleSystem) {
+								
+								Emit (_timeLocal);
+
+						}
+							
+						
 				}
 
 				public void LateUpdateNode (double timeCurrent)
@@ -338,6 +392,9 @@ namespace ws.winx.unity.sequence
 				{
 						_timeLocal = ((float)time - startTime);
 						_timeNormalized = (_timeLocal / duration);
+
+
+
 
 			              
 						// 
