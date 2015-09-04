@@ -2147,6 +2147,28 @@ namespace ws.winx.editor
 				private static ConstructorInfo method_ctor;
 				private	static MethodInfo EndViewGUI_MethodInfo;
 				private	static MethodInfo BeginViewGUI_MethodInfo;
+				private static MethodInfo __DrawingToViewTransformVector_MethodInfo;
+
+				public static MethodInfo DrawingToViewTransformVector_MethodInfo {
+						get {
+								if (__DrawingToViewTransformVector_MethodInfo == null)
+										__DrawingToViewTransformVector_MethodInfo = __RealType.BaseType.GetMethod ("DrawingToViewTransformVector", new Type[]{typeof(Vector2)});
+
+								return __DrawingToViewTransformVector_MethodInfo;
+						}
+				}
+
+				private static MethodInfo __Zoom_MethodInfo;
+
+				public static MethodInfo Zoom_MethodInfo {
+						get {
+								if (__Zoom_MethodInfo == null)
+										__Zoom_MethodInfo = __RealType.BaseType.GetMethod ("Zoom", BindingFlags.NonPublic | BindingFlags.Instance);
+
+								return __Zoom_MethodInfo;
+						}
+				}
+
 				private static MethodInfo __FrameToPixel_MethodInfo;
 
 				public static MethodInfo FrameToPixel_MethodInfo {
@@ -2233,17 +2255,49 @@ namespace ws.winx.editor
 				static PropertyInfo PropertyInfo_vRangeMin;
 				static PropertyInfo PropertyInfo_vRangeLocked;
 				static PropertyInfo PropertyInfo_hRangeLocked;
-				static PropertyInfo __PropertyInfo_scale;
 
-				static PropertyInfo PropertyInfo_scale {
+
+				//m_Translation
+
+				private static FieldInfo __translation_FieldInfo;
+		
+				static FieldInfo translation_FieldInfo {
 						get {
-								if (__PropertyInfo_scale == null)
-										__PropertyInfo_scale = __RealType.GetProperty ("scale");
-						
-						
-								return __PropertyInfo_scale;
+								if (__translation_FieldInfo == null)
+										__translation_FieldInfo = __RealType.BaseType.GetField ("m_Translation", BindingFlags.Instance | BindingFlags.NonPublic);
+				
+				
+								return __translation_FieldInfo;
 						}
 				}
+
+				//m_Scale
+
+				private static FieldInfo __scale_FieldInfo;
+			
+				static FieldInfo scale_FieldInfo {
+						get {
+								if (__scale_FieldInfo == null)
+										__scale_FieldInfo = __RealType.BaseType.GetField ("m_Scale", BindingFlags.Instance | BindingFlags.NonPublic);
+									
+									
+								return __scale_FieldInfo;
+						}
+				}
+
+
+
+//				static PropertyInfo __PropertyInfo_scale;
+//
+//				static PropertyInfo PropertyInfo_scale {
+//						get {
+//								if (__PropertyInfo_scale == null)
+//										__PropertyInfo_scale = __RealType.GetProperty ("scale");
+//						
+//						
+//								return __PropertyInfo_scale;
+//						}
+//				}
 
 				static PropertyInfo __PropertyInfo_hTicks;
 
@@ -2316,9 +2370,14 @@ namespace ws.winx.editor
 						}
 				}
 
+				public Vector2 translation {
+						get{ return (Vector2)translation_FieldInfo.GetValue (__instance);}
+						set{ translation_FieldInfo.SetValue (__instance, value);}
+				}
+
 				public Vector2 scale {
-					get{ return (Vector2)PropertyInfo_scale.GetValue (__instance, null);}
-					
+						get{ return (Vector2)scale_FieldInfo.GetValue (__instance);}
+						set{ scale_FieldInfo.SetValue (__instance, value);}
 				}
 		
 				public Rect rect {
@@ -2483,12 +2542,46 @@ namespace ws.winx.editor
 						
 				}
 
+
+				/// <summary>
+				/// CUSTOM FUNCTIONS
+				/// </summary>
+		 
+
+				/// <summary>
+				/// Focus the specified rect.(currenlty only Xpos is implemented)
+				/// </summary>
+				/// <param name="rect">Rect.</param>
+				public void Focus (Rect rect)
+				{
+
+						//find ratio of focus rect inside timeArea rect
+						float ratio = this.rect.width / rect.width;
+
+						//find pos offset
+						float diff = (rect.x - this.rect.x);
+
+						this.translation = new Vector2 ((this.translation.x - diff) * ratio, this.translation.y);
+						this.scale = new Vector2 (this.scale.x * ratio, this.scale.y);
+
+				}
+
 				public static float SnapTimeToWholeFPS (float time, float frameRate)
 				{
 						if (frameRate == 0f) {
 								return time;
 						}
 						return Mathf.Round (time * frameRate) / frameRate;
+				}
+
+				public Vector2 DrawingToViewTransformVector (Vector2 lhs)
+				{
+						return (Vector2)DrawingToViewTransformVector_MethodInfo.Invoke (__instance, new object[]{lhs});
+				}
+
+				public void Zoom (Vector2 zoomAround, bool scrollwhell)
+				{
+						Zoom_MethodInfo.Invoke (__instance, new object[]{zoomAround,scrollwhell});
 				}
 
 				public float TimeToPixel (float time, Rect rect)

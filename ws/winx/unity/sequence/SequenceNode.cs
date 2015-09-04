@@ -32,7 +32,7 @@ namespace ws.winx.unity.sequence
 				/// <summary>
 				/// The start time in Frames
 				/// </summary>
-				public float startTime;
+				public float timeStart;
 				float _timeLocal;
 				float _timeNormalized;
 				float[] _particleEmitTimeCurrent;
@@ -390,7 +390,7 @@ namespace ws.winx.unity.sequence
 
 				public void UpdateNode (double time)
 				{
-						_timeLocal = ((float)time - startTime);
+						_timeLocal = ((float)time - timeStart);
 						_timeNormalized = (_timeLocal / duration);
 
 

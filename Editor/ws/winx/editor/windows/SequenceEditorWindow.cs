@@ -195,6 +195,7 @@ namespace ws.winx.editor.windows
 							
 								__sequenceChannelsReordableList.onSelectCallback = onSelectSequenceChannelCallback;
 								__sequenceChannelsReordableList.onReorderCallback = onReorderSequenceChannelCallback;
+			
 					
 					
 						}
@@ -247,7 +248,7 @@ namespace ws.winx.editor.windows
 				
 				
 								//make animation jump to selected keyframe represented by Handle
-								__sequence.timeCurrent = __sequence.nodeSelected.startTime + AnimationUtilityEx.GetTimeAt (clip, keyframeInx, AnimationUtilityEx.EditorCurveBinding_PosX);
+								__sequence.timeCurrent = __sequence.nodeSelected.timeStart + AnimationUtilityEx.GetTimeAt (clip, keyframeInx, AnimationUtilityEx.EditorCurveBinding_PosX);
 
 
 								if (!__sequence.isRecording) { 
@@ -400,14 +401,14 @@ namespace ws.winx.editor.windows
 						
 						
 
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);			
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);
+						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.timeStart, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);			
+						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);
 
 			
 			
-						float startTimePos = __timeAreaW.TimeToPixel (node.startTime + node.transition, rect);
+						float startTimePos = __timeAreaW.TimeToPixel (node.timeStart + node.transition, rect);
 
-						float endTimePos = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect);
+						float endTimePos = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect);
 
 						float startTransitionTimePos = 0f;
 //						SequenceNode nodePrev = null;
@@ -427,7 +428,7 @@ namespace ws.winx.editor.windows
 								Color colorSave = GUI.color;
 								GUI.color = Color.red;
 
-								startTransitionTimePos = __timeAreaW.TimeToPixel (node.startTime, rect);
+								startTransitionTimePos = __timeAreaW.TimeToPixel (node.timeStart, rect);
 								
 								Rect transitionRect = new Rect (startTransitionTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, startTimePos - startTransitionTimePos, NODE_RECT_HEIGHT);
 				
@@ -603,7 +604,7 @@ namespace ws.winx.editor.windows
 
 								///TODO check this if not blocking playmode
 				 
-								Stop();
+								Stop ();
 				
 								__isPlayMode = true;
 				 
@@ -630,7 +631,7 @@ namespace ws.winx.editor.windows
 
 						if (node != null && node.channel.target != null && node.channel.type == SequenceChannel.SequenceChannelType.Animation) {
 
-								modifications.Concat (AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, TimeAreaW.SnapTimeToWholeFPS ((float)(__sequence.timeCurrent - node.startTime), __sequence.frameRate)));
+								modifications.Concat (AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, TimeAreaW.SnapTimeToWholeFPS ((float)(__sequence.timeCurrent - node.timeStart), __sequence.frameRate)));
 
 
 						}
@@ -641,8 +642,8 @@ namespace ws.winx.editor.windows
 
 				void LateUpdate ()
 				{
-						if(!EditorApplication.isPlaying && __sequence!=null && __sequence.isPlaying)
-						__sequence.LateUpdateSequence ();
+						if (!EditorApplication.isPlaying && __sequence != null && __sequence.isPlaying)
+								__sequence.LateUpdateSequence ();
 
 				}
 
@@ -662,7 +663,7 @@ namespace ws.winx.editor.windows
 		
 						if (!EditorApplication.isPlaying && (__sequence != null) && SequenceEditorWindow.__sequence.isPlaying) {//?TODO ?? enters here even isPlaying is false		
 							
-				Debug.Log("Update sequence from editor");
+								Debug.Log ("Update sequence from editor");
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 
 
@@ -694,7 +695,7 @@ namespace ws.winx.editor.windows
 								if (ch.type == SequenceChannel.SequenceChannelType.Video) {
 										ch.nodes.ForEach (itm => {
 
-												if (timeCurrent > itm.startTime && timeCurrent < itm.startTime + itm.duration) 
+												if (timeCurrent > itm.timeStart && timeCurrent < itm.timeStart + itm.duration) 
 														(itm.source as MovieTexture).Pause ();
 												else
 														(itm.source as MovieTexture).Stop ();
@@ -941,7 +942,7 @@ namespace ws.winx.editor.windows
 				static void onKeyframeEdit (TimeLineArgs<float> args)
 				{
 						if (__sequence != null && __sequence.nodeSelected != null) {
-								__sequence.timeCurrent = __sequence.nodeSelected.startTime + args.selectedValue * __sequence.nodeSelected.duration;
+								__sequence.timeCurrent = __sequence.nodeSelected.timeStart + args.selectedValue * __sequence.nodeSelected.duration;
 								if (!__sequence.isRecording) {
 										StartRecording ();
 
@@ -1156,6 +1157,24 @@ namespace ws.winx.editor.windows
 										onEventAdd ();
 														
 								}
+
+								
+			
+
+								if (GUILayout.Button ("F",EditorStyles.toolbarButton)) {
+										float sequenceTimeStartPositionX = 0f;
+										float sequenceTimeEndPositionX = 0f;
+
+										sequenceTimeStartPositionX = __timeAreaW.TimeToPixel ((float)__sequence.timeStart, __timeAreaW.rect);
+										sequenceTimeEndPositionX = __timeAreaW.TimeToPixel ((float)__sequence.timeStart + __sequence.duration, __timeAreaW.rect);
+
+										float sequenceWidth = sequenceTimeEndPositionX - sequenceTimeStartPositionX;
+
+										__timeAreaW.Focus (new Rect (sequenceTimeStartPositionX, 0, sequenceWidth, 0));
+
+								}
+
+
 								GUILayout.EndHorizontal ();
 						}
 			
@@ -1765,20 +1784,20 @@ namespace ws.winx.editor.windows
 										foreach (SequenceNode n in channel.nodes) {
 
 												//find first node which has n.startTime >= then current time
-												if (timeCurrent - n.startTime >= 0) {
+												if (timeCurrent - n.timeStart >= 0) {
 														//check if time comply to upper boundary
-														if (timeCurrent <= n.startTime + n.duration) {
+														if (timeCurrent <= n.timeStart + n.duration) {
 																node = n;
 																break;
 														} else { 
 																//if channel is of animation type and there is next node by time is between prev and next => snap time to prev node endTime
 																if (channel.type == SequenceChannel.SequenceChannelType.Animation 
-																		&& n.index + 1 < channel.nodes.Count && timeCurrent < channel.nodes [n.index + 1].startTime
+																		&& n.index + 1 < channel.nodes.Count && timeCurrent < channel.nodes [n.index + 1].timeStart
 								    
 								    							) {
 
 																		node = n;
-																		timeCurrent = n.startTime + n.duration;
+																		timeCurrent = n.timeStart + n.duration;
 																		break;
 																		
 																}
@@ -1805,7 +1824,7 @@ namespace ws.winx.editor.windows
 									
 													
 
-														AnimationMode.SampleAnimationClip (channel.target, node.source as AnimationClip, (float)(timeCurrent - node.startTime));
+														AnimationMode.SampleAnimationClip (channel.target, node.source as AnimationClip, (float)(timeCurrent - node.timeStart));
 
 						
 														///!!! It happen that Unity change the ID of channel or something happen and channal as key not to be found
@@ -1834,7 +1853,7 @@ namespace ws.winx.editor.windows
 														AudioClip audioClip = node.source as AudioClip;
 
 														
-														int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.startTime) / audioClip.length));
+														int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.timeStart) / audioClip.length));
 												     
 														AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
 														
@@ -1845,7 +1864,7 @@ namespace ws.winx.editor.windows
 							
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Particle) {
 														ParticleSystem particleSystem = node.source as ParticleSystem;
-														particleSystem.Simulate ((float)__sequence.timeCurrent - node.startTime, true);
+														particleSystem.Simulate ((float)__sequence.timeCurrent - node.timeStart, true);
 												}
 										}
 								}
@@ -2017,7 +2036,7 @@ namespace ws.winx.editor.windows
 				
 			
 								//resize rect at start of the node rect width=5px
-								clickRect = new Rect (__timeAreaW.TimeToPixel (node.startTime, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
+								clickRect = new Rect (__timeAreaW.TimeToPixel (node.timeStart, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT, 10, NODE_RECT_HEIGHT);
 					
 								if (__nodeSelected == node)//resize mouse interaction only on blue rect area (not key frames area)
 										clickRect.yMin += __keyframeMarker.image.height;
@@ -2033,7 +2052,7 @@ namespace ws.winx.editor.windows
 								}
 					
 								//resize rect at the end of rect width=5x;
-								clickRect.x = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - 5;
+								clickRect.x = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - 5;
 					
 					
 								//check the end of node rect width=5
@@ -2044,14 +2063,14 @@ namespace ws.winx.editor.windows
 								}
 					
 					
-								clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect) + 5;
-								clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x - 5;
+								clickRect.x = __timeAreaW.TimeToPixel (node.timeStart, rect) + 5;
+								clickRect.width = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - clickRect.x - 5;
 					
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										
 										if (ev.button == 0) {
 												
-												__clickDelta = node.startTime - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
+												__clickDelta = node.timeStart - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
 												__isDragged = true;
 												__nodeSelected = node;
 										} else
@@ -2075,9 +2094,9 @@ namespace ws.winx.editor.windows
 				
 
 					
-								clickRect.x = __timeAreaW.TimeToPixel (node.startTime, rect);
+								clickRect.x = __timeAreaW.TimeToPixel (node.timeStart, rect);
 								clickRect.y = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT;
-								clickRect.width = __timeAreaW.TimeToPixel (node.startTime + node.duration, rect) - clickRect.x;
+								clickRect.width = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - clickRect.x;
 					
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										
@@ -2186,13 +2205,13 @@ namespace ws.winx.editor.windows
 	
 
 																		//restrict selected node draging 
-																		if (nodePrev.startTime + leftOffset < startTime && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration - rightOffset) {
-																				__nodeSelected.startTime = startTime;
+																		if (nodePrev.timeStart + leftOffset < startTime && startTime + __nodeSelected.duration < nodeNext.timeStart + nodeNext.duration - rightOffset) {
+																				__nodeSelected.timeStart = startTime;
 
 																				//////////////////////////////////////
 																				//calc transition with prev node with selected
 																				__nodeSelected.transition = 0f;
-																				nodeEnd = nodePrev.startTime + nodePrev.duration;
+																				nodeEnd = nodePrev.timeStart + nodePrev.duration;
 																				if (startTime < nodeEnd) {
 																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __sequence.frameRate);
 																						//Debug.Log ("Transition Prev:" + __nodeSelected.transition);
@@ -2202,22 +2221,22 @@ namespace ws.winx.editor.windows
 																				//calc transition from selected to next node
 																				nodeNext.transition = 0f;//reset
 																				nodeEnd = startTime + __nodeSelected.duration;
-																				if (nodeEnd > nodeNext.startTime) {
-																						nodeNext.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __sequence.frameRate);
+																				if (nodeEnd > nodeNext.timeStart) {
+																						nodeNext.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.timeStart, __sequence.frameRate);
 																						//Debug.Log ("Transition Next:" + nodeNext.transition);
 																				}
 
 
 																		}
-																} else if ((nodePrev != null && nodePrev.startTime + leftOffset < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime + nodeNext.duration - rightOffset)) {
-																		__nodeSelected.startTime = startTime;
+																} else if ((nodePrev != null && nodePrev.timeStart + leftOffset < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.timeStart + nodeNext.duration - rightOffset)) {
+																		__nodeSelected.timeStart = startTime;
 
 
 																		if (nodePrev != null) {
 																				//////////////////////////////////////
 																				//calc transition with prev node with selected
 																				__nodeSelected.transition = 0f;
-																				nodeEnd = nodePrev.startTime + nodePrev.duration;
+																				nodeEnd = nodePrev.timeStart + nodePrev.duration;
 																				if (startTime < nodeEnd) {
 																						__nodeSelected.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - startTime, __sequence.frameRate);
 																						//Debug.Log ("Transition Only Prev:" + __nodeSelected.transition);
@@ -2229,8 +2248,8 @@ namespace ws.winx.editor.windows
 																				//calc transition from selected to next node
 																				nodeNext.transition = 0f;
 																				nodeEnd = startTime + __nodeSelected.duration;
-																				if (nodeEnd > nodeNext.startTime) {
-																						nodeNext.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.startTime, __sequence.frameRate);
+																				if (nodeEnd > nodeNext.timeStart) {
+																						nodeNext.transition = TimeAreaW.SnapTimeToWholeFPS (nodeEnd - nodeNext.timeStart, __sequence.frameRate);
 																						//Debug.Log ("Transition Only Next:" + nodeNext.transition);
 																				}
 																		}
@@ -2247,16 +2266,16 @@ namespace ws.winx.editor.windows
 																//ANY OTHER CHANNEL TYPE	
 														} else {
 																if (nodePrev != null && nodeNext != null) {//if there is prev and next node of current
-																		if (nodePrev.startTime + nodePrev.duration < startTime && startTime + __nodeSelected.duration < nodeNext.startTime) {
-																				__nodeSelected.startTime = startTime;
+																		if (nodePrev.timeStart + nodePrev.duration < startTime && startTime + __nodeSelected.duration < nodeNext.timeStart) {
+																				__nodeSelected.timeStart = startTime;
 																		}
 
-																} else if ((nodePrev != null && nodePrev.startTime + nodePrev.duration < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.startTime)) {
-																		__nodeSelected.startTime = startTime;
+																} else if ((nodePrev != null && nodePrev.timeStart + nodePrev.duration < startTime) || (nodeNext != null && startTime + __nodeSelected.duration < nodeNext.timeStart)) {
+																		__nodeSelected.timeStart = startTime;
 																}
 														}
 												} else
-														__nodeSelected.startTime = startTime;
+														__nodeSelected.timeStart = startTime;
 
 
 												
@@ -2449,7 +2468,7 @@ namespace ws.winx.editor.windows
 																
 																Stop ();
 
-								AddDropToNewOrExistingChannel (component != null ? component : droppedObject,component != null? component.GetType() : type, channel, Event.current.mousePosition);
+																AddDropToNewOrExistingChannel (component != null ? component : droppedObject, component != null ? component.GetType () : type, channel, Event.current.mousePosition);
 														}//draggedType check
 														else
 																Debug.LogWarning ("Unsuppored type. Audio,Video,Animaiton Clip or GameObject with ParticleSystem supported.");
@@ -2596,7 +2615,7 @@ namespace ws.winx.editor.windows
 						
 
 						//prevent intersection on Drop
-						if (sequenceChannel.nodes.Exists (itm => (itm.startTime < startTime && startTime < itm.startTime + itm.duration) || (itm.startTime < startTime + duration && startTime + duration < itm.startTime + itm.duration)))
+						if (sequenceChannel.nodes.Exists (itm => (itm.timeStart < startTime && startTime < itm.timeStart + itm.duration) || (itm.timeStart < startTime + duration && startTime + duration < itm.timeStart + itm.duration)))
 								return null;
 
 						
@@ -2617,7 +2636,7 @@ namespace ws.winx.editor.windows
 
 					
 					
-						node.startTime = startTime;
+						node.timeStart = startTime;
 						
 
 						int startTimeEarliestIndex = -1;
@@ -2658,7 +2677,7 @@ namespace ws.winx.editor.windows
 						if (sequenceChannel.nodes.Count > -1) {
 
 								//find index of node with earliest startTime
-								startTimeEarliestIndex = sequenceChannel.nodes.FindLastIndex (itm => itm.startTime < node.startTime);
+								startTimeEarliestIndex = sequenceChannel.nodes.FindLastIndex (itm => itm.timeStart < node.timeStart);
 
 						}
 						
@@ -2722,7 +2741,7 @@ namespace ws.winx.editor.windows
 								Vector2 pos = Vector2.zero;
 								if (__sequence.channelSelected != null && __sequence.channelSelected.type == SequenceChannel.SequenceChannelType.Animation) {
 										SequenceNode node = __sequence.channelSelected.nodes [__sequence.channelSelected.nodes.Count - 1];
-										pos.x = __timeAreaW.TimeToPixel (node.startTime + node.duration + 1, __timeAreaW.rect);
+										pos.x = __timeAreaW.TimeToPixel (node.timeStart + node.duration + 1, __timeAreaW.rect);
 									
 								} else {
 										pos.x = __timeAreaW.TimeToPixel (1f, __timeAreaW.rect);

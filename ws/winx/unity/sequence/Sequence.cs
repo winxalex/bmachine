@@ -11,42 +11,42 @@ namespace ws.winx.unity.sequence
 		public class Sequence : MonoBehaviour
 		{
 
-		//
-		// Nested Types
-		//
-		public class EventComparer : IComparer<SequenceEvent>
-		{
+				//
+				// Nested Types
+				//
+				public class EventComparer : IComparer<SequenceEvent>
+				{
 			#region IComparer implementation
 
-			public int Compare (SequenceEvent animationEvent, SequenceEvent animationEvent2)
-			{
+						public int Compare (SequenceEvent animationEvent, SequenceEvent animationEvent2)
+						{
 
-				//float time = (float)animationEvent.timeNormalized.Value;
-				//float time2 = (float)animationEvent2.timeNormalized.Value;
+								//float time = (float)animationEvent.timeNormalized.Value;
+								//float time2 = (float)animationEvent2.timeNormalized.Value;
 				
-				float time = (float)animationEvent.time;
-				float time2 = (float)animationEvent2.time;
-				if (time != time2) {
-					return (int)Mathf.Sign (time - time2);
-				}
-				int hashCode = animationEvent.GetHashCode ();
-				int hashCode2 = animationEvent2.GetHashCode ();
-				return hashCode - hashCode2;
-			}
+								float time = (float)animationEvent.time;
+								float time2 = (float)animationEvent2.time;
+								if (time != time2) {
+										return (int)Mathf.Sign (time - time2);
+								}
+								int hashCode = animationEvent.GetHashCode ();
+								int hashCode2 = animationEvent2.GetHashCode ();
+								return hashCode - hashCode2;
+						}
 
 			#endregion
 
 
-		}
+				}
 
-		public static EventComparer EVENT_COMPARER=new EventComparer();
+				public static EventComparer EVENT_COMPARER = new EventComparer ();
 		
-		//events 
-		public ws.winx.unity.sequence.SequenceEvent OnStart = new ws.winx.unity.sequence.SequenceEvent ();
+				//events 
+				public ws.winx.unity.sequence.SequenceEvent OnStart = new ws.winx.unity.sequence.SequenceEvent ();
 				public ws.winx.unity.sequence.SequenceEvent OnEnd = new ws.winx.unity.sequence.SequenceEvent ();
-
 				[NonSerialized]
-				public ws.winx.unity.sequence.SequenceEvent eventSelected;
+				public ws.winx.unity.sequence.SequenceEvent
+						eventSelected;
 
 				public event UnityAction<SequenceNode> SequenceNodeStart {
 						add {
@@ -82,10 +82,6 @@ namespace ws.winx.unity.sequence
 				List<SequenceChannel>
 						_channels;
 
-
-				
-				
-
 				public List<SequenceChannel> channels {
 						get {
 								if (_channels == null)
@@ -96,29 +92,26 @@ namespace ws.winx.unity.sequence
 
 				[SerializeField]
 				List<SequenceEvent>
-					_events;
-
+						_events;
 
 				public List<SequenceEvent> events {
-					get {
-						if (_events == null)
-							_events = new List<SequenceEvent> ();
-						return _events;
-					}
+						get {
+								if (_events == null)
+										_events = new List<SequenceEvent> ();
+								return _events;
+						}
 				}
 
 				[NonSerialized]
-				public SequenceNode nodeSelected;
-
+				public SequenceNode
+						nodeSelected;
 				[NonSerialized]
-				public SequenceChannel channelSelected;
-
+				public SequenceChannel
+						channelSelected;
 				public SequenceWrap wrap = SequenceWrap.ClampForever;
 				public bool playOnStart = true;
 				public int frameRate = 30;
 				public Vector2 scale;
-
-
 				int _eventCurrentIndex;
 				bool _isRecording;
 				
@@ -136,7 +129,7 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
-		public bool testBool;
+				public bool testBool;
 
 
 				/// <summary>
@@ -146,6 +139,18 @@ namespace ws.winx.unity.sequence
 
 				public double timeStart {
 						get {
+								if (!Application.isPlaying) {//refresh timeStart value in editor
+										_timeStart = double.MaxValue;
+
+										foreach (SequenceChannel channel in channels) {
+												if (channel.nodes [0].timeStart < _timeStart)
+														_timeStart = channel.nodes [0].timeStart;
+										}
+
+
+										_timeStart = _timeStart == double.MaxValue ? 0 : _timeStart;
+								}
+
 								return _timeStart;
 						}
 				}
@@ -169,7 +174,7 @@ namespace ws.winx.unity.sequence
 				/// <value>The duration.</value>
 				public float duration {
 						get {
-								if (float.IsNaN (__duration))
+								if (float.IsNaN (__duration) || !Application.isPlaying)
 										__duration = calcDuration ();
 
 
@@ -248,7 +253,7 @@ namespace ws.winx.unity.sequence
 								timeCurrent = this.duration;
 						} else {
 
-				double timeCurrentBeforeUpdate=timeCurrent;
+								double timeCurrentBeforeUpdate = timeCurrent;
 			
 								//update time
 								timeCurrent += t - _timeLast;//dt
@@ -256,31 +261,29 @@ namespace ws.winx.unity.sequence
 
 
 					
-				/////////  Dispatch events  ///////////
-				int eventsNum=events.Count;	
-				double eventTime=0;
-				for(int i=_eventCurrentIndex;i<eventsNum;i++)
-				{
-					eventTime=events[i].time;
-					if(timeCurrent> eventTime && timeCurrentBeforeUpdate<eventTime)
-					{
-						//Debug.Log("event at time:"+timeCurrent+ "set to fire "+eventTime);
-						events[i].Invoke(this);
-						_eventCurrentIndex=i;
-					}
-				}
-				/////////////////////////////////////////
+								/////////  Dispatch events  ///////////
+								int eventsNum = events.Count;	
+								double eventTime = 0;
+								for (int i=_eventCurrentIndex; i<eventsNum; i++) {
+										eventTime = events [i].time;
+										if (timeCurrent > eventTime && timeCurrentBeforeUpdate < eventTime) {
+												//Debug.Log("event at time:"+timeCurrent+ "set to fire "+eventTime);
+												events [i].Invoke (this);
+												_eventCurrentIndex = i;
+										}
+								}
+								/////////////////////////////////////////
 				
-				_timeLast = t;
+								_timeLast = t;
 					
 
-				///////////////////////////// Update Nodes ////////////////////////
+								///////////////////////////// Update Nodes ////////////////////////
 								foreach (SequenceChannel channel in this.channels)
 										foreach (SequenceNode node in channel.nodes) {
 												node.UpdateNode (timeCurrent);		
 										}
 						}
-				///////////////////////////////////////////////////////////////////
+						///////////////////////////////////////////////////////////////////
 
 
 			
@@ -289,38 +292,39 @@ namespace ws.winx.unity.sequence
 
 				}
 
+				public void LateUpdateSequence ()
+				{
 
-				public void LateUpdateSequence(){
-
-					///
-					foreach (SequenceChannel channel in this.channels)
-					foreach (SequenceNode node in channel.nodes) {
-						node.LateUpdateNode (timeCurrent);		
-					}
+						///
+						foreach (SequenceChannel channel in this.channels)
+								foreach (SequenceNode node in channel.nodes) {
+										node.LateUpdateNode (timeCurrent);		
+								}
 
 				}
 
-		void UpdateMe ()
-		{
+				void UpdateMe ()
+				{
 			
-			SequenceChannel channel1 = this.channels[0];
-			GameObject target = GameObject.Find ("emitter");// channel1.target;
+						SequenceChannel channel1 = this.channels [0];
+						GameObject target = GameObject.Find ("emitter");// channel1.target;
 			
-			ParticleSystem system = target.GetComponent<ParticleSystem> ();
-			if (testBool && !system.isPlaying
+						ParticleSystem system = target.GetComponent<ParticleSystem> ();
+						if (testBool && !system.isPlaying
 			    
 			    ) {
 				
-				//system.Stop();
-				system.Simulate(0f);
-				system.Play ();
-				Debug.Log("play "+system.isPlaying+
-				          " "+system.IsAlive()
-				          );
-			}else Debug.Log("Update"+system.isPlaying+
-			                " "+system.IsAlive()
-			                );
-		}
+								//system.Stop();
+								system.Simulate (0f);
+								system.Play ();
+								Debug.Log ("play " + system.isPlaying +
+										" " + system.IsAlive ()
+								);
+						} else
+								Debug.Log ("Update" + system.isPlaying +
+										" " + system.IsAlive ()
+								);
+				}
 
 				/// <summary>
 				/// Update this instance.
@@ -330,12 +334,12 @@ namespace ws.winx.unity.sequence
 				{
 
 
-			//UpdateMe ();
+						//UpdateMe ();
 		
 
 
 						if (_pause || _stop) {
-							return;			
+								return;			
 						}
 
 
@@ -348,9 +352,9 @@ namespace ws.winx.unity.sequence
 
 				}
 
-
-				void LateUpdate(){
-					LateUpdateSequence ();
+				void LateUpdate ()
+				{
+						LateUpdateSequence ();
 				}
 
 
@@ -373,7 +377,7 @@ namespace ws.winx.unity.sequence
 						//prevent
 						timeCurrent = Mathf.Min ((float)timeCurrent, __duration);
 
-						_eventCurrentIndex=0;
+						_eventCurrentIndex = 0;
 						_isPlaying = true;
 						_stop = false;
 						_pause = false;
@@ -497,16 +501,23 @@ namespace ws.winx.unity.sequence
 				/// <value>The end time.</value>
 				float calcDuration ()
 				{
-						float duration = 0f;
+						
+						double timeStartMin = double.MaxValue;
+						double timeEnd = 0;
+
+
+						foreach (SequenceChannel channel  in this.channels) {
+								if (timeStartMin > channel.nodes [0].timeStart)
+										timeStartMin = channel.nodes [0].timeStart;
+
+								if (timeEnd < (channel.nodes [channel.nodes.Count - 1].timeStart + channel.nodes [channel.nodes.Count - 1].duration))
+										timeEnd = channel.nodes [channel.nodes.Count - 1].timeStart + channel.nodes [channel.nodes.Count - 1].duration;
+
+						}
 			
-						foreach (SequenceChannel channel  in this.channels)
-								foreach (SequenceNode node in channel.nodes) {
-										if (duration < (node.startTime + node.duration)) {
-												duration = node.startTime + node.duration;
-										}
-								}
+						
 			
-						return duration;
+						return (float)(timeEnd-timeStartMin);
 			
 				}
 
