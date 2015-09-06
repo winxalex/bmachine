@@ -292,16 +292,7 @@ namespace ws.winx.unity.sequence
 
 				}
 
-				public void LateUpdateSequence ()
-				{
-
-						///
-						foreach (SequenceChannel channel in this.channels)
-								foreach (SequenceNode node in channel.nodes) {
-										node.LateUpdateNode (timeCurrent);		
-								}
-
-				}
+			
 
 				void UpdateMe ()
 				{
@@ -348,13 +339,16 @@ namespace ws.winx.unity.sequence
 
 					
 						UpdateSequence (Time.time);
-						//LateUpdateSequence ();
+						
 
 				}
 
 				void LateUpdate ()
 				{
-						LateUpdateSequence ();
+					foreach (SequenceChannel channel in this.channels)
+					foreach (SequenceNode node in channel.nodes) {
+						node.LateUpdateNode (timeCurrent);		
+					}
 				}
 
 

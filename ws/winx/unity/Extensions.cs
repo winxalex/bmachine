@@ -486,7 +486,6 @@ namespace ws.winx.unity
 
 				public static bool isRoot (this GameObject go)
 				{
-
 						return go.transform == go.transform.root;
 				}
 

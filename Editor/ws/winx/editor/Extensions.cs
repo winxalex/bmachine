@@ -22,12 +22,17 @@ namespace ws.winx.editor
 			
 			
 			
+
+			PropertyModification[] modifications = PrefabUtility.GetPropertyModifications (gameObjectRootAnimated);
+
 			//Get all modification except of type Transform
-			PropertyModification[] modifications = PrefabUtility.GetPropertyModifications (gameObjectRootAnimated).Select ((itm) => itm).Where ((itm) => itm.target.GetType () != typeof(T)).ToArray ();
-			
-			
-			
-			PrefabUtility.SetPropertyModifications (gameObjectRootAnimated, modifications);
+			if (modifications != null) {
+								modifications = modifications.Where ((itm) => itm.target.GetType () != typeof(T)).ToArray ();
+				
+				
+				
+								PrefabUtility.SetPropertyModifications (gameObjectRootAnimated, modifications);
+			}
 			
 			
 			

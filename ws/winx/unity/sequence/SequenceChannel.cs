@@ -56,7 +56,7 @@ namespace ws.winx.unity.sequence
 				public Quaternion targetRotationCurrent;
 
 
-				public Transform boneRoot;
+				public Transform targetBoneRoot;
 				
 
 				[SerializeField]

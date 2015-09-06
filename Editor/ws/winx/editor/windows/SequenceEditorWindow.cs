@@ -187,7 +187,7 @@ namespace ws.winx.editor.windows
 
 						if (__sequenceChannelsReordableList == null) {
 
-								__sequenceChannelsReordableList = new ReorderableList (new List<SequenceChannel> (), typeof(SequenceChannel), true, false, false, false);
+								__sequenceChannelsReordableList = new ReorderableList (new List<SequenceChannel> (), typeof(SequenceChannel), true, false, false, true);
 								__sequenceChannelsReordableList.elementHeight = NODE_RECT_HEIGHT;
 								__sequenceChannelsReordableList.headerHeight = 2f;
 							
@@ -195,7 +195,8 @@ namespace ws.winx.editor.windows
 							
 								__sequenceChannelsReordableList.onSelectCallback = onSelectSequenceChannelCallback;
 								__sequenceChannelsReordableList.onReorderCallback = onReorderSequenceChannelCallback;
-			
+								__sequenceChannelsReordableList.onRemoveCallback = onRemoveSequenceChannelCallback;
+					
 					
 					
 						}
@@ -288,20 +289,22 @@ namespace ws.winx.editor.windows
 
 														
 				) {  //active object is target of Animation type of channel
-								if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
-										Stop ();//stop "paused" and then reset
-										__sequence.timeCurrent = 0f;//rewind to begin and reset
-										ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
-								}
+								
 
 								//if change has been made to pos or rotation of the target => change orginal and save nodes animation position offest
 								if (channel.targetPositionOriginal != channel.target.transform.position
 										|| channel.targetRotationOriginal != channel.target.transform.rotation) {
 
+										if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
+												Stop ();//stop "paused" and then reset
+												__sequence.timeCurrent = 0f;//rewind to begin and reset
+												ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
+										}
 								
 								
 										Debug.Log ("Target object position have been changed");
 
+										//take new transform
 										channel.targetPositionOriginal = channel.target.transform.position;
 										channel.targetRotationOriginal = channel.target.transform.rotation;
 
@@ -514,18 +517,43 @@ namespace ws.winx.editor.windows
 				{
 						//	Debug.Log (list.index);
 
-//						SequenceChannel channel = null;
-//						int channelsNumber = __sequence.channels.Count;
-//
-//						for (int i=0; i<channelsNumber; i++) {
-//								channel = __sequence.channels [i];
-//								channel.nodes.ForEach (itm => itm.channelOrd = i);
-//						}
-
-						
-						
 				}
-		
+
+				void onRemoveSequenceChannelCallback (ReorderableList list)
+				{
+						SequenceChannel sequenceChannel = null;
+				
+						if (__sequence != null && (sequenceChannel = __sequence.channelSelected) != null) {
+								List<SequenceNode> nodes = __sequence.channelSelected.nodes;
+								
+								for (int i=0; i<1; i++)
+										onRemoveNode (nodes [0]);
+
+
+								__nodeSelected = null;
+								
+								
+								
+								Stop ();//cos target can be "paused" in some animation time t
+								//if not stop animation mode reset resets to Vector3D.zero
+								
+								__sequence.timeCurrent = 0f;
+								
+								ResetChannelTarget (sequenceChannel);//if target is in pause somewhere in time reset to Orginal pos/rot
+								
+								
+								if (!AnimationMode.InAnimationMode ())
+										AnimationMode.StartAnimationMode ();
+								ReOffsetNodesAnimation (sequenceChannel);//Now with node removed
+								AnimationMode.StopAnimationMode ();
+								
+								
+								ResetChannelTarget (sequenceChannel);
+								
+								window.Repaint ();
+				
+						}
+				}		
 			
 		
 		
@@ -640,12 +668,12 @@ namespace ws.winx.editor.windows
 						return modifications;
 				}
 
-				void LateUpdate ()
-				{
-						if (!EditorApplication.isPlaying && __sequence != null && __sequence.isPlaying)
-								__sequence.LateUpdateSequence ();
-
-				}
+//				void LateUpdate ()
+//				{
+//						if (!EditorApplication.isPlaying && __sequence != null && __sequence.isPlaying)
+//								__sequence.LateUpdateSequence ();
+//
+//				}
 
 				/// <summary>
 				/// Update this instance.
@@ -824,7 +852,7 @@ namespace ws.winx.editor.windows
 				
 				
 				
-						} else {//STOP
+						} else {//PAUSE 
 
 								
 								__sequence.Stop (__sequence.playForward);
@@ -834,6 +862,8 @@ namespace ws.winx.editor.windows
 								
 								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 
+								//Normal gameobjects do not preserve transform when animaiton mode is stoped as characters
+								//so preserving
 								foreach (SequenceChannel channel in __sequence.channels) {
 										PreserveTransformAtPause (channel);
 								}
@@ -909,7 +939,7 @@ namespace ws.winx.editor.windows
 
 
 						rect.x = this.position.width * 0.2f;
-						rect.width = this.position.width * 0.8f;//80% for timeArea
+						rect.width = this.position.width - rect.x;//80% for timeArea
 
 						rect.y = 0;
 
@@ -1094,7 +1124,7 @@ namespace ws.winx.editor.windows
 														channel.target = target;
 														channel.targetPositionOriginal = target.transform.position;
 														channel.targetRotationOriginal = target.transform.rotation;
-														channel.boneRoot = target.GetRootBone ();
+														channel.targetBoneRoot = target.GetRootBone ();
 
 														//AnimationMode
 
@@ -1121,7 +1151,7 @@ namespace ws.winx.editor.windows
 				{
 						GUIStyle style = new GUIStyle ("ProgressBarBack");
 						style.padding = new RectOffset (0, 0, 0, 0);
-						
+
 						GUILayout.BeginArea (rect, GUIContent.none, style);
 
 						if (__sequence != null) {
@@ -1161,7 +1191,7 @@ namespace ws.winx.editor.windows
 								
 			
 
-								if (GUILayout.Button ("F",EditorStyles.toolbarButton)) {
+								if (GUILayout.Button ("F", EditorStyles.toolbarButton)) {
 										float sequenceTimeStartPositionX = 0f;
 										float sequenceTimeEndPositionX = 0f;
 
@@ -1189,16 +1219,20 @@ namespace ws.winx.editor.windows
 
 						if (__sequence != null) {
 
+								
 								Rect rectLastControl = GUILayoutUtility.GetLastRect ();
-
-								rect.yMin = rectLastControl.yMax;
+				
+								//rectLastControl=GUILayoutUtility.GetRect(rect.width - 5f,rectLastControl.height);
+				                                                
+				                
 
 								//Draw Channels
-								__sequenceChannelsReordableList.list = __sequence.channels;
+								if (__sequenceChannelsReordableList.list != __sequence.channels)
+										__sequenceChannelsReordableList.list = __sequence.channels;
 					
 								__sequenceChannelsReordableList.DoLayoutList ();
 
-
+								rect.yMin = rectLastControl.yMax;
 								rectLastControl = GUILayoutUtility.GetLastRect ();
 								rect.yMax = rectLastControl.yMax - 16f;//16f for +/- buttons
 
@@ -1556,7 +1590,7 @@ namespace ws.winx.editor.windows
 
 				private static void PreserveTransformAtPause (SequenceChannel channel)
 				{
-						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.boneRoot == null) {
+						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.targetBoneRoot == null) {
 								channel.targetPositionCurrent = channel.target.transform.position;
 								channel.targetRotationCurrent = channel.target.transform.rotation;
 						
@@ -1594,7 +1628,7 @@ namespace ws.winx.editor.windows
 
 				private static void ApplyTransformAtPause (SequenceChannel channel)
 				{
-						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.boneRoot == null) {
+						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && channel.targetBoneRoot == null) {
 								channel.target.transform.position = channel.targetPositionCurrent;
 								channel.target.transform.rotation = channel.targetRotationCurrent;
 
@@ -1622,6 +1656,7 @@ namespace ws.winx.editor.windows
 					
 								//save bone position
 								Vector3 positionPrev = Vector3.zero;
+								Quaternion rotationPrev = Quaternion.identity;
 
 								Animator animator = channel.target.GetComponent<Animator> ();
 
@@ -1632,8 +1667,10 @@ namespace ws.winx.editor.windows
 								animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 
 								
-								rootBoneTransform = channel.boneRoot;
-								if (rootBoneTransform == null) {
+								rootBoneTransform = channel.targetBoneRoot;
+								if (rootBoneTransform == null && (rootBoneTransform = channel.targetBoneRoot = channel.target.GetRootBone ()) == null) {
+
+										
 										Debug.LogWarning ("Can't find Root bone Hips");
 										return;
 								}
@@ -1670,7 +1707,11 @@ namespace ws.winx.editor.windows
 												positionPrev = rootBoneTransform.position + channel.nodes [n.index - 1].clipBinding.boneRootPositionOffset;
 										} else {
 												positionPrev = rootBoneTransform.position;
+												
 										}
+
+
+										rotationPrev = rootBoneTransform.rotation;
 						
 
 										//Debug.Log ("node:" + n.name + "Before pos:" + rootBoneTransform.position);
@@ -1679,14 +1720,31 @@ namespace ws.winx.editor.windows
 										AnimationMode.SampleAnimationClip (channel.target, (AnimationClip)n.source, 0f);
 
 										//Debug.Log ("node:" + n.name + "After pos:" + rootBoneTransform.position);
-					
-					
-					
-										Vector3 positionAfter = rootBoneTransform.position;
-						
-										//calculate difference of bone position orginal - bone postion after clip effect at AnimationClip time t=0
-										n.clipBinding.boneRootPositionOffset = positionPrev - positionAfter;
 
+
+										//!!! AnimationClipSettings are incorrect from thoose set inside Inspector
+										AnimationClipSettings clipSettings = AnimationUtility.GetAnimationClipSettings (n.source as AnimationClip);
+
+										Vector3 positionAfter = rootBoneTransform.position;
+										
+										n.clipBinding.boneRootPositionOffset = positionPrev - positionAfter;
+										n.clipBinding.boneRootRotationOffset = rotationPrev;
+//										
+//
+//										if (!clipSettings.keepOriginalPositionXZ)// using CenterOfMass
+//										//calculate difference of bone position orginal - bone postion after clip effect at AnimationClip time t=0
+//										n.clipBinding.boneRootPositionOffset=positionPrev;
+//										else
+//											n.clipBinding.boneRootPositionOffset = positionPrev - positionAfter;
+//										//else offset is 0
+//
+//										if(!clipSettings.keepOriginalOrientation)//use BodyOrientation
+//											n.clipBinding.boneRootRotationOffset=rotationPrev;
+//										else
+//											n.clipBinding.boneRootRotationOffset=rootBoneTransform.rotation;
+										
+											
+										
 										//	Debug.Log ("node:" + n.name + "offset" + n.clipBinding.boneRootPositionOffset);
 						
 										timePointer = n.duration;
@@ -1822,9 +1880,16 @@ namespace ws.winx.editor.windows
 
 														animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 									
+														Quaternion boneRotation = Quaternion.identity;
+
+														
+														
 													
 
 														AnimationMode.SampleAnimationClip (channel.target, node.source as AnimationClip, (float)(timeCurrent - node.timeStart));
+
+													
+
 
 						
 														///!!! It happen that Unity change the ID of channel or something happen and channal as key not to be found
@@ -1833,20 +1898,33 @@ namespace ws.winx.editor.windows
 
 														//						Correction is needed for root bones as Animation Mode doesn't respect current GameObject transform position,rotation
 														//						=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation(alerady saved)
-														if ((rootBoneTransform = channel.boneRoot) != null) {
+														if ((rootBoneTransform = channel.targetBoneRoot) != null) {
 																//	Debug.Log ("node:" + node.name + " time:" + time + " pos:" + rootBoneTransform.position);
 																rootBoneTransform.position = rootBoneTransform.position + node.clipBinding.boneRootPositionOffset;
+
+																rootBoneTransform.rotation = node.clipBinding.boneRootRotationOffset;
 																//	Debug.Log ("node:" + node.name + " time:" + time + "After pos:" + rootBoneTransform.position);
 														} 
 
-
 														
+												
 
-														var ik = channel.target.GetComponent<FBBIKAnimatedValues> ();
-														if (ik != null) {
-																ik.Initate ();//didn't found soultuion when is not initated
-																ik.UpdateSolver ();
-														}
+
+														var ikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ();
+														if (ikAnimatedValues != null) {
+//								
+//								Vector3 position = ikAnimatedValues.ik.gameObject.transform.position;
+//								Quaternion rotation = ikAnimatedValues.ik.gameObject.transform.rotation;
+//
+//
+//								ikAnimatedValues.ik.gameObject.ResetPropertyModification<Transform> ();
+//								ikAnimatedValues.ik.gameObject.transform.position = position;
+//								ikAnimatedValues.ik.gameObject.transform.rotation = rotation;
+
+																ikAnimatedValues.UpdateSolver ();
+														}		
+
+										
 								
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Audio) {
 										
@@ -1928,10 +2006,9 @@ namespace ws.winx.editor.windows
 								
 								}
 
-										
-
+								if (rect.Contains (Event.current.mousePosition))
 								//make all area from end of label and Event pad to botton droppable
-								sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
+										sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
 			
 								Handles.color = Color.white;
 
@@ -1960,8 +2037,9 @@ namespace ws.winx.editor.windows
 										foreach (SequenceNode node in channel.nodes) {
 									
 												
+												if (rect.Contains (Event.current.mousePosition))
+														sequenceNodeClickEventHandler (node, rect, i);
 
-												sequenceNodeClickEventHandler (node, rect, i);
 												DoNode (node, rect, i);
 
 										
@@ -1984,8 +2062,8 @@ namespace ws.winx.editor.windows
 								Handles.DrawLine (new Vector3 (timeScrubberX, rect.y), new Vector3 (timeScrubberX, rect.height - 16f));//horizontal scroller
 								Handles.color = colorSaved;
 							
-								
-								sequenceNodeDragEventHandler (rect);
+								if (rect.Contains (Event.current.mousePosition))
+										sequenceNodeDragEventHandler (rect);
 						}
 				}
 
@@ -2013,7 +2091,7 @@ namespace ws.winx.editor.windows
 				private static GenericMenu createNodeMenu (SequenceNode node)
 				{
 						GenericMenu genericMenu = new GenericMenu ();
-						genericMenu.AddItem (new GUIContent ("Remove"), false, RemoveNode, node);
+						genericMenu.AddItem (new GUIContent ("Remove"), false, onRemoveNode, node);
 						return genericMenu;
 				}
 		
@@ -2306,15 +2384,68 @@ namespace ws.winx.editor.windows
 						}
 				}
 
+				private static void RemoveNode (SequenceNode node, SequenceChannel sequenceChannel)
+				{
+						if (node.source is AnimationClip) {
+								if (node.index + 1 < sequenceChannel.nodes.Count)//if prev node exist reset its transition
+										sequenceChannel.nodes [node.index + 1].transition = 0;
+				
+								//bypass transition
+								//								if (node.index - 1 > -1 && node.index + 1 < sequenceChannel.nodes.Count) {
+				
+								//										UnityEditor.Animations.AnimatorController animatorController = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController);
+								//										UnityEditor.Animations.AnimatorState statePrev = animatorController.GetStateBy (sequenceChannel.nodes [node.index - 1].stateNameHash);
+								//								
+								//										UnityEditor.Animations.AnimatorStateTransition transition = statePrev.transitions [0];
+								//										transition.destinationState = animatorController.GetStateBy (sequenceChannel.nodes [node.index + 1].stateNameHash);
+								//								
+								//								}
+						}
+			
+			
+			
+						//remove node
+						sequenceChannel.nodes.Remove (node);
+						DestroyImmediate (node);
+			
+			
+						if (sequenceChannel.runtimeAnimatorController != null)//remove AnimatorState
+								(sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).RemoveStateWith (node.stateNameHash);
+			
+						int nodesCount = sequenceChannel.nodes.Count;
+			
+			
+						//reindex nodes after remove
+						for (int i=node.index; i<nodesCount; i++)
+								sequenceChannel.nodes [i].index--;
+			
+			
+			
+			
+			
+						//if this removed node was last node => remove channel and move channels up(reindex)
+						if (sequenceChannel.nodes.Count == 0) {
+				
+								//remove channel
+								__sequence.channels.Remove (sequenceChannel);
+				
+								if (sequenceChannel == __sequence.channelSelected)
+										__sequence.channelSelected = null;
+				
+								DestroyImmediate (sequenceChannel);
+				
+						} 
 
-
-
-
+			
+				}
+		
+		
+		
 				/// <summary>
 				/// Removes the node.
 				/// </summary>
 				/// <param name="data">Data.</param>
-				private static void RemoveNode (object data)
+				private static void onRemoveNode (object data)
 				{
 						SequenceNode node = data as SequenceNode;
 						
@@ -2324,56 +2455,7 @@ namespace ws.winx.editor.windows
 
 			
 						
-						if (node.source is AnimationClip) {
-								if (node.index + 1 < sequenceChannel.nodes.Count)//if prev node exist reset its transition
-										sequenceChannel.nodes [node.index + 1].transition = 0;
-
-								//bypass transition
-//								if (node.index - 1 > -1 && node.index + 1 < sequenceChannel.nodes.Count) {
-										
-//										UnityEditor.Animations.AnimatorController animatorController = (sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController);
-//										UnityEditor.Animations.AnimatorState statePrev = animatorController.GetStateBy (sequenceChannel.nodes [node.index - 1].stateNameHash);
-//								
-//										UnityEditor.Animations.AnimatorStateTransition transition = statePrev.transitions [0];
-//										transition.destinationState = animatorController.GetStateBy (sequenceChannel.nodes [node.index + 1].stateNameHash);
-//								
-//								}
-						}
-
-
-
-						//remove node
-						sequenceChannel.nodes.Remove (node);
-						
-
-
-						if (sequenceChannel.runtimeAnimatorController != null)//remove AnimatorState
-								(sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).RemoveStateWith (node.stateNameHash);
-						
-						int nodesCount = sequenceChannel.nodes.Count;
-
-
-						//reindex nodes after remove
-						for (int i=node.index; i<nodesCount; i++)
-								sequenceChannel.nodes [i].index--;
-
-						
-						
-
-
-						//if this removed node was last node => remove channel and move channels up(reindex)
-						if (sequenceChannel.nodes.Count == 0) {
-
-								//remove channel
-								__sequence.channels.Remove (sequenceChannel);
-								
-								if (sequenceChannel == __sequence.channelSelected)
-										__sequence.channelSelected = null;
-							
-								DestroyImmediate (sequenceChannel);
-
-						} 
-			
+						RemoveNode (node, sequenceChannel);
 			
 			
 						__nodeSelected = null;

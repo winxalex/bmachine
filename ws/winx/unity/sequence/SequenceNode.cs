@@ -23,10 +23,14 @@ namespace ws.winx.unity.sequence
 				[HideInInspector]
 				public SequenceNodeEvent
 						onUpdate = new SequenceNodeEvent ();
+
 				public int index = -1;
 				public float transition = 0f;
 				public bool loop;
 				public float volume = 1f;
+
+				public bool keepOriginalPositionXZ;// using CenterOfMass
+				public bool keepOriginalOrientation;//use BodyOrientation
 				
 
 				/// <summary>
@@ -274,9 +278,7 @@ namespace ws.winx.unity.sequence
 
 								}
 						
-								//TODO Check if this is nessery
-								if (this.fbbikAnimatedValues != null)
-										this.fbbikAnimatedValues.Initate ();
+								
 								
 
 								onStart.Invoke (this);
@@ -353,8 +355,7 @@ namespace ws.winx.unity.sequence
 								}
 						}
 
-						if (this.fbbikAnimatedValues != null)
-								this.fbbikAnimatedValues.Initate ();
+					
 
 
 						onStop.Invoke (this);
@@ -365,6 +366,17 @@ namespace ws.winx.unity.sequence
 				{
 						if (onUpdate != null)
 								onUpdate.Invoke (this);
+
+
+						if (channel.type == SequenceChannel.SequenceChannelType.Animation && this.fbbikAnimatedValues != null) {
+
+								this.fbbikAnimatedValues.UpdateSolver ();
+				
+				
+				
+				
+				
+						}
 
 
 						if (source is ParticleSystem) {
@@ -378,13 +390,7 @@ namespace ws.winx.unity.sequence
 
 				public void LateUpdateNode (double timeCurrent)
 				{
-						if (channel.type == SequenceChannel.SequenceChannelType.Animation && this.fbbikAnimatedValues != null) {
-							
-								this.fbbikAnimatedValues.UpdateSolver ();
-							
-
-
-						}
+					
 					
 				}
 
