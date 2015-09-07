@@ -691,7 +691,7 @@ namespace ws.winx.editor.windows
 		
 						if (!EditorApplication.isPlaying && (__sequence != null) && SequenceEditorWindow.__sequence.isPlaying) {//?TODO ?? enters here even isPlaying is false		
 							
-								Debug.Log ("Update sequence from editor");
+							//	Debug.Log ("Update sequence from editor");
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 
 
@@ -817,7 +817,7 @@ namespace ws.winx.editor.windows
 
 				
 				
-								if ((float)__sequence.timeCurrent >= __sequence.duration) {//start from begining
+								if ((float)__sequence.timeCurrent >= __sequence.timeEnd) {//start from begining
 
 
 										//if(__sequence.isRecording) Stop();
@@ -828,7 +828,7 @@ namespace ws.winx.editor.windows
 										foreach (SequenceChannel channel in __sequence.channels)
 												ResetChannelTarget (channel);
 								} else
-										__sequence.timeCurrent = Mathf.Min ((float)__sequence.timeCurrent, __sequence.duration);
+										__sequence.timeCurrent = Mathf.Min ((float)__sequence.timeCurrent, (float)__sequence.timeEnd);
 				
 							
 				
@@ -1190,7 +1190,7 @@ namespace ws.winx.editor.windows
 
 								
 			
-
+								//FOCUS
 								if (GUILayout.Button ("F", EditorStyles.toolbarButton)) {
 										float sequenceTimeStartPositionX = 0f;
 										float sequenceTimeEndPositionX = 0f;
@@ -1676,7 +1676,7 @@ namespace ws.winx.editor.windows
 								}
 					
 					
-								float timePointer = 0f;
+								
 
 
 
@@ -1691,40 +1691,53 @@ namespace ws.winx.editor.windows
 								//save target position and rotation so can be restored after stoping animation mode
 								//channel.positionOriginalRoot = channel.target.transform.position;
 								//channel.rotationOriginalRoot = channel.target.transform.rotation;
+
+								//!!! AnimationClipSettings are incorrect from thoose set inside Inspector
+								AnimationClipSettings clipSettings = null;
+
 					
 					
 								foreach (SequenceNode n in channel.nodes) {
 
+					//check AnimationClip settings from previous node
+					clipSettings=AnimationUtility.GetAnimationClipSettings(channel.nodes [n.index].source as AnimationClip);
+
 												
 							
-										if (timePointer > 0) {
-							
-							
-												//get sample of animation clip of previous node at the end
-												AnimationMode.SampleAnimationClip (channel.target, channel.nodes [n.index - 1].source as AnimationClip, timePointer);
+									    if (n.index > 0) {
 
+												//get sample of animation clip of previous node at the end t=duration[s]
+												AnimationMode.SampleAnimationClip (channel.target, channel.nodes [n.index - 1].source as AnimationClip, channel.nodes [n.index - 1].duration);
+
+												
+												rotationPrev = rootBoneTransform.rotation;	//take orientations from previous node
 
 												positionPrev = rootBoneTransform.position + channel.nodes [n.index - 1].clipBinding.boneRootPositionOffset;
-										} else {
+										
+										} else {//first node => there is no previous
+
+												//save postion and rotation before Animation from first node is applied
+												
 												positionPrev = rootBoneTransform.position;
 												
+												rotationPrev = rootBoneTransform.rotation;	
 										}
 
 
-										rotationPrev = rootBoneTransform.rotation;
+										
 						
 
 										//Debug.Log ("node:" + n.name + "Before pos:" + rootBoneTransform.position);
 						
-										//get sample of animation clip of current node at start
+										//get sample of animation clip of current node at start t=0s.
 										AnimationMode.SampleAnimationClip (channel.target, (AnimationClip)n.source, 0f);
 
 										//Debug.Log ("node:" + n.name + "After pos:" + rootBoneTransform.position);
 
+										if(clipSettings.keepOriginalOrientation)
+											rotationPrev = rootBoneTransform.rotation;	
 
-										//!!! AnimationClipSettings are incorrect from thoose set inside Inspector
-										AnimationClipSettings clipSettings = AnimationUtility.GetAnimationClipSettings (n.source as AnimationClip);
-
+										
 										Vector3 positionAfter = rootBoneTransform.position;
 										
 										n.clipBinding.boneRootPositionOffset = positionPrev - positionAfter;
@@ -1747,7 +1760,7 @@ namespace ws.winx.editor.windows
 										
 										//	Debug.Log ("node:" + n.name + "offset" + n.clipBinding.boneRootPositionOffset);
 						
-										timePointer = n.duration;
+										
 
 
 											
@@ -1912,14 +1925,6 @@ namespace ws.winx.editor.windows
 
 														var ikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ();
 														if (ikAnimatedValues != null) {
-//								
-//								Vector3 position = ikAnimatedValues.ik.gameObject.transform.position;
-//								Quaternion rotation = ikAnimatedValues.ik.gameObject.transform.rotation;
-//
-//
-//								ikAnimatedValues.ik.gameObject.ResetPropertyModification<Transform> ();
-//								ikAnimatedValues.ik.gameObject.transform.position = position;
-//								ikAnimatedValues.ik.gameObject.transform.rotation = rotation;
 
 																ikAnimatedValues.UpdateSolver ();
 														}		
@@ -2006,7 +2011,7 @@ namespace ws.winx.editor.windows
 								
 								}
 
-								if (rect.Contains (Event.current.mousePosition))
+							
 								//make all area from end of label and Event pad to botton droppable
 										sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
 			

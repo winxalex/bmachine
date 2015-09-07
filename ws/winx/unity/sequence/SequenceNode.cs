@@ -29,8 +29,7 @@ namespace ws.winx.unity.sequence
 				public bool loop;
 				public float volume = 1f;
 
-				public bool keepOriginalPositionXZ;// using CenterOfMass
-				public bool keepOriginalOrientation;//use BodyOrientation
+				
 				
 
 				/// <summary>

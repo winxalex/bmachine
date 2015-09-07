@@ -113,6 +113,14 @@ namespace ws.winx.unity.sequence
 				public int frameRate = 30;
 				public Vector2 scale;
 				int _eventCurrentIndex;
+
+				/// <summary>
+				/// The end time in global time space (Time.time or EditorApplication.timeSinceStartup)
+				/// </summary>
+				double _timeAtEnd;
+
+
+
 				bool _isRecording;
 				
 				public bool isRecording {
@@ -155,14 +163,11 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
-				/// <summary>
-				/// The end time in global time space (Time.time or EditorApplication.timeSinceStartup)
-				/// </summary>
-				public double _timeAtEnd;
+				
 
-				public double endTime {
+				public double timeEnd {
 						get {
-								return _timeAtEnd;
+								return timeStart+duration;
 						}
 				}
 
@@ -175,7 +180,7 @@ namespace ws.winx.unity.sequence
 				public float duration {
 						get {
 								if (float.IsNaN (__duration) || !Application.isPlaying)
-										__duration = calcDuration ();
+										__duration = calcDuration ();//TODO make onChannels and onChannel change event and only then recalculate duration and timeStart
 
 
 								return __duration;
@@ -225,6 +230,8 @@ namespace ws.winx.unity.sequence
 						
 			
 						//Debug.Log ("Time current:" + timeCurrent+"Time.time"+Time.time+" _timeAtEnd:"+_timeAtEnd);
+
+			//Debug.Log ("Time current:" + timeCurrent+"ticki:"+t+" _timeAtEnd:"+_timeAtEnd+" _timeStart:"+timeStart+" duration:"+duration);
 			
 						if (t > _timeAtEnd) {
 								switch (wrap) {
@@ -250,7 +257,7 @@ namespace ws.winx.unity.sequence
 										break;
 								}	
 
-								timeCurrent = this.duration;
+								timeCurrent = timeEnd;
 						} else {
 
 								double timeCurrentBeforeUpdate = timeCurrent;
@@ -366,10 +373,8 @@ namespace ws.winx.unity.sequence
 
 						events.Sort (EVENT_COMPARER);
 				
-						__duration = calcDuration ();
-
-						//prevent
-						timeCurrent = Mathf.Min ((float)timeCurrent, __duration);
+						//prevent timeCurrent going outside 
+						timeCurrent = Mathf.Min ((float)timeCurrent, (float)timeStart+duration);
 
 						_eventCurrentIndex = 0;
 						_isPlaying = true;
@@ -378,7 +383,7 @@ namespace ws.winx.unity.sequence
 						_timePassed = 0;
 
 						this._timeLast = t;
-						this._timeAtEnd = t + __duration - timeCurrent;
+						this._timeAtEnd = t + timeStart+duration - timeCurrent;
 
 						//dispatch Start
 				
@@ -496,22 +501,21 @@ namespace ws.winx.unity.sequence
 				float calcDuration ()
 				{
 						
-						double timeStartMin = double.MaxValue;
+						
 						double timeEnd = 0;
 
-
+						SequenceNode nodeLast;
 						foreach (SequenceChannel channel  in this.channels) {
-								if (timeStartMin > channel.nodes [0].timeStart)
-										timeStartMin = channel.nodes [0].timeStart;
-
-								if (timeEnd < (channel.nodes [channel.nodes.Count - 1].timeStart + channel.nodes [channel.nodes.Count - 1].duration))
-										timeEnd = channel.nodes [channel.nodes.Count - 1].timeStart + channel.nodes [channel.nodes.Count - 1].duration;
+								
+								nodeLast=channel.nodes [channel.nodes.Count - 1];
+								if (timeEnd < nodeLast.timeStart + nodeLast.duration)
+									timeEnd =nodeLast.timeStart + nodeLast.duration;
 
 						}
 			
 						
 			
-						return (float)(timeEnd-timeStartMin);
+						return (float)(timeEnd-timeStart);
 			
 				}
 
