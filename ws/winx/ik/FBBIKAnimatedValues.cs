@@ -18,16 +18,20 @@ namespace ws.winx.ik
 		/// <summary>
 		/// The Left Hand Effector
 		/// </summary>
-
+		
 		public Transform LHETarget;
 
 		[Range(0,1)]
+		
 		public float LHEPositionWeight;
 
+		
 		public Vector3 LHEPositionOffset;
 
+		
 		public Transform positionOffsetSpace;
 
+		
 		public float LHERotationWeight;
 
 
@@ -38,11 +42,13 @@ namespace ws.winx.ik
 		public Transform RHETarget;
 		
 		[Range(0,1)]
+		
 		public float RHEPositionWeight;
+
 		
 		public Vector3 RHEPositionOffset;
 		
-	
+		
 		public float RHERotationWeight;
 
 
@@ -78,8 +84,44 @@ namespace ws.winx.ik
 		}
 
 
+		public void Reset(){
+
+			Debug.Log ("Reset FBBIKAnimatedValues");
+			ik.solver.leftHandEffector.target=LHETarget=null;
+			
+
+			ik.solver.leftHandEffector.positionWeight=LHEPositionWeight = 0;
+			ik.solver.leftHandEffector.position = Vector3.zero;
+			ik.solver.leftHandEffector.rotationWeight=LHERotationWeight = 0;
+
+			
+			LHEPositionOffset=Vector3.zero;
+		
+			
 
 
+			
+			RHETarget=null;
+			
+			
+
+			
+			RHEPositionOffset=Vector3.zero;
+
+			//effectors update
+			ik.solver.rightHandEffector.positionWeight = RHEPositionWeight = 0;
+			//ik.solver.rightHandEffector.positionOffset ???
+			ik.solver.rightHandEffector.target = RHETarget = null;
+			ik.solver.rightHandEffector.position = Vector3.zero;
+			ik.solver.rightHandEffector.rotationWeight = RHERotationWeight = 0;
+
+			
+
+
+			UpdateSolver ();
+
+		}
+		
 		
 		public void UpdateSolver ()
 		{

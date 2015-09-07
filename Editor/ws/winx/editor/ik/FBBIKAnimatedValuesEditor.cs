@@ -23,6 +23,8 @@ namespace ws.winx.editor.ik
 						ikAnimatedValues.Initate ();
 				}
 
+				
+
 				public override void OnInspectorGUI ()
 				{
 

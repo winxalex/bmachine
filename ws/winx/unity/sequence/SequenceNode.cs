@@ -23,7 +23,6 @@ namespace ws.winx.unity.sequence
 				[HideInInspector]
 				public SequenceNodeEvent
 						onUpdate = new SequenceNodeEvent ();
-
 				public int index = -1;
 				public float transition = 0f;
 				public bool loop;
@@ -41,8 +40,9 @@ namespace ws.winx.unity.sequence
 				float[] _particleEmitTimeCurrent;
 				float[] _particleEmitTime;
 				ParticleSystem[] _particleSystems;
-				FBBIKAnimatedValues fbbikAnimatedValues;
-				
+				FBBIKAnimatedValues _fbbikAnimatedValues;
+
+								
 
 
 				//TODO use them for resize
@@ -228,10 +228,9 @@ namespace ws.winx.unity.sequence
 										
 										} else if (source is  AnimationClip) {
 
-												if (source is AnimationClip && (this.fbbikAnimatedValues = target.GetComponent<FBBIKAnimatedValues> ()) != null) {
-													
-														this.fbbikAnimatedValues.Initate ();
-												}
+											_fbbikAnimatedValues = target.GetComponent<FBBIKAnimatedValues> ();
+						
+
 											
 
 												Animator animator = target.GetComponent<Animator> ();
@@ -330,6 +329,9 @@ namespace ws.winx.unity.sequence
 														Debug.LogWarning ("SequenceNode>Missing Renderer to render MovieTexture on target " + target.name);
 										} else if (source is AnimationClip) {
 
+												
+
+
 												//hard stop
 												Animator animator = target.GetComponent<Animator> ();
 															
@@ -355,11 +357,15 @@ namespace ws.winx.unity.sequence
 						}
 
 					
-
+						
+						
 
 						onStop.Invoke (this);
 
 				}
+
+
+				
 
 				public virtual void DoUpdate ()
 				{
@@ -367,14 +373,11 @@ namespace ws.winx.unity.sequence
 								onUpdate.Invoke (this);
 
 
-						if (channel.type == SequenceChannel.SequenceChannelType.Animation && this.fbbikAnimatedValues != null) {
+						if (_fbbikAnimatedValues != null) {
 
-								this.fbbikAnimatedValues.UpdateSolver ();
+								_fbbikAnimatedValues.UpdateSolver ();
 				
-				
-				
-				
-				
+
 						}
 
 

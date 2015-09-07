@@ -535,7 +535,7 @@ namespace ws.winx.editor.windows
 								
 								
 								Stop ();//cos target can be "paused" in some animation time t
-								//if not stop animation mode reset resets to Vector3D.zero
+								
 								
 								__sequence.timeCurrent = 0f;
 								
@@ -628,7 +628,8 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				private void OnPlayModeStateChange ()
 				{
-						if (!__isPlayMode && EditorApplication.isPlaying) {
+
+						if (!__isPlayMode && EditorApplication.isPlaying && !EditorApplication.isPaused) {
 
 								///TODO check this if not blocking playmode
 				 
@@ -1000,27 +1001,11 @@ namespace ws.winx.editor.windows
 				
 						} else {//PAUSE 
 
+								Stop (true);//soft stop preserve gameobject transforms after stop animation mode (something like "pause", not reseting GameObjets as stop record do)
+
 								
-								__sequence.Stop (__sequence.playForward);
 
-
-								StopAllVideo ();
-								
-								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
-
-								//Normal gameobjects do not preserve transform when animaiton mode is stoped as characters
-								//so preserving
-								foreach (SequenceChannel channel in __sequence.channels) {
-										PreserveTransformAtPause (channel);
-								}
-
-
-								AnimationMode.StopAnimationMode ();
-								
-								AudioUtilW.StopAllClips ();
-				
-				
-				
+					
 				
 								__sequence.SequenceNodeStart -= onSequenceNodeStart;
 			
@@ -1038,27 +1023,64 @@ namespace ws.winx.editor.windows
 			
 
 				/// <summary>
-				/// Stop Sequence playing.
+				/// Stop Sequence
 				/// </summary>
-				private static void Stop ()
+				private static void Stop (bool pause=false)
 				{
 						//Debug.Log ("Stop() ThreadID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+
+
+
 			
+
+
+						if (pause)
+			//Normal gameobjects do not preserve transform when animaiton mode is stoped as characters
+			//so preserving
+								foreach (SequenceChannel channel in __sequence.channels) {
+										PreserveTransformAtPause (channel);
+								}
+			
+			
+						AnimationMode.StopAnimationMode ();
+			
+						AudioUtilW.StopAllClips ();
+			
+
+				
 						if (__sequence != null) {
 								__sequence.Stop (__sequence.playForward);
 				
 								__sequence.StopRecording ();
 								StopAllVideo ();
+						
+			
+								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+
+								//Normal gameobjects do not preserve transform when animaiton mode is stoped as characters
+								//so preserving
+								foreach (SequenceChannel channel in __sequence.channels) {
+										PreserveTransformAtPause (channel);
+								}
+
+								AnimationMode.StopAnimationMode ();
+
+								if(pause)
+								foreach (SequenceChannel channel in __sequence.channels) {
+										ApplyTransformAtPause (channel);
+								}
+
+								//RESET 
+								FBBIKAnimatedValues fbbikAnimatedValues;
+								foreach (SequenceChannel channel in __sequence.channels)
+
+										if (channel.type == SequenceChannel.SequenceChannelType.Animation && (fbbikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ()) != null)
+												fbbikAnimatedValues.Reset ();//as this component is binded to FFBIK component need to reset IK values
+			
 						}
-			
-						Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
-						AnimationMode.StopAnimationMode ();
-			
-						AudioUtilW.StopAllClips ();
-			
-			
-			
-			
+
+
+
 				}
 			
 
@@ -1702,27 +1724,11 @@ namespace ws.winx.editor.windows
 						__sequence.timeCurrent = time;
 
 					
-					
+					if(!__sequence.isRecording)
 						StartRecording ();
 
 
-//						if (!AnimationMode.InAnimationMode ()) {
-//								AnimationMode.StartAnimationMode ();
-//								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
-//								
-////								foreach (SequenceChannel channel in __sequence.channels) {
-////										ReOffsetNodesAnimation (channel);
-////								}
-//				
-//								//SceneView.RepaintAll();
-//
-//								if (SceneView.currentDrawingSceneView != null)
-//										SceneView.currentDrawingSceneView.Repaint ();
-//								
-//								//Debug.Log ("Animation mode:" + AnimationMode.InAnimationMode ());
-//								
-//								
-//						} 
+ 
 			
 						SampleClipNodesAt (__sequence.timeCurrent);
 
@@ -3150,17 +3156,19 @@ namespace ws.winx.editor.windows
 				{
 
 
-						if (Selection.activeGameObject != null) {
+			if (Selection.activeGameObject != null && Selection.activeGameObject!=__sequenceGameObject) {
 
-
-								Stop ();
+								
+								
 
 								Sequence sequence = Selection.activeGameObject.GetComponent<Sequence> ();
 								if (sequence != null) {
 										__sequenceGameObject = sequence.gameObject;
 										__sequence = sequence;
 
-										if (SceneView.currentDrawingSceneView != null)
+									if(__sequence.isPlaying || __sequence.isRecording) Stop ();
+					
+									if (SceneView.currentDrawingSceneView != null)
 												SceneView.currentDrawingSceneView.Repaint ();
 									
 										EditorWindow.GetWindow<SequenceEditorWindow> ().Repaint ();

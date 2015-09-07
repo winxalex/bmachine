@@ -11,6 +11,7 @@ namespace ws.winx.unity
 	public class EditorClipBinding:ScriptableObject{
 
 
+
 		public Color color=Color.green;
 		public bool visible;
 

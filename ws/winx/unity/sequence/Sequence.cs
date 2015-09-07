@@ -301,28 +301,7 @@ namespace ws.winx.unity.sequence
 
 			
 
-				void UpdateMe ()
-				{
 			
-						SequenceChannel channel1 = this.channels [0];
-						GameObject target = GameObject.Find ("emitter");// channel1.target;
-			
-						ParticleSystem system = target.GetComponent<ParticleSystem> ();
-						if (testBool && !system.isPlaying
-			    
-			    ) {
-				
-								//system.Stop();
-								system.Simulate (0f);
-								system.Play ();
-								Debug.Log ("play " + system.isPlaying +
-										" " + system.IsAlive ()
-								);
-						} else
-								Debug.Log ("Update" + system.isPlaying +
-										" " + system.IsAlive ()
-								);
-				}
 
 				/// <summary>
 				/// Update this instance.
@@ -332,7 +311,7 @@ namespace ws.winx.unity.sequence
 				{
 
 
-						//UpdateMe ();
+						
 		
 
 
@@ -461,6 +440,8 @@ namespace ws.winx.unity.sequence
 								foreach (SequenceNode node in channel.nodes) {
 										if (node.isRunning)
 												node.Stop ();
+
+										
 								}	
 
 						//TODO handle forward=false loop and stuff
