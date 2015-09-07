@@ -664,6 +664,13 @@ namespace ws.winx.editor.windows
 
 						}
 					
+//						foreach (UndoPropertyModification undoP in modifications) {
+//								FBBIKAnimatedValues ikAnimatedValues = undoP.propertyModification.target as FBBIKAnimatedValues;
+//								if (ikAnimatedValues != null)
+//										ikAnimatedValues.UpdateSolver ();
+//
+//						}
+
 					
 						return modifications;
 				}
@@ -674,6 +681,143 @@ namespace ws.winx.editor.windows
 //								__sequence.LateUpdateSequence ();
 //
 //				}
+
+				public static void UpdateSequence(){
+			double time = __sequence.timeCurrent;
+			
+			Transform rootBoneTransform;
+			
+			
+			SequenceNode node = null;
+			Animator animator;
+			double timeCurrent = 0f;
+			
+		
+			
+			AnimationMode.BeginSampling ();
+			
+			//find changels of type Animation and find first node in channel that is in time or nearest node left of time
+			foreach (SequenceChannel channel in __sequence.channels) {
+				
+				timeCurrent = time;
+				
+				
+				if (channel.target != null) {
+					
+					
+					//node = channel.nodes.FirstOrDefault (itm => time - itm.startTime >= 0 && time <= itm.startTime + itm.duration);
+					
+					node = null;
+					
+					
+					
+					//find node in time (node in which time is in range between nodeStartTime and nodeEndTime)
+					foreach (SequenceNode n in channel.nodes) {
+						
+						//find first node which has n.startTime >= then current time
+						if (timeCurrent - n.timeStart >= 0) {
+							//check if time comply to upper boundary
+							if (timeCurrent <= n.timeStart + n.duration) {
+								node = n;
+								break;
+							} else { 
+								//if channel is of animation type and there is next node by time is between prev and next => snap time to prev node endTime
+								if (channel.type == SequenceChannel.SequenceChannelType.Animation 
+								    && n.index + 1 < channel.nodes.Count && timeCurrent < channel.nodes [n.index + 1].timeStart
+								    
+								    ) {
+									
+									node = n;
+									timeCurrent = n.timeStart + n.duration;
+									break;
+									
+								}
+								
+							}
+						}
+						
+					}
+					
+					
+					if (node != null) {
+						if (channel.type == SequenceChannel.SequenceChannelType.Animation) {
+							
+							
+							
+							
+							animator = channel.target.GetComponent<Animator> ();
+							
+							if (animator == null) {
+								animator = channel.target.AddComponent<Animator> ();
+							}
+							
+							animator.runtimeAnimatorController = channel.runtimeAnimatorController;
+							
+							Quaternion boneRotation = Quaternion.identity;
+							
+							
+							
+							
+							
+							AnimationMode.SampleAnimationClip (channel.target, node.source as AnimationClip, (float)(timeCurrent - node.timeStart));
+							
+							
+							
+							
+							
+							///!!! It happen that Unity change the ID of channel or something happen and channal as key not to be found
+							
+							
+							
+							//						Correction is needed for root bones as Animation Mode doesn't respect current GameObject transform position,rotation
+							//						=> shifting current boneTransform position as result of clip animation, to offset of orginal position before animation(alerady saved)
+							if ((rootBoneTransform = channel.targetBoneRoot) != null) {
+								//	Debug.Log ("node:" + node.name + " time:" + time + " pos:" + rootBoneTransform.position);
+								rootBoneTransform.position = rootBoneTransform.position + node.clipBinding.boneRootPositionOffset;
+								
+								rootBoneTransform.rotation = node.clipBinding.boneRootRotationOffset;
+								//	Debug.Log ("node:" + node.name + " time:" + time + "After pos:" + rootBoneTransform.position);
+							} 
+							
+							
+							
+							
+							
+							var ikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ();
+							if (ikAnimatedValues != null) {
+								
+								ikAnimatedValues.UpdateSolver ();
+							}		
+							
+							
+							
+						} else if (channel.type == SequenceChannel.SequenceChannelType.Audio) {
+							
+							AudioClip audioClip = node.source as AudioClip;
+							
+							
+							int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.timeStart) / audioClip.length));
+							
+							AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+							
+							
+						} else if (channel.type == SequenceChannel.SequenceChannelType.Video) {
+							///!!!I don't know the way of  Sampling or timeshifting of MovieTexture 
+							
+							
+						} else if (channel.type == SequenceChannel.SequenceChannelType.Particle) {
+							ParticleSystem particleSystem = node.source as ParticleSystem;
+							particleSystem.Simulate ((float)__sequence.timeCurrent - node.timeStart, true);
+						}
+					}
+				}
+			}
+			
+			
+			
+			AnimationMode.EndSampling ();
+
+				}
 
 				/// <summary>
 				/// Update this instance.
@@ -689,10 +833,12 @@ namespace ws.winx.editor.windows
 
 						
 		
-						if (!EditorApplication.isPlaying && (__sequence != null) && SequenceEditorWindow.__sequence.isPlaying) {//?TODO ?? enters here even isPlaying is false		
+						if (!EditorApplication.isPlaying && (__sequence != null) && __sequence.isPlaying) {//?TODO ?? enters here even isPlaying is false		
 							
-							//	Debug.Log ("Update sequence from editor");
+								
+								Debug.Log ("Update sequence from editor");
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
+								
 
 
 								//Debug.Log ((float)__sequence.timeCurrent + "__" + __sequence.duration + " " + __sequence.isPlaying + " " + __sequence.name);
@@ -1699,12 +1845,12 @@ namespace ws.winx.editor.windows
 					
 								foreach (SequenceNode n in channel.nodes) {
 
-					//check AnimationClip settings from previous node
-					clipSettings=AnimationUtility.GetAnimationClipSettings(channel.nodes [n.index].source as AnimationClip);
+										//check AnimationClip settings from previous node
+										clipSettings = AnimationUtility.GetAnimationClipSettings (channel.nodes [n.index].source as AnimationClip);
 
 												
 							
-									    if (n.index > 0) {
+										if (n.index > 0) {
 
 												//get sample of animation clip of previous node at the end t=duration[s]
 												AnimationMode.SampleAnimationClip (channel.target, channel.nodes [n.index - 1].source as AnimationClip, channel.nodes [n.index - 1].duration);
@@ -1734,8 +1880,8 @@ namespace ws.winx.editor.windows
 
 										//Debug.Log ("node:" + n.name + "After pos:" + rootBoneTransform.position);
 
-										if(clipSettings.keepOriginalOrientation)
-											rotationPrev = rootBoneTransform.rotation;	
+										if (clipSettings.keepOriginalOrientation)
+												rotationPrev = rootBoneTransform.rotation;	
 
 										
 										Vector3 positionAfter = rootBoneTransform.position;
@@ -1957,20 +2103,7 @@ namespace ws.winx.editor.windows
 						
 						AnimationMode.EndSampling ();
 
-//						//Debug.Log ("2:"+ani.bodyRotation.eulerAngles.ToString ()+" "+ani.rootRotation.eulerAngles.ToString());
-//						AnimationModeUtility.SampleClipBindingAt (targets, clips, times);
-//
-//
-//
-//						
-//						int targetsNum = targets.Count;
-//						Transform rootBoneTransform;
-//						for (int i=0; i<targetsNum; i++) {
-//
-//
-//								if ((rootBoneTransform = targets [i].GetRootBone ()) != null)
-//										rootBoneTransform.position = rootBoneTransform.position + nodes [i].boneOrginalPositionOffset;
-//						}
+
 		
 				
 						
@@ -2013,7 +2146,7 @@ namespace ws.winx.editor.windows
 
 							
 								//make all area from end of label and Event pad to botton droppable
-										sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
+								sequenceDropSourceEventHandler (new Rect (rect.x, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.width, rect.height - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT), Math.Min ((int)((Event.current.mousePosition.y - rect.y - TIME_LABEL_HEIGHT - EVENT_PAD_HEIGHT) / NODE_RECT_HEIGHT), __sequence.channels.Count));
 			
 								Handles.color = Color.white;
 
@@ -2514,7 +2647,7 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				/// <param name="area">Area.</param>
 				/// <param name="channel">Channel.</param>
-				public void sequenceDropSourceEventHandler (Rect area, int channel)
+				private void sequenceDropSourceEventHandler (Rect area, int channel)
 				{
 
 						if (__sequence.isPlaying || __sequence.isRecording)
@@ -2950,7 +3083,7 @@ namespace ws.winx.editor.windows
 				/// Ons the sequence end.
 				/// </summary>
 				/// <param name="sequence">Sequence.</param>
-				public static void onSequenceEnd (Sequence sequence)
+				public static void onSequenceEnd (object data)
 				{
 						
 						Stop ();

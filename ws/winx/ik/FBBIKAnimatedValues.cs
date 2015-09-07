@@ -31,6 +31,25 @@ namespace ws.winx.ik
 		public float LHERotationWeight;
 
 
+		/// <summary>
+		/// The Left Hand Effector
+		/// </summary>
+		
+		public Transform RHETarget;
+		
+		[Range(0,1)]
+		public float RHEPositionWeight;
+		
+		public Vector3 RHEPositionOffset;
+		
+	
+		public float RHERotationWeight;
+
+
+
+
+
+
 
 		bool _isInitated=false;
 
@@ -69,12 +88,16 @@ namespace ws.winx.ik
 
 
 			if (LHETarget != null) {
+
 								//effectors update
 								ik.solver.leftHandEffector.positionWeight = LHEPositionWeight;
 
 								ik.solver.leftHandEffector.position = LHEPositionOffset + LHETarget.position;
 
-								//ik.solver.leftFootEffector.positionWeight = 0;
+								
+								
+				
+				//ik.solver.leftFootEffector.positionWeight = 0;
 
 												//OffsetX
 				//			ik.solver.leftHandEffector.position += (positionOffsetSpace != null? positionOffsetSpace.rotation: ik.solver.GetRoot().rotation) * Vector3.right * LHEPositionOffset.x;
@@ -88,8 +111,15 @@ namespace ws.winx.ik
 						
 			}
 
-
-
+			if (RHETarget != null) {
+								//effectors update
+								ik.solver.rightHandEffector.positionWeight = RHEPositionWeight;
+								//ik.solver.rightHandEffector.positionOffset ???
+								ik.solver.rightHandEffector.position = RHEPositionOffset + RHETarget.position;
+						}
+			
+			
+			
 			if(!Application.isPlaying)//only update in Edit mode (In Playmode FullBodyBipedIK component take cares of update)
 			ik.solver.Update ();
 		}

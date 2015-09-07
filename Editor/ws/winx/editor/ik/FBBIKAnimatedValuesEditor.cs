@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEditor;
 using ws.winx.ik;
 using ws.winx.editor.extensions;
+using ws.winx.editor.windows;
 
 namespace ws.winx.editor.ik
 {
@@ -28,10 +29,17 @@ namespace ws.winx.editor.ik
 						
 								EditorGUI.BeginChangeCheck ();
 								base.OnInspectorGUI ();
-								if (EditorGUI.EndChangeCheck ()) {
-										Event.current.Use ();
 
-										if (!EditorApplication.isPlaying && !AnimationMode.InAnimationMode ()) {
+			//
+								
+		
+
+								if (EditorGUI.EndChangeCheck ()) {
+
+										Debug.Log ("inspector");
+
+
+										if (!EditorApplication.isPlaying && !AnimationMode.InAnimationMode ()){
 										//Reset
 										Vector3 position = ikAnimatedValues.ik.gameObject.transform.position;
 										Quaternion rotation = ikAnimatedValues.ik.gameObject.transform.rotation;
@@ -39,10 +47,15 @@ namespace ws.winx.editor.ik
 										ikAnimatedValues.ik.gameObject.transform.position = position;
 										ikAnimatedValues.ik.gameObject.transform.rotation = rotation;
 
-
+							
 										ikAnimatedValues.UpdateSolver ();
 
+										
+
 								}
+
+
+
 						}
 
 

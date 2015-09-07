@@ -8,7 +8,7 @@ using UnityEngine.Events;
 namespace ws.winx.unity.sequence
 {
 		[Serializable]
-		public class SequenceEvent:UnityEvent<Sequence>
+		public class SequenceEvent:UnityEvent<object>
 		{
 				public double time;
 
@@ -17,4 +17,8 @@ namespace ws.winx.unity.sequence
 
 
 		}
+
+
+
+		
 }
