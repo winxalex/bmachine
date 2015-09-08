@@ -87,32 +87,24 @@ namespace ws.winx.ik
 		public void Reset(){
 
 			Debug.Log ("Reset FBBIKAnimatedValues");
-			ik.solver.leftHandEffector.target=LHETarget=null;
+
 			
 
 			ik.solver.leftHandEffector.positionWeight=LHEPositionWeight = 0;
-			ik.solver.leftHandEffector.position = Vector3.zero;
 			ik.solver.leftHandEffector.rotationWeight=LHERotationWeight = 0;
-
+			ik.solver.leftHandEffector.target=LHETarget=null;
+			ik.solver.leftHandEffector.positionOffset=LHEPositionOffset=Vector3.zero;
 			
-			LHEPositionOffset=Vector3.zero;
+			
 		
 			
 
 
-			
-			RHETarget=null;
-			
-			
 
-			
-			RHEPositionOffset=Vector3.zero;
-
-			//effectors update
+			ik.solver.rightHandEffector.rotationWeight=RHERotationWeight = 0;
 			ik.solver.rightHandEffector.positionWeight = RHEPositionWeight = 0;
-			//ik.solver.rightHandEffector.positionOffset ???
 			ik.solver.rightHandEffector.target = RHETarget = null;
-			ik.solver.rightHandEffector.position = Vector3.zero;
+			ik.solver.rightHandEffector.positionOffset = RHEPositionOffset=Vector3.zero;
 			ik.solver.rightHandEffector.rotationWeight = RHERotationWeight = 0;
 
 			
@@ -129,17 +121,14 @@ namespace ws.winx.ik
 				this.Initate();
 
 
-			if (LHETarget != null) {
+
 
 								//effectors update
 								ik.solver.leftHandEffector.positionWeight = LHEPositionWeight;
 
-								ik.solver.leftHandEffector.position = LHEPositionOffset + LHETarget.position;
-
-								
-								
-				
-				//ik.solver.leftFootEffector.positionWeight = 0;
+								ik.solver.leftHandEffector.positionOffset = LHEPositionOffset;
+								ik.solver.leftHandEffector.target = LHETarget;
+					
 
 												//OffsetX
 				//			ik.solver.leftHandEffector.position += (positionOffsetSpace != null? positionOffsetSpace.rotation: ik.solver.GetRoot().rotation) * Vector3.right * LHEPositionOffset.x;
@@ -151,14 +140,15 @@ namespace ws.winx.ik
 
 
 						
-			}
 
-			if (RHETarget != null) {
+
+
 								//effectors update
 								ik.solver.rightHandEffector.positionWeight = RHEPositionWeight;
-								//ik.solver.rightHandEffector.positionOffset ???
-								ik.solver.rightHandEffector.position = RHEPositionOffset + RHETarget.position;
-						}
+								ik.solver.rightHandEffector.positionOffset = RHEPositionOffset;
+								ik.solver.rightHandEffector.target = RHETarget;
+								ik.solver.rightHandEffector.rotationWeight = RHERotationWeight;
+						
 			
 			
 			
