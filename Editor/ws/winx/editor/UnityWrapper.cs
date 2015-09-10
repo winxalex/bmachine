@@ -2754,7 +2754,12 @@ namespace ws.winx.editor
 //								framerate
 //			});
 
-						TimeRuler (new Rect (position.x, position.y, position.width, timeRullerLabelHeight), framerate);
+						float vSliderW = 0f;
+						if (this.vSlider)
+								vSliderW = 16f;
+						
+
+						TimeRuler (new Rect (position.x, position.y, position.width - vSliderW, timeRullerLabelHeight), framerate);
 
 			
 						EndViewGUI_MethodInfo.Invoke (__instance, null);

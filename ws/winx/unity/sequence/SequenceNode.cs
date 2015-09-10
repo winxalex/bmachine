@@ -27,7 +27,7 @@ namespace ws.winx.unity.sequence
 				public float transition = 0f;
 				public bool loop;
 				public float volume = 1f;
-
+				public int layerIndex;
 				
 				
 
@@ -246,10 +246,10 @@ namespace ws.winx.unity.sequence
 
 												if (transition > 0) {
 														Debug.Log ("Crossfade " + this.name);
-														animator.CrossFade (stateNameHash, transition, 0, 0f);
+														animator.CrossFade (stateNameHash, transition, layerIndex, 0f);
 												} else {
 														Debug.Log ("Play " + this.name);
-														animator.Play (stateNameHash, 0, 0f);
+														animator.Play (stateNameHash, layerIndex, 0f);
 												}
 										
 

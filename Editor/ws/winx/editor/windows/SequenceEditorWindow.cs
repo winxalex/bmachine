@@ -32,7 +32,7 @@ namespace ws.winx.editor.windows
 		/// for custome bone animation I used uncheked Bake rotation in pose
 		/// 
 		/// FFBIKAnimatedValues should be in channel after channels containing animation nodes manipulated by IK
-		/// 
+		/// FFBIKAnimatedValues animation node should have been same or less length then animation node manipulated by IK
 		/// If you animate target of FBBIKAnimatedValues double check if animation have saved it
 		/// 
 		/// 
@@ -175,8 +175,8 @@ namespace ws.winx.editor.windows
 
 								
 								__timeAreaW.hSlider = true;
-								__timeAreaW.vSlider = false;
-								__timeAreaW.vRangeLocked = true;
+								__timeAreaW.vSlider = true;
+								//__timeAreaW.vRangeLocked = true;
 								__timeAreaW.hRangeMin = 0f;
 								//__timeAreaW.hRangeMax=3f;
 
@@ -463,10 +463,24 @@ namespace ws.winx.editor.windows
 								
 								nodeRect.yMax = nodeRect.yMin + NODE_RECT_HEIGHT;
 								nodeRect.yMin += __keyframeMarker.image.height;
+
+								//do not draw if it is ouside visible area
+								
+								nodeRect.yMax = Mathf.Clamp (nodeRect.yMax, rect.yMin, rect.yMax);
+								nodeRect.xMax = Mathf.Clamp (nodeRect.xMax, rect.xMin, rect.xMax);
+								nodeRect.yMin = Mathf.Clamp (nodeRect.yMin, rect.yMin, rect.yMax);
+								nodeRect.xMin = Mathf.Clamp (nodeRect.xMin, rect.xMin, rect.xMax);
+
 								GUI.Box (nodeRect, "", "TL LogicBar 0");
 								
 								
 						} else {
+								//do not draw if it is ouside visible area
+								
+								nodeRect.yMax = Mathf.Clamp (nodeRect.yMax, rect.yMin, rect.yMax);
+								nodeRect.xMax = Mathf.Clamp (nodeRect.xMax, rect.xMin, rect.xMax);
+								nodeRect.yMin = Mathf.Clamp (nodeRect.yMin, rect.yMin, rect.yMax);
+								nodeRect.xMin = Mathf.Clamp (nodeRect.xMin, rect.xMin, rect.xMax);
 								GUI.Box (nodeRect, "", "TL LogicBar 0");
 						}
 
@@ -1086,7 +1100,7 @@ namespace ws.winx.editor.windows
 								FBBIKAnimatedValues fbbikAnimatedValues;
 								foreach (SequenceChannel channel in __sequence.channels)
 
-										if (channel.type == SequenceChannel.SequenceChannelType.Animation && (fbbikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ()) != null)
+										if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && (fbbikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ()) != null)
 												fbbikAnimatedValues.Reset ();//as this component is binded to FFBIK component need to reset IK values
 			
 						}
@@ -1120,14 +1134,15 @@ namespace ws.winx.editor.windows
 
 						rect.x = this.position.width * 0.2f;
 						rect.width = this.position.width - rect.x;//80% for timeArea
+						
 
 						rect.y = 0;
 
 						
 						if (__sequence != null)
-								OnTimelineGUI (rect, __sequence.frameRate);
+								DoTimelineGUI (rect, __sequence.frameRate);
 						else
-								OnTimelineGUI (rect, 30);
+								DoTimelineGUI (rect, 30);
 
 						rect.width = rect.x;//20% for settings
 						rect.x = 0;
@@ -1600,6 +1615,7 @@ namespace ws.winx.editor.windows
 				{
 						eventRect.y = EVENT_PAD_HEIGHT;
 						eventRect.height = EVENT_PAD_HEIGHT;
+						
 
 					
 
@@ -2107,10 +2123,17 @@ namespace ws.winx.editor.windows
 										
 														AudioClip audioClip = node.source as AudioClip;
 
+//														if(!node.isRunning)
+//														{
+//
+//															int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.timeStart) / audioClip.length));
+//													     
+//															AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+//															AudioUtilW.PlayClip(audioClip,sampleStart,node.loop);
+//														}
 														
-														int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.timeStart) / audioClip.length));
-												     
-														AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
+
+														
 														
 										
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Video) {
@@ -2158,7 +2181,7 @@ namespace ws.winx.editor.windows
 				/// </summary>
 				/// <param name="rect">Rect.</param>
 				/// <param name="frameRate">Frame rate.</param>
-				private void OnTimelineGUI (Rect rect, float frameRate)
+				private void DoTimelineGUI (Rect rect, float frameRate)
 				{
 						Handles.color = new Color (0.5f, 0.5f, 0.5f, 0.2f);
 					
@@ -2193,9 +2216,14 @@ namespace ws.winx.editor.windows
 								__timeAreaW.DoTimeArea (rect, 3);
 					
 						
-						
+						if (__timeAreaW.vSlider)
+								rect.width -= 16f;//slider width =16f
+						if (__timeAreaW.hSlider)
+								rect.height -= 16f;//slider width =16f
 
 						if (__sequence != null) {
+
+							
 
 								//DRAW EVENTS GUI
 								DoEventGUI (rect);
@@ -2589,7 +2617,7 @@ namespace ws.winx.editor.windows
 			
 			
 						if (sequenceChannel.runtimeAnimatorController != null)//remove AnimatorState
-								(sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).RemoveStateWith (node.stateNameHash);
+								(sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController).RemoveStateWith (node.stateNameHash, node.layerIndex);
 			
 						int nodesCount = sequenceChannel.nodes.Count;
 			
@@ -2806,12 +2834,38 @@ namespace ws.winx.editor.windows
 										return;
 								}
 						}
+
+
+						//SHOW SELECTION LAYER DIALOGS
+						UnityEditor.Animations.AnimatorController animatorController = sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+
+						int layerIndex = 0;
+			
+						if (animatorController.layers.Length == 1) {
+
+								if (!EditorUtility.DisplayDialog ("Layer Selection", "Select Layer", animatorController.layers [0].name, "New Layer"))
+										layerIndex = 1;
+						} else if (animatorController.layers.Length == 2) {
+
+								layerIndex = EditorUtility.DisplayDialogComplex ("Layer Selection", "Select Layer", animatorController.layers [0].name, animatorController.layers [1].name, "New Layer");
+						} else {
+							
+								while (layerIndex<animatorController.layers.Length && !EditorUtility.DisplayDialog ("Layer Selection", "Select Layer", animatorController.layers [lay].name, "Next")) {
+										layerIndex++;
+								}
+					
+					
+						}
+						
+
+		
+
 			
 			
 						//Vector2
 						//TODO current logic prevents overlapping on drop (might be ehnaced to allow transition overlap in Animation's node to some meassure)
-						//and if they overlapp move start time to fit
-						SequenceNode node = CreateNewSequenceNode (pos, droppedObject, sequenceChannel);
+						//and if they overlapp move start time to fit (there is bug)
+						SequenceNode node = CreateNewSequenceNode (pos, droppedObject, sequenceChannel, layerIndex);
 			
 			
 						if (node != null) {
@@ -2860,7 +2914,7 @@ namespace ws.winx.editor.windows
 				/// <param name="pos">Position.</param>
 				/// <param name="source">Source.</param>
 				/// <param name="channel">Channel.</param>
-				private static SequenceNode CreateNewSequenceNode (Vector2 pos, UnityEngine.Object source, SequenceChannel sequenceChannel)
+				private static SequenceNode CreateNewSequenceNode (Vector2 pos, UnityEngine.Object source, SequenceChannel sequenceChannel, int layerIndex=0)
 				{
 
 
@@ -2909,19 +2963,23 @@ namespace ws.winx.editor.windows
 								UnityEditor.Animations.AnimatorController animatorController = node.channel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
 
 
-					
+
+								if (animatorController.layers.Length - 1 < layerIndex)
+										animatorController.AddLayer ("New Layer " + layerIndex);
+
 								//create and add AnimatorState in controller from node.source
-								UnityEditor.Animations.AnimatorState stateCurrent = animatorController.AddMotion ((source as Motion));
+								UnityEditor.Animations.AnimatorState stateCurrent = animatorController.AddMotion ((source as Motion), layerIndex);
 
 								//save AnimatorState ID hase
 								node.stateNameHash = stateCurrent.nameHash;
+								node.layerIndex = layerIndex;
 
 								node.clipBinding = ScriptableObject.CreateInstance<EditorClipBinding> ();
 				
 								//if stateCurrent is first and default create empty state for default
-								if (animatorController.layers [0].stateMachine.defaultState == stateCurrent) {
-										stateCurrent = animatorController.layers [0].stateMachine.AddState ("DefaultState");
-										animatorController.layers [0].stateMachine.defaultState = stateCurrent;
+								if (animatorController.layers [layerIndex].stateMachine.defaultState == stateCurrent) {
+										stateCurrent = animatorController.layers [layerIndex].stateMachine.AddState ("DefaultState");
+										animatorController.layers [layerIndex].stateMachine.defaultState = stateCurrent;
 								}
 
 
@@ -2995,20 +3053,23 @@ namespace ws.winx.editor.windows
 								clip.name = Path.GetFileNameWithoutExtension (path);		
 								AssetDatabase.CreateAsset (clip, AssetDatabaseUtility.AbsoluteUrlToAssets (path));
 								AssetDatabase.SaveAssets ();
-								clip.frameRate = __sequence.frameRate;
+
+								if (__sequence != null) {
+										clip.frameRate = __sequence.frameRate;
 
 
-								//add to current channel after last node
-								Vector2 pos = Vector2.zero;
-								if (__sequence.channelSelected != null && __sequence.channelSelected.type == SequenceChannel.SequenceChannelType.Animation) {
-										SequenceNode node = __sequence.channelSelected.nodes [__sequence.channelSelected.nodes.Count - 1];
-										pos.x = __timeAreaW.TimeToPixel (node.timeStart + node.duration + 1, __timeAreaW.rect);
+										//add to current channel after last node
+										Vector2 pos = Vector2.zero;
+										if (__sequence.channelSelected != null && __sequence.channelSelected.type == SequenceChannel.SequenceChannelType.Animation) {
+												SequenceNode node = __sequence.channelSelected.nodes [__sequence.channelSelected.nodes.Count - 1];
+												pos.x = __timeAreaW.TimeToPixel (node.timeStart + node.duration + 1, __timeAreaW.rect);
 									
-								} else {
-										pos.x = __timeAreaW.TimeToPixel (1f, __timeAreaW.rect);
-								}
+										} else {
+												pos.x = __timeAreaW.TimeToPixel (1f, __timeAreaW.rect);
+										}
 								
-								AddDropToNewOrExistingChannel (clip, typeof(AnimationClip), __sequence.channelSelected, pos);
+										AddDropToNewOrExistingChannel (clip, typeof(AnimationClip), __sequence.channelSelected, pos);
+								}
 
 						
 						}
@@ -3058,7 +3119,11 @@ namespace ws.winx.editor.windows
 						Debug.Log ("onSequenceNodeStart " + node.name);
 			          
 						if (node.source is AudioClip) {
-								AudioUtilW.PlayClip (node.source as AudioClip, 0, node.loop);//startSample doesn't work in this function????
+								AudioClip audioClip = node.source as AudioClip;
+								int sampleStart = (int)Math.Ceiling (audioClip.samples * ((__sequence.timeCurrent - node.timeStart) / audioClip.length));
+																	
+								AudioUtilW.PlayClip (node.source as AudioClip, sampleStart, node.loop);//startSample doesn't work in this function????
+								AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);//sample function should follow to play from startSample positionAudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
 						} else if (node.source is MovieTexture) {
 								MovieTexture movieTexture = node.source as MovieTexture;
 								if (node.channel.target.tag == Tags.MAIN_CAMERA) {//==Camera.main
