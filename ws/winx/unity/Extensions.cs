@@ -599,10 +599,11 @@ namespace ws.winx.unity
 				public static  UnityEditor.Animations.AnimatorState RemoveStateWith (this UnityEditor.Animations.AnimatorController controller, int nameHash, int layerIndex=0)
 				{
 				
-						UnityEditor.Animations.AnimatorState state = controller.GetStateBy (nameHash);
+						UnityEditor.Animations.AnimatorState state = controller.GetStateBy (nameHash,layerIndex);
 
 						if (state != null) {
 								controller.layers [layerIndex].stateMachine.RemoveState (state);
+									
 								return state;
 						}
 				
