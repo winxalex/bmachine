@@ -11,6 +11,14 @@ namespace ws.winx.unity.sequence
 		[System.Serializable]
 		public class SequenceNode:ScriptableObject
 		{
+
+		[NonSerialized]
+		/// <summary>
+		/// The name of Animated the property.
+		/// </summary>
+		public string propertyName; 
+
+
 				[HideInInspector]
 				public SequenceNodeEvent
 						onStart = new SequenceNodeEvent ();
@@ -226,7 +234,7 @@ namespace ws.winx.unity.sequence
 					
 												 
 										
-										} else if (source is  AnimationClip) {
+					} else if (source is  AnimationClip) {
 
 											_fbbikAnimatedValues = target.GetComponent<FBBIKAnimatedValues> ();
 						
@@ -375,7 +383,7 @@ namespace ws.winx.unity.sequence
 
 						if (_fbbikAnimatedValues != null) {
 
-								_fbbikAnimatedValues.UpdateSolver ();
+								_fbbikAnimatedValues.UpdateValues ();
 				
 
 						}

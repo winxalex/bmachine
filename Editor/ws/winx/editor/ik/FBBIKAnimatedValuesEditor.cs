@@ -38,7 +38,7 @@ namespace ws.winx.editor.ik
 
 								if (EditorGUI.EndChangeCheck ()) {
 
-										Debug.Log ("inspector");
+										//Debug.Log ("inspector");
 
 
 										if (!EditorApplication.isPlaying && !AnimationMode.InAnimationMode ()){
@@ -50,12 +50,11 @@ namespace ws.winx.editor.ik
 										ikAnimatedValues.ik.gameObject.transform.rotation = rotation;
 
 							
-										ikAnimatedValues.UpdateSolver ();
+										ikAnimatedValues.UpdateValues ();
 
 										
 
 								}
-
 
 
 						}

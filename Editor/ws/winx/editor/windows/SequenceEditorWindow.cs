@@ -26,6 +26,9 @@ namespace ws.winx.editor.windows
 		/// <summary>
 		/// Sequence editor window.
 		/// !!! IMPORTANT
+		/// 
+		/// You need to select node(you are pointing which animation clip will contain records) in record mode then modify gameobject component values you want to record
+
 		/// Can't mix vidoe sound and audio=> crazyness happening
 		/// Can't stop all the channels with sounds (it stops just first StopAll doens't work seem all are on diff threads)
 		/// Bake rotation and position can affect your injected bones animation so 
@@ -33,12 +36,12 @@ namespace ws.winx.editor.windows
 		/// 
 		/// FFBIKAnimatedValues should be in channel after channels containing animation nodes manipulated by IK
 		/// FFBIKAnimatedValues animation node should have been same or less length then animation node manipulated by IK
-		/// If you animate target of FBBIKAnimatedValues double check if animation have saved it
+		/// If you animate target of IAnimatedValues double check if animation have saved it
 		/// 
 		/// 
 		/// TODOS:
 		/// bug fix AnimationUtility.DeleteFrame got -1 index Set Editor
-		/// make changing of the FBBIKAnimatedValues change 
+		/// make changing of the IAnimatedValues change 
 		/// 
 		/// </summary>
 		public class SequenceEditorWindow : EditorWindow
@@ -80,7 +83,6 @@ namespace ws.winx.editor.windows
 				//Event
 				
 				private static GUIContent __eventMarker;
-				private static EventComparer __eventComparer;
 				
 				private static SequenceNode __nodeSelected {
 						get {
@@ -99,25 +101,7 @@ namespace ws.winx.editor.windows
 				//
 				// Nested Types
 				//
-				public class EventComparer : IComparer
-				{
-						int IComparer.Compare (object objX, object objY)
-						{
-								SequenceEvent animationEvent = (SequenceEvent)objX;
-								SequenceEvent animationEvent2 = (SequenceEvent)objY;
-								//float time = (float)animationEvent.timeNormalized.Value;
-								//float time2 = (float)animationEvent2.timeNormalized.Value;
-						
-								float time = (float)animationEvent.time;
-								float time2 = (float)animationEvent2.time;
-								if (time != time2) {
-										return (int)Mathf.Sign (time - time2);
-								}
-								int hashCode = animationEvent.GetHashCode ();
-								int hashCode2 = animationEvent2.GetHashCode ();
-								return hashCode - hashCode2;
-						}
-				}
+			
 
 				private static SequenceEditorWindow __window;
 
@@ -672,6 +656,7 @@ namespace ws.winx.editor.windows
 						Debug.Log ("Play mode:" + __isPlayMode);
 				}
 
+				public static bool __update;
 
 				/// <summary>
 				/// Postprocesses the animation recording and property modifications.
@@ -680,21 +665,53 @@ namespace ws.winx.editor.windows
 				/// <param name="modifications">Modifications.</param>
 				private static UndoPropertyModification[] PostprocessAnimationRecordingModifications (UndoPropertyModification[] modifications)
 				{
-
+//						if (__update) {
+//				Debug.Log("update skiped");
+//								return modifications;
+//						}
+						UndoPropertyModification[] nodeChannelTargetModifications;
 						SequenceNode node = __sequence.nodeSelected;
 
 						if (node != null && node.channel.target != null && node.channel.type == SequenceChannel.SequenceChannelType.Animation) {
 
-								modifications.Concat (AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, TimeAreaW.SnapTimeToWholeFPS ((float)(__sequence.timeCurrent - node.timeStart), __sequence.frameRate)));
+
+								nodeChannelTargetModifications = AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, TimeAreaW.SnapTimeToWholeFPS ((float)(__sequence.timeCurrent - node.timeStart), __sequence.frameRate));
+								
+								//Debug.Log((modifications[0].propertyModification.target as IAnimatedValues).LHEPositionWeight+" "+float.Parse(modifications[0].propertyModification.value));
+								IAnimatedValues ikAnimatedValues = modifications [0].propertyModification.target as IAnimatedValues;
+								if (ikAnimatedValues != null) {
+										node.propertyName = modifications [0].propertyModification.propertyPath;
+										SampleClipNodesAt (__sequence.timeCurrent, false);
+								}
+				  
+								modifications.Concat (nodeChannelTargetModifications);
 
 
 						}
 					
 //						foreach (UndoPropertyModification undoP in modifications) {
-//								FBBIKAnimatedValues ikAnimatedValues = undoP.propertyModification.target as FBBIKAnimatedValues;
-//								if (ikAnimatedValues != null)
-//										ikAnimatedValues.UpdateSolver ();
+//								IAnimatedValues ikAnimatedValues = undoP.propertyModification.target as IAnimatedValues;
+//								if (ikAnimatedValues != null){
 //
+//
+//									__update=true;
+//									//SampleClipNodesAt1();
+//					SampleClipNodesAt(__sequence.timeCurrent);
+//
+//									
+//					Debug.Log("modificaiton noted");
+////					Debug.Log("Modification effector: ID:"+ikAnimatedValues.GetInstanceID()+" lhe:"+ikAnimatedValues.ik.solver.leftHandEffector.positionWeight+" LHE "+ikAnimatedValues.LHEPositionWeight);
+////					//ikAnimatedValues.UpdateSolver ();
+////					//EditorUtility.SetDirty(ikAnimatedValues.ik);
+////					Debug.Log("Modification after:"+ikAnimatedValues.ik.solver.leftHandEffector.positionWeight+" LHE "+ikAnimatedValues.LHEPositionWeight);
+////					//EditorUtility.SetDirty(ikAnimatedValues.ik);
+////					//EditorWindow.GetWindow<SequenceEditorWindow>().Repaint();
+//
+//									
+//
+//									}
+//										//ikAnimatedValues.UpdateSolver ();
+
 //						}
 
 					
@@ -810,10 +827,10 @@ namespace ws.winx.editor.windows
 							
 							
 							
-														var ikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ();
+														var ikAnimatedValues = channel.target.GetComponent<IAnimatedValues> ();
 														if (ikAnimatedValues != null) {
 								
-																ikAnimatedValues.UpdateSolver ();
+																ikAnimatedValues.UpdateValues ();
 														}		
 							
 							
@@ -885,7 +902,15 @@ namespace ws.winx.editor.windows
 								//SceneView.RepaintAll ();
 
 								
-						} 
+						}
+
+
+//							if (__sequence!=null && __sequence.isRecording) {
+//				if (AnimationMode.InAnimationMode ())//this solves problem of entering inside this block even playing is false
+//					SampleClipNodesAt1 ();
+//					//SampleClipNodesAt(__sequence.timeCurrent);
+//				
+//			}
 
 				}
 
@@ -941,6 +966,8 @@ namespace ws.winx.editor.windows
 								AnimationMode.StartAnimationMode ();
 								Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 								Undo.postprocessModifications += PostprocessAnimationRecordingModifications;
+
+			
 				
 						} 
 			
@@ -1055,17 +1082,6 @@ namespace ws.winx.editor.windows
 				{
 						//Debug.Log ("Stop() ThreadID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
-
-
-			
-
-
-						if (pause)
-			//Normal gameobjects do not preserve transform when animaiton mode is stoped as characters
-			//so preserving
-								foreach (SequenceChannel channel in __sequence.channels) {
-										PreserveTransformAtPause (channel);
-								}
 			
 			
 						AnimationMode.StopAnimationMode ();
@@ -1097,11 +1113,11 @@ namespace ws.winx.editor.windows
 										}
 
 								//RESET 
-								FBBIKAnimatedValues fbbikAnimatedValues;
+								IAnimatedValues fbbikAnimatedValues;
 								foreach (SequenceChannel channel in __sequence.channels)
 
-										if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && (fbbikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ()) != null)
-												fbbikAnimatedValues.Reset ();//as this component is binded to FFBIK component need to reset IK values
+										if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && (fbbikAnimatedValues = channel.target.GetComponent<IAnimatedValues> ()) != null)
+												fbbikAnimatedValues.ResetValues ();//as this component is binded to FFBIK component need to reset IK values
 			
 						}
 
@@ -1235,13 +1251,32 @@ namespace ws.winx.editor.windows
 
 
 								AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
+
+								//if node have source with animated values
+								bool hasAnimatedValues = false;
+
+								if (__nodeSelected.channel.target.GetComponent<IAnimatedValues> () != null) {
+										EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
+										if (curveBindings.Length > 0) {
+												if (String.IsNullOrEmpty (__sequence.nodeSelected.propertyName))
+														curveBinding = curveBindings [0];
+												else
+														curveBinding = curveBindings.FirstOrDefault (itm => itm.propertyName == __sequence.nodeSelected.propertyName);
+												hasAnimatedValues = true;
+										}
+
+
+
+								}
 				
-								if (Tools.current == Tool.Rotate || Tools.current == Tool.Move) {
+				
+								if (Tools.current == Tool.Rotate || Tools.current == Tool.Move || hasAnimatedValues) {
 					
 
 										//EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
-										if (Tools.current == Tool.Move)
+										if (!hasAnimatedValues && Tools.current == Tool.Move)
 												curveBinding = AnimationUtilityEx.EditorCurveBinding_PosX;
+
 
 
 										if (__sequence.nodeSelected.channel.target != null) {
@@ -1272,8 +1307,7 @@ namespace ws.winx.editor.windows
 					
 										
 					
-								} 
-				
+								}
 				
 						} 
 			
@@ -1467,13 +1501,13 @@ namespace ws.winx.editor.windows
 								toolsMenu.AddItem (new GUIContent ("[New Sequence]"), false, CreateNewSequence);
 								toolsMenu.AddItem (new GUIContent ("[New Animation Clip]"), false, CreateNewAnimationClip);
 								toolsMenu.AddItem (new GUIContent ("[New Animation Controller]"), false, CreateRuntimeAnimatorController);
-								//toolsMenu.AddItem (new GUIContent ("[New Particle]"), false, CreateNewParticleSystemNode);
+								
 
 
 								
 
 								toolsMenu.DropDown (GUILayoutUtility.GetLastRect ());
-								//toolsMenu.DropDown (new Rect (3, 37, 0, 0));
+								
 								EditorGUIUtility.ExitGUI ();
 						}
 			
@@ -1538,31 +1572,7 @@ namespace ws.winx.editor.windows
 				/// <param name="args">Arguments.</param>
 				void onEventDragEnd (TimeLineArgs<float> args)
 				{
-//			int[] indexArray = new int[mecanimNode.children.Length];
-//			for (int l = 0; l < indexArray.Length; l++) {
-//				indexArray [l] = l;
-//			}
 
-						if (__eventComparer == null)
-								__eventComparer = new EventComparer ();
-//			
-//			Array.Sort (mecanimNode.children, indexArray, eventTimeComparer);
-//			
-//			bool[] cloneOfSelected = (bool[])eventTimeValuesSelected.Clone ();
-//			int inx = -1;
-//			SendEventNormalizedNode ev;
-//			for (int m = 0; m < indexArray.Length; m++) {
-//				
-//				inx = indexArray [m];
-//				ev = ((SendEventNormalizedNode)mecanimNode.children [m]);	
-//				this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
-//				//this.eventTimeValues [m] = (float)ev.timeNormalized.Value; 
-//				this.eventTimeValues [m] = (float)ev.timeNormalized.serializedProperty.floatValue; 
-//				this.eventDisplayNames [m] = ev.name;
-//				
-//			}
-			
-			
 
 				}
 
@@ -2008,7 +2018,7 @@ namespace ws.winx.editor.windows
 				/// Samples the clip nodes at time.
 				/// </summary>
 				/// <param name="time">Time.</param>
-				private static void SampleClipNodesAt (double time)
+				private static void SampleClipNodesAt (double time, bool registerRecordObjectsAsUndos=true)
 				{
 
 
@@ -2018,9 +2028,12 @@ namespace ws.winx.editor.windows
 						SequenceNode node = null;
 						Animator animator;
 						double timeCurrent = 0f;
-						FBBIKAnimatedValues ikAnimatedValues = null;
+						IAnimatedValues animatedValues = null;
 
-						Undo.FlushUndoRecordObjects ();
+						//Ensure objects recorded using RecordObject or ::ref:RecordObjects are registered as an undoable action. In most cases there is no reason to invoke FlushUndoRecordObjects since 
+						//	it's automatically done right after mouse-up and certain other events that conventionally marks the end of an action
+						if (registerRecordObjectsAsUndos)
+								Undo.FlushUndoRecordObjects ();
 
 						AnimationMode.BeginSampling ();
 			
@@ -2112,9 +2125,11 @@ namespace ws.winx.editor.windows
 
 
 														 
-														if ((ikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ()) != null) {
-
-																ikAnimatedValues.UpdateSolver ();
+														if ((animatedValues = channel.target.GetComponent<IAnimatedValues> ()) != null) {
+																//Debug.Log ("Sample effector:" + ikAnimatedValues.ik.solver.leftHandEffector.positionWeight + " LHE " + ikAnimatedValues.LHEPositionWeight);
+																animatedValues.UpdateValues ();
+																//Debug.Log ("Sample effector After:" + ikAnimatedValues.ik.solver.leftHandEffector.positionWeight + " LHE " + ikAnimatedValues.LHEPositionWeight);
+								
 														}		
 
 										
@@ -2145,7 +2160,7 @@ namespace ws.winx.editor.windows
 														particleSystem.Simulate ((float)__sequence.timeCurrent - node.timeStart, true);
 												}
 										} 
-										//else if (channel.type == SequenceChannel.SequenceChannelType.Animation && (ikAnimatedValues = channel.target.GetComponent<FBBIKAnimatedValues> ()) != null) {
+										//else if (channel.type == SequenceChannel.SequenceChannelType.Animation && (ikAnimatedValues = channel.target.GetComponent<IAnimatedValues> ()) != null) {
 //												{
 //												//reset need cos you might have click in one node with ikAnimatedValues then in another => first node should be reseted
 //														ikAnimatedValues.Reset ();
@@ -2166,16 +2181,17 @@ namespace ws.winx.editor.windows
 						
 				
 
-
+						__update = false;
 					
 
 				}
 
 
-
 	
 
-
+		
+		
+		
 				/// <summary>
 				/// Raises the timeline GU event.
 				/// </summary>
@@ -2246,9 +2262,13 @@ namespace ws.winx.editor.windows
 										}
 								}
 
-								
-
-						
+//								if(__update){
+//					__update=false;
+//					//SampleClipNodesAt1 (__sequence.timeCurrent);
+////					SceneView.currentDrawingSceneView.Repaint();
+////					Debug.Log("Update forced");
+//				}
+				
 								timeScrubberEventHandler (rect);
 						
 
@@ -2292,7 +2312,22 @@ namespace ws.winx.editor.windows
 				{
 						GenericMenu genericMenu = new GenericMenu ();
 						genericMenu.AddItem (new GUIContent ("Remove"), false, onRemoveNode, node);
+
+						AnimationClip clip = node.source as AnimationClip;
+						if (clip != null && node.channel.target != null && node.channel.target.GetComponent<IAnimatedValues> () != null) {
+								EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
+								for (int i=0; i<curveBindings.Length; i++)
+										genericMenu.AddItem (new GUIContent ("Property/" + curveBindings [i].propertyName), false, onPropertyAnimatedSelected, curveBindings [i].propertyName);
+
+						}
+
+							
 						return genericMenu;
+				}
+
+				private static void onPropertyAnimatedSelected (object userData)
+				{
+						__nodeSelected.propertyName = userData as String;
 				}
 		
 		
@@ -2360,9 +2395,9 @@ namespace ws.winx.editor.windows
 														Selection.activeGameObject = node.channel.target;
 										} else
 										if (ev.button == 1) {
-												
-												createNodeMenu (node).ShowAsContext ();
 												__nodeSelected = node;
+												createNodeMenu (node).ShowAsContext ();
+												
 										}
 										ev.Use ();
 								}
@@ -2384,7 +2419,7 @@ namespace ws.winx.editor.windows
 								clickRect.width = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - clickRect.x;
 					
 								if (clickRect.Contains (Event.current.mousePosition)) {
-										
+										__nodeSelected = node;
 										createNodeMenu (node).ShowAsContext ();
 										
 								}
@@ -2771,6 +2806,8 @@ namespace ws.winx.editor.windows
 			
 				}
 
+				
+
 
 				
 				/// <summary>
@@ -2828,33 +2865,35 @@ namespace ws.winx.editor.windows
 								__sequence.channels.Add (sequenceChannel);
 						} else
 			
-			if (sequenceChannel.nodes.Count > 0) {
+								if (sequenceChannel.nodes.Count > 0) {
 								if (sequenceChannel.nodes [0].source.GetType () != type) {
 										Debug.LogWarning ("You can have only same type nodes in same channel");	
 										return;
 								}
 						}
 
-
-						//SHOW SELECTION LAYER DIALOGS
-						UnityEditor.Animations.AnimatorController animatorController = sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
-
 						int layerIndex = 0;
+						if (sequenceChannel.type == SequenceChannel.SequenceChannelType.Animation) {
+								//SHOW SELECTION LAYER DIALOGS
+								UnityEditor.Animations.AnimatorController animatorController = sequenceChannel.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+
+								
 			
-						if (animatorController.layers.Length == 1) {
+								if (animatorController.layers.Length == 1) {
 
-								if (!EditorUtility.DisplayDialog ("Layer Selection", "Select Layer", animatorController.layers [0].name, "New Layer"))
-										layerIndex = 1;
-						} else if (animatorController.layers.Length == 2) {
+										if (!EditorUtility.DisplayDialog ("Layer Selection", "Select Layer", animatorController.layers [0].name, "New Layer"))
+												layerIndex = 1;
+								} else if (animatorController.layers.Length == 2) {
 
-								layerIndex = EditorUtility.DisplayDialogComplex ("Layer Selection", "Select Layer", animatorController.layers [0].name, animatorController.layers [1].name, "New Layer");
-						} else {
+										layerIndex = EditorUtility.DisplayDialogComplex ("Layer Selection", "Select Layer", animatorController.layers [0].name, animatorController.layers [1].name, "New Layer");
+								} else {
 							
-								while (layerIndex<animatorController.layers.Length && !EditorUtility.DisplayDialog ("Layer Selection", "Select Layer", animatorController.layers [lay].name, "Next")) {
-										layerIndex++;
+										while (layerIndex<animatorController.layers.Length && !EditorUtility.DisplayDialog ("Layer Selection", "Select Layer", animatorController.layers [layerIndex].name, "Next")) {
+												layerIndex++;
+										}
+					
+					
 								}
-					
-					
 						}
 						
 

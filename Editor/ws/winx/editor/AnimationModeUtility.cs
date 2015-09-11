@@ -44,7 +44,7 @@ namespace ws.winx.editor
 		
 						object currentValue = GetCurrentValue (rootGameObject, binding);
 		
-						//Debug.Log (rootGameObject.transform.position + " " + binding.propertyName+"="+currentValue);
+					//	Debug.Log ("Add Key "+ binding.propertyName+"="+currentValue);
 						object value = null;
 		
 						ObjectReferenceKeyframe[] keyframesCurveReferenced;
@@ -79,11 +79,11 @@ namespace ws.winx.editor
 										if (!ValueFromPropertyModification (modification, binding, out value)) {
 												value = currentValue;
 										}
-				
+										//	Debug.Log("Add key at first frame");
 										AddKeyframeToCurve (curve, activeAnimationClip, binding, (float)value, type, 0);
 								}
 			
-			
+								//Debug.Log("Add key at some other frame");
 								AddKeyframeToCurve (curve, activeAnimationClip, binding, (float)currentValue, type, time);
 			
 						}
@@ -191,6 +191,9 @@ namespace ws.winx.editor
 		
 		
 				}
+
+
+
 	
 				/// <summary>
 				/// Saves the curve.
@@ -265,9 +268,10 @@ namespace ws.winx.editor
 				/// <param name="time">Time.</param>
 				public static UndoPropertyModification[] Process (GameObject rootGameObject, AnimationClip activeAnimationClip, UndoPropertyModification[] modifications, float time)
 				{
-		
+						//	Debug.Log("Process");
 						Animator component = rootGameObject.GetComponent<Animator> ();
 						if (!HasAnyRecordableModifications (rootGameObject, modifications)) {
+								//		Debug.Log("Doesn't have recordable modifcations");
 								return modifications;
 						}
 						List<UndoPropertyModification> list = new List<UndoPropertyModification> ();
@@ -276,22 +280,23 @@ namespace ws.winx.editor
 								PropertyModification propertyModification = modifications [i].propertyModification;
 								Type type = AnimationUtility.PropertyModificationToEditorCurveBinding (propertyModification, rootGameObject, out binding);
 								if (type != null) {
-				
+										//	Debug.Log("Add prop modification");
 //										if (component != null && component.isHuman && binding.type == typeof(Transform) && component.IsBoneTransform (propertyModification.target as Transform)) {
 //												Debug.LogWarning ("Keyframing for humanoid rig is not supported!", propertyModification.target as Transform);
 //										} else 
 //										{
-												AnimationMode.AddPropertyModification (binding, propertyModification, modifications [i].keepPrefabOverride);
-												EditorCurveBinding[] array = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, activeAnimationClip);
-												if (array != null) {
-														for (int j = 0; j < array.Length; j++) {
-																AddKey (time, rootGameObject, activeAnimationClip, array [j], type, FindPropertyModification (rootGameObject, modifications, array [j]));
-														}
-												} else {
-														AddKey (time, rootGameObject, activeAnimationClip, binding, type, propertyModification);
+										AnimationMode.AddPropertyModification (binding, propertyModification, modifications [i].keepPrefabOverride);
+										EditorCurveBinding[] array = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, activeAnimationClip);
+										if (array != null) {
+												for (int j = 0; j < array.Length; j++) {
+														AddKey (time, rootGameObject, activeAnimationClip, array [j], type, FindPropertyModification (rootGameObject, modifications, array [j]));
 												}
+										} else {
+												AddKey (time, rootGameObject, activeAnimationClip, binding, type, propertyModification);
+										}
 										//}
 								} else {
+										Debug.Log ("Type is null");
 										list.Add (modifications [i]);
 								}
 						}
@@ -414,39 +419,38 @@ namespace ws.winx.editor
 			
 				}
 
-
 				public static void SampleClipBindingAt (IList<GameObject> animatedObjects, IList<AnimationClip> animationClips, IList<float> times)
 				{
 					
 					
-					Undo.FlushUndoRecordObjects ();
+						Undo.FlushUndoRecordObjects ();
 
 
 					
 					
 					
-					AnimationMode.BeginSampling ();
+						AnimationMode.BeginSampling ();
 					
-					int len = animationClips.Count;
+						int len = animationClips.Count;
 					
-					if (len != animatedObjects.Count) {
-						len = 0;
-						Debug.LogError ("AnimaitonModeUtility.ResampleAnimation> Number of Animate Object should be same with Animation Clips");
-					}
+						if (len != animatedObjects.Count) {
+								len = 0;
+								Debug.LogError ("AnimaitonModeUtility.ResampleAnimation> Number of Animate Object should be same with Animation Clips");
+						}
 					
-					for (int i=0; i<len; i++) {
+						for (int i=0; i<len; i++) {
 
 						
-						AnimationMode.SampleAnimationClip (animatedObjects [i], animationClips [i], times[i]);
+								AnimationMode.SampleAnimationClip (animatedObjects [i], animationClips [i], times [i]);
 						
 						
-					}
+						}
 					
 					
 					
-					AnimationMode.EndSampling ();
+						AnimationMode.EndSampling ();
 					
-					SceneView.RepaintAll ();
+						SceneView.RepaintAll ();
 					
 				}
 
@@ -487,16 +491,16 @@ namespace ws.winx.editor
 				{
 						if (clipBindingCurrent.gameObject != null) {
 							
-								if(clipBindingCurrent.boneTransform!=null){
-								//save bone position
-								Vector3 positionPrev = clipBindingCurrent.boneTransform.position;
+								if (clipBindingCurrent.boneTransform != null) {
+										//save bone position
+										Vector3 positionPrev = clipBindingCurrent.boneTransform.position;
 							
-								//make sample at 0f (sample would probably change bone position according to ani clip)
-								AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, 0f);
+										//make sample at 0f (sample would probably change bone position according to ani clip)
+										AnimationMode.SampleAnimationClip (clipBindingCurrent.gameObject, clipBindingCurrent.clip, 0f);
 							
 							
-								//calculate difference of bone position orginal - bone postion after clip effect
-								clipBindingCurrent.boneRootPositionOffset = positionPrev - clipBindingCurrent.boneTransform.position;
+										//calculate difference of bone position orginal - bone postion after clip effect
+										clipBindingCurrent.boneRootPositionOffset = positionPrev - clipBindingCurrent.boneTransform.position;
 								}
 
 

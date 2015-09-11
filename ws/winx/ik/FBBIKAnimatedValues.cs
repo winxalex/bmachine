@@ -8,12 +8,12 @@ using ws.winx.unity;
 namespace ws.winx.ik
 {
 
-	public class FBBIKAnimatedValues:MonoBehaviour{
+	public class FBBIKAnimatedValues:MonoBehaviour,IAnimatedValues{
 
 
 		public FullBodyBipedIK ik;
 
-
+		public bool useLHETarget;
 
 		/// <summary>
 		/// The Left Hand Effector
@@ -38,6 +38,8 @@ namespace ws.winx.ik
 		/// <summary>
 		/// The Left Hand Effector
 		/// </summary>
+		/// 
+		public bool useRHETarget;
 		
 		public Transform RHETarget;
 		
@@ -84,7 +86,7 @@ namespace ws.winx.ik
 		}
 
 
-		public void Reset(){
+		public void ResetValues(){
 
 			Debug.Log ("Reset FBBIKAnimatedValues");
 
@@ -110,12 +112,12 @@ namespace ws.winx.ik
 			
 
 
-			UpdateSolver ();
+			UpdateValues ();
 
 		}
 		
 		
-		public void UpdateSolver ()
+		public void UpdateValues ()
 		{
 			if(!isInitated) 
 				this.Initate();
@@ -127,9 +129,13 @@ namespace ws.winx.ik
 								ik.solver.leftHandEffector.positionWeight = LHEPositionWeight;
 
 								ik.solver.leftHandEffector.positionOffset = LHEPositionOffset;
-								ik.solver.leftHandEffector.target = LHETarget;
-					
+								ik.solver.leftHandEffector.rotationWeight = RHERotationWeight;
 
+								if(useLHETarget)
+									ik.solver.leftHandEffector.target = LHETarget;
+								else
+									ik.solver.leftHandEffector.target = null;
+			
 												//OffsetX
 				//			ik.solver.leftHandEffector.position += (positionOffsetSpace != null? positionOffsetSpace.rotation: ik.solver.GetRoot().rotation) * Vector3.right * LHEPositionOffset.x;
 				//
