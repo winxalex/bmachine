@@ -271,7 +271,7 @@ namespace ws.winx.editor.windows
 				private static void OnSceneGUI (SceneView sceneView)
 				{
 
-						SequenceChannel channel;
+						List<SequenceChannel> channels;
 
 						if (
 								(Tools.current == Tool.Move || Tools.current == Tool.Rotate) && //Move or Rotate tool is selected
@@ -280,34 +280,36 @@ namespace ws.winx.editor.windows
 								__sequence != null && 
 								!__sequence.isPlaying && !__sequence.isRecording && //Not playing or recording
 						//__sequence.timeCurrent > 0f && //<< ????
-								(channel = __sequence.channels.FirstOrDefault (itm => itm.type == SequenceChannel.SequenceChannelType.Animation && itm.target == Selection.activeGameObject)) != null
+								(channels = __sequence.channels.FindAll (itm => itm.type == SequenceChannel.SequenceChannelType.Animation && itm.target == Selection.activeGameObject)) != null
 
 														
 				) {  //active object is target of Animation type of channel
 								
+								foreach (SequenceChannel channel in channels) {
 
-								//if change has been made to pos or rotation of the target => change orginal and save nodes animation position offest
-								if (channel.targetPositionOriginal != channel.target.transform.position
-										|| channel.targetRotationOriginal != channel.target.transform.rotation) {
+										//if change has been made to pos or rotation of the target => change orginal and save nodes animation position offest
+										if (channel.targetPositionOriginal != channel.target.transform.position
+												|| channel.targetRotationOriginal != channel.target.transform.rotation) {
 
-										if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
-												Stop ();//stop "paused" and then reset
-												__sequence.timeCurrent = 0f;//rewind to begin and reset
-												ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
+												if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
+														Stop ();//stop "paused" and then reset
+														__sequence.timeCurrent = 0f;//rewind to begin and reset
+														ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
+												}
+								
+								
+												Debug.Log ("Target object position have been changed");
+
+												//take new transform
+												channel.targetPositionOriginal = channel.target.transform.position;
+												channel.targetRotationOriginal = channel.target.transform.rotation;
+
+
+												if (!AnimationMode.InAnimationMode ())
+														AnimationMode.StartAnimationMode ();
+												ReOffsetNodesAnimation (channel);
+												AnimationMode.StopAnimationMode ();
 										}
-								
-								
-										Debug.Log ("Target object position have been changed");
-
-										//take new transform
-										channel.targetPositionOriginal = channel.target.transform.position;
-										channel.targetRotationOriginal = channel.target.transform.rotation;
-
-
-										if (!AnimationMode.InAnimationMode ())
-												AnimationMode.StartAnimationMode ();
-										ReOffsetNodesAnimation (channel);
-										AnimationMode.StopAnimationMode ();
 								}
 						}
 			    
@@ -678,41 +680,29 @@ namespace ws.winx.editor.windows
 								nodeChannelTargetModifications = AnimationModeUtility.Process (node.channel.target, node.source as AnimationClip, modifications, TimeAreaW.SnapTimeToWholeFPS ((float)(__sequence.timeCurrent - node.timeStart), __sequence.frameRate));
 								
 								//Debug.Log((modifications[0].propertyModification.target as IAnimatedValues).LHEPositionWeight+" "+float.Parse(modifications[0].propertyModification.value));
-								IAnimatedValues ikAnimatedValues = modifications [0].propertyModification.target as IAnimatedValues;
-								if (ikAnimatedValues != null) {
-										node.propertyName = modifications [0].propertyModification.propertyPath;
-										SampleClipNodesAt (__sequence.timeCurrent, false);
-								}
+								//U5.2
+#if UNITY_5_2
+				IAnimatedValues ikAnimatedValues = modifications [0].previousValue.target as IAnimatedValues;
+				if (ikAnimatedValues != null) {
+					node.propertyName = modifications [0].previousValue.propertyPath;
+					SampleClipNodesAt (__sequence.timeCurrent, false);
+				}
+#endif
+				
+								//U5
+//#if UNITY_5
+								//				IAnimatedValues ikAnimatedValues = modifications [0].propertyModification.target as IAnimatedValues;
+//								if (ikAnimatedValues != null) {
+//										node.propertyName = modifications [0].propertyModification.propertyPath;
+//										SampleClipNodesAt (__sequence.timeCurrent, false);
+//								}
+								//#endif
 				  
 								modifications.Concat (nodeChannelTargetModifications);
 
 
 						}
 					
-//						foreach (UndoPropertyModification undoP in modifications) {
-//								IAnimatedValues ikAnimatedValues = undoP.propertyModification.target as IAnimatedValues;
-//								if (ikAnimatedValues != null){
-//
-//
-//									__update=true;
-//									//SampleClipNodesAt1();
-//					SampleClipNodesAt(__sequence.timeCurrent);
-//
-//									
-//					Debug.Log("modificaiton noted");
-////					Debug.Log("Modification effector: ID:"+ikAnimatedValues.GetInstanceID()+" lhe:"+ikAnimatedValues.ik.solver.leftHandEffector.positionWeight+" LHE "+ikAnimatedValues.LHEPositionWeight);
-////					//ikAnimatedValues.UpdateSolver ();
-////					//EditorUtility.SetDirty(ikAnimatedValues.ik);
-////					Debug.Log("Modification after:"+ikAnimatedValues.ik.solver.leftHandEffector.positionWeight+" LHE "+ikAnimatedValues.LHEPositionWeight);
-////					//EditorUtility.SetDirty(ikAnimatedValues.ik);
-////					//EditorWindow.GetWindow<SequenceEditorWindow>().Repaint();
-//
-//									
-//
-//									}
-//										//ikAnimatedValues.UpdateSolver ();
-
-//						}
 
 					
 						return modifications;
@@ -880,7 +870,7 @@ namespace ws.winx.editor.windows
 						if (!EditorApplication.isPlaying && (__sequence != null) && __sequence.isPlaying) {//?TODO ?? enters here even isPlaying is false		
 							
 								
-								Debug.Log ("Update sequence from editor");
+								//Debug.Log ("Update sequence from editor");
 								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
 								
 

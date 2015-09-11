@@ -9,6 +9,10 @@ using ws.winx.editor.utilities;
 
 namespace ws.winx.editor
 {
+		/// <summary>
+		/// Animation mode utility extracted from UnityEditorInternal.AnimationRecording
+
+		/// </summary>
 		public class AnimationModeUtility
 		{
 				/// <summary>
@@ -44,7 +48,7 @@ namespace ws.winx.editor
 		
 						object currentValue = GetCurrentValue (rootGameObject, binding);
 		
-					//	Debug.Log ("Add Key "+ binding.propertyName+"="+currentValue);
+						//	Debug.Log ("Add Key "+ binding.propertyName+"="+currentValue);
 						object value = null;
 		
 						ObjectReferenceKeyframe[] keyframesCurveReferenced;
@@ -250,10 +254,19 @@ namespace ws.winx.editor
 				{
 						for (int i = 0; i < modifications.Length; i++) {
 								EditorCurveBinding lhs;
-								AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].propertyModification, root, out lhs);
+								//U5.2
+#if UNITY_5_2
+				AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].currentValue, root, out lhs);
+				if (lhs == binding) {
+					return modifications [i].currentValue;
+				}
+#elif UNITY_5_0
+
+												AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].propertyModification, root, out lhs);
 								if (lhs == binding) {
 										return modifications [i].propertyModification;
 								}
+#endif
 						}
 						return null;
 				}
@@ -277,7 +290,12 @@ namespace ws.winx.editor
 						List<UndoPropertyModification> list = new List<UndoPropertyModification> ();
 						for (int i = 0; i < modifications.Length; i++) {
 								EditorCurveBinding binding = default(EditorCurveBinding);
+#if UNITY_5_2
+								PropertyModification propertyModification = modifications [i].previousValue;
+#endif
+#if UNITY_5_0
 								PropertyModification propertyModification = modifications [i].propertyModification;
+#endif
 								Type type = AnimationUtility.PropertyModificationToEditorCurveBinding (propertyModification, rootGameObject, out binding);
 								if (type != null) {
 										//	Debug.Log("Add prop modification");
@@ -314,9 +332,16 @@ namespace ws.winx.editor
 				{
 						for (int i = 0; i < modifications.Length; i++) {
 								EditorCurveBinding editorCurveBinding;
-								if (AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].propertyModification, root, out editorCurveBinding) != null) {
-										return true;
-								}
+#if UNITY_5_2
+							if (AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].previousValue, root, out editorCurveBinding) != null) {
+								return true;
+							}
+#endif
+#if UNITY_5_0
+												if (AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].propertyModification, root, out editorCurveBinding) != null) {
+														return true;}
+#endif
+								
 						}
 						return false;
 				}

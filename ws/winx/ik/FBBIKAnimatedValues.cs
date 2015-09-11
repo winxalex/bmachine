@@ -94,7 +94,8 @@ namespace ws.winx.ik
 
 			ik.solver.leftHandEffector.positionWeight=LHEPositionWeight = 0;
 			ik.solver.leftHandEffector.rotationWeight=LHERotationWeight = 0;
-			ik.solver.leftHandEffector.target=LHETarget=null;
+			useLHETarget = false;
+			//ik.solver.leftHandEffector.target=LHETarget=null;
 			ik.solver.leftHandEffector.positionOffset=LHEPositionOffset=Vector3.zero;
 			
 			
@@ -105,7 +106,8 @@ namespace ws.winx.ik
 
 			ik.solver.rightHandEffector.rotationWeight=RHERotationWeight = 0;
 			ik.solver.rightHandEffector.positionWeight = RHEPositionWeight = 0;
-			ik.solver.rightHandEffector.target = RHETarget = null;
+			useRHETarget = false;
+			//ik.solver.rightHandEffector.target = RHETarget = null;
 			ik.solver.rightHandEffector.positionOffset = RHEPositionOffset=Vector3.zero;
 			ik.solver.rightHandEffector.rotationWeight = RHERotationWeight = 0;
 

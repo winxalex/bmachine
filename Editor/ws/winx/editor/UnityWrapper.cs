@@ -2194,8 +2194,13 @@ namespace ws.winx.editor
 				public static MethodInfo SetTickMarkerRanges_MethodInfo {
 						get {
 								if (__SetTickMarkerRanges_MethodInfo == null)
+					#if UNITY_5_2
+					__SetTickMarkerRanges_MethodInfo = __RealType.GetMethod ("SetTickMarkerRanges");
+				#endif
+#if UNITY_5_0
 										__SetTickMarkerRanges_MethodInfo = __RealType.GetMethod ("SetTickMarkerRanges", BindingFlags.NonPublic | BindingFlags.Instance);
-								return __SetTickMarkerRanges_MethodInfo;
+#endif							
+				return __SetTickMarkerRanges_MethodInfo;
 						}
 				}
 
