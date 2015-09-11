@@ -48,7 +48,7 @@ namespace ws.winx.unity.sequence
 				float[] _particleEmitTimeCurrent;
 				float[] _particleEmitTime;
 				ParticleSystem[] _particleSystems;
-				FBBIKAnimatedValues _fbbikAnimatedValues;
+				IAnimatedValues _animatedValues;
 
 								
 
@@ -236,7 +236,7 @@ namespace ws.winx.unity.sequence
 										
 					} else if (source is  AnimationClip) {
 
-											_fbbikAnimatedValues = target.GetComponent<FBBIKAnimatedValues> ();
+											_animatedValues = target.GetComponent<IAnimatedValues> ();
 						
 
 											
@@ -258,6 +258,7 @@ namespace ws.winx.unity.sequence
 												} else {
 														Debug.Log ("Play " + this.name);
 														animator.Play (stateNameHash, layerIndex, 0f);
+							//animator.Play("angry1@unitychan 1 0",1,0f);
 												}
 										
 
@@ -304,8 +305,8 @@ namespace ws.winx.unity.sequence
 
 						_isRunning = false;
 
-						Debug.Log ("StopNode " + source.name);
-
+						Debug.Log ("StopNode " + source.name+" at time:"+this.channel.sequence.timeCurrent);
+			
 						
 
 						if (target != null) {
@@ -343,9 +344,9 @@ namespace ws.winx.unity.sequence
 												//hard stop
 												Animator animator = target.GetComponent<Animator> ();
 															
-												//
-												if (animator != null && this.index + 1 == this.channel.nodes.Count)
-														animator.enabled = false;
+												//TODO can 2 nodes in different channel to share same target animator
+//												if (animator != null && this.index + 1 == this.channel.nodes.Count)
+//														animator.enabled = false;
 
 																	
 								
@@ -381,10 +382,10 @@ namespace ws.winx.unity.sequence
 								onUpdate.Invoke (this);
 
 
-						if (_fbbikAnimatedValues != null) {
+						if (_animatedValues != null) {
 
-								_fbbikAnimatedValues.UpdateValues ();
-				
+								_animatedValues.UpdateValues ();
+
 
 						}
 
