@@ -12,11 +12,6 @@ namespace ws.winx.unity.sequence
 		public class SequenceNode:ScriptableObject
 		{
 
-		[NonSerialized]
-		/// <summary>
-		/// The name of Animated the property.
-		/// </summary>
-		public string propertyName; 
 
 
 				[HideInInspector]
