@@ -48,7 +48,7 @@ namespace ws.winx.editor
 		
 						object currentValue = GetCurrentValue (rootGameObject, binding);
 		
-						//	Debug.Log ("Add Key "+ binding.propertyName+"="+currentValue);
+							Debug.Log ("Add Key "+ binding.propertyName+"="+currentValue);
 						object value = null;
 		
 						ObjectReferenceKeyframe[] keyframesCurveReferenced;
@@ -74,6 +74,12 @@ namespace ws.winx.editor
 			
 			
 						} else {
+
+
+
+
+				
+
 								curve = AnimationUtility.GetEditorCurve (activeAnimationClip, binding);
 			
 								if (curve == null)
@@ -208,6 +214,8 @@ namespace ws.winx.editor
 				public static void SaveCurve (AnimationCurve animationCurve, AnimationClip animatedClip, EditorCurveBinding binding)
 				{
 						Undo.RegisterCompleteObjectUndo (animatedClip, "Edit Curve");
+
+						
 		
 						QuaternionCurveTangentCalculationW.UpdateTangentsFromMode (animationCurve, animatedClip, binding);
 		
@@ -303,6 +311,27 @@ namespace ws.winx.editor
 //												Debug.LogWarning ("Keyframing for humanoid rig is not supported!", propertyModification.target as Transform);
 //										} else 
 //										{
+
+
+//					if(binding.propertyName.Contains("localEulerAngles")){
+//						PropertyModification mod=new PropertyModification();
+//						AnimationUtility.GetFloatValue(
+//						
+//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.x");
+//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.y");
+//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.z");
+//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.w");
+//						
+//					}
+//					
+//					Quaternion fromEuler = Quaternion.Euler (320, 238, 123);
+
+															if (component != null && component.isHuman && binding.type == typeof(Transform) && component.IsBoneTransform (propertyModification.target as Transform)) {
+																	
+															} 
+
+
+
 										AnimationMode.AddPropertyModification (binding, propertyModification, modifications [i].keepPrefabOverride);
 										EditorCurveBinding[] array = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, activeAnimationClip);
 										if (array != null) {

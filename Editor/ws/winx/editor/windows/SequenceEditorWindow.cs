@@ -70,6 +70,7 @@ namespace ws.winx.editor.windows
 				//20f for timer ruller + 20f for Events Pad
 				private const float TIME_LABEL_HEIGHT = 20f;
 				private const float EVENT_PAD_HEIGHT = 20f;
+				//private const float SCROLLER_SIZE =16f;
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				private static GUIContent __nodeLabelGUIContent = new GUIContent ();
 
@@ -3383,6 +3384,7 @@ namespace ws.winx.editor.windows
 										if (SceneView.currentDrawingSceneView != null)
 												SceneView.currentDrawingSceneView.Repaint ();
 									
+					if(__window!=null)
 										__window.Repaint ();
 
 									
@@ -3409,7 +3411,7 @@ namespace ws.winx.editor.windows
 								&& __sequence != null
 								&& __nodeSelected != null
 								&& __nodeSelected.channel.target != null
-								&& __nodeSelected.channel.type != SequenceChannel.SequenceChannelType.Animation
+								&& __nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation
 								&& (Selection.activeGameObject == __nodeSelected.channel.target || Selection.activeGameObject.transform.IsChildOf (__nodeSelected.channel.target.transform))
 			   ) {
 
