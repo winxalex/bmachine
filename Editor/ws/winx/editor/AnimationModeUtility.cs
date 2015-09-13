@@ -326,9 +326,9 @@ namespace ws.winx.editor
 //					
 //					Quaternion fromEuler = Quaternion.Euler (320, 238, 123);
 
-															if (component != null && component.isHuman && binding.type == typeof(Transform) && component.IsBoneTransform (propertyModification.target as Transform)) {
-																	
-															} 
+//															if (component != null && component.isHuman && binding.type == typeof(Transform) && component.IsBoneTransform (propertyModification.target as Transform)) {
+//																	
+//															} 
 
 
 
