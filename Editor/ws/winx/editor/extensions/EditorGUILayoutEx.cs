@@ -112,9 +112,14 @@ namespace ws.winx.editor.extensions
 
 				public class AnimationStyles
 				{
+						public GUIContent prevKeyContent = EditorGUIUtility.IconContent("Animation.PrevKey");
+						public GUIContent nextKeyContent = EditorGUIUtility.IconContent("Animation.NextKey");
 						public Texture2D pointIcon = EditorGUIUtilityW.LoadIcon ("animationkeyframe");
 						public GUIContent eventMarker = EditorGUIUtility.IconContent ("Animation.EventMarker");
+						public GUIContent addEventContent = EditorGUIUtility.IconContent("Animation.AddEvent");
 						public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
+						public GUIContent playIconOn =  EditorGUIUtility.IconContent("PlayButton On");
+
 						public GUIContent playIconSmall = EditorGUIUtility.IconContent ("Animation.Play");
 						public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
 						public GUIContent recordIcon = EditorGUIUtility.IconContent ("Animation.Record");

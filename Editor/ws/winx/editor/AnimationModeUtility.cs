@@ -48,7 +48,7 @@ namespace ws.winx.editor
 		
 						object currentValue = GetCurrentValue (rootGameObject, binding);
 		
-							Debug.Log ("Add Key "+ binding.propertyName+"="+currentValue);
+//							Debug.Log ("Add Key "+ binding.propertyName+"="+currentValue);
 						object value = null;
 		
 						ObjectReferenceKeyframe[] keyframesCurveReferenced;
@@ -59,6 +59,8 @@ namespace ws.winx.editor
 						if (isCurveReferenced) {
 								keyframesCurveReferenced = AnimationUtility.GetObjectReferenceCurve (activeAnimationClip, binding);
 			
+								if(keyframesCurveReferenced==null)
+								keyframesCurveReferenced=new ObjectReferenceKeyframe[0];
 			
 			
 								if (keyframesCurveReferenced.Length == 0 && frameCurrent != 0) {
@@ -166,7 +168,7 @@ namespace ws.winx.editor
 												key.SetKeyTangentMode (1, TangentMode.Stepped);
 												key.SetKeyBroken (true);
 					
-					
+												animationCurve.AddKey (key);
 					
 										} else {
 												int num = animationCurve.AddKey (key);
