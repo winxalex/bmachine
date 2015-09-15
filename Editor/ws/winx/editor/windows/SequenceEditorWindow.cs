@@ -77,11 +77,13 @@ namespace ws.winx.editor.windows
 				//private const float SCROLLER_SIZE =16f;
 				private static GUIContent __frameRateGUIContent = new GUIContent ("fps:");
 				private static GUIContent __nodeLabelGUIContent = new GUIContent ();
+				private static GUIContent __nodeGUIContent = new GUIContent ();
+				private static GUIContent __nodeTransitionGUIContent = new GUIContent ();
 
 				//Keyframe
-				private static float[] keyframeTimeValues;
-				private static float[] keyframTimeValuesPrev;
-				private static bool[] keyframeTimeValuesSelected;
+				private static float[] keyframeTimeValuesNormalized;
+				private static float[] keyframeTimeValuesNormalizePrev;
+				private static bool[] keyframeTimeValuesNormalizedSelected;
 				private static string[] keyframesDisplayNames;
 				private static GUIContent __keyframeMarker;
 
@@ -426,6 +428,17 @@ namespace ws.winx.editor.windows
 //								
 //						}
 
+						//find curveBinding property path and name
+						String propertyAnimated = String.Empty;
+						
+						if (__nodeSelected == node && __nodeSelected.channel.target != null && __nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation) {
+								if (!String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
+										propertyAnimated = "(" + __nodeSelectedSourceEditorCurveBinding.path + ">" + __nodeSelectedSourceEditorCurveBinding.propertyName.Split ('.') [0].Replace ("m_LocalRotation", "Rotation").Replace ("m_LocalPosition", "Position") + ")";//TODO check regex
+								
+								
+								}
+						}
+
 
 						//Draw Transtion rect
 						Rect transitionRect = new Rect ();
@@ -450,7 +463,8 @@ namespace ws.winx.editor.windows
 								transitionRect.yMin = Mathf.Clamp (transitionRect.yMin, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
 								transitionRect.xMin = Mathf.Clamp (transitionRect.xMin, rect.xMin, rect.xMax);
 
-								GUI.Box (transitionRect, "", "TL LogicBar 0");
+								__nodeTransitionGUIContent.tooltip = "Transition=" + (startTimePos - startTransitionTimePos);
+								GUI.Box (transitionRect, __nodeTransitionGUIContent, "TL LogicBar 0");
 
 
 
@@ -463,17 +477,12 @@ namespace ws.winx.editor.windows
 						// __timeAreaW.translation.y; is negative when down scroll is clicked
 						Rect nodeRect = new Rect (startTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, endTimePos - startTimePos, NODE_RECT_HEIGHT);
 
-						
+						__nodeGUIContent.tooltip = ">" + propertyAnimated;
 
 						if (!__sequence.isPlaying && __nodeSelected == node) {
 
+								nodeRect.height = __keyframeMarker.image.height;
 								DoKeyFrames (nodeRect, rect);
-
-
-								//descrese node height so keyframes can be shown on top
-								nodeRect.yMax = nodeRect.yMin + __keyframeMarker.image.height;
-
-								
 
 
 								nodeRect.yMax = nodeRect.yMin + NODE_RECT_HEIGHT;
@@ -489,7 +498,7 @@ namespace ws.winx.editor.windows
 							
 								
 
-								GUI.Box (nodeRect, "", "TL LogicBar 0");
+								GUI.Box (nodeRect, __nodeGUIContent, "TL LogicBar 0");
 								
 								
 						} else {
@@ -499,7 +508,7 @@ namespace ws.winx.editor.windows
 								nodeRect.xMax = Mathf.Clamp (nodeRect.xMax, rect.xMin, rect.xMax);
 								nodeRect.yMin = Mathf.Clamp (nodeRect.yMin, rect.yMin + rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
 								nodeRect.xMin = Mathf.Clamp (nodeRect.xMin, rect.xMin, rect.xMax);
-								GUI.Box (nodeRect, "", "TL LogicBar 0");
+								GUI.Box (nodeRect, __nodeGUIContent, "TL LogicBar 0");
 						}
 
 						
@@ -520,15 +529,7 @@ namespace ws.winx.editor.windows
 								style.normal.textColor = color;
 
 							
-								String propertyAnimated = String.Empty;
-
-								if (__nodeSelected == node && __nodeSelected.channel.target != null && __nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation) {
-										if (!String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
-												propertyAnimated = "(" + __nodeSelectedSourceEditorCurveBinding.path + ">" + __nodeSelectedSourceEditorCurveBinding.propertyName.Split ('.') [0].Replace ("m_LocalRotation", "Rotation").Replace ("m_LocalPosition", "Position") + ")";//TODO check regex
-									
-
-										}
-								}
+								
 						
 								//calc draw name of the node
 								__nodeLabelGUIContent.text = node.name + propertyAnimated;
@@ -663,7 +664,7 @@ namespace ws.winx.editor.windows
 				static void onSelectSequenceChannelCallback (ReorderableList list)
 				{
 
-						Debug.Log ("Select " + list.index);
+						//Debug.Log ("Select " + list.index);
 						__sequence.channelSelected = (list.list [list.index] as SequenceChannel);
 
 				}
@@ -1231,7 +1232,8 @@ namespace ws.winx.editor.windows
 				/// <param name="args">Arguments.(return normalized value)</param>
 				static void onKeyframeEdit (TimeLineArgs<float> args)
 				{
-						if (__sequence != null && __sequence.nodeSelected != null) {
+						
+			if (__sequence != null && __sequence.nodeSelected != null && !__sequence.isPlaying) {
 								__sequence.timeCurrent = __sequence.nodeSelected.timeStart + args.selectedValue * __sequence.nodeSelected.duration;
 								if (!__sequence.isRecording) {
 										StartRecording ();
@@ -1294,9 +1296,13 @@ namespace ws.winx.editor.windows
 								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.nodeSelected.source as AnimationClip, args.selectedIndex);
 				}
 
-			
+				static void onKeyframeDragEnd (TimeLineArgs<float> args)
+				{
+
+						//Debug.Log ("onKeyframeDragEnd");
 
 
+				}
 
 
 				/// <summary>
@@ -1340,9 +1346,9 @@ namespace ws.winx.editor.windows
 										return;
 
 								//limit keyframes to visible area
-								float timeFromNormalized = Mathf.Round (Math.Abs (__timeAreaW.PixelToTime (Mathf.Clamp (keyframesRect.xMin, rect.xMin, rect.xMax), rect) - __nodeSelected.timeStart) / __nodeSelected.duration);			
-								float timeToNormalized = Mathf.Round (Math.Abs (__timeAreaW.PixelToTime (Mathf.Clamp (keyframesRect.xMax, rect.xMin, rect.xMax), rect) - __nodeSelected.timeStart) / __nodeSelected.duration);
-
+								float timeFromNormalized = TimeAreaW.SnapTimeToWholeFPS (Math.Abs (__timeAreaW.PixelToTime (Mathf.Clamp (keyframesRect.xMin, rect.xMin, rect.xMax), rect) - __nodeSelected.timeStart), __sequence.frameRate) / __nodeSelected.duration;			
+								float timeToNormalized = TimeAreaW.SnapTimeToWholeFPS (Math.Abs (__timeAreaW.PixelToTime (Mathf.Clamp (keyframesRect.xMax, rect.xMin, rect.xMax), rect) - __nodeSelected.timeStart), __sequence.frameRate) / __nodeSelected.duration;
+								
 
 								keyframesRect.xMax += __keyframeMarker.image.width * 0.5f;
 								keyframesRect.xMin -= __keyframeMarker.image.width * 0.5f;
@@ -1350,25 +1356,85 @@ namespace ws.winx.editor.windows
 
 
 
-								keyframeTimeValues = AnimationUtilityEx.GetTimes (clip, curveBinding, clip.length);
+								keyframeTimeValuesNormalized = AnimationUtilityEx.GetTimes (clip, curveBinding, clip.length);
 
-								keyframeTimeValues = keyframeTimeValues.Select (itm => itm).Where ((itm) => itm >= timeFromNormalized && itm <= timeToNormalized).ToArray ();
+
+				int keysNum=keyframeTimeValuesNormalized.Length;
+
+								//filter only visible keyframes normalized values
+								keyframeTimeValuesNormalized = keyframeTimeValuesNormalized.Select (itm => itm).Where ((itm) => (itm > timeFromNormalized || Mathf.Approximately (itm, timeFromNormalized)) && (itm < timeToNormalized || Mathf.Approximately (itm, timeToNormalized))).ToArray ();
+								
+
+								/////// FIND INDICES OF FISRTS AND LAST SHOWN KEY ///
+								int indexFrom = 0;
+								int indexTo = 0;
+
+								AnimationCurve curve = AnimationUtility.GetEditorCurve (clip, __nodeSelectedSourceEditorCurveBinding);
+								
+								if(keyframeTimeValuesNormalized.Length>0){
+									float timeFrom = keyframeTimeValuesNormalized [0] * __nodeSelected.duration;
+									float timeTo = keyframeTimeValuesNormalized [keyframeTimeValuesNormalized.Length - 1] * __nodeSelected.duration;
+									
+									for (int i=0; i<keysNum; i++) {
+										if (Mathf.Approximately (timeFrom, curve.keys [i].time))
+											indexFrom = i;
+										if (Mathf.Approximately (timeTo, curve.keys [i].time)) {
+											indexTo = i;
+											break;
+										}
 										
+										
+										
+									}
+								}
+								
 					
-								keyframesDisplayNames = keyframeTimeValues.Select ((itm) => {
+								//prepare text for tooltip
+								keyframesDisplayNames = keyframeTimeValuesNormalized.Select ((itm) => {
 												
 										return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
 					
-								keyframeTimeValuesSelected = new bool[keyframeTimeValues.Length];// for multiselection option not used here
+						
+								if (keyframeTimeValuesNormalizedSelected == null || keyframeTimeValuesNormalizedSelected.Length != keyframeTimeValuesNormalized.Length)
+										keyframeTimeValuesNormalizedSelected = new bool[keyframeTimeValuesNormalized.Length];
 					
 								//create custom timeline showing rotation or scale keyframes
-								EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, __keyframeMarker, ref keyframeTimeValues, ref keyframTimeValuesPrev, ref keyframesDisplayNames, ref keyframeTimeValuesSelected, -1f, onKeyframeAdd
-					                                   , onKeyframeDelete, null, onKeyframeEdit, null
+								EditorGUILayoutEx.CustomTimeLine (ref keyframesRect, __keyframeMarker, ref keyframeTimeValuesNormalized, ref keyframeTimeValuesNormalizePrev, ref keyframesDisplayNames, ref keyframeTimeValuesNormalizedSelected, -1f, onKeyframeAdd
+					                                   , onKeyframeDelete, null, onKeyframeEdit, onKeyframeDragEnd
 								);
-					
+
+
+								if (!__sequence.isPlaying && keyframeTimeValuesNormalized.Length > 0 && Event.current.type==EventType.Used) {
+										//UPDATE of DRAGED CHANGED VALUES
+
+
+										
+										if (!String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
+
+												
+												
+
+										
+												//Debug.Log ("Drag inx from:"+indexFrom+" to:"+indexTo);
+												//if (indexFrom < indexTo)
+														for (int l = indexFrom; l <=indexTo; l++) {
+																if (keyframeTimeValuesNormalizedSelected [l - indexFrom]) {
+																		Keyframe keyframe = curve.keys [l];
+																		//Debug.Log ("Drag inx:" + l + " keyframe:" + keyframe.time + " to:" + keyframeTimeValuesNormalized [l-indexFrom] * __nodeSelected.duration+" value of frm 60:"+keyframeTimeValuesNormalized[60]*__nodeSelected.duration);
+																		keyframe.time = keyframeTimeValuesNormalized [l - indexFrom] * __nodeSelected.duration;//cos of normalized values
+																		curve.MoveKey (l, keyframe);	
+																		AnimationModeUtility.SaveCurve (curve, clip, __nodeSelectedSourceEditorCurveBinding);
+
+																		if(__sequence.isRecording) __sequence.timeCurrent=keyframe.time+__nodeSelected.timeStart;
+											
+																}
+														}
+									
+									
+										}
 										
 					
-								//}
+								}
 				
 						} 
 			

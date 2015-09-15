@@ -81,8 +81,10 @@ namespace ws.winx.ik
 
 		public void Initate ()
 		{
-			ik.solver.Initiate (ik.transform);
-			_isInitated = true;
+			if (ik != null) {
+								ik.solver.Initiate (ik.transform);
+								_isInitated = true;
+						}
 		}
 
 
