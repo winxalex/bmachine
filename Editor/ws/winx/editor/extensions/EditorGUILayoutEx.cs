@@ -779,7 +779,7 @@ namespace ws.winx.editor.extensions
 				/// </summary>
 				/// <param name="rectGlobal">Rect global.</param>
 				/// <param name="timeValues">Time values.</param>
-				/// <param name="timeValuesTime">Internal purpose. Time values at drag start (just pass reference).</param>
+				/// <param name="timeValuesPrev">Internal purpose. Time values at drag start (just pass reference).</param>
 				/// <param name="displayNames">Display names.</param>
 				/// <param name="selected">Selected. Array true/false values of thoose selected</param>
 				/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
@@ -788,7 +788,7 @@ namespace ws.winx.editor.extensions
 				/// <param name="EditClose">Edit close.</param>
 				/// <param name="EditOpen">Edit open.</param>
 				/// <param name="DragEnd">Drag end.</param>
-				public static void CustomTimeLine (ref Rect rectGlobal, GUIContent marker, ref float[] timeValues, ref float[] timeValuesTime, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
+				public static void CustomTimeLine (ref Rect rectGlobal, GUIContent marker, ref float[] timeValues, ref float[] timeValuesPrev, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
 		                                   Action<TimeLineArgs<float>> Add=null, Action<TimeLineArgs<float>> Delete=null, Action<TimeLineArgs<float>> EditClose=null, Action<TimeLineArgs<float>> EditOpen=null, Action<TimeLineArgs<float>> DragEnd=null
 				)
 				{
@@ -968,7 +968,7 @@ namespace ws.winx.editor.extensions
 					
 								case HighLevelEvent.BeginDrag:
 					
-										timeValuesTime = (float[])timeValues.Clone ();
+										timeValuesPrev = (float[])timeValues.Clone ();
 					
 					//										//copy values when begin to drag	
 					//										for (int j = 0; j < timeValues.Length; j++) {
@@ -985,7 +985,7 @@ namespace ws.winx.editor.extensions
 												for (int k = timeValues.Length - 1; k >= 0; k--) {
 														if (selected [k]) {
 							
-																timeValues [k] = (float)Math.Round (timeValuesTime [k] + offset.x / rectLocal.width, 4);
+																timeValues [k] = (float)Math.Round (timeValuesPrev [k] + offset.x / rectLocal.width, 4);
 							
 																if (timeValues [k] > 1f)
 																		timeValues [k] = 1f;
@@ -1021,6 +1021,8 @@ namespace ws.winx.editor.extensions
 												
 						
 												if (EditOpen != null) {
+														//selected = new bool[timeValuesNumber];
+														selected[clickedIndex]=true;
 														EditOpen (new TimeLineArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 							
 												}
