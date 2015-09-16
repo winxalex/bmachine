@@ -155,7 +155,7 @@ namespace ws.winx.unity.sequence
 				public void StartNode ()
 				{
 
-						Debug.Log ("StartNode " + source.name);
+						//Debug.Log ("StartNode " + source.name);
 
 						
 
@@ -248,12 +248,12 @@ namespace ws.winx.unity.sequence
 												animator.Update (_timeNormalized);
 
 												if (transition > 0) {
-														Debug.Log ("Crossfade " + this.name);
+													//	Debug.Log ("Crossfade " + this.name);
 														animator.CrossFade (stateNameHash, transition, layerIndex, 0f);
 												} else {
-														Debug.Log ("Play " + this.name);
+														//Debug.Log ("Play " + this.name);
 														animator.Play (stateNameHash, layerIndex, 0f);
-							//animator.Play("angry1@unitychan 1 0",1,0f);
+
 												}
 										
 
@@ -300,7 +300,7 @@ namespace ws.winx.unity.sequence
 
 						_isRunning = false;
 
-						Debug.Log ("StopNode " + source.name+" at time:"+this.channel.sequence.timeCurrent);
+						//Debug.Log ("StopNode " + source.name+" at time:"+this.channel.sequence.timeCurrent);
 			
 						
 

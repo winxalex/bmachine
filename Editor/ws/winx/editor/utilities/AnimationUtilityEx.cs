@@ -29,7 +29,86 @@ namespace ws.winx.editor.utilities
 				public static EditorCurveBinding EditorCurveBinding_SclZ = EditorCurveBinding.FloatCurve ("", TransformType, "m_LocalScale.z");
 
 
+				/// <summary>
+				/// Moves the key to time.
+				/// </summary>
+				/// <param name="binding">Binding.</param>
+				/// <param name="clip">Clip.</param>
+				/// <param name="keyframeInx">L.</param>
+				/// <param name="time">New Time to be moved keyframe to</param>
+				public static void MoveKeyToTime (EditorCurveBinding binding, AnimationClip clip, int keyframeInx, float time)
+				{
+						if (keyframeInx < 0) {
+								Debug.LogWarning ("Try to move keyframe at index " + keyframeInx + " from prop:" + binding.propertyName + " from " + clip.name);
+								return;
+						}
+			
+						//if property is "m_LocalRotation.y" create "m_LocalRotation.x" "m_LocalRotation.z" and "m_LocalRotation.w"
+						EditorCurveBinding[] array = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, clip);
+						if (array != null) {
+								for (int j = 0; j < array.Length; j++) {
+										MoveKey (array [j], clip, keyframeInx, time);
+								}
+						} else {
+								MoveKey (binding, clip, keyframeInx, time);
+						}
+			
+				}
+
+				private static void MoveKey (EditorCurveBinding binding, AnimationClip clip, int keyframeInx, float time)
+				{
+						AnimationCurve curve;
+			
+			
+			
+						Type type = null;
+			
+						int frameCurrent = (int)(time * clip.frameRate);
+						Component componentCurrent;
+			
+			
+			
+			
+		
+			
+
+			
+						if (binding.isPPtrCurve) {
 				
+								ObjectReferenceKeyframe[] keyframesCurveReferenced = AnimationUtility.GetObjectReferenceCurve (clip, binding);
+				
+								if (keyframesCurveReferenced != null && keyframesCurveReferenced.Length > keyframeInx) {
+										keyframesCurveReferenced [keyframeInx].time = time;
+
+										AnimationUtility.SetObjectReferenceCurve (clip, binding, keyframesCurveReferenced);
+								}
+				
+				
+					
+				
+				
+				
+						} else {
+				
+				
+				
+								curve = AnimationUtility.GetEditorCurve (clip, binding);
+				
+								if (curve != null) {
+										Keyframe key = curve.keys [keyframeInx];
+										key.time = time;
+										curve.MoveKey (keyframeInx, key);
+
+										AnimationModeUtility.SaveCurve (curve, clip, binding);
+								}
+					
+					
+
+				
+						}
+				}
+		
+		
 				/// <summary>
 				/// Adds the keyframe to clip at time based of current values of root GameObject.
 				/// <param name="curveBindingCurrent">Curve binding current.</param>
@@ -37,68 +116,102 @@ namespace ws.winx.editor.utilities
 				/// <param name="root">Root.</param>
 				/// <param name="clip">Clip.</param>
 				/// <param name="time">Time.</param>
-				public static void AddKeyframeTo (EditorCurveBinding curveBindingCurrent,GameObject root, AnimationClip clip, float time)
+				public static void AddKeyframeTo (EditorCurveBinding binding, GameObject root, AnimationClip clip, float time)
 				{
-						
-						AnimationCurve curve;
-						
-						
-						
-						Type type = null;
-						object valueCurrent = null;
-						int frameCurrent = (int)(time * clip.frameRate);
-						Component componentCurrent;
 
-						
-								valueCurrent = AnimationModeUtility.GetCurrentValue (root, curveBindingCurrent);
+						object valueCurrent = AnimationModeUtility.GetCurrentValue (root, binding);
 
-								UnityEngine.Object objectAnimated=AnimationUtility.GetAnimatedObject (root, curveBindingCurrent);
-								
-								if (curveBindingCurrent.type == TransformType)
-									type = typeof(float);
-								else
-									type = objectAnimated.GetType ().GetField (curveBindingCurrent.propertyName,System.Reflection.BindingFlags.NonPublic).FieldType;
-
-								if (curveBindingCurrent.isPPtrCurve) {
-
-										ObjectReferenceKeyframe[] keyframesCurveReferenced = AnimationUtility.GetObjectReferenceCurve (clip, curveBindingCurrent);
-					
-					
-					
-										if (keyframesCurveReferenced.Length == 0 && frameCurrent != 0) {
-
-						
-												AnimationModeUtility.AddKeyframeToObjectReferenceCurve (keyframesCurveReferenced, clip, curveBindingCurrent, valueCurrent, type, 0);
-						
-										}
-					
-										AnimationModeUtility.AddKeyframeToObjectReferenceCurve (keyframesCurveReferenced, clip, curveBindingCurrent, valueCurrent, type, time);
-
-
-
-								} else {
-
-
-
-										curve = AnimationUtility.GetEditorCurve (clip, curveBindingCurrent);
-									
-
-										if (curve.length == 0 && frameCurrent != 0) {
-
-												//	Debug.Log("Add key at first frame");
-												AnimationModeUtility.AddKeyframeToCurve (curve, clip, curveBindingCurrent, (float)valueCurrent, type, 0);
-										}
-									
-										//Debug.Log("Add key at some other frame");
-										AnimationModeUtility.AddKeyframeToCurve (curve, clip, curveBindingCurrent, (float)valueCurrent, type, time);
-
+						//if property is "m_LocalRotation.y" create "m_LocalRotation.x" "m_LocalRotation.z" and "m_LocalRotation.w"
+						EditorCurveBinding[] array = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, clip);
+						if (array != null) {
+								for (int j = 0; j < array.Length; j++) {
+										AddKey (array [j], root, clip, valueCurrent, time);
 								}
+						} else {
+								AddKey (binding, root, clip, valueCurrent, time);
+						}
+						
+					
 
 
 
 
 						
 				}
+
+				private static void AddKey (EditorCurveBinding curveBindingCurrent, GameObject root, AnimationClip clip, object valueCurrent, float time)
+				{
+						AnimationCurve curve;
+						
+						
+						
+						Type type = null;
+						
+						int frameCurrent = (int)(time * clip.frameRate);
+						Component componentCurrent;
+						
+						
+						
+						
+						UnityEngine.Object objectAnimated = AnimationUtility.GetAnimatedObject (root, curveBindingCurrent);
+						
+						if (curveBindingCurrent.type == TransformType)
+								type = typeof(float);
+						else
+								type = objectAnimated.GetType ().GetField (curveBindingCurrent.propertyName).FieldType;
+						
+						if (curveBindingCurrent.isPPtrCurve) {
+							
+								ObjectReferenceKeyframe[] keyframesCurveReferenced = AnimationUtility.GetObjectReferenceCurve (clip, curveBindingCurrent);
+							
+								if (keyframesCurveReferenced == null)
+										keyframesCurveReferenced = new ObjectReferenceKeyframe[0];
+							
+							
+								//if you put first frame somewhere in time there should be one at 0f so curve can be made
+								//also if you put first frame in 0f then create one in 1f
+								if (keyframesCurveReferenced.Length == 0) {
+										if (frameCurrent != 0) 
+												AnimationModeUtility.AddKeyframeToObjectReferenceCurve (keyframesCurveReferenced, clip, curveBindingCurrent, valueCurrent, type, 0);
+										else 
+												AnimationModeUtility.AddKeyframeToObjectReferenceCurve (keyframesCurveReferenced, clip, curveBindingCurrent, valueCurrent, type, 1f);
+								
+								}
+							
+							
+								AnimationModeUtility.AddKeyframeToObjectReferenceCurve (keyframesCurveReferenced, clip, curveBindingCurrent, valueCurrent, type, time);
+							
+							
+							
+						} else {
+							
+							
+							
+								curve = AnimationUtility.GetEditorCurve (clip, curveBindingCurrent);
+							
+								if (curve == null)
+										curve = new AnimationCurve ();
+							
+							
+							
+							
+							
+								//if you put first frame somewhere in time there should be one at 0f so curve can be made
+								//also if you put first frame in 0f then create one in 1f
+								if (curve.length == 0) {
+										if (frameCurrent != 0) 
+									
+												AnimationModeUtility.AddKeyframeToCurve (curve, clip, curveBindingCurrent, (float)valueCurrent, type, 0);
+										else
+												AnimationModeUtility.AddKeyframeToCurve (curve, clip, curveBindingCurrent, (float)valueCurrent, type, 1f);
+								}
+							
+								//Debug.Log("Add key at some other frame");
+								AnimationModeUtility.AddKeyframeToCurve (curve, clip, curveBindingCurrent, (float)valueCurrent, type, time);
+							
+						}
+				}
+				
 				
 		
 		
@@ -107,29 +220,47 @@ namespace ws.winx.editor.utilities
 				/// </summary>
 				/// <param name="clip">Clip.</param>
 				/// <param name="keyframeInx">Keyframe inx.</param>
-				public static void RemoveKeyframeFrom (AnimationClip clip, int keyframeInx)
+				public static void RemoveKeyframeFrom (AnimationClip clip, EditorCurveBinding binding, int keyframeInx)
 				{
 
-						EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
+						if (keyframeInx < 0) {
+								Debug.LogWarning ("Try to remove keyframe at index " + keyframeInx + " from prop:" + binding.propertyName + " from " + clip.name);
+								return;
+						}
+
+						EditorCurveBinding[] curveBindings = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, clip);
 						AnimationCurve curve;
+
+
 						int curveBindingsNum = curveBindings.Length;
 						EditorCurveBinding curveBindingCurrent;
+						if (curveBindings != null) {
+								for (int i=0; i<curveBindingsNum; i++) {
 
-						for (int i=0; i<curveBindingsNum; i++) {
+										curveBindingCurrent = curveBindings [i];
+										curve = AnimationUtility.GetEditorCurve (clip, curveBindingCurrent);
 
-								curveBindingCurrent = curveBindings [i];
-								curve = AnimationUtility.GetEditorCurve (clip, curveBindingCurrent);
-
-								if (curve != null && curve.length > keyframeInx && keyframeInx > -1) {
+										if (curve != null && curve.length > keyframeInx) {
+												curve.RemoveKey (keyframeInx);
+												
+												AnimationModeUtility.SaveCurve (curve, clip, curveBindingCurrent);
+										}
+								}
+						} else {
+								curve = AnimationUtility.GetEditorCurve (clip, binding);
+				
+								if (curve != null && curve.length > keyframeInx) {
 										curve.RemoveKey (keyframeInx);
-										AnimationUtility.SetEditorCurve (clip, curveBindingCurrent, curve);
+										
+										AnimationModeUtility.SaveCurve (curve, clip, binding);
 								}
 						}
-					
-
-						
+				
+				
+				
+				
 				}
-
+			
 
 				/// <summary>
 				/// Gets the time at clip, keyFrameInx and curveBinding.
@@ -149,6 +280,26 @@ namespace ws.winx.editor.utilities
 
 				}
 
+
+
+
+
+				/// <summary>
+				/// Gets the times.
+				/// </summary>
+				/// <returns>The times.</returns>
+				/// <param name="clip">Clip.</param>
+				/// <param name="curveBinding">Curve binding.</param>
+				/// <param name="clipLength">Clip length.</param>
+				public static float[] GetTimes (AnimationClip clip, EditorCurveBinding curveBinding, float clipLength=1f)
+				{
+						AnimationCurve curve = AnimationUtility.GetEditorCurve (clip, curveBinding);
+						if (curve == null)
+								return new float[0];
+						return curve.keys.Select ((itm) => itm.time).ToArray ();
+			
+				}
+		
 				/// <summary>
 				/// Gets the times.(normalized 0-1)
 				/// </summary>
@@ -156,7 +307,7 @@ namespace ws.winx.editor.utilities
 				/// <param name="clip">Clip.</param>
 				/// <param name="curveBinding">Curve binding.</param>
 				/// <param name="clipLength">Clip length.</param>
-				public static float[] GetTimes (AnimationClip clip, EditorCurveBinding curveBinding, float clipLength=1f)
+				public static float[] GetTimesNormalized (AnimationClip clip, EditorCurveBinding curveBinding, float clipLength=1f)
 				{
 						AnimationCurve curve = AnimationUtility.GetEditorCurve (clip, curveBinding);
 						if (curve == null)

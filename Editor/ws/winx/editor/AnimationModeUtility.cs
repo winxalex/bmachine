@@ -183,9 +183,6 @@ namespace ws.winx.editor
 						} else {
 			
 			
-			
-								//??? maybe I should add new time too
-								//animationCurve.keys[keyframeIndex].value=value;
 								key = animationCurve.keys [keyframeIndex];
 								key.value = value;
 								animationCurve.MoveKey (keyframeIndex, key);
@@ -218,7 +215,7 @@ namespace ws.winx.editor
 						Undo.RegisterCompleteObjectUndo (animatedClip, "Edit Curve");
 
 						
-		
+						//Debug.Log (binding.propertyName+" "+binding.path);
 						QuaternionCurveTangentCalculationW.UpdateTangentsFromMode (animationCurve, animatedClip, binding);
 		
 		
@@ -266,9 +263,9 @@ namespace ws.winx.editor
 								EditorCurveBinding lhs;
 								//U5.2
 #if UNITY_5_2
-				AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].currentValue, root, out lhs);
+				AnimationUtility.PropertyModificationToEditorCurveBinding (modifications [i].previousValue, root, out lhs);
 				if (lhs == binding) {
-					return modifications [i].currentValue;
+					return modifications [i].previousValue;
 				}
 #elif UNITY_5_0
 
@@ -314,27 +311,9 @@ namespace ws.winx.editor
 //										} else 
 //										{
 
-
-//					if(binding.propertyName.Contains("localEulerAngles")){
-//						PropertyModification mod=new PropertyModification();
-//						AnimationUtility.GetFloatValue(
-//						
-//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.x");
-//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.y");
-//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.z");
-//						EditorCurveBinding newBinding = EditorCurveBinding.FloatCurve ("", typeof(Animator), "LeftHandQ.w");
-//						
-//					}
-//					
-//					Quaternion fromEuler = Quaternion.Euler (320, 238, 123);
-
-//															if (component != null && component.isHuman && binding.type == typeof(Transform) && component.IsBoneTransform (propertyModification.target as Transform)) {
-//																	
-//															} 
-
-
-
 										AnimationMode.AddPropertyModification (binding, propertyModification, modifications [i].keepPrefabOverride);
+
+										//if property is "m_LocalRotation.y" create "m_LocalRotation.x" "m_LocalRotation.z" and "m_LocalRotation.w"
 										EditorCurveBinding[] array = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (binding, activeAnimationClip);
 										if (array != null) {
 												for (int j = 0; j < array.Length; j++) {

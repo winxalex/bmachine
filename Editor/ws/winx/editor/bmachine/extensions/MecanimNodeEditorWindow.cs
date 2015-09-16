@@ -379,7 +379,7 @@ namespace ws.winx.editor.bmachine.extensions
 
 								
 
-								AnimationUtilityEx.RemoveKeyframeFrom (clip, keyframeInx);
+								//AnimationUtilityEx.RemoveKeyframeFrom (clip, clipBindings [bindingInx], keyframeInx);
 
 								__timeNormalized = 0f;
 								__timeNormalizedUpdate = true;
@@ -699,7 +699,7 @@ namespace ws.winx.editor.bmachine.extensions
 							EditorClipBinding clipBindingCurrent = (clipBindingsSerialized.value as EditorClipBinding[]).FirstOrDefault ((itm) => itm.gameObject != null && itm.gameObject.transform.childCount > 0 && itm.gameObject.transform.GetChild (0).gameObject == Selection.activeGameObject);
 							
 							
-							AnimationUtilityEx.RemoveKeyframeFrom (clipBindingCurrent.clip, args.selectedIndex);
+							//AnimationUtilityEx.RemoveKeyframeFrom (clipBindingCurrent.clip, args.selectedIndex);
 				}
 				
 				/// <summary>

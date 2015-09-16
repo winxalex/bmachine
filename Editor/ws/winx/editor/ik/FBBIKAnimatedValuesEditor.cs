@@ -41,7 +41,7 @@ namespace ws.winx.editor.ik
 										//Debug.Log ("inspector");
 
 
-										if (!EditorApplication.isPlaying && !AnimationMode.InAnimationMode ()){
+										if (!EditorApplication.isPlaying && !AnimationMode.InAnimationMode () && ikAnimatedValues.ik!=null){
 										//Reset
 										Vector3 position = ikAnimatedValues.ik.gameObject.transform.position;
 										Quaternion rotation = ikAnimatedValues.ik.gameObject.transform.rotation;

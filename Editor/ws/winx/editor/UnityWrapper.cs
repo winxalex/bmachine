@@ -178,6 +178,17 @@ namespace ws.winx.editor
 		
 				private static Type __RealType;
 				private static ConstructorInfo method_ctor;
+				static MethodInfo _RemapAnimationBindingForRotationCurves_MethodInfo;
+				
+				public static MethodInfo RemapAnimationBindingForRotationCurves_MethodInfo {
+						get {
+								if (_RemapAnimationBindingForRotationCurves_MethodInfo == null)
+										_RemapAnimationBindingForRotationCurves_MethodInfo = GetWrappedType ().GetMethod ("RemapAnimationBindingForRotationCurves");
+						
+								return _RemapAnimationBindingForRotationCurves_MethodInfo;
+						}
+				}
+		
 				static MethodInfo _RemapAnimationBindingForAddKey_MethodInfo;
 		
 				public static MethodInfo RemapAnimationBindingForAddKey_MethodInfo {
@@ -197,6 +208,14 @@ namespace ws.winx.editor
 						}
 			
 						return __RealType;
+				}
+
+				public static EditorCurveBinding RemapAnimationBindingForRotationCurves (EditorCurveBinding binding, AnimationClip clip)
+				{
+						return (EditorCurveBinding)RemapAnimationBindingForRotationCurves_MethodInfo.Invoke (null, new object[] {
+				binding,
+				clip
+			});
 				}
 		
 				public static EditorCurveBinding[] RemapAnimationBindingForAddKey (EditorCurveBinding binding, AnimationClip clip)
@@ -2200,7 +2219,7 @@ namespace ws.winx.editor
 #if UNITY_5_0
 										__SetTickMarkerRanges_MethodInfo = __RealType.GetMethod ("SetTickMarkerRanges", BindingFlags.NonPublic | BindingFlags.Instance);
 #endif							
-				return __SetTickMarkerRanges_MethodInfo;
+										return __SetTickMarkerRanges_MethodInfo;
 						}
 				}
 

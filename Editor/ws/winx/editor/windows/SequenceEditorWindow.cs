@@ -99,7 +99,31 @@ namespace ws.winx.editor.windows
 								return null;
 						}
 						set {
+
+								if (value == __nodeSelected)
+										return;
+								
 								__sequence.nodeSelected = value;
+
+
+								if (__sequence.nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation) {
+										__nodeSelectedSourceEditorCurveBinding = default(EditorCurveBinding);// EditorCurveBinding.FloatCurve ("", typeof(float), "");
+
+
+				
+										AnimationClip clip = __nodeSelected.source as AnimationClip;
+								
+										//if there is no curveBinding selected try to find at least one and select it as default
+
+										EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
+										if (curveBindings != null && curveBindings.Length > 0) {
+												__nodeSelectedSourceEditorCurveBinding = curveBindings.FirstOrDefault (itm => itm.type != typeof(Animator));
+										}
+					
+								}
+
+
+
 								EditorUtility.SetDirty (__sequence);
 						}
 				}
@@ -225,13 +249,13 @@ namespace ws.winx.editor.windows
 				/// <param name="userData">User data.</param>
 				private static void onDragHandleEvent (int controlID, Event e, int keyframeInx)
 				{
-						if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace)) {
+			if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace) && !String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) {
 
 								AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
 				
 				
 				
-								AnimationUtilityEx.RemoveKeyframeFrom (clip, keyframeInx);
+								AnimationUtilityEx.RemoveKeyframeFrom (clip,__nodeSelectedSourceEditorCurveBinding, keyframeInx);
 				
 								window.Repaint ();
 				
@@ -299,11 +323,11 @@ namespace ws.winx.editor.windows
 										if (channel.targetPositionOriginal != channel.target.transform.position
 												|| channel.targetRotationOriginal != channel.target.transform.rotation) {
 
-												if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
-														Stop ();//stop "paused" and then reset
-														__sequence.timeCurrent = 0f;//rewind to begin and reset
-														ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
-												}
+//												if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
+//														Stop ();//stop "paused" and then reset
+//														__sequence.timeCurrent = 0f;//rewind to begin and reset
+//														ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
+//												}
 								
 								
 												Debug.Log ("Target object position have been changed");
@@ -733,7 +757,7 @@ namespace ws.winx.editor.windows
 #if UNITY_5_2
 				PropertyModification propertyModification=modifications [0].previousValue;
 
-				__nodeSelectedSourceEditorCurveBinding=AnimationUtility.GetCurveBindings(node.source as AnimationClip).FirstOrDefault(itm=>itm.path==AnimationUtility.CalculateTransformPath((propertyModification.target as Component).transform,node.channel.target.transform)  && itm.propertyName==propertyModification.propertyPath);
+				//__nodeSelectedSourceEditorCurveBinding=AnimationUtility.GetCurveBindings(node.source as AnimationClip).FirstOrDefault(itm=>itm.path==AnimationUtility.CalculateTransformPath((propertyModification.target as Component).transform,node.channel.target.transform)  && itm.propertyName==propertyModification.propertyPath);
 
 				//if(!String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) EditorWindow.GetWindow<SequenceEditorWindow>().Repaint();
 
@@ -746,11 +770,12 @@ namespace ws.winx.editor.windows
 								//U5
 #if UNITY_5_0
 								
-				PropertyModification propertyModification=modifications [0].propertyModification;		
-				__nodeSelectedSourceEditorCurveBinding=AnimationUtility.GetCurveBindings(node.source as AnimationClip).FirstOrDefault(itm=>itm.path==AnimationUtility.CalculateTransformPath((propertyModification.target as Component).transform,node.channel.target.transform)  && itm.propertyName==propertyModification.propertyPath);
+				PropertyModification propertyModification=modifications [0].propertyModification;	
+
+				//__nodeSelectedSourceEditorCurveBinding=AnimationUtility.GetCurveBindings(node.source as AnimationClip).FirstOrDefault(itm=>itm.path==AnimationUtility.CalculateTransformPath((propertyModification.target as Component).transform,node.channel.target.transform)  && itm.propertyName==propertyModification.propertyPath);
 
 
-				if(!String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) EditorWindow.GetWindow<SequenceEditorWindow>().Repaint();
+				//if(!String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) EditorWindow.GetWindow<SequenceEditorWindow>().Repaint();
 
 				IAnimatedValues animatedValues = modifications [0].propertyModification.target as IAnimatedValues;
 				if (animatedValues != null) {
@@ -1233,7 +1258,7 @@ namespace ws.winx.editor.windows
 				static void onKeyframeEdit (TimeLineArgs<float> args)
 				{
 						
-			if (__sequence != null && __sequence.nodeSelected != null && !__sequence.isPlaying) {
+						if (__sequence != null && __sequence.nodeSelected != null && !__sequence.isPlaying) {
 								__sequence.timeCurrent = __sequence.nodeSelected.timeStart + args.selectedValue * __sequence.nodeSelected.duration;
 								if (!__sequence.isRecording) {
 										StartRecording ();
@@ -1276,10 +1301,13 @@ namespace ws.winx.editor.windows
 										AnimationUtilityEx.AddKeyframeTo (__nodeSelectedSourceEditorCurveBinding, __nodeSelected.channel.target, __nodeSelected.source as AnimationClip, time);
 
 				
-								} else
+								} else {
+										if (!String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName))
 
-										AnimationUtilityEx.AddKeyframeTo (__nodeSelectedSourceEditorCurveBinding, __nodeSelected.channel.target, __nodeSelected.source as AnimationClip, time);
-								
+												AnimationUtilityEx.AddKeyframeTo (__nodeSelectedSourceEditorCurveBinding, __nodeSelected.channel.target, __nodeSelected.source as AnimationClip, time);
+										else
+												Debug.LogWarning ("Create property in AnimationClip you want to add keyframe to");
+								}
 			
 						}
 				}
@@ -1292,8 +1320,8 @@ namespace ws.winx.editor.windows
 				{
 						
 						
-						if (__sequence != null && __sequence.nodeSelected != null)
-								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.nodeSelected.source as AnimationClip, args.selectedIndex);
+						if (__sequence != null && __sequence.nodeSelected != null && !String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName))
+								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.nodeSelected.source as AnimationClip,__nodeSelectedSourceEditorCurveBinding, args.selectedIndex);
 				}
 
 				static void onKeyframeDragEnd (TimeLineArgs<float> args)
@@ -1329,21 +1357,14 @@ namespace ws.winx.editor.windows
 
 				           
 
-								EditorCurveBinding curveBinding;
+								
 
 								AnimationClip clip = __nodeSelected.source as AnimationClip;
 
-								//if there is no curveBinding selected try to find at least one and select it as default
-								if (String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
-										EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings (clip);
-										if (curveBindings != null && curveBindings.Length > 0)
-												__nodeSelectedSourceEditorCurveBinding = curveBindings.FirstOrDefault (itm => itm.type != typeof(Animator));
-								}
+							
 
-								curveBinding = __nodeSelectedSourceEditorCurveBinding;
-
-								if (String.IsNullOrEmpty (curveBinding.propertyName))
-										return;
+							
+								
 
 								//limit keyframes to visible area
 								float timeFromNormalized = TimeAreaW.SnapTimeToWholeFPS (Math.Abs (__timeAreaW.PixelToTime (Mathf.Clamp (keyframesRect.xMin, rect.xMin, rect.xMax), rect) - __nodeSelected.timeStart), __sequence.frameRate) / __nodeSelected.duration;			
@@ -1353,48 +1374,56 @@ namespace ws.winx.editor.windows
 								keyframesRect.xMax += __keyframeMarker.image.width * 0.5f;
 								keyframesRect.xMin -= __keyframeMarker.image.width * 0.5f;
 
-
-
-
-								keyframeTimeValuesNormalized = AnimationUtilityEx.GetTimes (clip, curveBinding, clip.length);
-
-
-				int keysNum=keyframeTimeValuesNormalized.Length;
-
-								//filter only visible keyframes normalized values
-								keyframeTimeValuesNormalized = keyframeTimeValuesNormalized.Select (itm => itm).Where ((itm) => (itm > timeFromNormalized || Mathf.Approximately (itm, timeFromNormalized)) && (itm < timeToNormalized || Mathf.Approximately (itm, timeToNormalized))).ToArray ();
-								
-
-								/////// FIND INDICES OF FISRTS AND LAST SHOWN KEY ///
 								int indexFrom = 0;
 								int indexTo = 0;
+								AnimationCurve curve = null;
 
-								AnimationCurve curve = AnimationUtility.GetEditorCurve (clip, __nodeSelectedSourceEditorCurveBinding);
-								
-								if(keyframeTimeValuesNormalized.Length>0){
-									float timeFrom = keyframeTimeValuesNormalized [0] * __nodeSelected.duration;
-									float timeTo = keyframeTimeValuesNormalized [keyframeTimeValuesNormalized.Length - 1] * __nodeSelected.duration;
+								if (String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) 
+										keyframeTimeValuesNormalized = new float[0];
+								else {
+
+										EditorCurveBinding bindingReMapped = RotationCurveInterpolationW.RemapAnimationBindingForRotationCurves (__nodeSelectedSourceEditorCurveBinding, clip);
+					
+					
+										keyframeTimeValuesNormalized = AnimationUtilityEx.GetTimesNormalized (clip,bindingReMapped , clip.length);
+							
 									
-									for (int i=0; i<keysNum; i++) {
-										if (Mathf.Approximately (timeFrom, curve.keys [i].time))
-											indexFrom = i;
-										if (Mathf.Approximately (timeTo, curve.keys [i].time)) {
-											indexTo = i;
-											break;
+
+										int keysNum = keyframeTimeValuesNormalized.Length;
+
+										//filter only visible keyframes normalized values
+										keyframeTimeValuesNormalized = keyframeTimeValuesNormalized.Select (itm => itm).Where ((itm) => (itm > timeFromNormalized || Mathf.Approximately (itm, timeFromNormalized)) && (itm < timeToNormalized || Mathf.Approximately (itm, timeToNormalized))).ToArray ();
+								
+
+										/////// FIND INDICES OF FISRTS AND LAST SHOWN KEY ///
+										
+
+										curve = AnimationUtility.GetEditorCurve (clip, bindingReMapped);
+								
+										if (keyframeTimeValuesNormalized.Length > 0) {
+												float timeFrom = keyframeTimeValuesNormalized [0] * __nodeSelected.duration;
+												float timeTo = keyframeTimeValuesNormalized [keyframeTimeValuesNormalized.Length - 1] * __nodeSelected.duration;
+									
+												for (int i=0; i<keysNum; i++) {
+														if (Mathf.Approximately (timeFrom, curve.keys [i].time))
+																indexFrom = i;
+														if (Mathf.Approximately (timeTo, curve.keys [i].time)) {
+																indexTo = i;
+																break;
+														}
+										
+										
+										
+												}
 										}
-										
-										
-										
-									}
-								}
 								
 					
-								//prepare text for tooltip
-								keyframesDisplayNames = keyframeTimeValuesNormalized.Select ((itm) => {
+										//prepare text for tooltip
+										keyframesDisplayNames = keyframeTimeValuesNormalized.Select ((itm) => {
 												
-										return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
+												return Decimal.Round (Convert.ToDecimal (itm * clip.length), 2).ToString () + ".s"; }).ToArray ();
 					
-						
+								}
 								if (keyframeTimeValuesNormalizedSelected == null || keyframeTimeValuesNormalizedSelected.Length != keyframeTimeValuesNormalized.Length)
 										keyframeTimeValuesNormalizedSelected = new bool[keyframeTimeValuesNormalized.Length];
 					
@@ -1404,8 +1433,8 @@ namespace ws.winx.editor.windows
 								);
 
 
-								if (!__sequence.isPlaying && keyframeTimeValuesNormalized.Length > 0 && Event.current.type==EventType.Used) {
-										//UPDATE of DRAGED CHANGED VALUES
+								if (!__sequence.isPlaying && keyframeTimeValuesNormalized.Length > 0 && Event.current.type == EventType.Used) {
+										//UPDATE of DRAGED CHANGED VALUES (dragging of keyframe marker)
 
 
 										
@@ -1413,22 +1442,23 @@ namespace ws.winx.editor.windows
 
 												
 												
-
+						float time=0f;
 										
 												//Debug.Log ("Drag inx from:"+indexFrom+" to:"+indexTo);
 												//if (indexFrom < indexTo)
-														for (int l = indexFrom; l <=indexTo; l++) {
-																if (keyframeTimeValuesNormalizedSelected [l - indexFrom]) {
-																		Keyframe keyframe = curve.keys [l];
-																		//Debug.Log ("Drag inx:" + l + " keyframe:" + keyframe.time + " to:" + keyframeTimeValuesNormalized [l-indexFrom] * __nodeSelected.duration+" value of frm 60:"+keyframeTimeValuesNormalized[60]*__nodeSelected.duration);
-																		keyframe.time = keyframeTimeValuesNormalized [l - indexFrom] * __nodeSelected.duration;//cos of normalized values
-																		curve.MoveKey (l, keyframe);	
-																		AnimationModeUtility.SaveCurve (curve, clip, __nodeSelectedSourceEditorCurveBinding);
-
-																		if(__sequence.isRecording) __sequence.timeCurrent=keyframe.time+__nodeSelected.timeStart;
+												for (int l = indexFrom; l <=indexTo; l++) {
+														if (keyframeTimeValuesNormalizedSelected [l - indexFrom]) {
+																//Keyframe keyframe = curve.keys [l];
+																//Debug.Log ("Drag inx:" + l + " keyframe:" + keyframe.time + " to:" + keyframeTimeValuesNormalized [l-indexFrom] * __nodeSelected.duration+" value of frm 60:"+keyframeTimeValuesNormalized[60]*__nodeSelected.duration);
+								//keyframe.time = ;//cos of normalized values
+								time=keyframeTimeValuesNormalized [l - indexFrom] * __nodeSelected.duration;
+								AnimationUtilityEx.MoveKeyToTime(__nodeSelectedSourceEditorCurveBinding,clip,l,time);
+									
+									if (__sequence.isRecording)//drag timeScrubber with 
+																		__sequence.timeCurrent =time + __nodeSelected.timeStart;
 											
-																}
 														}
+												}
 									
 									
 										}
@@ -3432,7 +3462,7 @@ namespace ws.winx.editor.windows
 				public static void onSequenceNodeStart (SequenceNode node)
 				{
 
-						Debug.Log ("onSequenceNodeStart " + node.name);
+						//Debug.Log ("onSequenceNodeStart " + node.name);
 			          
 						if (node.source is AudioClip) {
 								AudioClip audioClip = node.source as AudioClip;
@@ -3610,38 +3640,46 @@ namespace ws.winx.editor.windows
 								
 						}
 
-
-
 						if (activeGameObject != null 
 								&& __sequence != null
 								&& __nodeSelected != null
 								&& __nodeSelected.channel.target != null
 								&& __nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation
-								&& __nodeSelected.channel.target.GetComponent<Animator> ().isHuman
-								&& __nodeSelected.channel.target.GetComponent<Animator> ().IsBoneTransform (activeGameObject.transform)
-								&& (activeGameObject == __nodeSelected.channel.target || activeGameObject.transform.IsChildOf (__nodeSelected.channel.target.transform))
-			   ) {
+							   ) {
 
-								EditorCurveBinding curveBinding = EditorCurveBinding.FloatCurve ("", null, "");
+								Animator component = __nodeSelected.channel.target.GetComponent<Animator> ();
+								if (component != null 
+										&& component.isHuman
+										&& component.IsBoneTransform (activeGameObject.transform)
+										&& (activeGameObject == __nodeSelected.channel.target || activeGameObject.transform.IsChildOf (__nodeSelected.channel.target.transform))) {
 
-								if (Tools.current == Tool.Move) {
-										curveBinding = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip).FirstOrDefault (itm => itm.type == typeof(Transform) && itm.propertyName.Contains ("Position"));
+										EditorCurveBinding curveBinding = default(EditorCurveBinding);
 
-								} else if (Tools.current == Tool.Rotate) {
-										curveBinding = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip).FirstOrDefault (itm => itm.type == typeof(Transform) && itm.propertyName.Contains ("Rotation"));
+										String path = AnimationUtility.CalculateTransformPath (activeGameObject.transform, __nodeSelected.channel.target.transform);
+
+										EditorCurveBinding[] bindings = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip);
+					
+										if (Tools.current == Tool.Move) {
+												curveBinding = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip).FirstOrDefault (itm => itm.type == typeof(Transform) && itm.propertyName.StartsWith ("m_LocalPosition.") && itm.path == path);
+
+										} else if (Tools.current == Tool.Rotate) {
+												curveBinding = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip).FirstOrDefault (itm => itm.type == typeof(Transform) && (itm.propertyName.StartsWith ("m_LocalRotation.") || itm.propertyName.StartsWith ("localEulerAngles.") || itm.propertyName.StartsWith ("localEulerAnglesBaked.")) && itm.path == path);
+					
+					
+										} else if (Tools.current == Tool.Scale) {
+												curveBinding = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip).FirstOrDefault (itm => itm.type == typeof(Transform) && itm.propertyName.Contains ("m_LocalScale.") && itm.path == path);
+					
+										}
 
 
-								} else if (Tools.current == Tool.Scale) {
-										curveBinding = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip).FirstOrDefault (itm => itm.type == typeof(Transform) && itm.propertyName.Contains ("Scale"));
+
+										if (!String.IsNullOrEmpty (curveBinding.propertyName)) {
+												__nodeSelectedSourceEditorCurveBinding = curveBinding;
+												if (window != null)
+														window.Repaint ();
+										}
 
 								}
-
-								if (!String.IsNullOrEmpty (curveBinding.propertyName)) {
-										__nodeSelectedSourceEditorCurveBinding = curveBinding;
-										if (window != null)
-												window.Repaint ();
-								}
-
 						}
 
 				}
