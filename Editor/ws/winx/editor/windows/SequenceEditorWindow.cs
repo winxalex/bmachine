@@ -454,10 +454,20 @@ namespace ws.winx.editor.windows
 
 						//find curveBinding property path and name
 						String propertyAnimated = String.Empty;
+						String propertyName = String.Empty;
 						
 						if (__nodeSelected == node && __nodeSelected.channel.target != null && __nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation) {
 								if (!String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
-										propertyAnimated = "(" + __nodeSelectedSourceEditorCurveBinding.path + ">" + __nodeSelectedSourceEditorCurveBinding.propertyName.Split ('.') [0].Replace ("m_LocalRotation", "Rotation").Replace ("m_LocalPosition", "Position") + ")";//TODO check regex
+
+									int backSlashIndx=__nodeSelectedSourceEditorCurveBinding.path.LastIndexOf("/");
+
+									if(backSlashIndx>-1)
+										propertyName=__nodeSelectedSourceEditorCurveBinding.path.Substring(backSlashIndx+1);
+									else
+										propertyName=__nodeSelectedSourceEditorCurveBinding.path;
+										
+									propertyName="[ "+propertyName+"."+__nodeSelectedSourceEditorCurveBinding.propertyName.Split ('.') [0].Replace ("m_LocalRotation", "Rotation").Replace ("m_LocalPosition", "Position").Replace ("m_LocalScale", "Scale")+"]";
+									propertyAnimated = "(" + __nodeSelectedSourceEditorCurveBinding.path + ">" + propertyName + ")";
 								
 								
 								}
@@ -556,7 +566,7 @@ namespace ws.winx.editor.windows
 								
 						
 								//calc draw name of the node
-								__nodeLabelGUIContent.text = node.name + propertyAnimated;
+								__nodeLabelGUIContent.text = node.name + propertyName;
 
 								Vector3 size = style.CalcSize (__nodeLabelGUIContent);
 						
@@ -1213,6 +1223,10 @@ namespace ws.winx.editor.windows
 						if (EditorApplication.isPlaying)
 								return;
 
+					
+
+
+
 						if (__eventMarker == null)
 								__eventMarker = EditorGUILayoutEx.ANIMATION_STYLES.eventMarker;
 						
@@ -1229,16 +1243,20 @@ namespace ws.winx.editor.windows
 
 						rect.y = 0;
 
-						
+						if (Event.current.type == EventType.MouseDown && rect.Contains (Event.current.mousePosition))//deselect
+						__sequence.channelSelected = null;
+				
+				
 						if (__sequence != null)
 								DoTimelineGUI (rect, __sequence.frameRate);
 						else
 								DoTimelineGUI (rect, 30);
 
-						rect.width = rect.x;//20% for settings
+						rect.width = rect.x;//20% for settings && channels
 						rect.x = 0;
 						rect.y = 0;
-			
+
+				
 						DoChannelsGUI (rect);
 
 						//	Debug.Log ("Scale:" + __timeAreaW.scale);
@@ -1650,7 +1668,7 @@ namespace ws.winx.editor.windows
 								if (__focusContent == null)
 										__focusContent = new GUIContent ("F", "Focus");
 			
-								//FOCUS
+								//FOCUS on nodes (spread width and scroll to)
 								if (GUILayout.Button (__focusContent, EditorStyles.toolbarButton)) {
 										float sequenceTimeStartPositionX = 0f;
 										float sequenceTimeEndPositionX = 0f;
@@ -1719,6 +1737,8 @@ namespace ws.winx.editor.windows
 								if (__sequence.channels.Count > 0 && rect.Contains (Event.current.mousePosition)) {
 										sequenceDropChannelTargetEventHandler (rect, (int)((Event.current.mousePosition.y - rect.yMin - __timeAreaW.translation.y) / NODE_RECT_HEIGHT));
 								}
+
+							
 
 						}
 
@@ -2570,8 +2590,10 @@ namespace ws.winx.editor.windows
 								bool equal = x.type == typeof(Transform) 
 										&& y.type == typeof(Transform) 
 										&& x.path == y.path 
-										&& ((x.propertyName.Contains ("m_LocalRotation") && y.propertyName.Contains ("m_LocalRotation")) 
-										|| (x.propertyName.Contains ("m_LocalPosition") && y.propertyName.Contains ("m_LocalPosition")));
+										&& ((x.propertyName.Contains ("m_LocalRotation") && y.propertyName.Contains ("m_LocalRotation"))
+										|| (x.propertyName.Contains ("m_LocalPosition") && y.propertyName.Contains ("m_LocalPosition"))
+						   				 || (x.propertyName.Contains ("m_LocalScale") && y.propertyName.Contains ("m_LocalScale"))
+						    );
 
 
 								return equal;

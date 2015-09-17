@@ -1195,7 +1195,7 @@ namespace ws.winx.editor.bmachine.extensions
 												if (clipBindingCurrent != null && clipBindingCurrent.visible && clipBindingCurrent.clip != null) {
 														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_RotX;
 														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
-														keyframeTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
+														keyframeTimeValues = AnimationUtilityEx.GetTimesNormalized (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
 
 												}else
 													keyframeTimeValues = new float[0];
@@ -1209,7 +1209,7 @@ namespace ws.winx.editor.bmachine.extensions
 												if (clipBindingCurrent != null && clipBindingCurrent.visible && clipBindingCurrent.clip != null) {
 														EditorCurveBinding curveBinding = AnimationUtilityEx.EditorCurveBinding_SclX;
 														curveBinding.path = AnimationUtility.CalculateTransformPath (clipBindingCurrent.gameObject.transform.GetChild (0), clipBindingCurrent.gameObject.transform.root);
-														keyframeTimeValues = AnimationUtilityEx.GetTimes (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
+														keyframeTimeValues = AnimationUtilityEx.GetTimesNormalized (clipBindingCurrent.clip, curveBinding, __spaceGameObjectAnimationClip.length);
 
 											}else
 												keyframeTimeValues = new float[0];
