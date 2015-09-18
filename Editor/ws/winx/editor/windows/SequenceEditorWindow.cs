@@ -249,13 +249,13 @@ namespace ws.winx.editor.windows
 				/// <param name="userData">User data.</param>
 				private static void onDragHandleEvent (int controlID, Event e, int keyframeInx)
 				{
-			if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace) && !String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) {
+						if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace) && !String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
 
 								AnimationClip clip = __sequence.nodeSelected.source as AnimationClip;
 				
 				
 				
-								AnimationUtilityEx.RemoveKeyframeFrom (clip,__nodeSelectedSourceEditorCurveBinding, keyframeInx);
+								AnimationUtilityEx.RemoveKeyframeFrom (clip, __nodeSelectedSourceEditorCurveBinding, keyframeInx);
 				
 								window.Repaint ();
 				
@@ -459,15 +459,15 @@ namespace ws.winx.editor.windows
 						if (__nodeSelected == node && __nodeSelected.channel.target != null && __nodeSelected.channel.type == SequenceChannel.SequenceChannelType.Animation) {
 								if (!String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
 
-									int backSlashIndx=__nodeSelectedSourceEditorCurveBinding.path.LastIndexOf("/");
+										int backSlashIndx = __nodeSelectedSourceEditorCurveBinding.path.LastIndexOf ("/");
 
-									if(backSlashIndx>-1)
-										propertyName=__nodeSelectedSourceEditorCurveBinding.path.Substring(backSlashIndx+1);
-									else
-										propertyName=__nodeSelectedSourceEditorCurveBinding.path;
+										if (backSlashIndx > -1)
+												propertyName = __nodeSelectedSourceEditorCurveBinding.path.Substring (backSlashIndx + 1);
+										else
+												propertyName = __nodeSelectedSourceEditorCurveBinding.path;
 										
-									propertyName="[ "+propertyName+"."+__nodeSelectedSourceEditorCurveBinding.propertyName.Split ('.') [0].Replace ("m_LocalRotation", "Rotation").Replace ("m_LocalPosition", "Position").Replace ("m_LocalScale", "Scale")+"]";
-									propertyAnimated = "(" + __nodeSelectedSourceEditorCurveBinding.path + ">" + propertyName + ")";
+										propertyName = "[ " + propertyName + "." + __nodeSelectedSourceEditorCurveBinding.propertyName.Split ('.') [0].Replace ("m_LocalRotation", "Rotation").Replace ("m_LocalPosition", "Position").Replace ("m_LocalScale", "Scale") + "]";
+										propertyAnimated = "(" + __nodeSelectedSourceEditorCurveBinding.path + ">" + propertyName + ")";
 								
 								
 								}
@@ -544,6 +544,8 @@ namespace ws.winx.editor.windows
 								nodeRect.xMin = Mathf.Clamp (nodeRect.xMin, rect.xMin, rect.xMax);
 								GUI.Box (nodeRect, __nodeGUIContent, "TL LogicBar 0");
 						}
+							
+							
 
 						
 
@@ -1244,7 +1246,7 @@ namespace ws.winx.editor.windows
 						rect.y = 0;
 
 						if (Event.current.type == EventType.MouseDown && rect.Contains (Event.current.mousePosition))//deselect
-						__sequence.channelSelected = null;
+								__sequence.channelSelected = null;
 				
 				
 						if (__sequence != null)
@@ -1338,8 +1340,8 @@ namespace ws.winx.editor.windows
 				{
 						
 						
-						if (__sequence != null && __sequence.nodeSelected != null && !String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName))
-								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.nodeSelected.source as AnimationClip,__nodeSelectedSourceEditorCurveBinding, args.selectedIndex);
+						if (__sequence != null && __sequence.nodeSelected != null && !String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName))
+								AnimationUtilityEx.RemoveKeyframeFrom (__sequence.nodeSelected.source as AnimationClip, __nodeSelectedSourceEditorCurveBinding, args.selectedIndex);
 				}
 
 				static void onKeyframeDragEnd (TimeLineArgs<float> args)
@@ -1403,7 +1405,7 @@ namespace ws.winx.editor.windows
 										EditorCurveBinding bindingReMapped = RotationCurveInterpolationW.RemapAnimationBindingForRotationCurves (__nodeSelectedSourceEditorCurveBinding, clip);
 					
 					
-										keyframeTimeValuesNormalized = AnimationUtilityEx.GetTimesNormalized (clip,bindingReMapped , clip.length);
+										keyframeTimeValuesNormalized = AnimationUtilityEx.GetTimesNormalized (clip, bindingReMapped, clip.length);
 							
 									
 
@@ -1460,7 +1462,7 @@ namespace ws.winx.editor.windows
 
 												
 												
-						float time=0f;
+												float time = 0f;
 										
 												//Debug.Log ("Drag inx from:"+indexFrom+" to:"+indexTo);
 												//if (indexFrom < indexTo)
@@ -1468,12 +1470,12 @@ namespace ws.winx.editor.windows
 														if (keyframeTimeValuesNormalizedSelected [l - indexFrom]) {
 																//Keyframe keyframe = curve.keys [l];
 																//Debug.Log ("Drag inx:" + l + " keyframe:" + keyframe.time + " to:" + keyframeTimeValuesNormalized [l-indexFrom] * __nodeSelected.duration+" value of frm 60:"+keyframeTimeValuesNormalized[60]*__nodeSelected.duration);
-								//keyframe.time = ;//cos of normalized values
-								time=keyframeTimeValuesNormalized [l - indexFrom] * __nodeSelected.duration;
-								AnimationUtilityEx.MoveKeyToTime(__nodeSelectedSourceEditorCurveBinding,clip,l,time);
+																//keyframe.time = ;//cos of normalized values
+																time = keyframeTimeValuesNormalized [l - indexFrom] * __nodeSelected.duration;
+																AnimationUtilityEx.MoveKeyToTime (__nodeSelectedSourceEditorCurveBinding, clip, l, time);
 									
-									if (__sequence.isRecording)//drag timeScrubber with 
-																		__sequence.timeCurrent =time + __nodeSelected.timeStart;
+																if (__sequence.isRecording)//drag timeScrubber with 
+																		__sequence.timeCurrent = time + __nodeSelected.timeStart;
 											
 														}
 												}
@@ -2538,12 +2540,14 @@ namespace ws.winx.editor.windows
 										}
 								}
 
+								
+								
 
-				
+								
 								timeScrubberEventHandler (rect);
 						
 
-								//draw time scrubber
+								//DRAW TIME SCRUBBER
 								Color colorSaved = GUI.color;
 
 								//if(__sequence.isPlaying)
@@ -2592,7 +2596,7 @@ namespace ws.winx.editor.windows
 										&& x.path == y.path 
 										&& ((x.propertyName.Contains ("m_LocalRotation") && y.propertyName.Contains ("m_LocalRotation"))
 										|| (x.propertyName.Contains ("m_LocalPosition") && y.propertyName.Contains ("m_LocalPosition"))
-						   				 || (x.propertyName.Contains ("m_LocalScale") && y.propertyName.Contains ("m_LocalScale"))
+										|| (x.propertyName.Contains ("m_LocalScale") && y.propertyName.Contains ("m_LocalScale"))
 						    );
 
 
@@ -2672,47 +2676,65 @@ namespace ws.winx.editor.windows
 						switch (ev.rawType) {
 						case EventType.MouseDown:
 				
-			
-								//resize rect at start of the node rect width=5px
-								clickRect = new Rect (__timeAreaW.TimeToPixel (node.timeStart, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, 10, NODE_RECT_HEIGHT);
+								float nodeEndPosition = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect);
+								float nodeStartPosition = __timeAreaW.TimeToPixel (node.timeStart, rect);
+								
+								clickRect = new Rect (nodeStartPosition, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, nodeEndPosition-nodeStartPosition, NODE_RECT_HEIGHT);
 					
 								if (__nodeSelected == node)//resize mouse interaction only on blue rect area (not key frames area)
 										clickRect.yMin += __keyframeMarker.image.height;
 
-								clickRect.xMin = Mathf.Clamp (clickRect.xMin, rect.xMin, rect.xMax);
-								clickRect.xMax = Mathf.Clamp (clickRect.xMax, rect.xMin, rect.xMax);
 								clickRect.yMax = Mathf.Clamp (clickRect.yMax, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
 								clickRect.yMin = Mathf.Clamp (clickRect.yMin, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
 
-
-
-								//check start of the node rect width=5
-								if (clickRect.Contains (Event.current.mousePosition)) {
-										
+								clickRect.xMin = Mathf.Clamp (clickRect.xMin, rect.xMin, rect.xMax);
+								clickRect.xMax = Mathf.Clamp (clickRect.xMax, rect.xMin, rect.xMax);
+								
+					
+								//check if start and end are visible
+								float nodeRectWidth = clickRect.width;
+								bool canResizeStart = nodeRectWidth > 5 && rect.x <= clickRect.x - 5;
+								bool canResizeEnd = nodeRectWidth > 5 && rect.xMax >= clickRect.xMax + 5;
+					
+								
+								//move rect at node start -5px
+								clickRect.x -= 5;
+								clickRect.width=10;
+								
+								//check start of the node rect width=10
+								if (canResizeStart && clickRect.Contains (Event.current.mousePosition)) {
+					
 										__nodeSelected = node;
 
 										
-
+										Debug.Log ("Resize start");
 										__wasResizingNodeStart = true;
 
 										ev.Use ();
 								}
 					
-								//resize rect at the end of rect width=5x;
-								clickRect.x = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - 5;
+								//move rect at the node rect end  width=10x;
+								clickRect.x += nodeRectWidth;
+								
 					
 					
 								//check the end of node rect width=5
-								if (clickRect.Contains (Event.current.mousePosition)) {
+								if (canResizeEnd && clickRect.Contains (Event.current.mousePosition)) {
 										__nodeSelected = node;
 										__wasResizingNodeEnd = true;
+										Debug.Log ("Resize end");
 										ev.Use ();
 								}
 					
 					
-								clickRect.x = __timeAreaW.TimeToPixel (node.timeStart, rect) + 5;
-								clickRect.width = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - clickRect.x - 5;
-					
+								clickRect.x -= nodeRectWidth-5;
+								clickRect.width=nodeRectWidth;
+
+
+
+				
+			
+				
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										
 										if (ev.button == 0) {
@@ -2720,6 +2742,24 @@ namespace ws.winx.editor.windows
 												__clickDelta = node.timeStart - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
 												__isDragged = true;
 												__nodeSelected = node;
+
+												//if (node == __nodeSelected && Event.current.type==EventType.MouseDown && Event.current.button==0 && nodeRect.Contains(Event.current.mousePosition)) {
+												if (node.channel.type == SequenceChannel.SequenceChannelType.Animation && !String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) {
+
+														Debug.Log ("Show");
+														Rect curveEditorRect = clickRect;
+													
+														curveEditorRect.yMin = curveEditorRect.yMax;
+														curveEditorRect.height = Screen.height - curveEditorRect.yMin;
+														curveEditorRect.y = curveEditorRect.y + window.position.yMin;//make it global
+								
+														//curveEditorRect.width=rect.width * 0.8f;
+
+
+													
+														CurveEditorWindow.ShowWindow (curveEditorRect,  node.source as AnimationClip, __nodeSelectedSourceEditorCurveBinding);
+							
+												}
 
 //												if (__sequence.isRecording)
 //														Selection.activeGameObject = node.channel.target;

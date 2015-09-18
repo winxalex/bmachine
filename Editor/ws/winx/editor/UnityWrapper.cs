@@ -1485,6 +1485,7 @@ namespace ws.winx.editor
 
 				public Vector2 Scale {
 						get{ return (Vector2)FieldInfo_m_Scale.GetValue (__instance);}
+						set{ FieldInfo_m_Scale.SetValue (__instance,value);}
 			
 				}
 
@@ -1947,7 +1948,7 @@ namespace ws.winx.editor
 												_indexSelected = -1;
 										}
 
-
+										if(onSelect!=null)
 										onSelect (_indexSelected);
 								}
 
