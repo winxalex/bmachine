@@ -20,7 +20,7 @@ namespace ws.winx.editor.windows
 
 						__window = ScriptableObject.CreateInstance<CurveEditorWindow> ();//  EditorWindow.GetWindow<CurveEditorWindow> ();
 						__window.__binding = binding;
-			__window.__clip = clip;
+						__window.__clip = clip;
 						//rect = new Rect (0, 0, 100, 100);
 						__window.position = rect;
 						__window.ShowPopup ();
@@ -49,10 +49,10 @@ namespace ws.winx.editor.windows
 									
 										CurveWrapperW curveWrapperNew;
 										Color curveColor = Color.red;
-										int curveBindingsNum =0;
+										int curveBindingsNum = 0;
 										EditorCurveBinding curveBindingCurrent;
 										if (__bindings != null) {
-						curveBindingsNum=__bindings.Length;
+												curveBindingsNum = __bindings.Length;
 												__curves = new AnimationCurve[curveBindingsNum];
 												curveWrappers = new CurveWrapperW[curveBindingsNum];
 												for (int i=0; i<curveBindingsNum; i++) {
@@ -102,15 +102,15 @@ namespace ws.winx.editor.windows
 										__curveEditor.vSlider = false;
 
 										__curveEditor.hRangeMin = __curves [0].keys [0].time;
-										__curveEditor.hRangeMax =__clip.length;// __curves [0].keys [__curves [0].length - 1].time;
+										__curveEditor.hRangeMax = __clip.length;// __curves [0].keys [__curves [0].length - 1].time;
 										__curveEditor.hRangeLocked = true;
-					__curveEditor.Scale=new Vector2(__window.position.width/__clip.length,__curveEditor.Scale.y);//scale x manually
+										__curveEditor.Scale = new Vector2 (__window.position.width / __clip.length, __curveEditor.Scale.y);//scale x manually
 										__curveEditor.leftmargin = 0f;
 
-					__curveEditor.rightmargin =0;// __window.position.width - __curveEditor.hRangeMax * __clip.length / __window.position.width;
+										__curveEditor.rightmargin = 0;// __window.position.width - __curveEditor.hRangeMax * __clip.length / __window.position.width;
 						
 							
-					//__curveEditor.onSelect += onCurveSelect;
+										//__curveEditor.onSelect += onCurveSelect;
 				
 				
 				
@@ -118,29 +118,39 @@ namespace ws.winx.editor.windows
 								} else {
 										__curveEditorRect = new Rect (0, 0, Screen.width, Screen.height);
 										__curveEditor.rect = __curveEditorRect;
-					//__curveEditor.Scale=new Vector2(237,__curveEditor.Scale.y);
+										//__curveEditor.Scale=new Vector2(237,__curveEditor.Scale.y);
 										//__curveEditor.FrameSelected (false, false);
 				
 								}
 
 
-				//if(Event.current.type==EventType.MouseMove || Event.current.type==EventType.ScrollWheel && !__window.position.Contains(Event.current.mousePosition))
-					//this.Close();
+								//if(Event.current.type==EventType.MouseMove || Event.current.type==EventType.ScrollWheel && !__window.position.Contains(Event.current.mousePosition))
+								//this.Close();
 			
-								EditorGUI.BeginChangeCheck ();
-				GUI.changed=false;
-								__curveEditor.DoEditor ();
+								//EditorGUI.BeginChangeCheck ();
 
+//								if (Event.current.type == EventType.MouseMove && !__window.position.Contains (Event.current.mousePosition)) {
+//										this.Close ();
+//								}
 
-				Debug.Log(	__curveEditor.Scale+" "+__window.position.width);			
-
-								if (EditorGUI.EndChangeCheck () || GUI.changed) {
-
+								if (Event.current.type == EventType.MouseDrag && Event.current.button == 0) {
+									
 										//if change happen change curve
 										for (int k=0; k<__bindings.Length; k++) {
 												AnimationModeUtility.SaveCurve (__curves [k], __clip, __bindings [k]);
+												Debug.Log ("Save");
 										}
 								}
+			
+								__curveEditor.DoEditor ();
+
+
+								Debug.Log (__curveEditor.Scale + " " + __window.position.width + " " + Event.current.type);			
+
+								//if (EditorGUI.EndChangeCheck ()) {
+
+										
+								//}
 
 						}
 				}
