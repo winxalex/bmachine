@@ -1226,7 +1226,8 @@ namespace ws.winx.editor.windows
 								return;
 
 					
-
+						if (Event.current.type == EventType.ScrollWheel && CurveEditorWindow.window != null)
+								CurveEditorWindow.window.Close ();
 
 
 						if (__eventMarker == null)
@@ -1671,7 +1672,7 @@ namespace ws.winx.editor.windows
 										__focusContent = new GUIContent ("F", "Focus");
 			
 								//FOCUS on nodes (spread width and scroll to)
-								if (GUILayout.Button (__focusContent, EditorStyles.toolbarButton)) {
+								if (GUILayout.Button (__focusContent, EditorStyles.toolbarButton) && __sequence.duration>0) {
 										float sequenceTimeStartPositionX = 0f;
 										float sequenceTimeEndPositionX = 0f;
 
@@ -1680,6 +1681,8 @@ namespace ws.winx.editor.windows
 
 										float sequenceWidth = sequenceTimeEndPositionX - sequenceTimeStartPositionX;
 
+
+										//if(!float.IsNaN(sequenceTimeStartPositionX) &&  
 										__timeAreaW.Focus (new Rect (sequenceTimeStartPositionX, 0, sequenceWidth, 0));
 
 								}

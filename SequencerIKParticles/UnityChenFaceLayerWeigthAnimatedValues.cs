@@ -11,6 +11,14 @@ public class UnityChenFaceLayerWeigthAnimatedValues : MonoBehaviour,IAnimatedVal
 	public int FaceLayerIndex;
 
 	#region IAnimatedValues implementation
+
+
+
+	public void Initate ()
+	{
+		throw new System.NotImplementedException ();
+	}
+
 	public void UpdateValues ()
 	{
 		animator.SetLayerWeight (FaceLayerIndex, FaceLayerWeight);

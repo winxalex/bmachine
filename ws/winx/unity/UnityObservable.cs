@@ -18,10 +18,14 @@ namespace ws.winx.unity{
 	using UniRx.InternalUtil;
 	using UnityEngine;
 	using System.Reflection;
+	using UniRx.Triggers;
 	
 	
 	public static class  ObservableExtensionsEx{
-		
+		public static IDisposable DisposeWith(this IDisposable disposable, GameObject gameObject)
+		{
+			return gameObject.OnDestroyAsObservable().First().Subscribe(p => disposable.Dispose());
+		}
 		
 		public static IDisposable AddListener (this IObservable<GameObject> source,UnityAction call)
 		{

@@ -9,13 +9,19 @@ namespace ws.winx.editor.windows
 
 				private static CurveEditorWindow __window;
 
+				public static CurveEditorWindow window {
+					get {
+						return __window;
+					}
+				}
+
 				public static void ShowWindow (Rect rect, AnimationClip clip, EditorCurveBinding  binding)
 				{
 
 						
 						if (__window != null) {
 								__window.Close ();
-								Debug.Log ("Hide Prev");
+								//Debug.Log ("Hide Prev");
 						}
 
 						__window = ScriptableObject.CreateInstance<CurveEditorWindow> ();//  EditorWindow.GetWindow<CurveEditorWindow> ();
@@ -138,14 +144,14 @@ namespace ws.winx.editor.windows
 										//if change happen change curve
 										for (int k=0; k<__bindings.Length; k++) {
 												AnimationModeUtility.SaveCurve (__curves [k], __clip, __bindings [k]);
-												Debug.Log ("Save");
+												//Debug.Log ("Save");
 										}
 								}
 			
 								__curveEditor.DoEditor ();
 
 
-								Debug.Log (__curveEditor.Scale + " " + __window.position.width + " " + Event.current.type);			
+							//	Debug.Log ("CurveEditorWindow:"+__curveEditor.Scale + " " + __window.position.width + " " + Event.current.type);			
 
 								//if (EditorGUI.EndChangeCheck ()) {
 
@@ -160,7 +166,7 @@ namespace ws.winx.editor.windows
 						this.Close ();
 						__window = null;
 
-						Debug.Log ("Hide");
+						//Debug.Log ("Hide");
 
 				}
 		}

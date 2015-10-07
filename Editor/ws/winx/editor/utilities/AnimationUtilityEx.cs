@@ -232,9 +232,11 @@ namespace ws.winx.editor.utilities
 						AnimationCurve curve;
 
 
-						int curveBindingsNum = curveBindings.Length;
+						
 						EditorCurveBinding curveBindingCurrent;
 						if (curveBindings != null) {
+							int curveBindingsNum = curveBindings.Length;
+
 								for (int i=0; i<curveBindingsNum; i++) {
 
 										curveBindingCurrent = curveBindings [i];

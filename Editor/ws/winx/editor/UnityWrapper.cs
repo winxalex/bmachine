@@ -2161,8 +2161,8 @@ namespace ws.winx.editor
 		public class TimeAreaW
 		{
 				private object __instance;
-				private TickHandlerW _hTicks;
-				private TickHandlerW _vTicks;
+				private TickHandlerW __hTicks;
+				private TickHandlerW __vTicks;
 				private static Type __RealType;
 				private static ConstructorInfo method_ctor;
 				private	static MethodInfo EndViewGUI_MethodInfo;
@@ -2372,26 +2372,26 @@ namespace ws.winx.editor
 
 				public TickHandlerW hTicks {
 						get { 
-								if (_hTicks == null) {
-										_hTicks = new TickHandlerW ();
-										_hTicks.wrapped = PropertyInfo_hTicks.GetValue (__instance, null);
+								if (__hTicks == null) {
+										__hTicks = new TickHandlerW ();
+										__hTicks.wrapped = PropertyInfo_hTicks.GetValue (__instance, null);
 								}
-								return _hTicks;
+								return __hTicks;
 						}
-						set{ _hTicks = value;}
+						set{ __hTicks = value;}
 				}
 
 				public TickHandlerW vTicks {
 						get { 
-								if (_vTicks == null) {
-										_vTicks = new TickHandlerW ();
-										_vTicks.wrapped = PropertyInfo_vTicks.GetValue (__instance, null);
+								if (__vTicks == null) {
+										__vTicks = new TickHandlerW ();
+										__vTicks.wrapped = PropertyInfo_vTicks.GetValue (__instance, null);
 								}
-								return _vTicks;
+								return __vTicks;
 						}
 						set { 
-								_vTicks = value;
-								PropertyInfo_vTicks.SetValue (__instance, _vTicks.wrapped, null);
+								__vTicks = value;
+								PropertyInfo_vTicks.SetValue (__instance, __vTicks.wrapped, null);
 						}
 				}
 
