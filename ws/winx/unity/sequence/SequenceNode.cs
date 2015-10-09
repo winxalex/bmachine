@@ -229,9 +229,9 @@ namespace ws.winx.unity.sequence
 					
 												 
 										
-					} else if (source is  AnimationClip) {
+										} else if (source is  AnimationClip) {
 
-											_animatedValues = target.GetComponent<IAnimatedValues> ();
+												_animatedValues = target.GetComponent<IAnimatedValues> ();
 						
 
 											
@@ -244,17 +244,28 @@ namespace ws.winx.unity.sequence
 												animator.runtimeAnimatorController = this.channel.runtimeAnimatorController;
 												animator.enabled = true;
 
-									   
-												animator.Update (_timeNormalized);
+									   			
+
+												//Debug.Log("time normalized"+_timeNormalized);
+
+												//change direction (from _timeNormalized to 0f or from _timeNormalized to 1f)
+												if (!channel.sequence.playForward) 
+
+														animator.speed = -1f;
+												else
+
+														animator.speed = 1f;
+
 
 												if (transition > 0) {
-													//	Debug.Log ("Crossfade " + this.name);
-														animator.CrossFade (stateNameHash, transition, layerIndex, 0f);
+														//	Debug.Log ("Crossfade " + this.name);
+														animator.CrossFade (stateNameHash, transition, layerIndex, _timeNormalized);
 												} else {
 														//Debug.Log ("Play " + this.name);
-														animator.Play (stateNameHash, layerIndex, 0f);
+														animator.Play (stateNameHash, layerIndex, _timeNormalized);
 
 												}
+						
 										
 
 
@@ -368,9 +379,6 @@ namespace ws.winx.unity.sequence
 
 				}
 
-
-				
-
 				public virtual void DoUpdate ()
 				{
 						if (onUpdate != null)
@@ -418,8 +426,30 @@ namespace ws.winx.unity.sequence
 						} else {
 								if (_timeNormalized > 0.0f && _timeNormalized <= 1.0f) {
 										StartNode ();
-								
-								
+								} else if (source is AnimationClip) {
+
+//									float timeNormalizedSnapped;
+//
+//									//if sequence time is before or after this node
+//									if(_timeLocal<timeStart)
+//										timeNormalizedSnapped=0f;
+//									else
+//										timeNormalizedSnapped=1f;
+//
+//
+//										Animator animator = channel.target.GetComponent<Animator> ();
+//					
+//										if (animator == null) {
+//											animator = channel.target.AddComponent<Animator> ();
+//										}
+//										animator.runtimeAnimatorController = this.channel.runtimeAnimatorController;
+//										animator.enabled = true;
+//										
+//										
+//										animator.Update (timeNormalizedSnapped);
+//
+//										animator.Play (stateNameHash, layerIndex, 0f);
+
 								}
 								
 						}

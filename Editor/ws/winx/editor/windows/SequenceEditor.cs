@@ -69,53 +69,80 @@ namespace ws.winx.editor.windows
 
 
 
-						if (EditorGUI.EndChangeCheck ()) {
-								serializedObject.ApplyModifiedProperties ();
+						
 
 
 
-						}
-
-
-
+				if(!sequence.isPlaying && !sequence.isRecording)
+			sequence.timeCurrent = EditorGUILayout.Slider ("Time Current", (float)sequence.timeCurrent,(float)sequence.timeStart,(float)sequence.timeEnd);
 
 
 
 
 		
 						EditorGUILayout.BeginHorizontal ();
-						if (GUILayout.Button ("Play")) {
-								sequence.PlayAt ();
+
+				
+
+						if (GUILayout.Button (!Application.isPlaying ? (sequence.isPlaying ? "Pause" :"Play Forward") : "Play Forward")) {
+								if (Application.isPlaying)
+										sequence.Play (sequence.timeCurrent);
+								else
+										SequenceEditorWindow.Play ();
 
 						}
 
-						if (GUILayout.Button ("Stop Forward")) {
-								sequence.Stop (true);
+						if (GUILayout.Button ("Play Backward")) {
+								if (Application.isPlaying)
+										sequence.Play (sequence.timeCurrent, false);
+								else
+									SequenceEditorWindow.Play (false);	
+							
 						}
 
-						if (GUILayout.Button ("Stop Reset")) {
-								//sequence.Stop(false);
-								Debug.Log ("Not yet tested, not finished");
+						if (GUILayout.Button ("Stop")) {
+								if (Application.isPlaying)
+										sequence.Stop ();
+								else
+										SequenceEditorWindow.Stop ();
+
+
 						}
 
-						if (GUILayout.Button ("Pause")) {
-								sequence.Pause ();
-								Debug.Log ("Not yet tested, not finished");
-						}
-						if (GUILayout.Button ("UnPause")) {
-								Debug.Log ("Not yet tested, not finished");
-								sequence.UnPause ();
-						}
-						if (GUILayout.Button ("Restart")) {
-								//sequence.Restart();
-								Debug.Log ("Not yet tested, not finished");
-						}
+						if (Application.isPlaying)
+							if (GUILayout.Button ("Pause")) {
+									Debug.LogWarning ("Not yet tested, not finished");
+									
+											sequence.Pause ();
+								
+									
+							}
+
+						if (Application.isPlaying)
+							if (GUILayout.Button ("UnPause")) {
+									Debug.LogWarning ("Not yet tested, not finished");
+											sequence.UnPause ();
+									
+							}
+						
+						if(!Application.isPlaying)
 						if (GUILayout.Button ("Open Editor")) {
 								SequenceEditorWindow.ShowWindow ();
 						}
 
 						EditorGUILayout.EndHorizontal ();
 
+
+						if (EditorGUI.EndChangeCheck ()) {
+							serializedObject.ApplyModifiedProperties ();
+							
+							SequenceEditorWindow.window.Repaint();
+							
+						}
+
+
+
+						///// DRAW SELECTED NODE (inside SequenceEditor) ////////
 						SequenceNode selectedNode = sequence.nodeSelected;
 						if (selectedNode != null) {
 

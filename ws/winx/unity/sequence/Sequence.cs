@@ -108,6 +108,7 @@ namespace ws.winx.unity.sequence
 				[NonSerialized]
 				public SequenceChannel
 						channelSelected;
+
 				public SequenceWrap wrap = SequenceWrap.ClampForever;
 				public bool playOnStart = true;
 				public int frameRate = 30;
@@ -118,9 +119,6 @@ namespace ws.winx.unity.sequence
 				/// The end time in global time space (Time.time or EditorApplication.timeSinceStartup)
 				/// </summary>
 				double _timeAtEnd;
-
-
-
 				bool _isRecording;
 				
 				public bool isRecording {
@@ -163,11 +161,9 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
-				
-
 				public double timeEnd {
 						get {
-								return timeStart+duration;
+								return timeStart + duration;
 						}
 				}
 
@@ -187,7 +183,14 @@ namespace ws.winx.unity.sequence
 						}
 				}
 				
-				public bool playForward;
+				bool _playForward=true;
+
+				public bool playForward {
+					get {
+						return _playForward;
+					}
+				}
+
 				bool _stop = true;
 				bool _pause;
 				double _timeLast;
@@ -197,7 +200,7 @@ namespace ws.winx.unity.sequence
 				private void Start ()
 				{
 						if (playOnStart) {
-								PlayAt ();			
+								Play ();			
 						}
 				}
 
@@ -231,7 +234,7 @@ namespace ws.winx.unity.sequence
 			
 						//Debug.Log ("Time current:" + timeCurrent+"Time.time"+Time.time+" _timeAtEnd:"+_timeAtEnd);
 
-			//Debug.Log ("Time current:" + timeCurrent+"ticki:"+t+" _timeAtEnd:"+_timeAtEnd+" _timeStart:"+timeStart+" duration:"+duration);
+						//Debug.Log ("Time current:" + timeCurrent+"ticki:"+t+" _timeAtEnd:"+_timeAtEnd+" _timeStart:"+timeStart+" duration:"+duration);
 			
 						if (t > _timeAtEnd) {
 								switch (wrap) {
@@ -242,30 +245,49 @@ namespace ws.winx.unity.sequence
 										break;
 								case SequenceWrap.Once:
 										Debug.Log ("Sequence>SequenceWrap.Once not tested, not finished");
-										Stop (false);
-										
+
+										///////////////////////////// Update Nodes ////////////////////////
+										foreach (SequenceChannel channel in this.channels)
+												foreach (SequenceNode node in channel.nodes) {
+														node.UpdateNode (0);		
+												}
+
+										Stop ();
+										OnEnd.Invoke (this);
 										
 										
 										break;
 								case SequenceWrap.ClampForever:
-										Stop (true);
+										Stop ();
+
+										if(_playForward)
+											timeCurrent = timeEnd;
+										else
+											timeCurrent=timeStart;
+
 										OnEnd.Invoke (this);
+										
 										break;
 								case SequenceWrap.Loop:
-										//Restart (t);
-										Debug.Log ("Sequence>SequenceWrap.Loop not tested, not finished");
+										OnEnd.Invoke (this);
+										Play(0,_playForward);
+										Debug.LogWarning ("Sequence>SequenceWrap.Loop not tested, not finished");
 										break;
 								}	
 
-								timeCurrent = timeEnd;
+								
 						} else {
 
 								double timeCurrentBeforeUpdate = timeCurrent;
 			
 								//update time
-								timeCurrent += t - _timeLast;//dt
+								if(_playForward)
+									timeCurrent += t - _timeLast;//dt
+								else
+									timeCurrent -= t - _timeLast;
 
 
+								//Debug.Log("Time:"+timeCurrent);
 
 					
 								/////////  Dispatch events  ///////////
@@ -284,9 +306,10 @@ namespace ws.winx.unity.sequence
 								_timeLast = t;
 					
 
-								///////////////////////////// Update Nodes ////////////////////////
+								////////////////////////// Update Nodes ////////////////////////
 								foreach (SequenceChannel channel in this.channels)
 										foreach (SequenceNode node in channel.nodes) {
+
 												node.UpdateNode (timeCurrent);		
 										}
 						}
@@ -331,10 +354,10 @@ namespace ws.winx.unity.sequence
 
 				void LateUpdate ()
 				{
-					foreach (SequenceChannel channel in this.channels)
-					foreach (SequenceNode node in channel.nodes) {
-						node.LateUpdateNode (timeCurrent);		
-					}
+						foreach (SequenceChannel channel in this.channels)
+								foreach (SequenceNode node in channel.nodes) {
+										node.LateUpdateNode (timeCurrent);		
+								}
 				}
 
 
@@ -343,17 +366,24 @@ namespace ws.winx.unity.sequence
 
 
 				/// <summary>
-				/// Play the sequence
+				/// Play the sequence BY
 				/// </summary>
 				/// <param name="t">global "time"  (Time.time or EditorApplicaiton.timeSinceStartUp).</param>
-				public void Play (double t)
+				public void PlayBy (double t,bool forward=true)
 				{
+						this._playForward = forward;
+
 						StopRecording ();
+
+						Stop ();
+						
+						foreach (SequenceChannel channel in channels)
+								channel.Reset ();
 
 						events.Sort (EVENT_COMPARER);
 				
 						//prevent timeCurrent going outside 
-						timeCurrent = Mathf.Min ((float)timeCurrent, (float)timeStart+duration);
+						timeCurrent = Mathf.Min ((float)timeCurrent, (float)timeStart + duration);
 
 						_eventCurrentIndex = 0;
 						_isPlaying = true;
@@ -362,33 +392,49 @@ namespace ws.winx.unity.sequence
 						_timePassed = 0;
 
 						this._timeLast = t;
-						this._timeAtEnd = t + timeStart+duration - timeCurrent;
 
-						//dispatch Start
+						if(forward)
+							this._timeAtEnd = t + timeStart + duration - timeCurrent;
+						else
+							this._timeAtEnd = t + timeStart + timeCurrent;
+
+
+						//dispatch Start Event
 				
 						OnStart.Invoke (this);
 				}
 
 
 				/// <summary>
+				/// 
 				/// Play the  sequence  at specified time.
+				/// !!! USE THIS FUNCTION FOR SEQUENCE PLAY
 				/// </summary>
 				/// <param name="t">T is local sequence time.</param>
-				public void PlayAt (double t=0)
+				/// <param name="forward">If set to <c>true</c> forward.</param>
+				public void Play (double t=0, bool forward=true)
 				{
 						
-
 						timeCurrent = t;
 						
-						Play (Time.time);
+						PlayBy (Time.time,forward);
 
 				}
 
+				/// <summary>
+				/// Pause this instance.
+				/// !!! USE THIS FUNCTION FOR SEQUENCE RUNTIME PAUSE
+				/// </summary>
 				public void Pause ()
 				{
 						Pause (Time.time);
 				}
 
+
+				/// <summary>
+				/// Pause the specified t.
+				/// </summary>
+				/// <param name="t">T is global time Time.time or EditorApplication.timeSinceStartup</param>
 				public void Pause (float t)
 				{
 						_pause = true;	
@@ -396,6 +442,11 @@ namespace ws.winx.unity.sequence
 						_isPlaying = false;
 				}
 
+
+				/// <summary>
+				/// Unpause.
+				/// </summary>
+				/// <param name="t">T is global time Time.time or EditorApplication.timeSinceStartup</param>
 				public void UnPause (float t)
 				{
 						if (_pause) {
@@ -411,25 +462,33 @@ namespace ws.winx.unity.sequence
 			
 				}
 
+
+				/// <summary>
+				/// Unpause.
+				/// </summary>
 				public void UnPause ()
 				{
 						UnPause (Time.time);
 
 				}
 
+				/// <summary>
+				/// Restart the specified t.
+				/// </summary>
+				/// <param name="t">T.</param>
 				public void Restart (double t)
 				{
-						Stop (false);
-						Play (t);
+						Stop ();
+						PlayBy (t);
 				}
 		
 				public void Restart ()
 				{
-						Stop (false);
-						PlayAt ();
+						Stop ();
+						Play ();
 				}
 
-				public void Stop (bool forward)
+				public void Stop ()
 				{
 						_stop = true;
 
@@ -444,11 +503,6 @@ namespace ws.winx.unity.sequence
 										
 								}	
 
-						//TODO handle forward=false loop and stuff
-				
-
-
-					
 
 						//Debug.Log ("Sequence>Stop " + _isPlaying);
 
@@ -461,7 +515,7 @@ namespace ws.winx.unity.sequence
 
 						__duration = calcDuration ();
 
-						Stop (playForward);
+						Stop ();
 				}
 
 				public void StopRecording ()
@@ -476,7 +530,7 @@ namespace ws.winx.unity.sequence
 				}
 
 				/// <summary>
-				/// Value of Final Node end time in local sequence time space
+				/// Value of Final Node's EndTime in local sequence time space
 				/// </summary>
 				/// <value>The end time.</value>
 				float calcDuration ()
@@ -488,15 +542,15 @@ namespace ws.winx.unity.sequence
 						SequenceNode nodeLast;
 						foreach (SequenceChannel channel  in this.channels) {
 								
-								nodeLast=channel.nodes [channel.nodes.Count - 1];
+								nodeLast = channel.nodes [channel.nodes.Count - 1];
 								if (timeEnd < nodeLast.timeStart + nodeLast.duration)
-									timeEnd =nodeLast.timeStart + nodeLast.duration;
+										timeEnd = nodeLast.timeStart + nodeLast.duration;
 
 						}
 			
 						
 			
-						return (float)(timeEnd-timeStart);
+						return (float)(timeEnd - timeStart);
 			
 				}
 

@@ -34,6 +34,10 @@ namespace ws.winx.unity.sequence
 						}
 				}
 
+				[NonSerialized]
+				public bool
+						targetTransformHasChanged = false;
+
 				/// <summary>
 				/// The position of the target before animation is applied.
 				/// </summary>
@@ -54,11 +58,7 @@ namespace ws.winx.unity.sequence
 				/// The rotation of the target - current.
 				/// </summary>
 				public Quaternion targetRotationCurrent;
-
-
 				public Transform targetBoneRoot;
-				
-
 				[SerializeField]
 				List<SequenceNode>
 						_nodes;
@@ -73,6 +73,12 @@ namespace ws.winx.unity.sequence
 
 				public RuntimeAnimatorController runtimeAnimatorController;
 
+				public void Reset ()
+				{
+
+						this.target.transform.position = this.targetPositionOriginal;
+						this.target.transform.rotation = this.targetRotationOriginal;
+				}
 
 
 		}

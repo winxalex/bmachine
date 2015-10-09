@@ -42,7 +42,7 @@ namespace ws.winx.ik
 				public void Initate ()
 				{
 						if (ik != null) {
-								Debug.Log("CCDAnimatedValues>> Init Solver");
+								//Debug.Log("CCDAnimatedValues>> Init Solver");
 								ik.solver.Initiate (ik.transform);
 								_isInitated = true;
 						}
@@ -84,7 +84,7 @@ namespace ws.winx.ik
 //								if(boneWeights.Length>i)
 //								bones [i].weight = boneWeights [i];
 
-			ik.solver.FixTransforms ();
+						ik.solver.FixTransforms ();
 						ik.solver.SetIKPositionWeight (weight);
 			
 						if (!Application.isPlaying)//only update in Edit mode (In Playmode FullBodyBipedIK component take cares of update)

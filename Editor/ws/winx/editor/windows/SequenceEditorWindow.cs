@@ -27,19 +27,19 @@ namespace ws.winx.editor.windows
 		/// Sequence editor window.
 		/// !!! IMPORTANT
 		/// 
-		/// You need to select node(you are pointing which animation clip will contain records) in record mode then modify gameobject component values you want to record
+		/// You need to select node(you are pointing which animation clip will contain animated channel.target records) in record mode then modify channel.target-gameobject's component values you want to record
 
-		/// Can't mix vidoe sound and audio=> crazyness happening
+		/// Can't mix vidoeo sound and audio clips=> crazyness happening
 		/// Can't stop all the channels with sounds (it stops just first StopAll doens't work seem all are on diff threads)
 		/// Bake rotation and position can affect your injected bones animation so 
-		/// for custome bone animation I used uncheked Bake rotation in pose
+		/// for custom bone animation I used uncheked Bake rotation in pose
 		/// 
-		/// FFBIKAnimatedValues should be in channel after channels containing animation nodes manipulated by IK
-		/// FFBIKAnimatedValues animation node should have been same or less length then animation node manipulated by IK
+		/// IAnimatedValues animation node should be in channel after channels containing animation nodes manipulated by IK
+		/// IAnimatedValues animation node should have been same or less length then animation node manipulated by IK
 		/// If you animate target of IAnimatedValues double check if animation have saved it
 		/// 
-		/// changes of transform in channel.traget inspector doesn't trigger ReOffest and Resaving(use scene rot,pos,scl)
-		/// 
+		/// Changes of channel target's transform inspector doesn't trigger ReOffest and ReSaving(use scene rot,pos)
+		/// Reset to t=0 in Editor, before u play in Application mode
 		/// 
 		/// TODOS:
 		/// bug fix AnimationUtility.DeleteFrame got -1 index Set Editor
@@ -312,7 +312,7 @@ namespace ws.winx.editor.windows
 								__sequence != null && 
 								!__sequence.isPlaying && !__sequence.isRecording && //Not playing or recording
 						//__sequence.timeCurrent > 0f && //<< ????
-								(channels = __sequence.channels.FindAll (itm => itm.type == SequenceChannel.SequenceChannelType.Animation && itm.target == Selection.activeGameObject)) != null
+								(channels = __sequence.channels.FindAll (itm =>!itm.targetTransformHasChanged && itm.type == SequenceChannel.SequenceChannelType.Animation && itm.target == Selection.activeGameObject)) != null
 
 														
 				) {  //active object is target of Animation type of channel
@@ -323,24 +323,20 @@ namespace ws.winx.editor.windows
 										if (channel.targetPositionOriginal != channel.target.transform.position
 												|| channel.targetRotationOriginal != channel.target.transform.rotation) {
 
-//												if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
-//														Stop ();//stop "paused" and then reset
-//														__sequence.timeCurrent = 0f;//rewind to begin and reset
-//														ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
-//												}
+												if (__sequence.timeCurrent > 0f) {//paused animation at some point in time (target is moved/rotated)
+														Stop ();//stop "paused" and then reset
+														__sequence.timeCurrent = 0f;//rewind to begin and reset
+														ResetChannelTarget (channel);//target is reset to Original pos/rot before animation is applied
+												}
 								
 								
-												Debug.Log ("Target object position have been changed");
-
-												//take new transform
-												channel.targetPositionOriginal = channel.target.transform.position;
-												channel.targetRotationOriginal = channel.target.transform.rotation;
+												Debug.Log ("Target object position/rotation have been changed");
 
 
-												if (!AnimationMode.InAnimationMode ())
-														AnimationMode.StartAnimationMode ();
-												ReOffsetNodesAnimation (channel);
-												AnimationMode.StopAnimationMode ();
+
+
+											channel.targetTransformHasChanged=true;
+											
 										}
 								}
 						}
@@ -348,7 +344,7 @@ namespace ws.winx.editor.windows
 
 
 		
-
+						////// DRAW sphere cap for position keyframes of selectedNode's target GameObject and connect them with line creating motion path ////////
 
 
 						Color clr = Color.red;
@@ -708,11 +704,7 @@ namespace ws.winx.editor.windows
 				/// /////////////////////////////////////////////////////////////////////
 
 
-				private void OnAddEvent ()
-				{
-						EditorUtility.DisplayDialog ("Not implemented!", "Events are not availible in this version.", 
-			                            "Close");			
-				}
+				
 
 
 				/// <summary>
@@ -723,15 +715,19 @@ namespace ws.winx.editor.windows
 
 						if (!__isPlayMode && EditorApplication.isPlaying && !EditorApplication.isPaused) {
 
-								///TODO check this if not blocking playmode
-								
-								Stop ();
+								SceneView.onSceneGUIDelegate -= OnSceneGUI;
+
 
 								__sequenceGameObject = null;
+								
+				
 								__isPlayMode = true;
 				 
 						
 						} else {
+
+								SceneView.onSceneGUIDelegate += OnSceneGUI;
+
 								__isPlayMode = false;
 
 								
@@ -964,40 +960,43 @@ namespace ws.winx.editor.windows
 
 						
 		
-						if (!EditorApplication.isPlaying && (__sequence != null) && __sequence.isPlaying) {//?TODO ?? enters here even isPlaying is false		
+						if (!EditorApplication.isPlaying)
+			
+						if (__sequence != null) { 
+
+								if (__sequence.isPlaying) {	
+								
+									
+										//Debug.Log ("Update sequence from editor");
+										__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
+									
+
+
+										//Debug.Log ((float)__sequence.timeCurrent + "__" + __sequence.duration + " " + __sequence.isPlaying + " " + __sequence.name);
+										//Debug.Log ("Update() ThreadID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+
+										if (AnimationMode.InAnimationMode ())//this solves problem of entering inside this block even playing is false
+												SampleClipNodesAt (__sequence.timeCurrent);
+
+									
+									
+
+										this.Repaint ();
+
+										//this ensure update of MovieTexture (it its bottle neck do some reflection and force render call)
+										if (SceneView.currentDrawingSceneView != null)				
+												SceneView.currentDrawingSceneView.Repaint ();//TODO test this
+										//SceneView.RepaintAll ();
+								} 
+
+
 							
-								
-								//Debug.Log ("Update sequence from editor");
-								__sequence.UpdateSequence (EditorApplication.timeSinceStartup);
-								
-
-
-								//Debug.Log ((float)__sequence.timeCurrent + "__" + __sequence.duration + " " + __sequence.isPlaying + " " + __sequence.name);
-								//Debug.Log ("Update() ThreadID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
-
-								if (AnimationMode.InAnimationMode ())//this solves problem of entering inside this block even playing is false
-										SampleClipNodesAt (__sequence.timeCurrent);
-
-								
-								
-
-								this.Repaint ();
-
-								//this ensure update of MovieTexture (it its bottle neck do some reflection and force render call)
-								if (SceneView.currentDrawingSceneView != null)				
-										SceneView.currentDrawingSceneView.Repaint ();//TODO test this
-								//SceneView.RepaintAll ();
-
-								
 						}
+								
+						
 
 
-//							if (__sequence!=null && __sequence.isRecording) {
-//				if (AnimationMode.InAnimationMode ())//this solves problem of entering inside this block even playing is false
-//					SampleClipNodesAt1 ();
-//					//SampleClipNodesAt(__sequence.timeCurrent);
-//				
-//			}
+
 
 				}
 
@@ -1057,13 +1056,44 @@ namespace ws.winx.editor.windows
 			
 				
 						} 
-			
+						
+						double timeSaved = __sequence.timeCurrent;
+
+						__sequence.timeCurrent = 0f;
+
+						foreach (SequenceChannel channel in __sequence.channels)
+								if (channel.target != null && channel.targetTransformHasChanged) {
+										Debug.Log ("StartRecording Target:" + channel.target + " trasform has been changed resave transform and reoffsetnodes ");
+										channel.targetPositionOriginal = channel.target.transform.position;
+										channel.targetRotationOriginal = channel.target.transform.rotation;
+								
+										ReOffsetNodesAnimation (channel);
+
+										channel.targetTransformHasChanged = false;
+								}
+
+						__sequence.timeCurrent = timeSaved;
 						
 			
 			
 				}
-		
-				private void OnPlay ()
+
+
+				/// <summary>
+				/// Play the sequence .
+				/// </summary>
+				/// <param name="forward">If set to <c>true</c> play sequence forward.</param>
+				public static void Play(bool forward=true){
+
+						//__sequence.timeCurrent
+						SequenceEditorWindow.OnPlay (forward);
+				}
+
+
+				/// <summary>
+				/// Handles the play event.
+				/// </summary>
+				private static void OnPlay (bool forward=true)
 				{
 						//						AnimationMode.StartAnimationMode ();
 //						MethodInfo SetIKPositionWeight = typeof(Animator).GetMethod ("SetIKPositionWeightInternal", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -1086,7 +1116,7 @@ namespace ws.winx.editor.windows
 //						return;
 
 
-			
+						if (__sequence != null && __sequence.duration > 0)
 						if (!__sequence.isPlaying) {//PLAY
 								
 								
@@ -1104,18 +1134,18 @@ namespace ws.winx.editor.windows
 
 				
 				
-								if ((float)__sequence.timeCurrent >= __sequence.timeEnd) {//start from begining
-
-
-										//if(__sequence.isRecording) Stop();
-										AnimationMode.StopAnimationMode ();//stop if paused or recording then => reset target
-
-										__sequence.timeCurrent = 0f;
-
-										foreach (SequenceChannel channel in __sequence.channels)
-												ResetChannelTarget (channel);
-								} else
-										__sequence.timeCurrent = Mathf.Min ((float)__sequence.timeCurrent, (float)__sequence.timeEnd);
+//								if ( (float)__sequence.timeCurrent >= __sequence.timeEnd) {//start from begining
+//
+//
+//										//if(__sequence.isRecording) Stop();
+//										AnimationMode.StopAnimationMode ();//stop if paused or recording then => reset target
+//
+//										__sequence.timeCurrent = 0f;
+//
+//										foreach (SequenceChannel channel in __sequence.channels)
+//												ResetChannelTarget (channel);
+//								} else
+//										__sequence.timeCurrent = Mathf.Min ((float)__sequence.timeCurrent, (float)__sequence.timeEnd);
 				
 							
 				
@@ -1125,14 +1155,12 @@ namespace ws.winx.editor.windows
 										AnimationMode.StartAnimationMode ();
 
 										
-
-										
 								} 
 				         
 				         
 				         
 								
-								__sequence.Play (EditorApplication.timeSinceStartup);
+								__sequence.PlayBy (EditorApplication.timeSinceStartup,forward);
 
 								
 				
@@ -1152,9 +1180,9 @@ namespace ws.winx.editor.windows
 				
 								__sequence.SequenceNodeStop -= onSequenceNodeStop;
 
-								foreach (SequenceChannel channel in __sequence.channels) {
-										ApplyTransformAtPause (channel);
-								}
+//								foreach (SequenceChannel channel in __sequence.channels) {
+//										ApplyTransformAtPause (channel);
+//								}
 						}
 
 						
@@ -1165,22 +1193,20 @@ namespace ws.winx.editor.windows
 				/// <summary>
 				/// Stop Sequence
 				/// </summary>
-				private static void Stop (bool pause=false)
+				public static void Stop (bool pause=false)
 				{
 						//Debug.Log ("Stop() ThreadID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
-			
-			
-						AnimationMode.StopAnimationMode ();
 			
 						AudioUtilW.StopAllClips ();
 			
 
 				
 						if (__sequence != null) {
-								__sequence.Stop (__sequence.playForward);
+								__sequence.Stop ();
 				
 								__sequence.StopRecording ();
+
 								StopAllVideo ();
 						
 			
@@ -1188,6 +1214,7 @@ namespace ws.winx.editor.windows
 
 								//Normal gameobjects do not preserve transform when animaiton mode is stoped as characters
 								//so preserving
+								if(pause)
 								foreach (SequenceChannel channel in __sequence.channels) {
 										PreserveTransformAtPause (channel);
 								}
@@ -1225,8 +1252,8 @@ namespace ws.winx.editor.windows
 						if (EditorApplication.isPlaying)
 								return;
 
-					
-						if (Event.current.type == EventType.ScrollWheel && CurveEditorWindow.window != null)
+
+						if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag || Event.current.type == EventType.ScrollWheel) && CurveEditorWindow.window != null)
 								CurveEditorWindow.window.Close ();
 
 
@@ -1537,6 +1564,7 @@ namespace ws.winx.editor.windows
 														channel.targetBoneRoot = target.GetRootBone ();
 
 														//AnimationMode
+														__sequence.timeCurrent = 0;
 
 														if (!AnimationMode.InAnimationMode ())
 																AnimationMode.StartAnimationMode ();
@@ -1672,7 +1700,7 @@ namespace ws.winx.editor.windows
 										__focusContent = new GUIContent ("F", "Focus");
 			
 								//FOCUS on nodes (spread width and scroll to)
-								if (GUILayout.Button (__focusContent, EditorStyles.toolbarButton) && __sequence.duration>0) {
+								if (GUILayout.Button (__focusContent, EditorStyles.toolbarButton) && __sequence.duration > 0) {
 										float sequenceTimeStartPositionX = 0f;
 										float sequenceTimeEndPositionX = 0f;
 
@@ -2095,8 +2123,7 @@ namespace ws.winx.editor.windows
 				
 				
 								//rewind to start position and rotation (before Animation sampling)
-								channel.target.transform.position = channel.targetPositionOriginal;
-								channel.target.transform.rotation = channel.targetRotationOriginal;
+								channel.Reset();
 				
 						}
 			
@@ -2682,7 +2709,7 @@ namespace ws.winx.editor.windows
 								float nodeEndPosition = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect);
 								float nodeStartPosition = __timeAreaW.TimeToPixel (node.timeStart, rect);
 								
-								clickRect = new Rect (nodeStartPosition, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, nodeEndPosition-nodeStartPosition, NODE_RECT_HEIGHT);
+								clickRect = new Rect (nodeStartPosition, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, nodeEndPosition - nodeStartPosition, NODE_RECT_HEIGHT);
 					
 								if (__nodeSelected == node)//resize mouse interaction only on blue rect area (not key frames area)
 										clickRect.yMin += __keyframeMarker.image.height;
@@ -2702,7 +2729,7 @@ namespace ws.winx.editor.windows
 								
 								//move rect at node start -5px
 								clickRect.x -= 5;
-								clickRect.width=10;
+								clickRect.width = 10;
 								
 								//check start of the node rect width=10
 								if (canResizeStart && clickRect.Contains (Event.current.mousePosition)) {
@@ -2730,8 +2757,8 @@ namespace ws.winx.editor.windows
 								}
 					
 					
-								clickRect.x -= nodeRectWidth-5;
-								clickRect.width=nodeRectWidth;
+								clickRect.x -= nodeRectWidth - 5;
+								clickRect.width = nodeRectWidth;
 
 
 
@@ -2747,9 +2774,9 @@ namespace ws.winx.editor.windows
 												__nodeSelected = node;
 
 												//if (node == __nodeSelected && Event.current.type==EventType.MouseDown && Event.current.button==0 && nodeRect.Contains(Event.current.mousePosition)) {
-												if (node.channel.type == SequenceChannel.SequenceChannelType.Animation && !String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) {
+												if (node.channel.type == SequenceChannel.SequenceChannelType.Animation && !String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
 
-														Debug.Log ("Show");
+														//Debug.Log ("Show Curve Editor");
 														Rect curveEditorRect = clickRect;
 													
 														curveEditorRect.yMin = curveEditorRect.yMax;
@@ -2760,7 +2787,7 @@ namespace ws.winx.editor.windows
 
 
 													
-														CurveEditorWindow.ShowWindow (curveEditorRect,  node.source as AnimationClip, __nodeSelectedSourceEditorCurveBinding);
+														CurveEditorWindow.ShowWindow (curveEditorRect, node.source as AnimationClip, __nodeSelectedSourceEditorCurveBinding);
 							
 												}
 
@@ -3527,7 +3554,7 @@ namespace ws.winx.editor.windows
 				public static void onSequenceNodeStart (SequenceNode node)
 				{
 
-						//Debug.Log ("onSequenceNodeStart " + node.name);
+						Debug.Log ("SequenceEditorWindow>> onSequenceNodeStart " + node.name);
 			          
 						if (node.source is AudioClip) {
 								AudioClip audioClip = node.source as AudioClip;
@@ -3604,6 +3631,8 @@ namespace ws.winx.editor.windows
 				{
 						
 						Stop ();
+
+						
 				}
 
 
