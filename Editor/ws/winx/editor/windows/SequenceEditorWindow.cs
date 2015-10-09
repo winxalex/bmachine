@@ -312,7 +312,7 @@ namespace ws.winx.editor.windows
 								__sequence != null && 
 								!__sequence.isPlaying && !__sequence.isRecording && //Not playing or recording
 						//__sequence.timeCurrent > 0f && //<< ????
-								(channels = __sequence.channels.FindAll (itm =>!itm.targetTransformHasChanged && itm.type == SequenceChannel.SequenceChannelType.Animation && itm.target == Selection.activeGameObject)) != null
+								(channels = __sequence.channels.FindAll (itm => !itm.targetTransformHasChanged && itm.type == SequenceChannel.SequenceChannelType.Animation && itm.target == Selection.activeGameObject)) != null
 
 														
 				) {  //active object is target of Animation type of channel
@@ -335,7 +335,7 @@ namespace ws.winx.editor.windows
 
 
 
-											channel.targetTransformHasChanged=true;
+												channel.targetTransformHasChanged = true;
 											
 										}
 								}
@@ -1083,7 +1083,8 @@ namespace ws.winx.editor.windows
 				/// Play the sequence .
 				/// </summary>
 				/// <param name="forward">If set to <c>true</c> play sequence forward.</param>
-				public static void Play(bool forward=true){
+				public static void Play (bool forward=true)
+				{
 
 						//__sequence.timeCurrent
 						SequenceEditorWindow.OnPlay (forward);
@@ -1160,7 +1161,7 @@ namespace ws.winx.editor.windows
 				         
 				         
 								
-								__sequence.PlayBy (EditorApplication.timeSinceStartup,forward);
+								__sequence.PlayBy (EditorApplication.timeSinceStartup, forward);
 
 								
 				
@@ -1214,10 +1215,10 @@ namespace ws.winx.editor.windows
 
 								//Normal gameobjects do not preserve transform when animaiton mode is stoped as characters
 								//so preserving
-								if(pause)
-								foreach (SequenceChannel channel in __sequence.channels) {
-										PreserveTransformAtPause (channel);
-								}
+								if (pause)
+										foreach (SequenceChannel channel in __sequence.channels) {
+												PreserveTransformAtPause (channel);
+										}
 
 								AnimationMode.StopAnimationMode ();
 
@@ -2123,7 +2124,7 @@ namespace ws.winx.editor.windows
 				
 				
 								//rewind to start position and rotation (before Animation sampling)
-								channel.Reset();
+								channel.Reset ();
 				
 						}
 			
@@ -2361,16 +2362,19 @@ namespace ws.winx.editor.windows
 										//find node in time (node in which time is in range between nodeStartTime and nodeEndTime)
 										foreach (SequenceNode n in channel.nodes) {
 
-												//find first node which has n.startTime >= then current time
+												//find first node which has n.startTime >= then current time (lower boundary)
 												if (timeCurrent - n.timeStart >= 0) {
 														//check if time comply to upper boundary
 														if (timeCurrent <= n.timeStart + n.duration) {
 																node = n;
 																break;
 														} else { 
-																//if channel is of animation type and there is next node by time is between prev and next => snap time to prev node endTime
+																//if channel is of animation type 
+																//and this is only node
+																//or there is next node, so time is between prev and next node => snap time to prev node endTime
 																if (channel.type == SequenceChannel.SequenceChannelType.Animation 
-																		&& n.index + 1 < channel.nodes.Count && timeCurrent < channel.nodes [n.index + 1].timeStart
+																		&& (channel.nodes.Count == 1
+																		|| (n.index + 1 < channel.nodes.Count && timeCurrent < channel.nodes [n.index + 1].timeStart))
 								    
 								    							) {
 

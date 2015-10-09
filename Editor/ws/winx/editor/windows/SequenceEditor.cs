@@ -74,7 +74,7 @@ namespace ws.winx.editor.windows
 
 
 				if(!sequence.isPlaying && !sequence.isRecording)
-			sequence.timeCurrent = EditorGUILayout.Slider ("Time Current", (float)sequence.timeCurrent,(float)sequence.timeStart,(float)sequence.timeEnd);
+					sequence.timeCurrent = EditorGUILayout.Slider ("Time Current", (float)sequence.timeCurrent,(float)sequence.timeStart,(float)sequence.timeEnd);
 
 
 
