@@ -75,9 +75,10 @@ namespace ws.winx.unity.sequence
 
 				public void Reset ()
 				{
-
-						this.target.transform.position = this.targetPositionOriginal;
-						this.target.transform.rotation = this.targetRotationOriginal;
+						if (this.target != null) {
+								this.target.transform.position = this.targetPositionOriginal;
+								this.target.transform.rotation = this.targetRotationOriginal;
+						}
 				}
 
 

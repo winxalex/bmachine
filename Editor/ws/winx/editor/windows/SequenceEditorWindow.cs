@@ -422,32 +422,63 @@ namespace ws.winx.editor.windows
 				/// <param name="node">Node.</param>
 				/// <param name="rect">Rect.</param>
 				/// <param name="channelOrd">Channel ord.</param>
-				private static void DoNode (SequenceNode node, Rect rect, int channelOrd)
+				private static Rect DoNode (SequenceNode node, Rect rect, int channelOrd)
 				{
 						float keyFramesRectHeight = __nodeSelected == node ? __keyframeMarker.image.height : 0f;
 
+						float startTransitionTimePos = __timeAreaW.TimeToPixel (node.timeStart, rect);
+		
+
+						float startTimePos = startTransitionTimePos;
+
+						/////////////////////////////////// DRAW TRANSITION ///////////////////////////////////
+						Rect transitionRect = new Rect ();
+			
+						if (node.transition > 0) {
+
+								//shift node start position for transtion duration
+								startTimePos = __timeAreaW.TimeToPixel (node.timeStart + node.transition, rect);
+				
+								Color colorSave = GUI.color;
+								GUI.color = Color.red;
+				
+				
+				
+								transitionRect = new Rect (startTransitionTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, startTimePos - startTransitionTimePos, NODE_RECT_HEIGHT);
+				
+								if (!__sequence.isPlaying && __nodeSelected == node) {
+										transitionRect.yMin += __keyframeMarker.image.height;
+								}
+				
+								//don't draw if outside visible area
+								transitionRect.yMax = Mathf.Clamp (transitionRect.yMax, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
+								transitionRect.xMax = Mathf.Clamp (transitionRect.xMax, rect.xMin, rect.xMax);
+								transitionRect.yMin = Mathf.Clamp (transitionRect.yMin, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
+								transitionRect.xMin = Mathf.Clamp (transitionRect.xMin, rect.xMin, rect.xMax);
+				
+								__nodeTransitionGUIContent.tooltip = "Transition=" + (startTimePos - startTransitionTimePos);
+								GUI.Box (transitionRect, __nodeTransitionGUIContent, "TL LogicBar 0");
+				
+				
+				
+								GUI.color = colorSave;
+				
+				
+				
+						}
+						//////////////////////////////////////////////////////////////////////////////////////////
+			
+						
+			
+
 						
 						
-
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.timeStart, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);			
-						EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);
-
 			
-			
-						float startTimePos = __timeAreaW.TimeToPixel (node.timeStart + node.transition, rect);
-
 						float endTimePos = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect);
-
-						float startTransitionTimePos = 0f;
-//						SequenceNode nodePrev = null;
-
-						//if there is next node with transition
-//						if (node.index + 1< node.channel.nodes.Count && (nodePrev = node.channel.nodes [node.index - 1]).transition > 0) {
-//								
-//								startTimePos = __timeAreaW.TimeToPixel (node.startTime + nodePrev.transition, rect);
-//								
-//						}
-
+			
+			
+		
+						//////////////////////////////////// DRAW SELECTED PROPERTY PATH and NAME /////////////////////////////////////////////
 						//find curveBinding property path and name
 						String propertyAnimated = String.Empty;
 						String propertyName = String.Empty;
@@ -468,41 +499,9 @@ namespace ws.winx.editor.windows
 								
 								}
 						}
+						/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-						//Draw Transtion rect
-						Rect transitionRect = new Rect ();
-
-						if (node.transition > 0) {
-								
-
-								Color colorSave = GUI.color;
-								GUI.color = Color.red;
-
-								startTransitionTimePos = __timeAreaW.TimeToPixel (node.timeStart, rect);
-								
-								transitionRect = new Rect (startTransitionTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, startTimePos - startTransitionTimePos, NODE_RECT_HEIGHT);
-
-								if (!__sequence.isPlaying && __nodeSelected == node) {
-										transitionRect.yMin += __keyframeMarker.image.height;
-								}
-
-								//don't draw if outside visible area
-								transitionRect.yMax = Mathf.Clamp (transitionRect.yMax, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
-								transitionRect.xMax = Mathf.Clamp (transitionRect.xMax, rect.xMin, rect.xMax);
-								transitionRect.yMin = Mathf.Clamp (transitionRect.yMin, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
-								transitionRect.xMin = Mathf.Clamp (transitionRect.xMin, rect.xMin, rect.xMax);
-
-								__nodeTransitionGUIContent.tooltip = "Transition=" + (startTimePos - startTransitionTimePos);
-								GUI.Box (transitionRect, __nodeTransitionGUIContent, "TL LogicBar 0");
-
-
-
-								GUI.color = colorSave;
-
-								
-
-						}
+						/////////////////////////////////////////////////// DRAW NODE RECT /////////////////////////////////////////////////////////////
 
 						// __timeAreaW.translation.y; is negative when down scroll is clicked
 						Rect nodeRect = new Rect (startTimePos, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, endTimePos - startTimePos, NODE_RECT_HEIGHT);
@@ -540,17 +539,36 @@ namespace ws.winx.editor.windows
 								nodeRect.xMin = Mathf.Clamp (nodeRect.xMin, rect.xMin, rect.xMax);
 								GUI.Box (nodeRect, __nodeGUIContent, "TL LogicBar 0");
 						}
-							
-							
-
+						/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
+					
+						
 						
 
-						//add offset for cursor
-						nodeRect.xMin += 5;
-						nodeRect.xMax -= 5;
-						EditorGUIUtility.AddCursorRect (nodeRect, MouseCursor.Pan);
-
+						///////////////////////////// DRAW RESIZE CURSORS ////////////////////////////////////
+						 if (nodeRect.width > 10) {
+								EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.timeStart, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);			
+								EditorGUIUtility.AddCursorRect (new Rect (__timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - 5, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + keyFramesRectHeight, 10, NODE_RECT_HEIGHT - keyFramesRectHeight), MouseCursor.ResizeHorizontal);
+						}
 			
+
+						//////////////////// DRAW PAN CURSORS //////////////////////////////////
+						 
+						Rect panRect = nodeRect;
+						panRect.xMin += 5;
+						panRect.xMax -= 5;
+						
+						if (panRect.width <= 0) {
+							panRect.x=nodeRect.x;
+							panRect.width=3f;
+
+
+						}
+			
+
+						EditorGUIUtility.AddCursorRect (panRect, MouseCursor.Pan);
+
+
+						/////////////////////////////////////////////////// DRAW LABEL ////////////////////////////////////////////////////////////
 						GUIStyle style = new GUIStyle ("Label");
 						if (nodeRect.height > Mathf.Max (12, style.fontSize)) {
 								style.fontSize = (__nodeSelected == node ? 12 : style.fontSize);
@@ -584,10 +602,10 @@ namespace ws.winx.editor.windows
 										GUI.Label (rect1, __nodeLabelGUIContent, style);
 								}
 						}
-
+						///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 						
-			
+						return nodeRect;
 
 			
 				}
@@ -2557,20 +2575,29 @@ namespace ws.winx.editor.windows
 								DoEventGUI (rect);
 
 
-								//DRAW NODES 
+								//////// DRAW NODES ///////// 
+								Rect nodeRect;
+								Rect clickRect;
 								int channelNumber = __sequence.channels.Count;
 								SequenceChannel channel = null;
 								for (int i=0; i<channelNumber; i++) {
 										channel = __sequence.channels [i];
 										foreach (SequenceNode node in channel.nodes) {
-									
 												
-												if (rect.Contains (Event.current.mousePosition))
-														sequenceNodeClickEventHandler (node, rect, i);
+												
+												
+												nodeRect=DoNode (node, rect, i);
+												nodeRect.width=Mathf.Max(nodeRect.width,3f);
 
-												DoNode (node, rect, i);
+												clickRect=nodeRect;
+												clickRect.xMin=clickRect.xMin - 5;
+												clickRect.xMax=clickRect.xMax +5;
 
-										
+												if (clickRect.Contains (Event.current.mousePosition))
+												sequenceNodeClickEventHandler (node, nodeRect,rect, i);
+
+						
+						
 										}
 								}
 
@@ -2698,31 +2725,17 @@ namespace ws.winx.editor.windows
 				/// <param name="node">Node.</param>
 				/// <param name="rect">Rect.</param>
 				/// <param name="channelOrd">Channel ord.</param>
-				private void sequenceNodeClickEventHandler (SequenceNode node, Rect rect, int channelOrd)
+				private void sequenceNodeClickEventHandler (SequenceNode node, Rect clickRect,Rect rect, int channelOrd)
 				{
 
 						Event ev = Event.current;
-						Rect clickRect;
-
-						float keyFramesRectHeight = __nodeSelected == node ? __keyframeMarker.image.height : 0f;
-			
 						
+	
 						switch (ev.rawType) {
 						case EventType.MouseDown:
 				
-								float nodeEndPosition = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect);
-								float nodeStartPosition = __timeAreaW.TimeToPixel (node.timeStart, rect);
-								
-								clickRect = new Rect (nodeStartPosition, TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT + __timeAreaW.translation.y, nodeEndPosition - nodeStartPosition, NODE_RECT_HEIGHT);
 					
-								if (__nodeSelected == node)//resize mouse interaction only on blue rect area (not key frames area)
-										clickRect.yMin += __keyframeMarker.image.height;
 
-								clickRect.yMax = Mathf.Clamp (clickRect.yMax, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
-								clickRect.yMin = Mathf.Clamp (clickRect.yMin, rect.yMin + TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT, rect.yMax);
-
-								clickRect.xMin = Mathf.Clamp (clickRect.xMin, rect.xMin, rect.xMax);
-								clickRect.xMax = Mathf.Clamp (clickRect.xMax, rect.xMin, rect.xMax);
 								
 					
 								//check if start and end are visible
@@ -2770,6 +2783,8 @@ namespace ws.winx.editor.windows
 			
 				
 								if (clickRect.Contains (Event.current.mousePosition)) {
+
+										Debug.Log ("Click Node");
 										
 										if (ev.button == 0) {
 												
@@ -2778,7 +2793,9 @@ namespace ws.winx.editor.windows
 												__nodeSelected = node;
 
 												//if (node == __nodeSelected && Event.current.type==EventType.MouseDown && Event.current.button==0 && nodeRect.Contains(Event.current.mousePosition)) {
-												if (node.channel.type == SequenceChannel.SequenceChannelType.Animation && !String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
+												
+											////// SHOW CURVE EDITOR ////////
+											if (nodeRectWidth>30f &&   node.channel.type == SequenceChannel.SequenceChannelType.Animation && !String.IsNullOrEmpty (__nodeSelectedSourceEditorCurveBinding.propertyName)) {
 
 														//Debug.Log ("Show Curve Editor");
 														Rect curveEditorRect = clickRect;
@@ -2811,15 +2828,6 @@ namespace ws.winx.editor.windows
 						case EventType.ContextClick:
 
 								
-
-								clickRect = new Rect (0, 0, 0, NODE_RECT_HEIGHT - keyFramesRectHeight);
-				
-
-					
-								clickRect.x = __timeAreaW.TimeToPixel (node.timeStart, rect);
-								clickRect.y = TIME_LABEL_HEIGHT + EVENT_PAD_HEIGHT + channelOrd * NODE_RECT_HEIGHT;
-								
-								clickRect.width = __timeAreaW.TimeToPixel (node.timeStart + node.duration, rect) - clickRect.x;
 					
 								if (clickRect.Contains (Event.current.mousePosition)) {
 										__nodeSelected = node;
