@@ -1,11 +1,4 @@
-//----------------------------------------------
-//            Behaviour Machine
-// Copyright © 2014 Anderson Campos Cardoso
-//----------------------------------------------
-//----------------------------------------------
-//           MecanimNode
-// 			by Alex Winx
-//----------------------------------------------
+#if BEHAVIOUR_MACHINE
 using UnityEngine;
 using System;
 using System.Collections;
@@ -566,3 +559,4 @@ namespace ws.winx.bmachine.extensions
 
 		}
 }
+#endif

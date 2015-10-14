@@ -1,3 +1,4 @@
+#if BEHAVIOUR_MACHINE
 using UnityEngine;
 using System.Collections;
 using BehaviourMachine;
@@ -149,4 +150,4 @@ namespace ws.winx.bmachine.extensions
 
 		}
 }
-
+#endif

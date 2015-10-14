@@ -1,4 +1,6 @@
-﻿using UnityEngine.Events;
+﻿#if UNI_RX
+
+using UnityEngine.Events;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -779,3 +781,4 @@ namespace ws.winx.unity{
 
 
 }
+#endif

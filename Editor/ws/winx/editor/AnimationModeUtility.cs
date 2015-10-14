@@ -289,7 +289,7 @@ namespace ws.winx.editor
 				public static UndoPropertyModification[] Process (GameObject rootGameObject, AnimationClip activeAnimationClip, UndoPropertyModification[] modifications, float time)
 				{
 						//	Debug.Log("Process");
-						Animator component = rootGameObject.GetComponent<Animator> ();
+						//Animator component = rootGameObject.GetComponent<Animator> ();
 						if (!HasAnyRecordableModifications (rootGameObject, modifications)) {
 								//		Debug.Log("Doesn't have recordable modifcations");
 								return modifications;

@@ -58,19 +58,6 @@ namespace ws.winx.editor.utilities
 				private static void MoveKey (EditorCurveBinding binding, AnimationClip clip, int keyframeInx, float time)
 				{
 						AnimationCurve curve;
-			
-			
-			
-						Type type = null;
-			
-						int frameCurrent = (int)(time * clip.frameRate);
-						Component componentCurrent;
-			
-			
-			
-			
-		
-			
 
 			
 						if (binding.isPPtrCurve) {
@@ -148,9 +135,6 @@ namespace ws.winx.editor.utilities
 						Type type = null;
 						
 						int frameCurrent = (int)(time * clip.frameRate);
-						Component componentCurrent;
-						
-						
 						
 						
 						UnityEngine.Object objectAnimated = AnimationUtility.GetAnimatedObject (root, curveBindingCurrent);

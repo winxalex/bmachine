@@ -45,13 +45,13 @@ namespace ws.winx.editor.windows
 				void OnGUI ()
 				{
 
-						if (__binding != null) {
+						if (__binding != default(EditorCurveBinding)) {
 								if (__curveEditor == null) {
 				
 										CurveWrapperW[] curveWrappers;
 
 										__bindings = RotationCurveInterpolationW.RemapAnimationBindingForAddKey (__binding, __clip);
-										AnimationCurve curve;
+										
 									
 										CurveWrapperW curveWrapperNew;
 										Color curveColor = Color.red;

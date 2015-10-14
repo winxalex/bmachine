@@ -1,7 +1,4 @@
-﻿//----------------------------------------------
-//            Behaviour Machine
-// Copyright © 2014 Anderson Campos Cardoso
-//----------------------------------------------
+﻿#if BEHAVIOUR_MACHINE
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -139,3 +136,4 @@ namespace ws.winx.bmachine.extensions
 				}
 		}
 }
+#endif

@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using VisualTween.Action;
 using System;
 using UnityEngine.Events;
 using ws.winx.ik;
@@ -261,7 +260,7 @@ namespace ws.winx.unity.sequence
 														//	Debug.Log ("Crossfade " + this.name);
 														animator.CrossFade (stateNameHash, transition, layerIndex, _timeNormalized);
 												} else {
-														//Debug.Log ("Play " + this.name);
+														Debug.Log ("Play " + this.name);
 														animator.Play (stateNameHash, layerIndex, _timeNormalized);
 
 												}

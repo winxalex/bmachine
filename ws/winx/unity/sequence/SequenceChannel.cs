@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using VisualTween.Action;
 using System;
 
 namespace ws.winx.unity.sequence

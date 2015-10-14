@@ -803,7 +803,7 @@ namespace ws.winx.editor.windows
 
 				//if(!String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) EditorWindow.GetWindow<SequenceEditorWindow>().Repaint();
 
-				IAnimatedValues animatedValues = modifications [0].propertyModification.target as IAnimatedValues;
+				IAnimatedValues animatedValues = propertyModification.target as IAnimatedValues;
 				if (animatedValues != null) {
 					SampleClipNodesAt (__sequence.timeCurrent, false);
 				}
@@ -898,8 +898,7 @@ namespace ws.winx.editor.windows
 							
 														animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 							
-														Quaternion boneRotation = Quaternion.identity;
-							
+														
 							
 							
 							
@@ -2422,7 +2421,7 @@ namespace ws.winx.editor.windows
 
 														animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 									
-														Quaternion boneRotation = Quaternion.identity;
+														
 
 														
 														
@@ -2464,7 +2463,7 @@ namespace ws.winx.editor.windows
 								
 												} else if (channel.type == SequenceChannel.SequenceChannelType.Audio) {
 										
-														AudioClip audioClip = node.source as AudioClip;
+//														AudioClip audioClip = node.source as AudioClip;
 
 //														if(!node.isRunning)
 //														{
@@ -2754,7 +2753,7 @@ namespace ws.winx.editor.windows
 										__nodeSelected = node;
 
 										
-										Debug.Log ("Resize start");
+										//Debug.Log ("Resize start");
 										__wasResizingNodeStart = true;
 
 										ev.Use ();
@@ -2769,7 +2768,7 @@ namespace ws.winx.editor.windows
 								if (canResizeEnd && clickRect.Contains (Event.current.mousePosition)) {
 										__nodeSelected = node;
 										__wasResizingNodeEnd = true;
-										Debug.Log ("Resize end");
+										//Debug.Log ("Resize end");
 										ev.Use ();
 								}
 					
@@ -2784,7 +2783,7 @@ namespace ws.winx.editor.windows
 				
 								if (clickRect.Contains (Event.current.mousePosition)) {
 
-										Debug.Log ("Click Node");
+										//Debug.Log ("Click Node");
 										
 										if (ev.button == 0) {
 												
@@ -3763,7 +3762,7 @@ namespace ws.winx.editor.windows
 
 										String path = AnimationUtility.CalculateTransformPath (activeGameObject.transform, __nodeSelected.channel.target.transform);
 
-										EditorCurveBinding[] bindings = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip);
+										//EditorCurveBinding[] bindings = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip);
 					
 										if (Tools.current == Tool.Move) {
 												curveBinding = AnimationUtility.GetCurveBindings (__nodeSelected.source as AnimationClip).FirstOrDefault (itm => itm.type == typeof(Transform) && itm.propertyName.StartsWith ("m_LocalPosition.") && itm.path == path);
