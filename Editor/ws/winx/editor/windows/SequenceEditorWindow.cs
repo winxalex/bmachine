@@ -13,6 +13,7 @@ using ws.winx.editor.extensions;
 using ws.winx.unity.utilities;
 using UnityEditor.Animations;
 using ws.winx.unity;
+using ws.winx.unity.extensions;
 using ws.winx.unity.sequence;
 using ws.winx.ik;
 

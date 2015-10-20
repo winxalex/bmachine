@@ -11,19 +11,23 @@ using ws.winx.editor.drawers;
 using System.IO;
 using UnityEditor.Animations;
 using ws.winx.csharp.extensions;
+using System.CodeDom.Compiler;
+
 
 namespace ws.winx.editor.utilities
 {
 	[InitializeOnLoad]
 	public class EditorUtilityEx
 		{
+
+//#if UNITY_VARIABLE
 				public delegate Rect SwitchDrawerDelegate (Rect rect,UnityVariable variable);
 
 
 				//into static editor Utilityor somthing
 				static List<Func<Type,SwitchDrawerDelegate>> _drawers;
 				static Func<Type,SwitchDrawerDelegate> _defaultSwitchDrawer;
-
+//#endif
 				const string showLockIconPrefKey = "Lock_ShowIcon";
 				const string addLockUndoRedoPrefKey = "Lock_UndoRedo";
 				const string lockMultiSelectionPrefKey = "Lock_MultiSelection";
@@ -71,7 +75,7 @@ namespace ws.winx.editor.utilities
 				}
 
 
-		
+		//#if UNITY_VARIABLE		
 				public static void AddCustomDrawer<T> (SwitchDrawerDelegate drawer)
 				{
 						if (_drawers == null)
@@ -118,6 +122,308 @@ namespace ws.winx.editor.utilities
 						return _defaultSwitchDrawer;
 				}
 
+
+
+
+		static Assembly[] _loadedEditorAssemblies;
+		
+		
+		public static Assembly[] loadedEditorAssemblies
+		{
+			get
+			{
+				if (EditorUtilityEx._loadedEditorAssemblies == null)
+				{
+					EditorUtilityEx._loadedEditorAssemblies = AppDomain.CurrentDomain.GetAssemblies ();
+					List<Assembly> list = new List<Assembly> ();
+					Assembly[] array = EditorUtilityEx._loadedEditorAssemblies;
+					for (int i = 0; i < array.Length; i++)
+					{
+						Assembly assembly = array [i];
+						if (!assembly.GetName ().Name.Contains ("Editor"))
+						{
+							list.Add (assembly);
+						}
+					}
+					EditorUtilityEx._loadedEditorAssemblies = list.ToArray ();
+				}
+				return EditorUtilityEx._loadedEditorAssemblies;
+			}
+		}
+		
+		
+		public static Type[] GetDerivedTypes (Type baseType)
+		{
+			List<Type> list = new List<Type> ();
+			Assembly[] loadedAssemblies = EditorUtilityEx.loadedEditorAssemblies;
+			int i = 0;
+			while (i < loadedAssemblies.Length)
+			{
+				Assembly assembly = loadedAssemblies [i];
+				Type[] exportedTypes;
+				try
+				{
+					exportedTypes = assembly.GetExportedTypes ();
+				}
+				catch (ReflectionTypeLoadException)
+				{
+					Debug.LogWarning (string.Format ("EditorUtilityEx will ignore the following assembly due to type-loading errors: {0}", assembly.FullName));
+					goto IL_91;
+				}
+				goto IL_44;
+			IL_91:
+					i++;
+				continue;
+			IL_44:
+					for (int j = 0; j < exportedTypes.Length; j++)
+				{
+					Type type = exportedTypes [j];
+					if (!type.IsAbstract&& type.IsSubclassOf (baseType) && type.FullName  != null)
+					{
+						list.Add (type);
+					}
+				}
+				goto IL_91;
+			}
+			list.Sort ((Type o1, Type o2) => o1.ToString ().CompareTo (o2.ToString ()));
+			return list.ToArray ();
+		}
+
+		
+		
+		
+
+		
+		
+		
+		
+		
+		public static SerializedProperty SerializeVariable (UnityVariable variable)
+		{
+			
+			using (Microsoft.CSharp.CSharpCodeProvider foo = 
+			       new Microsoft.CSharp.CSharpCodeProvider()) {
+				
+				CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+				
+				
+				
+				compilerParams.GenerateInMemory = true; 
+				
+				var assembyExcuting = Assembly.GetExecutingAssembly ();
+				
+				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+				
+				string usingString = "using UnityEngine;";
+				
+				if (!(variable.ValueType.IsPrimitive || variable.ValueType == typeof(string))) {
+					string assemblyLocationVarable = Assembly.GetAssembly (variable.ValueType).Location;
+					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+					
+					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+						
+						usingString += "using " + variable.ValueType.Namespace + ";";
+					}
+				}
+				
+				
+				
+				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+				
+				
+				
+				// Create class with one property value of type same as type of the object we want to serialize
+				var res = foo.CompileAssemblyFromSource (
+					compilerParams, String.Format (
+					
+					" {0}" +
+					
+					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+					, usingString, variable.ValueType.ToString ())
+					);
+				
+				
+				
+				
+				if (res.Errors.Count > 0) {
+					
+					foreach (CompilerError CompErr in res.Errors) {
+						Debug.LogError (
+							"Line number " + CompErr.Line +
+							", Error Number: " + CompErr.ErrorNumber +
+							", '" + CompErr.ErrorText + ";" 
+							);
+					}
+					
+					return null;
+					
+				} else {
+					
+					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+					
+					ScriptableObject st = ScriptableObject.CreateInstance (type);
+					
+					type.GetField ("value").SetValue (st, variable.Value);
+
+					SerializedObject seralizedObject=new SerializedObject(st);
+
+
+
+					return seralizedObject.FindProperty ("value");
+					
+				
+					
+					
+					
+				}
+				
+			}
+			
+			
+		}
+		
+		
+		
+		
+		public static void UpdateSerializedProperty(UnityVariable variable){
+			SerializedProperty serializedProperty = variable.serializedProperty as SerializedProperty;
+
+			object value = variable.Value;
+			
+			if (variable.ValueType == typeof(float)) {
+				
+				serializedProperty.floatValue = (float)value;
+			} else
+			if (variable.ValueType == typeof(bool)) {
+				
+				serializedProperty.boolValue = (bool)value;
+			} else
+			if (variable.ValueType == typeof(Bounds)) {
+				serializedProperty.boundsValue = (Bounds)value;
+				
+			} else
+			if (variable.ValueType == typeof(Color)) {
+				serializedProperty.colorValue = (Color)value;
+				
+			} else
+			if (variable.ValueType == typeof(Rect)) {
+				serializedProperty.rectValue = (Rect)value;
+				
+			} else
+			if (variable.ValueType == typeof(int)) {
+				serializedProperty.intValue = (int)value;
+			} else
+			if (variable.ValueType == typeof(Vector3)) {
+				serializedProperty.vector3Value = (Vector3)value;
+			} else
+			if (variable.ValueType == typeof(string)) {
+				serializedProperty.stringValue = (string)value;
+			} else
+			if (variable.ValueType == typeof(Quaternion)) {
+				serializedProperty.quaternionValue = (Quaternion)value;
+			} else if(value is UnityEngine.Object)
+				serializedProperty.objectReferenceValue = value as UnityEngine.Object;
+			
+			
+		}
+		
+		
+		/// <summary>
+		/// Applies the modified properties. !!!! For reusing of Unity Drawers
+		/// </summary>
+		public static void ApplyModifiedProperties (UnityVariable variable)
+		{
+			//SerializedObject __seralizedObject = variable.seralizedObject as SerializedObject;
+			SerializedProperty seralizedProperty=variable.serializedProperty as SerializedProperty;
+
+
+
+			if (seralizedProperty.serializedObject != null) {
+				
+				if (seralizedProperty.serializedObject.targetObject == null) { //has been destroyed by Unity ????
+					
+					//__seralizedObject=null;
+					seralizedProperty=null;
+					
+					variable.serializedProperty=seralizedProperty=Serialize(variable);
+
+				}
+				
+				//__seralizedObject.ApplyModifiedProperties ();
+				seralizedProperty.serializedObject.ApplyModifiedProperties();
+				
+				
+				
+				if (variable.ValueType == typeof(float) && (float)variable.Value != seralizedProperty.floatValue) {
+					
+					variable.Value = seralizedProperty.floatValue;
+					variable.OnBeforeSerialize ();//serialize primitive and objects that aren't subclass of UnityObject or are UnityEvents
+				} else
+				if (variable.ValueType == typeof(bool) && (bool)variable.Value != seralizedProperty.boolValue) {
+					
+					variable.Value = seralizedProperty.boolValue;
+					variable.OnBeforeSerialize ();
+				} else
+				if (variable.ValueType == typeof(Bounds)) {
+					if (((Bounds)variable.Value).center != seralizedProperty.boundsValue.center || ((Bounds)variable.Value).max != seralizedProperty.boundsValue.max || ((Bounds)variable.Value).min != seralizedProperty.boundsValue.min || ((Bounds)variable.Value).size != seralizedProperty.boundsValue.size) {
+						variable.Value = seralizedProperty.boundsValue;
+						variable.OnBeforeSerialize ();
+					}
+					
+				} else
+				if (variable.ValueType == typeof(Color)) {
+					if (((Color)variable.Value).r != seralizedProperty.colorValue.r || ((Color)variable.Value).g != seralizedProperty.colorValue.g || ((Color)variable.Value).b != seralizedProperty.colorValue.b || ((Color)variable.Value).a != seralizedProperty.colorValue.a) {
+						variable.Value = seralizedProperty.colorValue;
+						variable.OnBeforeSerialize ();
+					}
+					
+				} else
+				if (variable.ValueType == typeof(Rect)) {
+					if (((Rect)variable.Value).x != seralizedProperty.rectValue.x || ((Rect)variable.Value).y != seralizedProperty.rectValue.y || ((Rect)variable.Value).width != seralizedProperty.rectValue.width || ((Rect)variable.Value).height != seralizedProperty.rectValue.height) {
+						variable.Value = seralizedProperty.rectValue;
+						variable.OnBeforeSerialize ();
+					}
+					
+				} else
+				if (variable.ValueType == typeof(int) && (int)variable.Value != seralizedProperty.intValue) {
+					
+					variable.Value = seralizedProperty.intValue;
+					variable.OnBeforeSerialize ();
+				} else
+				if (variable.ValueType == typeof(Vector3)) {
+					if (((Vector3)variable.Value).x != seralizedProperty.vector3Value.x || ((Vector3)variable.Value).y != seralizedProperty.vector3Value.y || ((Vector3)variable.Value).z != seralizedProperty.vector3Value.z) {
+						variable.Value = seralizedProperty.vector3Value;
+						variable.OnBeforeSerialize ();
+					}
+				} else
+				if (variable.ValueType == typeof(string) && (string)variable.Value != seralizedProperty.stringValue) {
+					
+					variable.Value = seralizedProperty.stringValue;
+					variable.OnBeforeSerialize ();
+				} else
+				if (variable.ValueType == typeof(Quaternion)) {
+					if (((Quaternion)variable.Value).x != seralizedProperty.quaternionValue.x || ((Quaternion)variable.Value).y != seralizedProperty.quaternionValue.y || ((Quaternion)variable.Value).z != seralizedProperty.quaternionValue.z || ((Quaternion)variable.Value).w != seralizedProperty.quaternionValue.w) {
+						variable.Value = seralizedProperty.quaternionValue;
+						variable.OnBeforeSerialize ();
+					}
+				} else
+				if (variable.ValueType == typeof(AnimationCurve)) {
+					
+					
+					variable.OnBeforeSerialize ();
+					
+				} else
+					if (variable.valueObject is UnityEngine.Object)
+						variable.Value = seralizedProperty.objectReferenceValue;
+				
+				
+			}
+		}
+		
+
+
+//#endif
 
 
 				//
@@ -208,91 +514,302 @@ namespace ws.winx.editor.utilities
 		#endregion
 
 		#region SerializedObject
+		public static SerializedProperty Serialize (object obj)
+		{
 
-			
-				public static SerializedObject Serialize (object value)
-				{
+			//ws.winx.csharp.CSharpCodeCompilerOriginal compOrig = new ws.winx.csharp.CSharpCodeCompilerOriginal ();
+			ws.winx.csharp.CSharpCodeCompiler compOrig = new ws.winx.csharp.CSharpCodeCompiler ();
+			ws.winx.csharp.CSharpCodeCompiler.unixMcsCommand="/Applications/Unity/MonoDevelop.app/Contents/Frameworks/Mono.framework/Versions/Current/bin/gmcs";
 
-						using (Microsoft.CSharp.CSharpCodeProvider foo = 
-				      new Microsoft.CSharp.CSharpCodeProvider()) {
-				
-								System.CodeDom.Compiler.CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+			object value = obj;
 
-								Type ValueType = value.GetType ();
-				
-								compilerParams.GenerateInMemory = true; 
-				
-								var assembyExcuting = Assembly.GetExecutingAssembly ();
-				
-								string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
-				
-								string usingString = "using UnityEngine;";
-				
-								if (!(ValueType.IsPrimitive || ValueType == typeof(string))) {
-										string assemblyLocationVarable = Assembly.GetAssembly (ValueType).Location;
-										compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
-					
-										if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
-						
-												usingString += "using " + ValueType.Namespace + ";";
-										}
-								}
-				
-				
-				
-								compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
-								compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
-				
-				
-				
-				
-								var res = foo.CompileAssemblyFromSource (
-					compilerParams, String.Format (
-					
-					" {0}" +
-					
-										"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-					, usingString, ValueType.ToString ())
-								);
-				
-				
-				
-				
-								if (res.Errors.Count > 0) {
-					
-										foreach (System.CodeDom.Compiler.CompilerError CompErr in res.Errors) {
-												Debug.LogError (
-														"Line number " + CompErr.Line +
-														", Error Number: " + CompErr.ErrorNumber +
-														", '" + CompErr.ErrorText + ";" 
-												);
-										}
+			if(obj is UnityVariable){
+				UnityVariable var=obj as UnityVariable;
+			//respaw reference to other unity variable
+//			if(var.unityVariableReferencedInstanceID!=0)
+//				{
+//					//TODO Test this hard
+//
+//					EditorUtility.InstanceIDToObject(var.unityVariableReferencedInstanceID);
+//				}else
+					value=var.Value;
+					                                 
+			}
 
 
-										return null;
 
-
-								} else {
-					
-										var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
-					
-										ScriptableObject st = ScriptableObject.CreateInstance (type);
-					
-										type.GetField ("value").SetValue (st, value);
-					
-					
-					
-										return new SerializedObject (st);
-					
-
-					
-								}
-				
-						}
+							Type ValueType =  obj is UnityVariable? (obj as UnityVariable).ValueType : obj.GetType ();
+			//System.CodeDom.Compiler.CodeDomProvider provider = new CodeDomProvider ();			
+			CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
 			
 			
 			
+			compilerParams.GenerateInMemory = true; 
+			
+			var assembyExcuting = Assembly.GetExecutingAssembly ();
+			
+			string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+			
+			string usingString = "using UnityEngine;";
+			
+			if (!(ValueType.IsPrimitive || ValueType == typeof(string))) {
+				string assemblyLocationVarable = Assembly.GetAssembly (ValueType).Location;
+				compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+				
+				if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+					
+					usingString += "using " + ValueType.Namespace + ";";
 				}
+			}
+			
+			
+			
+			compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+			compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+			
+
+
+			// Create class with one property value of type same as type of the object we want to serialize
+
+			var res = compOrig.CompileAssemblyFromSource (
+				compilerParams, String.Format (
+				
+				" {0}" +
+				
+				"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+				, usingString, ValueType.ToString ())
+				);
+			
+			
+			
+			
+			if (res.Errors.Count > 0) {
+				
+				foreach (CompilerError CompErr in res.Errors) {
+					Debug.LogError (
+						"Line number " + CompErr.Line +
+						", Error Number: " + CompErr.ErrorNumber +
+						", '" + CompErr.ErrorText + ";" 
+						);
+				}
+				
+				return null;
+				
+			} else {
+				
+				var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+				
+				ScriptableObject st = ScriptableObject.CreateInstance (type);
+				
+				type.GetField ("value").SetValue (st, value);
+				
+				SerializedObject seralizedObject=new SerializedObject(st);
+				
+				
+				
+				return seralizedObject.FindProperty ("value");
+				
+				
+				
+				
+				
+			}
+
+			//System.CodeDom.Compiler.CodeDomProvider provider = new CodeDomProvider ();
+			//provider.CompileAssemblyFromSource ();
+
+			//Mono.CSharp.CSharpCodeCompiler compiler=new Mono.CSharp.CSharpCodeCompiler();
+
+
+			//return SerializeVariable (value as UnityVariable);
+//			
+//			using (Microsoft.CSharp.CSharpCodeProvider provider = 
+//			       new Microsoft.CSharp.CSharpCodeProvider()) {
+//
+//				System.CodeDom.Compiler.CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+//
+//
+//				
+//
+//				Type ValueType = typeof(float);//   value is UnityVariable? (value as UnityVariable).ValueType : value.GetType ();
+//				
+//				
+//				compilerParams.GenerateInMemory = true; 
+//				
+//				var assembyExcuting = Assembly.GetExecutingAssembly ();
+//				
+//				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+//				
+//				string usingString = "using UnityEngine;";
+//				
+//				if (!(ValueType.IsPrimitive || ValueType == typeof(string))) {
+//					string assemblyLocationVarable = Assembly.GetAssembly (ValueType).Location;
+//					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+//					
+//					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+//						
+//						usingString += "using " + ValueType.Namespace + ";";
+//					}
+//				}
+//
+//			//	MemberInfo windowsMcsPath=typeof(Mono.CSharp.CSharpCodeCompiler).GetField("windowsMcsPath",BindingFlags.Static && BindingFlags.NonPublic);
+//			//	MemberInfo windowsMonoPath=typeof(Mono.CSharp.CSharpCodeCompiler).GetField("windowsMonoPath",BindingFlags.Static && BindingFlags.NonPublic);
+//
+//
+//
+//
+//				if(Application.platform==RuntimePlatform.OSXPlayer && Application.platform==RuntimePlatform.OSXEditor){
+//
+//				}
+//
+//				
+//				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+//				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+//				
+//
+//
+////				var res = compiler.CompileAssemblyFromSource (
+////					compilerParams, String.Format (
+////					
+////					" {0}" +
+////					
+////					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+////					, usingString, ValueType.ToString ())
+////					);
+//				var res = provider.CompileAssemblyFromSource (
+//					compilerParams, String.Format (
+//					
+//					" {0}" +
+//					
+//					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+//					, usingString, ValueType.ToString ())
+//					);
+//				
+//				
+//				
+//				
+//				if (res.Errors.Count > 0) {
+//					
+//					foreach (System.CodeDom.Compiler.CompilerError CompErr in res.Errors) {
+//						Debug.LogError (
+//							"Line number " + CompErr.Line +
+//							", Error Number: " + CompErr.ErrorNumber +
+//							", '" + CompErr.ErrorText + ";" 
+//							);
+//					}
+//					
+//					
+//					return null;
+//					
+//					
+//				} else {
+//					
+//					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+//					
+//					ScriptableObject st = ScriptableObject.CreateInstance (type);
+//					
+//					type.GetField ("value").SetValue (st, value);
+//					
+//					
+//					
+//					
+//					
+//					return new SerializedObject (st).FindProperty ("value");
+//					
+//				}
+//				
+//			}
+			
+			
+			
+//			using (Microsoft.CSharp.CSharpCodeProvider foo = 
+//			       new Microsoft.CSharp.CSharpCodeProvider()) {
+//				
+//				System.CodeDom.Compiler.CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+//				
+//				
+//				
+//				Type ValueType = typeof(float);//   value is UnityVariable? (value as UnityVariable).ValueType : value.GetType ();
+//				
+//				
+//				compilerParams.GenerateInMemory = true; 
+//				
+//				var assembyExcuting = Assembly.GetExecutingAssembly ();
+//				
+//				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+//				
+//				string usingString = "using UnityEngine;";
+//				
+//				if (!(ValueType.IsPrimitive || ValueType == typeof(string))) {
+//					string assemblyLocationVarable = Assembly.GetAssembly (ValueType).Location;
+//					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+//					
+//					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+//						
+//						usingString += "using " + ValueType.Namespace + ";";
+//					}
+//				}
+//				
+//				
+//				
+//				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+//				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+//				
+//				
+//				
+//				
+//				var res = foo.CompileAssemblyFromSource (
+//					compilerParams, String.Format (
+//					
+//					" {0}" +
+//					
+//					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+//					, usingString, ValueType.ToString ())
+//					);
+//				
+//				
+//				
+//				
+//				if (res.Errors.Count > 0) {
+//					
+//					foreach (System.CodeDom.Compiler.CompilerError CompErr in res.Errors) {
+//						Debug.LogError (
+//							"Line number " + CompErr.Line +
+//							", Error Number: " + CompErr.ErrorNumber +
+//							", '" + CompErr.ErrorText + ";" 
+//							);
+//					}
+//					
+//					
+//					return null;
+//					
+//					
+//				} else {
+//					
+//					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+//					
+//					ScriptableObject st = ScriptableObject.CreateInstance (type);
+//					
+//					type.GetField ("value").SetValue (st, value);
+//					
+//					
+//					
+//					
+//					
+//					return new SerializedObject (st).FindProperty ("value");
+//					
+//				}
+//				
+//			}
+			
+			
+			
+		}
+				
+
+			
+				
+				
 		#endregion
 
 

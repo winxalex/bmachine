@@ -38,8 +38,6 @@ namespace ws.winx.csharp.extensions
 
 				public delegate void MemberInfoSetterDelegate<T,in TValue> (ref T target,TValue value);
 
-		
-			
 
 
 

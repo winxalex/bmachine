@@ -27,6 +27,8 @@ namespace ws.winx.unity.utilities{
 			AddSurrogate (typeof(UnityEngine.Keyframe), new KeyFrameSurrogate ());
 			AddSurrogate (typeof(UnityEngine.AnimationCurve), new AnimationCurveSurrogate ());
 			AddSurrogate (typeof(UnityEngine.Bounds), new BoundsSurrogate ());
+			AddSurrogate (typeof(UnityEngine.GameObject), new GameObjectSurrogate ());
+
 
 
 

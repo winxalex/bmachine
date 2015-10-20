@@ -11,9 +11,12 @@ using System.Runtime.Serialization;
 using ws.winx.csharp.utilities;
 using ws.winx.unity.utilities;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+
+
+
+/// <summary>
+///  NEEED REDOING REMOVING ALL UNITY EDITOR SHIT INTO EDITOR SCRIPTS
+/// </summary>
 
 namespace ws.winx.unity
 {
@@ -29,6 +32,13 @@ namespace ws.winx.unity
 				[SerializeField]
 				private int
 						__unityVariableReferencedInstanceID = 0;
+
+		public int unityVariableReferencedInstanceID {
+			get {
+				return __unityVariableReferencedInstanceID;
+			}
+		}
+
 				[HideInInspector]
 				public byte[]
 						valueTypeSerialized;
@@ -41,8 +51,9 @@ namespace ws.winx.unity
 								
 						}
 
-
 				}
+
+				
 				
 				[SerializeField]
 				private string
@@ -78,8 +89,11 @@ namespace ws.winx.unity
 				public byte[]
 						valueObjectSerialized;
 				[NonSerialized]
-				private object
-						__valueObject;
+				private object __valueObject;
+
+				
+
+
 				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object>  __structSetterDelegate;
 				private Func<object,object> __structGetterDelegate;
 				private ws.winx.csharp.extensions.ReflectionExtension.MemberInfoSetterDelegate<object,object> __valueSetterDelegate;
@@ -146,12 +160,12 @@ namespace ws.winx.unity
 				/// </summary>
 				/// <value> valueObject conatiner, can be event,UnityEngine.Object or other System.Object
 				/// </value>
-				object valueObject {
+				public object valueObject {
 						get {
 								return __valueObject;
 					
 						}
-						set {
+						private set {
 								__valueObject = value;
 
 								__unityVariableReferencedInstanceID = 0;
@@ -272,11 +286,11 @@ namespace ws.winx.unity
 								
 								if (value == null) {
 
-#if UNITY_EDITOR
-										__seralizedProperty = null;
-										__seralizedObject = null;
 
-#endif
+										serializedProperty = null;
+										
+
+
 										__unityVariableReferencedInstanceID = 0;
 									
 										//value=default(this.ValueType);
@@ -328,9 +342,6 @@ namespace ws.winx.unity
 
 
 
-#if UNITY_EDITOR
-				UpdateSerializedProperty(value);
-#endif
 								
 						}
 				}
@@ -410,12 +421,8 @@ namespace ws.winx.unity
 										_valueType = typeof(System.Object);
 
 
-#if UNITY_EDITOR
-								if (__unityVariableReferencedInstanceID != 0) {
-										__valueObject = EditorUtility.InstanceIDToObject (__unityVariableReferencedInstanceID);
-										return;
-								}
-#endif
+								
+
 
 								if (valueObjectSerialized != null && valueObjectSerialized.Length > 0) { 
 
@@ -423,10 +430,10 @@ namespace ws.winx.unity
 			
 										__valueObject = SerializationUtility.Deserialize (valueObjectSerialized);
 
-#if UNITY_EDITOR
-										__seralizedProperty = null;
-										__seralizedObject = null;
-#endif
+
+										serializedProperty = null;
+										
+
 
 								} else {
 										if (__instanceUnityObject != null)
@@ -584,253 +591,16 @@ namespace ws.winx.unity
 				////////////////////////////////////////////////////////////////////////////////////
 				//                            !!!! For reusing of Unity Drawers	                 //	
 
-#if UNITY_EDITOR
 		[NonSerialized]
-		public PropertyDrawer
+		public object /*PropertyDrawer*/
 			drawer;
 		
 		[NonSerialized]
-		private SerializedProperty
-			__seralizedProperty;
-		[NonSerialized]
-		private SerializedObject
-			__seralizedObject;
-		
-		public SerializedProperty serializedProperty {
-			get {
-				
-				if (__seralizedProperty == null && this.Value != null) {
-					
-					__seralizedObject=SerializeVariable ();
-					__seralizedProperty = __seralizedObject.FindProperty ("value");
-				
-					
-				}
-				
-				
-				
-				
-				return __seralizedProperty;
-				
-			}
-		}
+		public object /*SerializedProperty*/
+			serializedProperty;
 
 
 
-
-		
-		SerializedObject SerializeVariable ()
-				{
-
-						using (Microsoft.CSharp.CSharpCodeProvider foo = 
-					       new Microsoft.CSharp.CSharpCodeProvider()) {
-						
-								CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
-						
-						
-						
-								compilerParams.GenerateInMemory = true; 
-						
-								var assembyExcuting = Assembly.GetExecutingAssembly ();
-						
-								string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
-						
-								string usingString = "using UnityEngine;";
-						
-								if (!(this.ValueType.IsPrimitive || this.ValueType == typeof(string))) {
-										string assemblyLocationVarable = Assembly.GetAssembly (this.ValueType).Location;
-										compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
-							
-										if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
-								
-												usingString += "using " + this.ValueType.Namespace + ";";
-										}
-								}
-						
-						
-						
-								compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
-								compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
-						
-						
-						
-						
-								var res = foo.CompileAssemblyFromSource (
-							compilerParams, String.Format (
-							
-							" {0}" +
-							
-										"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-							, usingString, this.ValueType.ToString ())
-								);
-						
-						
-						
-						
-								if (res.Errors.Count > 0) {
-							
-										foreach (CompilerError CompErr in res.Errors) {
-												Debug.LogError (
-									"Line number " + CompErr.Line +
-														", Error Number: " + CompErr.ErrorNumber +
-														", '" + CompErr.ErrorText + ";" 
-												);
-										}
-
-								return null;
-
-								} else {
-							
-										var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
-							
-										ScriptableObject st = ScriptableObject.CreateInstance (type);
-							
-										type.GetField ("value").SetValue (st, this.Value);
-							
-							
-							
-										return new SerializedObject (st);
-							
-										
-							
-								}
-						
-						}
-
-
-				}
-
-
-
-
-		public void UpdateSerializedProperty(object value){
-
-
-			if (this.ValueType == typeof(float)) {
-
-				this.serializedProperty.floatValue = (float)value;
-			}else
-			if (this.ValueType == typeof(bool)) {
-				
-				this.serializedProperty.boolValue=(bool)value;
-			} else
-			if (this.ValueType == typeof(Bounds)) {
-				this.serializedProperty.boundsValue=(Bounds)value;
-				
-			} else
-			if (this.ValueType == typeof(Color)) {
-				this.serializedProperty.colorValue=(Color)value;
-				
-			} else
-			if (this.ValueType == typeof(Rect)) {
-				this.serializedProperty.rectValue=(Rect)value;
-				
-			} else
-			if (this.ValueType == typeof(int)) {
-				this.serializedProperty.intValue=(int)value;
-			} else
-			if (this.ValueType == typeof(Vector3)) {
-				this.serializedProperty.vector3Value=(Vector3)value;
-			} else
-			if (this.ValueType == typeof(string)) {
-				this.serializedProperty.stringValue=(string)value;
-			} else
-			if (this.ValueType == typeof(Quaternion)) {
-				this.serializedProperty.quaternionValue=(Quaternion)value;
-			} 
-
-
-		}
-
-
-		/// <summary>
-		/// Applies the modified properties. !!!! For reusing of Unity Drawers
-		/// </summary>
-		public void ApplyModifiedProperties ()
-		{
-			if (__seralizedObject != null) {
-				
-					if (__seralizedObject.targetObject == null) { //has been destroyed by Unity ????
-
-					__seralizedObject=null;
-					__seralizedProperty=null;
-
-					__seralizedObject=SerializeVariable ();
-					__seralizedProperty = __seralizedObject.FindProperty ("value");
-
-				}
-
-				__seralizedObject.ApplyModifiedProperties ();
-				
-				
-				
-				if (this.ValueType == typeof(float) && (float)this.Value != __seralizedProperty.floatValue) {
-					
-					this.Value = __seralizedProperty.floatValue;
-					this.OnBeforeSerialize ();//serialize primitive and objects that aren't subclass of UnityObject or are UnityEvents
-				} else
-				if (this.ValueType == typeof(bool) && (bool)this.Value != __seralizedProperty.boolValue) {
-					
-					this.Value = __seralizedProperty.boolValue;
-					this.OnBeforeSerialize ();
-				} else
-				if (this.ValueType == typeof(Bounds)) {
-					if (((Bounds)this.Value).center != __seralizedProperty.boundsValue.center || ((Bounds)this.Value).max != __seralizedProperty.boundsValue.max || ((Bounds)this.Value).min != __seralizedProperty.boundsValue.min || ((Bounds)this.Value).size != __seralizedProperty.boundsValue.size) {
-						this.Value = __seralizedProperty.boundsValue;
-						this.OnBeforeSerialize ();
-					}
-					
-				} else
-				if (this.ValueType == typeof(Color)) {
-					if (((Color)this.Value).r != __seralizedProperty.colorValue.r || ((Color)this.Value).g != __seralizedProperty.colorValue.g || ((Color)this.Value).b != __seralizedProperty.colorValue.b || ((Color)this.Value).a != __seralizedProperty.colorValue.a) {
-						this.Value = __seralizedProperty.colorValue;
-						this.OnBeforeSerialize ();
-					}
-					
-				} else
-				if (this.ValueType == typeof(Rect)) {
-					if (((Rect)this.Value).x != __seralizedProperty.rectValue.x || ((Rect)this.Value).y != __seralizedProperty.rectValue.y || ((Rect)this.Value).width != __seralizedProperty.rectValue.width || ((Rect)this.Value).height != __seralizedProperty.rectValue.height) {
-						this.Value = __seralizedProperty.rectValue;
-						this.OnBeforeSerialize ();
-					}
-					
-				} else
-				if (this.ValueType == typeof(int) && (int)this.Value != __seralizedProperty.intValue) {
-					
-					this.Value = __seralizedProperty.intValue;
-					this.OnBeforeSerialize ();
-				} else
-				if (this.ValueType == typeof(Vector3)) {
-					if (((Vector3)this.Value).x != __seralizedProperty.vector3Value.x || ((Vector3)this.Value).y != __seralizedProperty.vector3Value.y || ((Vector3)this.Value).z != __seralizedProperty.vector3Value.z) {
-						this.Value = __seralizedProperty.vector3Value;
-						this.OnBeforeSerialize ();
-					}
-				} else
-				if (this.ValueType == typeof(string) && (string)this.Value != __seralizedProperty.stringValue) {
-					
-					this.Value = __seralizedProperty.stringValue;
-					this.OnBeforeSerialize ();
-				} else
-				if (this.ValueType == typeof(Quaternion)) {
-					if (((Quaternion)this.Value).x != __seralizedProperty.quaternionValue.x || ((Quaternion)this.Value).y != __seralizedProperty.quaternionValue.y || ((Quaternion)this.Value).z != __seralizedProperty.quaternionValue.z || ((Quaternion)this.Value).w != __seralizedProperty.quaternionValue.w) {
-						this.Value = __seralizedProperty.quaternionValue;
-						this.OnBeforeSerialize ();
-					}
-				} else
-				if (this.ValueType == typeof(AnimationCurve)) {
-					
-					
-					this.OnBeforeSerialize ();
-					
-				} else
-					if (this.__valueObject is UnityEngine.Object)
-						this.Value = __seralizedProperty.objectReferenceValue;
-				
-				
-			}
-		}
-
-#endif
 
 			
 

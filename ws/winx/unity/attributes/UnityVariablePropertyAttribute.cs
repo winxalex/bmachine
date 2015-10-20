@@ -20,11 +20,13 @@ namespace ws.winx.unity.attributes
 		public Type variableType;
 		public string name;
 		public DisplayOptions displayOptions;
+		public string blackboardName;
 
-		public UnityVariablePropertyAttribute(Type type,string name="",DisplayOptions displayOptions=DisplayOptions.Raw | DisplayOptions.Bind | DisplayOptions.Locals | DisplayOptions.Globals ){
+		public UnityVariablePropertyAttribute(Type type,string name="",string blackboardName="Blackboard",DisplayOptions displayOptions=DisplayOptions.Raw | DisplayOptions.Bind | DisplayOptions.Locals | DisplayOptions.Globals ){
 
 			this.variableType = type;
 			this.name = name;
+			this.blackboardName = blackboardName;
 			this.displayOptions = displayOptions;
 		}
 	}

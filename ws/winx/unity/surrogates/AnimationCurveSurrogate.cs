@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Runtime.Serialization;
-using BehaviourMachine;
+
 
 namespace ws.winx.unity.surrogates{
 
@@ -9,14 +9,14 @@ namespace ws.winx.unity.surrogates{
 	{
 		public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
 		{
-			var vector = (AnimationCurve)obj;
-			int len = vector.keys.Length;
+			var curve = (AnimationCurve)obj;
+			int len = curve.keys.Length;
 			for (int i=0; i<len; i++) {
-				info.AddValue("keyt"+i, vector[i].time);
-				info.AddValue("keyv"+i, vector[i].value);
-				info.AddValue("keyin"+i, vector[i].inTangent);
-				info.AddValue("keyout"+i, vector[i].outTangent);
-				info.AddValue("keymod"+i, vector[i].tangentMode);
+				info.AddValue("keyt"+i, curve[i].time);
+				info.AddValue("keyv"+i, curve[i].value);
+				info.AddValue("keyin"+i, curve[i].inTangent);
+				info.AddValue("keyout"+i, curve[i].outTangent);
+				info.AddValue("keymod"+i, curve[i].tangentMode);
 
 
 

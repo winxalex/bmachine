@@ -15,9 +15,9 @@ namespace ws.winx.unity.surrogates
 		{
 				public void GetObjectData (object obj, SerializationInfo info, StreamingContext context)
 				{
-						var vector = (Bounds)obj;
-						info.AddValue ("c", vector.center);
-						info.AddValue ("s", vector.size);
+						var bounds = (Bounds)obj;
+						info.AddValue ("c", bounds.center);
+						info.AddValue ("s", bounds.size);
 					
 				}
 		

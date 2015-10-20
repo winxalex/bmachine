@@ -7,6 +7,9 @@ using ws.winx.editor.extensions;
 using System.Collections.Generic;
 using System;
 using System.Runtime.Serialization;
+using UnityEngine.Events;
+using System.Linq;
+using ws.winx.unity.ai.behaviours;
 
 namespace ws.winx.editor.drawers
 {
@@ -15,21 +18,48 @@ namespace ws.winx.editor.drawers
 	public class UnityVariablePropertyDrawer:PropertyDrawer
 	{
 
+		public override float GetPropertyHeight (SerializedProperty property, GUIContent label)
+		{
+			UnityVariable variable = property.objectReferenceValue as UnityVariable;
+			if (variable!=null && variable.serializedProperty!=null && variable.ValueType == typeof(UnityEvent)) {
+				SerializedProperty elements = (variable.serializedProperty as SerializedProperty).FindPropertyRelative ("m_PersistentCalls.m_Calls");
+				
 
+				return Math.Max (1, elements.arraySize) * 43 + 36f+2f+16f;//16f label height , 2f separator
+			
+			}
+
+
+
+			return base.GetPropertyHeight (property, label);
+		}
 
 		public override void OnGUI (Rect position, SerializedProperty property, GUIContent label)
 		{
-
-			EditorGUILayout.BeginHorizontal ();
-			EditorGUILayout.LabelField (label,new GUILayoutOption[]{GUILayout.MaxWidth(80)});
-
+		
 
 			Type selectedType = ((UnityVariablePropertyAttribute)attribute).variableType;
 
+			UnityVariablePropertyAttribute att = (UnityVariablePropertyAttribute)attribute;
+
+			Blackboard blackboard = GameObject.FindObjectsOfType<Blackboard> ().FirstOrDefault(itm=> itm.gameObject.name==att.blackboardName);
+
+
+
+			List<UnityVariable> blackboardLocalList=null;
+			List<GUIContent> displayOptionsList=null;
+
+			if(blackboard!=null){
+			blackboardLocalList = blackboard.GetVariableBy (att.variableType);
 			
-			property.objectReferenceValue=EditorGUILayoutEx.UnityVariablePopup(null,property.objectReferenceValue as UnityVariable,selectedType,new List<GUIContent>(),new List<UnityVariable>());
+			
+			displayOptionsList = blackboardLocalList.Select (item => new GUIContent (att.blackboardName + "/" + item.name)).ToList ();
+			}
+
+			
+			property.objectReferenceValue=EditorGUILayoutEx.UnityVariablePopup(label,property.objectReferenceValue as UnityVariable,selectedType,displayOptionsList,blackboardLocalList,position);
 			property.serializedObject.ApplyModifiedProperties();
-			EditorGUILayout.EndHorizontal ();
+
 		}	
 	}
 }

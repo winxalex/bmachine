@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 using ws.winx.unity.utilities;
 using UnityEditor.Animations;
 
-namespace ws.winx.unity
+namespace ws.winx.unity.extensions
 {
 
 

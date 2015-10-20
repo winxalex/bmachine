@@ -1,4 +1,4 @@
-#if BEHAVIOUR_MACHINE
+
 using UnityEngine;
 using System;
 using System.Collections;
@@ -8,6 +8,7 @@ using BehaviourMachine;
 using Motion=UnityEngine.Motion;
 using ws.winx.unity;
 using ws.winx.unity.attributes;
+using ws.winx.unity.extensions;
 using System.Runtime.Serialization;
 
 namespace ws.winx.bmachine.extensions
@@ -559,4 +560,3 @@ namespace ws.winx.bmachine.extensions
 
 		}
 }
-#endif

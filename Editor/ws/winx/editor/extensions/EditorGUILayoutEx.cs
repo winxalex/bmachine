@@ -16,27 +16,27 @@ using ws.winx.unity;
 using ws.winx.editor.extensions;
 using System.Reflection;
 using System.Linq;
-using BehaviourMachine;
 using UnityEngine.Events;
 using System.Runtime.Serialization;
 using ws.winx.csharp.extensions;
+using ws.winx.unity.extensions;
 using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.extensions
 {
-		public class EditorGUILayoutEx
-		{
+	public class EditorGUILayoutEx
+	{
 
 //				private static object SELECTED_OBJECT = null;
-				private static int CONTROL_ID = -1;
-				private static int SELECTED_INDEX = -1;
-				private static IList CHANGED_VALUES = null;
-				private static GUIContent[] __unityTypesDisplayOptions;
+		private static int CONTROL_ID = -1;
+		private static int SELECTED_INDEX = -1;
+		private static IList CHANGED_VALUES = null;
+		private static GUIContent[] __unityTypesDisplayOptions;
 
-				public static GUIContent[] unityTypesDisplayOptions {
-						get {
-								if (__unityTypesDisplayOptions == null) {
-										__unityTypesDisplayOptions = new GUIContent[] {
+		public static GUIContent[] unityTypesDisplayOptions {
+			get {
+				if (__unityTypesDisplayOptions == null) {
+					__unityTypesDisplayOptions = new GUIContent[] {
 												new GUIContent ("float"),
 												new GUIContent ("int"),
 												new GUIContent ("bool"),
@@ -53,21 +53,21 @@ namespace ws.winx.editor.extensions
 												new GUIContent ("AnimationCurve"),
 												new GUIContent ("AnimationClip"),
 												new GUIContent ("UnityEvent")//,
-										//new GUIContent ("UnityObject")
+					//new GUIContent ("UnityObject")
 										};
 				
 
-								}
-								return __unityTypesDisplayOptions;
-						}
 				}
+				return __unityTypesDisplayOptions;
+			}
+		}
 
-				private static Type[] __unityTypes;
+		private static Type[] __unityTypes;
 						                                                              
-				public static Type[] unityTypes {
-						get {
-								if (__unityTypes == null) {
-										__unityTypes = new Type[] {
+		public static Type[] unityTypes {
+			get {
+				if (__unityTypes == null) {
+					__unityTypes = new Type[] {
 												typeof(float),
 												typeof(int),
 												typeof(bool),
@@ -84,806 +84,805 @@ namespace ws.winx.editor.extensions
 												typeof(AnimationCurve),
 												typeof(AnimationClip),
 												typeof(UnityEvent)//,
-										//typeof(UnityEngine.Object)
+					//typeof(UnityEngine.Object)
 										};                        
 
-								}
-								return __unityTypes;
-						}
+				}
+				return __unityTypes;
+			}
 	
-				}
+		}
 
 
 
-				public delegate void MenuCallback<T> (int selectedIndex,T SelectedObject,int controlID);
+		public delegate void MenuCallback<T> (int selectedIndex,T SelectedObject,int controlID);
 
-				public delegate void EventCallback<T> (int ownerControlID,Event e,T userData);
+		public delegate void EventCallback<T> (int ownerControlID,Event e,T userData);
 
-				public delegate void ObjectPropertyCallback (UnityEngine.Object @object,Type type,string property);
+		public delegate void ObjectPropertyCallback (UnityEngine.Object @object,Type type,string property);
 
 
 				
 
 
 
-				//
-				// Nested Types
-				//
+		//
+		// Nested Types
+		//
 
-				public class AnimationStyles
-				{
-						public GUIContent prevKeyContent = EditorGUIUtility.IconContent("Animation.PrevKey");
-						public GUIContent nextKeyContent = EditorGUIUtility.IconContent("Animation.NextKey");
-						public Texture2D pointIcon = EditorGUIUtilityW.LoadIcon ("animationkeyframe");
-						public GUIContent eventMarker = EditorGUIUtility.IconContent ("Animation.EventMarker");
-						public GUIContent addEventContent = EditorGUIUtility.IconContent("Animation.AddEvent");
-						public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
-						public GUIContent playIconOn =  EditorGUIUtility.IconContent("PlayButton On");
-
-						public GUIContent playIconSmall = EditorGUIUtility.IconContent ("Animation.Play");
-						public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
-						public GUIContent recordIcon = EditorGUIUtility.IconContent ("Animation.Record");
-						public GUIStyle playButton = "TimeScrubberButton";
-						public GUIStyle timeScrubber = "TimeScrubber";
-						public GUIStyle  eventBackground = "AnimationEventBackground";
+		public class AnimationStyles
+		{
+			public GUIContent prevKeyContent = EditorGUIUtility.IconContent ("Animation.PrevKey");
+			public GUIContent nextKeyContent = EditorGUIUtility.IconContent ("Animation.NextKey");
+			public Texture2D pointIcon = EditorGUIUtilityW.LoadIcon ("animationkeyframe");
+			public GUIContent eventMarker = EditorGUIUtility.IconContent ("Animation.EventMarker");
+			public GUIContent addEventContent = EditorGUIUtility.IconContent ("Animation.AddEvent");
+			public GUIContent playIcon = EditorGUIUtility.IconContent ("PlayButton");
+			public GUIContent playIconOn = EditorGUIUtility.IconContent ("PlayButton On");
+			public GUIContent playIconSmall = EditorGUIUtility.IconContent ("Animation.Play");
+			public GUIContent pauseIcon = EditorGUIUtility.IconContent ("PauseButton");
+			public GUIContent recordIcon = EditorGUIUtility.IconContent ("Animation.Record");
+			public GUIStyle playButton = "TimeScrubberButton";
+			public GUIStyle timeScrubber = "TimeScrubber";
+			public GUIStyle  eventBackground = "AnimationEventBackground";
 					
 					
-				}
+		}
 				
 				
-				private static AnimationStyles __ANIMATION_STYLES;
+		private static AnimationStyles __ANIMATION_STYLES;
 
-				public static AnimationStyles ANIMATION_STYLES {
-						get {
+		public static AnimationStyles ANIMATION_STYLES {
+			get {
 							
-								if (__ANIMATION_STYLES == null)
-										__ANIMATION_STYLES = new AnimationStyles ();
-								return __ANIMATION_STYLES;
-						}
-				}				
+				if (__ANIMATION_STYLES == null)
+					__ANIMATION_STYLES = new AnimationStyles ();
+				return __ANIMATION_STYLES;
+			}
+		}				
 
-				public class ToolTipStyles
-				{
+		public class ToolTipStyles
+		{
 					
-						public GUIStyle tooltipBackground = "AnimationEventTooltip";
-						public GUIStyle tooltipArrow = "AnimationEventTooltipArrow";
+			public GUIStyle tooltipBackground = "AnimationEventTooltip";
+			public GUIStyle tooltipArrow = "AnimationEventTooltipArrow";
 
-				}
+		}
 				
-				private static ToolTipStyles __TOOLTIP_STYLES;
+		private static ToolTipStyles __TOOLTIP_STYLES;
 
-				public static ToolTipStyles TOOLTIP_STYLES {
-						get {
-								if (__TOOLTIP_STYLES == null)
-										__TOOLTIP_STYLES = new ToolTipStyles ();
-								return __TOOLTIP_STYLES;
-						}
-				}
-
-
-				public class TimeAreaStyles
-				{
-					public GUIStyle TimelineTick = "AnimationTimelineTick";
-					public GUIStyle labelTickMarks = "CurveEditorLabelTickMarks";
-				}
+		public static ToolTipStyles TOOLTIP_STYLES {
+			get {
+				if (__TOOLTIP_STYLES == null)
+					__TOOLTIP_STYLES = new ToolTipStyles ();
+				return __TOOLTIP_STYLES;
+			}
+		}
 
 
-				private static TimeAreaStyles __TIMEAREA_STYLES;
+		public class TimeAreaStyles
+		{
+			public GUIStyle TimelineTick = "AnimationTimelineTick";
+			public GUIStyle labelTickMarks = "CurveEditorLabelTickMarks";
+		}
+
+
+		private static TimeAreaStyles __TIMEAREA_STYLES;
 				
-				public static TimeAreaStyles TIMEAREA_STYLES {
-					get {
-						if (__TIMEAREA_STYLES == null)
-							__TIMEAREA_STYLES = new TimeAreaStyles ();
-						return __TIMEAREA_STYLES;
-					}
-				}
+		public static TimeAreaStyles TIMEAREA_STYLES {
+			get {
+				if (__TIMEAREA_STYLES == null)
+					__TIMEAREA_STYLES = new TimeAreaStyles ();
+				return __TIMEAREA_STYLES;
+			}
+		}
 
 				
 			
 
 		#region CustomHSlider
 
-				public static float CustomHSlider (Rect rect, float value, float min, float max, GUIStyle background)
-				{
+		public static float CustomHSlider (Rect rect, float value, float min, float max, GUIStyle background)
+		{
 
-						Event current = Event.current;
-						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;//TimeControl.kScrubberIDHash, FocusType.Keyboard);
-						Rect rect3 = rect;
+			Event current = Event.current;
+			int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;//TimeControl.kScrubberIDHash, FocusType.Keyboard);
+			Rect rect3 = rect;
 
-						rect3.height = 21f;// background.CalcSize().y;
+			rect3.height = 21f;// background.CalcSize().y;
 		
 
 
 
 
-						float m_MouseDrag = 0f;
-						bool interact = false;
+			float m_MouseDrag = 0f;
+			bool interact = false;
 
 
 
-						switch (current.GetTypeForControl (controlID)) {
-						case EventType.MouseDown:
-								if (rect.Contains (current.mousePosition)) {
-										GUIUtility.keyboardControl = controlID;
-								}
-								if (rect3.Contains (current.mousePosition)) {
-										EditorGUIUtility.SetWantsMouseJumping (1);
-										GUIUtility.hotControl = controlID;
-										m_MouseDrag = Mathf.Clamp (current.mousePosition.x - rect3.xMin, 0, rect3.xMax);
-										value = m_MouseDrag * (max - min) / rect3.width + min;
+			switch (current.GetTypeForControl (controlID)) {
+			case EventType.MouseDown:
+				if (rect.Contains (current.mousePosition)) {
+					GUIUtility.keyboardControl = controlID;
+				}
+				if (rect3.Contains (current.mousePosition)) {
+					EditorGUIUtility.SetWantsMouseJumping (1);
+					GUIUtility.hotControl = controlID;
+					m_MouseDrag = Mathf.Clamp (current.mousePosition.x - rect3.xMin, 0, rect3.xMax);
+					value = m_MouseDrag * (max - min) / rect3.width + min;
 				
-										interact = true;
-										current.Use ();
+					interact = true;
+					current.Use ();
 
-										GUI.changed = true;
-								}
-								break;
-						case EventType.MouseUp:
-								if (GUIUtility.hotControl == controlID) {
-										EditorGUIUtility.SetWantsMouseJumping (0);
-										GUIUtility.hotControl = 0;
-										current.Use ();
-								}
-								break;
-						case EventType.MouseDrag:
-								if (GUIUtility.hotControl == controlID) {
-										m_MouseDrag = Mathf.Clamp (current.mousePosition.x - rect3.xMin, 0, rect3.xMax);
-										value = Mathf.Clamp (m_MouseDrag, 0f, rect3.width) * (max - min) / rect3.width + min;
-										interact = true;
-										current.Use ();
+					GUI.changed = true;
+				}
+				break;
+			case EventType.MouseUp:
+				if (GUIUtility.hotControl == controlID) {
+					EditorGUIUtility.SetWantsMouseJumping (0);
+					GUIUtility.hotControl = 0;
+					current.Use ();
+				}
+				break;
+			case EventType.MouseDrag:
+				if (GUIUtility.hotControl == controlID) {
+					m_MouseDrag = Mathf.Clamp (current.mousePosition.x - rect3.xMin, 0, rect3.xMax);
+					value = Mathf.Clamp (m_MouseDrag, 0f, rect3.width) * (max - min) / rect3.width + min;
+					interact = true;
+					current.Use ();
 
-										GUI.changed = true;
-								}
-								break;
-						case EventType.KeyDown:
-								if (GUIUtility.keyboardControl == controlID) {
-										if (current.keyCode == KeyCode.LeftArrow) {
+					GUI.changed = true;
+				}
+				break;
+			case EventType.KeyDown:
+				if (GUIUtility.keyboardControl == controlID) {
+					if (current.keyCode == KeyCode.LeftArrow) {
 //						if (this.currentTime - this.startTime > 0.01f)
 //						{
 //							this.deltaTime = -0.01f;
 //						}
 
-												interact = true;
-												current.Use ();
-										}
-										if (current.keyCode == KeyCode.RightArrow) {
+						interact = true;
+						current.Use ();
+					}
+					if (current.keyCode == KeyCode.RightArrow) {
 //						if (this.stopTime - this.currentTime > 0.01f)
 //						{
 //							this.deltaTime = 0.01f;
 //						}
 
-												interact = true;
-												current.Use ();
-										}
-								}
-								break;
-						}
-
-						GUI.Box (rect3, GUIContent.none, background);
-		
-						if (GUIUtility.keyboardControl == controlID) {
-								Handles.color = new Color (1f, 0f, 0f, 1f);
-						} else {
-								Handles.color = new Color (1f, 0f, 0f, 0.5f);
-						}
-
-
-						if (!interact)
-								m_MouseDrag = rect3.xMin + ((value - min) * (rect3.width)) / (max - min);
-		
-
-						Handles.DrawLine (new Vector2 (m_MouseDrag, rect3.yMin), new Vector2 (m_MouseDrag, rect3.yMax));
-
-
-
-		
-
-
-						return value;
+						interact = true;
+						current.Use ();
+					}
 				}
+				break;
+			}
+
+			GUI.Box (rect3, GUIContent.none, background);
+		
+			if (GUIUtility.keyboardControl == controlID) {
+				Handles.color = new Color (1f, 0f, 0f, 1f);
+			} else {
+				Handles.color = new Color (1f, 0f, 0f, 0.5f);
+			}
+
+
+			if (!interact)
+				m_MouseDrag = rect3.xMin + ((value - min) * (rect3.width)) / (max - min);
+		
+
+			Handles.DrawLine (new Vector2 (m_MouseDrag, rect3.yMin), new Vector2 (m_MouseDrag, rect3.yMax));
+
+
+
+		
+
+
+			return value;
+		}
 		#endregion
 	
 
 
 		#region CustomPopup
-				/// <summary>
-				/// Custom popup.
-				/// </summary>
-				/// <returns>The popup.</returns>
-				/// <param name="label">Label.</param>
-				/// <param name="selectedIndex">Selected index.</param>
-				/// <param name="displayOptions">Display options.</param>
-				/// <param name="values">Values.</param>
-				/// <param name="onSelection">On selection.</param>
-				/// <param name="onEvent">On event.</param>
-				/// <param name="style">Style.</param>
-				/// <param name="position">Position.</param>
-				/// <typeparam name="T">The 1st type parameter.</typeparam>
-				public static int CustomPopup<T> (GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
+		/// <summary>
+		/// Custom popup.
+		/// </summary>
+		/// <returns>The popup.</returns>
+		/// <param name="label">Label.</param>
+		/// <param name="selectedIndex">Selected index.</param>
+		/// <param name="displayOptions">Display options.</param>
+		/// <param name="values">Values.</param>
+		/// <param name="onSelection">On selection.</param>
+		/// <param name="onEvent">On event.</param>
+		/// <param name="style">Style.</param>
+		/// <param name="position">Position.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
+		public static int CustomPopup<T> (GUIContent label, int selectedIndex, GUIContent[] displayOptions, IList<T> values,
 		                                 MenuCallback<T> onSelection=null,
 		                                 EventCallback<T> onEvent=null,
 		                                 GUIStyle style=null,
 		                                  UnityEngine.Rect? position=null
 		                                
-				)
-				{
-						GUIContent content;
-						string buttonLabel = null;
-						int i = 0;
-						int len;
-						int inxd;
+		)
+		{
+			GUIContent content;
+			string buttonLabel = null;
+			int i = 0;
+			int len;
+			int inxd;
 						
-						Rect pos = default(UnityEngine.Rect);
+			Rect pos = default(UnityEngine.Rect);
 
-						if (position.HasValue)
-								pos = position.Value;
+			if (position.HasValue)
+				pos = position.Value;
 		
-						if (position == null)
-								EditorGUILayout.BeginHorizontal ();
+			if (position == null)
+				EditorGUILayout.BeginHorizontal ();
 						
 
 
 			
-						//add Label field
-						// Screen.width in insprector returns its width not Screen => so 35% for the lable and rest for the popup button
-						if (style != null && label != null) {
-								if (position.HasValue) {
-										Rect labelPos = new Rect (pos.x, position.Value.y, 80, position.Value.height);
-										pos.xMin = labelPos.xMax + 10;
-										EditorGUI.LabelField (position.Value, label, style);
-								} else
-										EditorGUILayout.LabelField (label, style, GUILayout.Width (style.CalcSize (label).x));
+			//add Label field
+			// Screen.width in insprector returns its width not Screen => so 35% for the lable and rest for the popup button
+			if (style != null && label != null) {
+				if (position.HasValue) {
+					Rect labelPos = new Rect (pos.x, position.Value.y, 80, position.Value.height);
+					pos.xMin = labelPos.xMax + 10;
+					EditorGUI.LabelField (position.Value, label, style);
+				} else
+					EditorGUILayout.LabelField (label, style, GUILayout.Width (style.CalcSize (label).x));
 										
-						} else 	if (label != null) {
+			} else 	if (label != null) {
 							
-								if (position.HasValue) {
-										Rect labelPos = new Rect (pos.x, position.Value.y, 80, position.Value.height);
-										pos.xMin = labelPos.xMax + 10;
-										EditorGUI.LabelField (labelPos, label);
-								} else
-										EditorGUILayout.LabelField (label, GUILayout.Width (GUI.skin.label.CalcSize (label).x));
+				if (position.HasValue) {
+					Rect labelPos = new Rect (pos.x, position.Value.y, 80, position.Value.height);
+					pos.xMin = labelPos.xMax + 10;
+					EditorGUI.LabelField (labelPos, label);
+				} else
+					EditorGUILayout.LabelField (label, GUILayout.Width (GUI.skin.label.CalcSize (label).x));
 										
-						}
+			}
 
 			
-						//get current control ID
-						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
+			//get current control ID
+			int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
 			
-						//if current == previous selected control => asign "selectedObject" and reset global
-						if (controlID == EditorGUILayoutEx.CONTROL_ID) {
-								selectedIndex = EditorGUILayoutEx.SELECTED_INDEX;
+			//if current == previous selected control => asign "selectedObject" and reset global
+			if (controlID == EditorGUILayoutEx.CONTROL_ID) {
+				selectedIndex = EditorGUILayoutEx.SELECTED_INDEX;
 				
-								//reset
-								//	EditorGUILayoutEx._CustomPopup_SelectedObject = null;
-								EditorGUILayoutEx.SELECTED_INDEX = -1;
-								EditorGUILayoutEx.CONTROL_ID = -1;
-						}
+				//reset
+				//	EditorGUILayoutEx._CustomPopup_SelectedObject = null;
+				EditorGUILayoutEx.SELECTED_INDEX = -1;
+				EditorGUILayoutEx.CONTROL_ID = -1;
+			}
 			
-						//if selectionObject is null on Init
-						if (selectedIndex < 0) {
+			//if selectionObject is null on Init
+			if (selectedIndex < 0) {
 				
 				
-								inxd = len = displayOptions.Length;
+				inxd = len = displayOptions.Length;
 				
-								//set "selectedObject" to first values[i] that is Enable
-								for (i=0; i<len; i++) {
-										buttonLabel = displayOptions [i].text;
+				//set "selectedObject" to first values[i] that is Enable
+				for (i=0; i<len; i++) {
+					buttonLabel = displayOptions [i].text;
 					
-										//check if contains "*" disable mark
-										if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
-												continue;
+					//check if contains "*" disable mark
+					if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
+						continue;
 					
-										inxd = i;
-										break;
+					inxd = i;
+					break;
 					
-								}
+				}
 				
-								//if we have found value[i] which is Enabled => set selectObject to it
-								if (inxd < len) {
-										//remove submenu's mark "/"
-										buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);		
-										selectedIndex = inxd;
-								}
+				//if we have found value[i] which is Enabled => set selectObject to it
+				if (inxd < len) {
+					//remove submenu's mark "/"
+					buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);		
+					selectedIndex = inxd;
+				}
 				
-						} else {
+			} else {
 				
-								//find label on displayOptions[i] which is value[i] == selectedObject
-								buttonLabel = displayOptions [selectedIndex].text;
+				//find label on displayOptions[i] which is value[i] == selectedObject
+				buttonLabel = displayOptions [selectedIndex].text;
 				
-								//remove submenus mark "/"
-								buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);
+				//remove submenus mark "/"
+				buttonLabel = buttonLabel.Substring (buttonLabel.LastIndexOf ("/") + 1);
 				
 				
-						}
+			}
 			
 			
-						//Debug.Log ("SelectedIndex:"+selectedIndex);
+			//Debug.Log ("SelectedIndex:"+selectedIndex);
 			
 			
-						//dispatch events
-						if (onEvent != null && controlID == GUIUtility.hotControl) {
-								onEvent (controlID, Event.current, values [selectedIndex]);
-						}
+			//dispatch events
+			if (onEvent != null && controlID == GUIUtility.hotControl) {
+				onEvent (controlID, Event.current, values [selectedIndex]);
+			}
 						 
 			
-						bool clicked;
+			bool clicked;
 
-						if (position.HasValue) {
+			if (position.HasValue) {
 							
 								
-								Rect buttonPos = new Rect (pos.x, pos.y, pos.width, position.Value.height);
+				Rect buttonPos = new Rect (pos.x, pos.y, pos.width, position.Value.height);
 								
-								clicked = GUI.Button (buttonPos, buttonLabel, EditorStyles.popup);
-						} else
-								clicked = GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup);
+				clicked = GUI.Button (buttonPos, buttonLabel, EditorStyles.popup);
+			} else
+				clicked = GUILayout.Button (new GUIContent (buttonLabel), EditorStyles.popup);
 			
-						if (clicked) {
+			if (clicked) {
 				
-								//shoot custom MouseDown event here!!!
+				//shoot custom MouseDown event here!!!
 				
-								// Now create the menu, add items and show it
-								GenericMenu menu = new GenericMenu ();
+				// Now create the menu, add items and show it
+				GenericMenu menu = new GenericMenu ();
 				
-								len = displayOptions.Length;
+				len = displayOptions.Length;
 				
-								for (i=0; i<len; i++) {
+				for (i=0; i<len; i++) {
 					
-										content = displayOptions [i];
+					content = displayOptions [i];
 					
-										// null mean AddSeparator
-										if (content == null)
-												menu.AddSeparator ("");
+					// null mean AddSeparator
+					if (content == null)
+						menu.AddSeparator ("");
 					// "*" at the end => mean AddDisabledItem
 					else if (content.text.LastIndexOf ('*', content.text.Length - 1) > -1) {
-												content.text = content.text.Remove (content.text.Length - 1);
-												menu.AddDisabledItem (content);
-										} else
-												menu.AddItem (content, false, (obj) => {
-														int inx = (int)obj;
-														//EditorGUILayoutEx._CustomPopup_SelectedObject = values [inx];
-														EditorGUILayoutEx.CONTROL_ID = controlID;
-														EditorGUILayoutEx.SELECTED_INDEX = inx;
+						content.text = content.text.Remove (content.text.Length - 1);
+						menu.AddDisabledItem (content);
+					} else
+						menu.AddItem (content, false, (obj) => {
+							int inx = (int)obj;
+							//EditorGUILayoutEx._CustomPopup_SelectedObject = values [inx];
+							EditorGUILayoutEx.CONTROL_ID = controlID;
+							EditorGUILayoutEx.SELECTED_INDEX = inx;
 							
-														//Debug.Log ("Selected:" + inx);	
+							//Debug.Log ("Selected:" + inx);	
 							
-														//dispatch selected
-														if (onSelection != null)
-																onSelection (inx, values [inx], controlID);
+							//dispatch selected
+							if (onSelection != null)
+								onSelection (inx, values [inx], controlID);
 							
-												}, i);
-								}
-				
-				
-				
-								menu.ShowAsContext ();
-						}
-
-						if (position == null)
-								EditorGUILayout.EndHorizontal ();
-
-						return selectedIndex;
+						}, i);
 				}
+				
+				
+				
+				menu.ShowAsContext ();
+			}
+
+			if (position == null)
+				EditorGUILayout.EndHorizontal ();
+
+			return selectedIndex;
+		}
 		#endregion
 
 		#region CustomObjectPopup
-				public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values, Func<T,T,bool> comparer=null,
+		public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values, Func<T,T,bool> comparer=null,
 		                                      MenuCallback<T> onSelection=null,
 		                                      EventCallback<T> onEvent=null,
 		                                      GUIStyle labelStyle=null,
 
 		                                      UnityEngine.Rect? position=null
 		                                      
-				)
-				{
+		)
+		{
 
-						int inxOfSelectedObject;
-						int len;
-						int i;
-						string buttonLabel;
+			int inxOfSelectedObject;
+			int len;
+			int i;
+			string buttonLabel;
 			
 			
-						if (displayOptions == null || values == null) {
-								Debug.LogError ("Display options or values shouldn't be NULL");
-								return default(T);
-						}
+			if (displayOptions == null || values == null) {
+				Debug.LogError ("Display options or values shouldn't be NULL");
+				return default(T);
+			}
 
-						if ((displayOptions != null && displayOptions.Length == 0) || (values != null && values.Count == 0)) {
-								return default(T);
-						}
+			if ((displayOptions != null && displayOptions.Length == 0) || (values != null && values.Count == 0)) {
+				return default(T);
+			}
 
 
 			
 			
-						//if selectionObject is null on Init
-						if (selectedObject == null) {
+			//if selectionObject is null on Init
+			if (selectedObject == null) {
 				
 				
-								inxOfSelectedObject = len = displayOptions.Length;
+				inxOfSelectedObject = len = displayOptions.Length;
 				
-								//find index of "selectedObject" that is Enable
-								for (i=0; i<len; i++) {
-										buttonLabel = displayOptions [i].text;
+				//find index of "selectedObject" that is Enable
+				for (i=0; i<len; i++) {
+					buttonLabel = displayOptions [i].text;
 					
-										//check if contains "*" disable mark
-										if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
-												continue;
+					//check if contains "*" disable mark
+					if (buttonLabel.LastIndexOf ('*', buttonLabel.Length - 1) > -1)
+						continue;
 					
-										inxOfSelectedObject = i;
-										break;
+					inxOfSelectedObject = i;
+					break;
 					
-								}
+				}
 				
-								//if we have found value[i] which is Enabled => set selectObject to it
-								if (inxOfSelectedObject < len) {
+				//if we have found value[i] which is Enabled => set selectObject to it
+				if (inxOfSelectedObject < len) {
 					
-										selectedObject = values [inxOfSelectedObject];
-										CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
-								}
+					selectedObject = values [inxOfSelectedObject];
+					CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
+				}
 				
-						} else {
-								if (comparer != null) {
+			} else {
+				if (comparer != null) {
 
-										inxOfSelectedObject = values.FindIndex (selectedObject, comparer);
-										Debug.Log (inxOfSelectedObject);
-								} else {
+					inxOfSelectedObject = values.FindIndex (selectedObject, comparer);
+					Debug.Log (inxOfSelectedObject);
+				} else {
 				
-										//find label on displayOptions[i] which is value[i] == selectedObject
-										//!!! don't forget to implement IComparable or override Equals on custom objects
-										inxOfSelectedObject = values.IndexOf (selectedObject);
-								}
+					//find label on displayOptions[i] which is value[i] == selectedObject
+					//!!! don't forget to implement IComparable or override Equals on custom objects
+					inxOfSelectedObject = values.IndexOf (selectedObject);
+				}
 								
 				
-								inxOfSelectedObject = CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
+				inxOfSelectedObject = CustomPopup (label, inxOfSelectedObject, displayOptions, values, onSelection, onEvent, labelStyle, position);
 				
-								selectedObject = values [inxOfSelectedObject];
+				selectedObject = values [inxOfSelectedObject];
 				
 				
-						}
+			}
 			
 			
 			
 			
 			
 			
-						return selectedObject;
+			return selectedObject;
 
-				}
+		}
 
 		#endregion
 
 
 		#region CustomTooltip
 
-				public static void  CustomTooltip (Rect positionRect, string text)
-				{
+		public static void  CustomTooltip (Rect positionRect, string text)
+		{
 						
 						
-						GUIStyle gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipArrow;
-						Vector2 arrowSize = gUIStyle.CalcSize (new GUIContent ());
+			GUIStyle gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipArrow;
+			Vector2 arrowSize = gUIStyle.CalcSize (new GUIContent ());
 		
 		
 		
 												
-						GUI.Label (new Rect (positionRect.x - arrowSize.x * 0.5f - 5f, positionRect.y + positionRect.height, arrowSize.x, arrowSize.y), string.Empty, gUIStyle);
+			GUI.Label (new Rect (positionRect.x - arrowSize.x * 0.5f - 5f, positionRect.y + positionRect.height, arrowSize.x, arrowSize.y), string.Empty, gUIStyle);
 												
 		
 		
-						gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipBackground;
-						Vector2 textSize = gUIStyle.CalcSize (new GUIContent (text));
-						gUIStyle.alignment = TextAnchor.MiddleCenter;
+			gUIStyle = EditorGUILayoutEx.TOOLTIP_STYLES.tooltipBackground;
+			Vector2 textSize = gUIStyle.CalcSize (new GUIContent (text));
+			gUIStyle.alignment = TextAnchor.MiddleCenter;
 		
 		
 		
 												
-						GUI.Label (new Rect (positionRect.x + arrowSize.x * 0.5f - Mathf.Max (arrowSize.x, textSize.x) * 0.5f, positionRect.y + positionRect.height + arrowSize.y, Mathf.Max (arrowSize.x, textSize.x), textSize.y), text, gUIStyle);
+			GUI.Label (new Rect (positionRect.x + arrowSize.x * 0.5f - Mathf.Max (arrowSize.x, textSize.x) * 0.5f, positionRect.y + positionRect.height + arrowSize.y, Mathf.Max (arrowSize.x, textSize.x), textSize.y), text, gUIStyle);
 												
 
-				}
+		}
 		#endregion
 
 		#region CustomTimeLine
-				//
-				// Methods
-				//
+		//
+		// Methods
+		//
 		
-				/// <summary>
-				/// Gets the index of the mouse hover rect.
-				/// </summary>
-				/// <returns>The mouse hover rect index.</returns>
-				/// <param name="postionRect">Postion rect.</param>
-				/// <param name="values">Values.</param>
-				/// <param name="hitRects">Hit rects.</param>
-				/// <param name="controlID">Control I.</param>
-				private static int GetMouseHoverRectIndex (Rect postionRect, float[] values, Rect[] hitRects)
-				{
-						Vector2 mousePosition = Event.current.mousePosition;
+		/// <summary>
+		/// Gets the index of the mouse hover rect.
+		/// </summary>
+		/// <returns>The mouse hover rect index.</returns>
+		/// <param name="postionRect">Postion rect.</param>
+		/// <param name="values">Values.</param>
+		/// <param name="hitRects">Hit rects.</param>
+		/// <param name="controlID">Control I.</param>
+		private static int GetMouseHoverRectIndex (Rect postionRect, float[] values, Rect[] hitRects)
+		{
+			Vector2 mousePosition = Event.current.mousePosition;
 						
-						if (values.Length == hitRects.Length) {
-								for (int i = hitRects.Length - 1; i >= 0; i--) {
-										if (hitRects [i].Contains (mousePosition)) {
+			if (values.Length == hitRects.Length) {
+				for (int i = hitRects.Length - 1; i >= 0; i--) {
+					if (hitRects [i].Contains (mousePosition)) {
 						
 						
 						
-												return i;
-										}
-								}
-						}
-			
-						return -1;
+						return i;
+					}
 				}
+			}
+			
+			return -1;
+		}
 		
 		
-				/// <summary>
-				/// Deletes the events.
-				/// </summary>
-				/// <param name="args">Arguments.</param>
-				/// <param name="deleteIndices">Delete indices.</param>
-				private static void DeleteTimeValues (TimeLineArgs<float> args, bool[] deleteIndices)
-				{
+		/// <summary>
+		/// Deletes the events.
+		/// </summary>
+		/// <param name="args">Arguments.</param>
+		/// <param name="deleteIndices">Delete indices.</param>
+		private static void DeleteTimeValues (TimeLineArgs<float> args, bool[] deleteIndices)
+		{
 			
-						List<float> list = new List<float> (args.values);
+			List<float> list = new List<float> (args.values);
 			
 			
-						for (int i = list.Count  - 1; i >= 0; i--) {
+			for (int i = list.Count  - 1; i >= 0; i--) {
 				
-								if (deleteIndices [i]) {
-										list.RemoveAt (i);
+				if (deleteIndices [i]) {
+					list.RemoveAt (i);
 					
-								}
-						}
-			
-						if (list.Count < args.values.Count) {
-				
-								if (args.EditClose != null)
-										args.EditClose (args);
-				
-				
-								CHANGED_VALUES = list.ToArray ();
-								CONTROL_ID = args.controlID;
-				
-				
-				
-				
-				
-								if (args.Delete != null)
-									args.Delete (new TimeLineArgs<float> (args.selectedIndex, 0f, (float[])CHANGED_VALUES, null, args.controlID));
-										//args.Delete (new TimeLineArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
-						}
 				}
+			}
+			
+			if (list.Count < args.values.Count) {
+				
+				if (args.EditClose != null)
+					args.EditClose (args);
+				
+				
+				CHANGED_VALUES = list.ToArray ();
+				CONTROL_ID = args.controlID;
+				
+				
+				
+				
+				
+				if (args.Delete != null)
+					args.Delete (new TimeLineArgs<float> (args.selectedIndex, 0f, (float[])CHANGED_VALUES, null, args.controlID));
+				//args.Delete (new TimeLineArgs<float> (-1, 0f, (float[])CHANGED_VALUES, null, args.controlID));
+			}
+		}
 		
 		
 		
 		
-				/// <summary>
-				/// Ons the add.
-				/// </summary>
-				/// <param name="obj">Object.</param>
-				private static void onAdd (System.Object obj)
-				{
-						//Debug.Log ("onAdd");
-						TimeLineArgs<float> args = (TimeLineArgs<float>)obj;
+		/// <summary>
+		/// Ons the add.
+		/// </summary>
+		/// <param name="obj">Object.</param>
+		private static void onAdd (System.Object obj)
+		{
+			//Debug.Log ("onAdd");
+			TimeLineArgs<float> args = (TimeLineArgs<float>)obj;
 			
 			
-						int newTimeValueInx = args.values.Count;
+			int newTimeValueInx = args.values.Count;
 			
-						//find first time > then current and insert before it
-						for (int i = 0; i < newTimeValueInx; i++) {
-								if (args.values [i] > args.selectedValue) {
-										newTimeValueInx = i;
-										break;
-								}
-						}
-			
-						float[] timeValues = new float[args.values.Count];
-						args.values.CopyTo (timeValues, 0);
-			
-			
-			
-						ArrayUtility.Insert<float> (ref timeValues, newTimeValueInx, args.selectedValue);
-			
-			
-			
-						CONTROL_ID = args.controlID;
-						CHANGED_VALUES = timeValues;
-			
-			
-			
-						//open editor for newely added 
-						if (args.Add != null)
-								args.Add (new TimeLineArgs<float> (newTimeValueInx, args.selectedValue, timeValues, null, args.controlID));
+			//find first time > then current and insert before it
+			for (int i = 0; i < newTimeValueInx; i++) {
+				if (args.values [i] > args.selectedValue) {
+					newTimeValueInx = i;
+					break;
 				}
+			}
+			
+			float[] timeValues = new float[args.values.Count];
+			args.values.CopyTo (timeValues, 0);
+			
+			
+			
+			ArrayUtility.Insert<float> (ref timeValues, newTimeValueInx, args.selectedValue);
+			
+			
+			
+			CONTROL_ID = args.controlID;
+			CHANGED_VALUES = timeValues;
+			
+			
+			
+			//open editor for newely added 
+			if (args.Add != null)
+				args.Add (new TimeLineArgs<float> (newTimeValueInx, args.selectedValue, timeValues, null, args.controlID));
+		}
 		
-				/// <summary>
-				/// Ons the delete.
-				/// </summary>
-				/// <param name="obj">Object.</param>
-				private static void onDelete (System.Object obj)
-				{
-						TimeLineArgs<float> args = (TimeLineArgs<float>)obj;
+		/// <summary>
+		/// Ons the delete.
+		/// </summary>
+		/// <param name="obj">Object.</param>
+		private static void onDelete (System.Object obj)
+		{
+			TimeLineArgs<float> args = (TimeLineArgs<float>)obj;
 			
-						int index = args.selectedIndex;
-						if (args.selected [index]) {
-								DeleteTimeValues (args, args.selected);
-						} else {
-								bool[] timeValuesSelected = new bool[args.selected.Length];
-								timeValuesSelected [index] = true;
-								DeleteTimeValues (args, timeValuesSelected);
-						}
+			int index = args.selectedIndex;
+			if (args.selected [index]) {
+				DeleteTimeValues (args, args.selected);
+			} else {
+				bool[] timeValuesSelected = new bool[args.selected.Length];
+				timeValuesSelected [index] = true;
+				DeleteTimeValues (args, timeValuesSelected);
+			}
 			
 			
-				}
+		}
 		
-				/// <summary>
-				/// Ons the edit.
-				/// </summary>
-				/// <param name="obj">Object.</param>
-				private static void onEdit (System.Object obj)
-				{
-						TimeLineArgs<float> args = (TimeLineArgs<float>)obj;
+		/// <summary>
+		/// Ons the edit.
+		/// </summary>
+		/// <param name="obj">Object.</param>
+		private static void onEdit (System.Object obj)
+		{
+			TimeLineArgs<float> args = (TimeLineArgs<float>)obj;
 			
-						if (args.EditOpen != null) {
-								args.EditOpen (args);
-						}
+			if (args.EditOpen != null) {
+				args.EditOpen (args);
+			}
 			
 			
-				}
-		
-		
-				/// <summary>
-				/// Ons the context click on time value.
-				/// </summary>
-				/// <param name="args">Arguments.</param>
-				private static void onContextClickOnTimeValue (TimeLineArgs<float> args)
-				{
-			
-						GenericMenu genericMenu = new GenericMenu ();
-						genericMenu.AddItem (new GUIContent ("Edit"), false, new GenericMenu.MenuFunction2 (onEdit), args);
-						genericMenu.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
-						genericMenu.AddItem (new GUIContent ("Delete"), false, new GenericMenu.MenuFunction2 (onDelete), args);
-						genericMenu.ShowAsContext ();
-			
-				}
+		}
 		
 		
-				/// <summary>
-				/// Ons the context click.
-				/// </summary>
-				/// <param name="args">Arguments.</param>
-				private static void onContextClick (TimeLineArgs<float> args)
-				{
-						//Debug.Log ("ContextClick on empty");
-						Event.current.Use ();
-						GenericMenu genericMenu2 = new GenericMenu ();
-						genericMenu2.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
-						genericMenu2.ShowAsContext ();
-				}
+		/// <summary>
+		/// Ons the context click on time value.
+		/// </summary>
+		/// <param name="args">Arguments.</param>
+		private static void onContextClickOnTimeValue (TimeLineArgs<float> args)
+		{
+			
+			GenericMenu genericMenu = new GenericMenu ();
+			genericMenu.AddItem (new GUIContent ("Edit"), false, new GenericMenu.MenuFunction2 (onEdit), args);
+			genericMenu.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
+			genericMenu.AddItem (new GUIContent ("Delete"), false, new GenericMenu.MenuFunction2 (onDelete), args);
+			genericMenu.ShowAsContext ();
+			
+		}
+		
+		
+		/// <summary>
+		/// Ons the context click.
+		/// </summary>
+		/// <param name="args">Arguments.</param>
+		private static void onContextClick (TimeLineArgs<float> args)
+		{
+			//Debug.Log ("ContextClick on empty");
+			Event.current.Use ();
+			GenericMenu genericMenu2 = new GenericMenu ();
+			genericMenu2.AddItem (new GUIContent ("Add"), false, new GenericMenu.MenuFunction2 (onAdd), args);
+			genericMenu2.ShowAsContext ();
+		}
 
-				public static GenericMenu GeneraterGenericMenu<T> (GUIContent[] displayOptions, IList<T> values, GenericMenu.MenuFunction2 callback)
-				{
+		public static GenericMenu GeneraterGenericMenu<T> (GUIContent[] displayOptions, IList<T> values, GenericMenu.MenuFunction2 callback)
+		{
 					
-						GenericMenu genericMenu = new GenericMenu ();
-						int count = displayOptions.Length;
-						for (int i=0; i<count; i++) {
+			GenericMenu genericMenu = new GenericMenu ();
+			int count = displayOptions.Length;
+			for (int i=0; i<count; i++) {
 
-								genericMenu.AddItem (displayOptions [i], false, callback
+				genericMenu.AddItem (displayOptions [i], false, callback
 											, values [i]);
-						}
+			}
 
 
-						return genericMenu;
-				}
+			return genericMenu;
+		}
 		
 		
-				/// <summary>
-				/// Customs the time line.
-				/// </summary>
-				/// <param name="rectGlobal">Rect global.</param>
-				/// <param name="timeValues">Time values.</param>
-				/// <param name="timeValuesPrev">Internal purpose. Time values at drag start (just pass reference).</param>
-				/// <param name="displayNames">Display names.</param>
-				/// <param name="selected">Selected. Array true/false values of thoose selected</param>
-				/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
-				/// <param name="Add">Add.</param>
-				/// <param name="Delete">Delete.</param>
-				/// <param name="EditClose">Edit close.</param>
-				/// <param name="EditOpen">Edit open.</param>
-				/// <param name="DragEnd">Drag end.</param>
-				public static void CustomTimeLine (ref Rect rectGlobal, GUIContent marker, ref float[] timeValues, ref float[] timeValuesPrev, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
+		/// <summary>
+		/// Customs the time line.
+		/// </summary>
+		/// <param name="rectGlobal">Rect global.</param>
+		/// <param name="timeValues">Time values.</param>
+		/// <param name="timeValuesPrev">Internal purpose. Time values at drag start (just pass reference).</param>
+		/// <param name="displayNames">Display names.</param>
+		/// <param name="selected">Selected. Array true/false values of thoose selected</param>
+		/// <param name="timeInput">Time. (0 to 1f) or -1 if not used mouse click position would be used</param>
+		/// <param name="Add">Add.</param>
+		/// <param name="Delete">Delete.</param>
+		/// <param name="EditClose">Edit close.</param>
+		/// <param name="EditOpen">Edit open.</param>
+		/// <param name="DragEnd">Drag end.</param>
+		public static void CustomTimeLine (ref Rect rectGlobal, GUIContent marker, ref float[] timeValues, ref float[] timeValuesPrev, ref string[] displayNames, ref bool[] selected, float timeInput=-1,
 		                                   Action<TimeLineArgs<float>> Add=null, Action<TimeLineArgs<float>> Delete=null, Action<TimeLineArgs<float>> EditClose=null, Action<TimeLineArgs<float>> EditOpen=null, Action<TimeLineArgs<float>> DragEnd=null
-				)
-				{
+		)
+		{
 						
 					
 
 			
-						int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
-						//Debug.Log ("Cid:" + controlID + " " + GUIEditorGUILayoutEx.hotControl);
+			int controlID = GUIUtility.GetControlID (FocusType.Passive) + 1;
+			//Debug.Log ("Cid:" + controlID + " " + GUIEditorGUILayoutEx.hotControl);
 			
-						if (controlID == CONTROL_ID) {
-								CONTROL_ID = -1;
-								timeValues = (float[])CHANGED_VALUES;
+			if (controlID == CONTROL_ID) {
+				CONTROL_ID = -1;
+				timeValues = (float[])CHANGED_VALUES;
 				
-								CHANGED_VALUES = null;
-						}
+				CHANGED_VALUES = null;
+			}
 			
-						GUI.BeginGroup (rectGlobal);
+			GUI.BeginGroup (rectGlobal);
 						
-						Color color = GUI.color;
+			Color color = GUI.color;
 			
-						Rect rectLocal = new Rect (0f, 0f, rectGlobal.width, rectGlobal.height);
+			Rect rectLocal = new Rect (0f, 0f, rectGlobal.width, rectGlobal.height);
 			
-						//background
-						//GUI.Box (rectLocal, GUIContent.none);
-						rectLocal.width -= marker.image.width;
+			//background
+			//GUI.Box (rectLocal, GUIContent.none);
+			rectLocal.width -= marker.image.width;
 			
 			
 			
-						//if time less then zero use mouse position for Add otherwise use input param value 
+			//if time less then zero use mouse position for Add otherwise use input param value 
 
-						float time = 0f;
-						int timeValuesNumber = timeValues.Length;
-						Rect[] positionsHitRectArray = new Rect[timeValuesNumber];
-						Rect[] positionsRectArray = new Rect[timeValuesNumber];
-						int timeValuesNumberOfTheSame = 0;//items that have same time
+			float time = 0f;
+			int timeValuesNumber = timeValues.Length;
+			Rect[] positionsHitRectArray = new Rect[timeValuesNumber];
+			Rect[] positionsRectArray = new Rect[timeValuesNumber];
+			int timeValuesNumberOfTheSame = 0;//items that have same time
 
-						if (rectLocal.Contains (Event.current.mousePosition)) {
-								time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 4);
+			if (rectLocal.Contains (Event.current.mousePosition)) {
+				time = (float)Math.Round (Event.current.mousePosition.x / rectLocal.width, 4);
 				 					
-						} 
+			} 
 
 			
 			
 			
 					
 
-						//mulitiplier simple changes the y position of the timeValue handle so
-						//same timeValues's hanldes are on of top of another
+			//mulitiplier simple changes the y position of the timeValue handle so
+			//same timeValues's hanldes are on of top of another
 			
-						float[] timeValuesTheSameHightMultiply = new float[timeValuesNumber]; 
-						float timeValue;
-						int i = 0;
-						int fromToEndInx = 0;
+			float[] timeValuesTheSameHightMultiply = new float[timeValuesNumber]; 
+			float timeValue;
+			int i = 0;
+			int fromToEndInx = 0;
 			
-						float timeValuePositionX = 0f;
-			
-			
+			float timeValuePositionX = 0f;
 			
 			
-						for (i = 0; i < timeValuesNumber; i++) {
+			
+			
+			for (i = 0; i < timeValuesNumber; i++) {
 				
 				
-								timeValue = timeValues [i];
-								timeValuePositionX = timeValue * rectLocal.width;
-								timeValuesNumberOfTheSame = 0;
+				timeValue = timeValues [i];
+				timeValuePositionX = timeValue * rectLocal.width;
+				timeValuesNumberOfTheSame = 0;
 				
-								//version 1 display one tube no visible separtion od handles
-								//								if (timeValuesTheSameHightMultiply [i] == 0) {
-								//										//find other with same value and record multiply (1x,2x,...)
-								//										for (fromToEndInx=i+1; fromToEndInx < timeValuesNumber; fromToEndInx++) {
-								//												if (timeValues [fromToEndInx] == timeValue) {
-								//														timeValuesNumberOfTheSame++;
-								//														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
-								//												}
-								//										
-								//										}
-								//								}
+				//version 1 display one tube no visible separtion od handles
+				//								if (timeValuesTheSameHightMultiply [i] == 0) {
+				//										//find other with same value and record multiply (1x,2x,...)
+				//										for (fromToEndInx=i+1; fromToEndInx < timeValuesNumber; fromToEndInx++) {
+				//												if (timeValues [fromToEndInx] == timeValue) {
+				//														timeValuesNumberOfTheSame++;
+				//														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+				//												}
+				//										
+				//										}
+				//								}
 				
 				
 				
-								//version 2 display has visible separation of handles when they have same time
-								if (timeValuesTheSameHightMultiply [i] == 0) {
-										//find other with same value and record multiply (1x,2x,...)
-										for (fromToEndInx=timeValuesNumber-1; fromToEndInx > i; fromToEndInx--) {
-												if (timeValues [fromToEndInx] == timeValue) {
+				//version 2 display has visible separation of handles when they have same time
+				if (timeValuesTheSameHightMultiply [i] == 0) {
+					//find other with same value and record multiply (1x,2x,...)
+					for (fromToEndInx=timeValuesNumber-1; fromToEndInx > i; fromToEndInx--) {
+						if (timeValues [fromToEndInx] == timeValue) {
 							
-														timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
-														timeValuesNumberOfTheSame++;
-												}
+							timeValuesTheSameHightMultiply [fromToEndInx] = timeValuesNumberOfTheSame;
+							timeValuesNumberOfTheSame++;
+						}
 						
-										}
+					}
 					
-										timeValuesTheSameHightMultiply [i] = timeValuesNumberOfTheSame;
-								}
+					timeValuesTheSameHightMultiply [i] = timeValuesNumberOfTheSame;
+				}
 				
 				
 				
@@ -892,83 +891,83 @@ namespace ws.winx.editor.extensions
 				
 				
 				
-								Rect rect3 = new Rect (timeValuePositionX, marker.image.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)marker.image.width, (float)marker.image.height);
+				Rect rect3 = new Rect (timeValuePositionX, marker.image.height * timeValuesTheSameHightMultiply [i] * 0.66f, (float)marker.image.width, (float)marker.image.height);
 				
 				
-								positionsHitRectArray [i] = rect3;
-								positionsRectArray [i] = rect3;
-						}
+				positionsHitRectArray [i] = rect3;
+				positionsRectArray [i] = rect3;
+			}
 			
 			
 			
 			
 			
-						//selected = new bool[timeValuesNumber];
+			//selected = new bool[timeValuesNumber];
 		
-						if (selected == null || selected.Length != timeValuesNumber) {
-								selected = new bool[timeValuesNumber];
+			if (selected == null || selected.Length != timeValuesNumber) {
+				selected = new bool[timeValuesNumber];
 				
-								if (EditClose != null)
-										EditClose (null);
+				if (EditClose != null)
+					EditClose (null);
 				
 				
 				
-						}
+			}
 			
 
 			
 			
-						Vector2 offset = Vector2.zero; 
-						int clickedIndex;
-						float startSelect;
-						float endSelect;
+			Vector2 offset = Vector2.zero; 
+			int clickedIndex;
+			float startSelect;
+			float endSelect;
 			
-						HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, marker, positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
+			HighLevelEvent highLevelEvent = EditorGUIExtW.MultiSelection (rectGlobal, positionsRectArray, marker, positionsHitRectArray, ref selected, null, out clickedIndex, out offset, out startSelect, out endSelect, GUIStyle.none);
 			
 						
 			
-						if (highLevelEvent != HighLevelEvent.None) {
-								switch (highLevelEvent) {
+			if (highLevelEvent != HighLevelEvent.None) {
+				switch (highLevelEvent) {
 
 //								case HighLevelEvent.Click:
 //										
 //										break;
-								case HighLevelEvent.DoubleClick:
-										if (clickedIndex != -1) {
-												if (EditOpen != null) {
-														EditOpen (new TimeLineArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
+				case HighLevelEvent.DoubleClick:
+					if (clickedIndex != -1) {
+						if (EditOpen != null) {
+							EditOpen (new TimeLineArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 							
-												}
+						}
 						
-										} else {
-												//never enters here???
-												if (timeInput >= 0)
-														time = timeInput;
-												onAdd (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add));
+					} else {
+						//never enters here???
+						if (timeInput >= 0)
+							time = timeInput;
+						onAdd (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add));
 						
-										}
-										break;
+					}
+					break;
 					
-								case HighLevelEvent.ContextClick:
-										{
+				case HighLevelEvent.ContextClick:
+					{
 					
-												//Debug.Log ("ContextClick on handle");
-												selected = new bool[timeValuesNumber];
-												selected [clickedIndex] = true;
+						//Debug.Log ("ContextClick on handle");
+						selected = new bool[timeValuesNumber];
+						selected [clickedIndex] = true;
 
-												if (timeInput >= 0)
-														time = timeInput;
-												else
-														time = timeValues [clickedIndex];
-												onContextClickOnTimeValue (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add, Delete, EditClose, EditOpen));
+						if (timeInput >= 0)
+							time = timeInput;
+						else
+							time = timeValues [clickedIndex];
+						onContextClickOnTimeValue (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add, Delete, EditClose, EditOpen));
 					
 					
-												break;
-										}
+						break;
+					}
 					
-								case HighLevelEvent.BeginDrag:
+				case HighLevelEvent.BeginDrag:
 					
-										timeValuesPrev = (float[])timeValues.Clone ();
+					timeValuesPrev = (float[])timeValues.Clone ();
 					
 					//										//copy values when begin to drag	
 					//										for (int j = 0; j < timeValues.Length; j++) {
@@ -978,129 +977,129 @@ namespace ws.winx.editor.extensions
 					
 					
 					
-										break;
-								case HighLevelEvent.Drag:
-										{
+					break;
+				case HighLevelEvent.Drag:
+					{
 					
-												for (int k = timeValues.Length - 1; k >= 0; k--) {
-														if (selected [k]) {
+						for (int k = timeValues.Length - 1; k >= 0; k--) {
+							if (selected [k]) {
 							
-																timeValues [k] = (float)Math.Round (timeValuesPrev [k] + offset.x / rectLocal.width, 4);
+								timeValues [k] = (float)Math.Round (timeValuesPrev [k] + offset.x / rectLocal.width, 4);
 							
-																if (timeValues [k] > 1f)
-																		timeValues [k] = 1f;
-																else if (timeValues [k] < 0f)
-																		timeValues [k] = 0f;
-																//Debug.Log ("Dragged time" + timeValues [k]);
-														}
-												}
+								if (timeValues [k] > 1f)
+									timeValues [k] = 1f;
+								else if (timeValues [k] < 0f)
+									timeValues [k] = 0f;
+								//Debug.Log ("Dragged time" + timeValues [k]);
+							}
+						}
 					
 					
 					
 					
 					
-												break;
-										}
+						break;
+					}
 					
-								case HighLevelEvent.EndDrag:
+				case HighLevelEvent.EndDrag:
 
-										if (DragEnd != null) {
-												DragEnd (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID));
-										}
+					if (DragEnd != null) {
+						DragEnd (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID));
+					}
 
-										break;
-								case HighLevelEvent.Delete:
-										DeleteTimeValues (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, null, Delete), selected);
-										break;
-								case HighLevelEvent.SelectionChanged:
+					break;
+				case HighLevelEvent.Delete:
+					DeleteTimeValues (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, null, Delete), selected);
+					break;
+				case HighLevelEvent.SelectionChanged:
 
 										
 					
-										if (clickedIndex > -1) {
+					if (clickedIndex > -1) {
 						
 												
 						
-												if (EditOpen != null) {
-														//selected = new bool[timeValuesNumber];
-														selected[clickedIndex]=true;
-														EditOpen (new TimeLineArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
+						if (EditOpen != null) {
+							//selected = new bool[timeValuesNumber];
+							selected [clickedIndex] = true;
+							EditOpen (new TimeLineArgs<float> (clickedIndex, timeValues [clickedIndex], timeValues, selected, controlID));
 							
-												}
+						}
 												
 												
 						
-										} else
+					} else
 
-												selected = new bool[timeValuesNumber];
-										break;
-								}
-						} else {
-			
-								if (!rectLocal.Contains (Event.current.mousePosition) && Event.current.type == EventType.Repaint) 
-										selected = new bool[timeValuesNumber];
-
-						}
-
-				
-
-			
-			
-						int hoverInx = -1; 
-						hoverInx = GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray);
-			
-			
-						if (hoverInx > 0 && Event.current.button == 1 && Event.current.isMouse) {
-				
-								Event.current.Use ();
-								selected = new bool[timeValuesNumber];
-								selected [hoverInx] = true;
-							
-								if (timeInput >= 0)
-										time = timeInput;
-								else
-										time = timeValues [hoverInx];
-								onContextClickOnTimeValue (new TimeLineArgs<float> (hoverInx, time, timeValues, selected, controlID, Add, Delete, EditClose, EditOpen));
-				
-						}
-			
-			
-			
-						//HighLevelEvent.ContextClick doens't raize when mouse right click so =>
-						if (Event.current.type == EventType.ContextClick && rectLocal.Contains (Event.current.mousePosition) 
-								|| (Event.current.button == 1 && Event.current.isMouse)) {
-				
-								if (timeInput >= 0)
-										time = timeInput;
-								onContextClick (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add));
-				
-				
-				
-				
-						}
-			
-						GUI.color = color;
-			
-						GUI.EndGroup ();
-			
-						//show tooltip on hover
-						if (hoverInx >= 0 && hoverInx < positionsHitRectArray.Length) {
-				
-				
-								Rect positionRect = positionsRectArray [hoverInx];
-				
-								//from local to global
-								positionRect.y += rectGlobal.y;
-								positionRect.x += rectGlobal.x;
-				
-				
-								if(displayNames!=null && displayNames.Length>hoverInx)
-								EditorGUILayoutEx.CustomTooltip (positionRect, displayNames [hoverInx] + "[" + Decimal.Round(Convert.ToDecimal(timeValues [hoverInx]),2) + "]");
-				
-						}
-			
-			
-			
+						selected = new bool[timeValuesNumber];
+					break;
 				}
+			} else {
+			
+				if (!rectLocal.Contains (Event.current.mousePosition) && Event.current.type == EventType.Repaint) 
+					selected = new bool[timeValuesNumber];
+
+			}
+
+				
+
+			
+			
+			int hoverInx = -1; 
+			hoverInx = GetMouseHoverRectIndex (rectGlobal, timeValues, positionsHitRectArray);
+			
+			
+			if (hoverInx > 0 && Event.current.button == 1 && Event.current.isMouse) {
+				
+				Event.current.Use ();
+				selected = new bool[timeValuesNumber];
+				selected [hoverInx] = true;
+							
+				if (timeInput >= 0)
+					time = timeInput;
+				else
+					time = timeValues [hoverInx];
+				onContextClickOnTimeValue (new TimeLineArgs<float> (hoverInx, time, timeValues, selected, controlID, Add, Delete, EditClose, EditOpen));
+				
+			}
+			
+			
+			
+			//HighLevelEvent.ContextClick doens't raize when mouse right click so =>
+			if (Event.current.type == EventType.ContextClick && rectLocal.Contains (Event.current.mousePosition) 
+				|| (Event.current.button == 1 && Event.current.isMouse)) {
+				
+				if (timeInput >= 0)
+					time = timeInput;
+				onContextClick (new TimeLineArgs<float> (clickedIndex, time, timeValues, selected, controlID, Add));
+				
+				
+				
+				
+			}
+			
+			GUI.color = color;
+			
+			GUI.EndGroup ();
+			
+			//show tooltip on hover
+			if (hoverInx >= 0 && hoverInx < positionsHitRectArray.Length) {
+				
+				
+				Rect positionRect = positionsRectArray [hoverInx];
+				
+				//from local to global
+				positionRect.y += rectGlobal.y;
+				positionRect.x += rectGlobal.x;
+				
+				
+				if (displayNames != null && displayNames.Length > hoverInx)
+					EditorGUILayoutEx.CustomTooltip (positionRect, displayNames [hoverInx] + "[" + Decimal.Round (Convert.ToDecimal (timeValues [hoverInx]), 2) + "]");
+				
+			}
+			
+			
+			
+		}
 		#endregion
 
 
@@ -1109,268 +1108,291 @@ namespace ws.winx.editor.extensions
 //			if(Type
 //
 //		}
-
+		//	#if UNITY_VARIABLE
 
 		#region UnityVariablePopup
-				public static UnityVariable UnityVariablePopup (GUIContent label, UnityVariable variableSelected, Type typeSelected, List<GUIContent> displayOptions, List<UnityVariable> values, Rect? position=null)
-				{
+		public static UnityVariable UnityVariablePopup (GUIContent label, UnityVariable variableSelected, Type typeSelected, List<GUIContent> displayOptions, List<UnityVariable> values, Rect? position=null)
+		{
 
 
 
-						//add first element as custom (selection of Object properties)
-						//others are selection from provided list of values
-						displayOptions.Insert (0, new GUIContent ("Raw"));
-						displayOptions.Insert (1, new GUIContent ("Bind"));
+			//add first element as custom (selection of Object properties)
+			//others are selection from provided list of values
+			if (displayOptions == null)
+				displayOptions = new List<GUIContent> ();
 
-						Rect pos = default(UnityEngine.Rect);
+			displayOptions.Insert (0, new GUIContent ("Raw"));
+			displayOptions.Insert (1, new GUIContent ("Bind"));
+
+			Rect pos = default(UnityEngine.Rect);
 						
 			
-						if (position.HasValue)
-								pos = position.Value;
+			if (position.HasValue)
+				pos = position.Value;
 					
 							
 					
 
-						if (label != null) {
+			if (label != null) {
 
 
-								if (position.HasValue) {
-										Rect labelPos = new Rect ();
-										labelPos.x = position.Value.x;
-										labelPos.y = position.Value.y;
-										labelPos.width = 80;
-										labelPos.height = position.Value.height;
+				if (position.HasValue) {
+					Rect labelPos = new Rect ();
+					labelPos.x = position.Value.x;
+					labelPos.y = position.Value.y;
+					labelPos.width = 80;
+					labelPos.height = position.Value.height;
 
-										pos.xMin = labelPos.xMax + 10;
-										EditorGUI.LabelField (labelPos, label);
-								} else
-										EditorGUILayout.LabelField (label, new GUILayoutOption[]{GUILayout.MaxWidth (80)});
-						}
+					pos.xMin = labelPos.xMax + 10;
+					EditorGUI.LabelField (labelPos, label);
+				} else
+					EditorGUILayout.LabelField (label, new GUILayoutOption[]{GUILayout.MaxWidth (80)});
+			}
 
 
 							
-						int indexSelected;
-						int indexSelectedPrev;
+			int indexSelected=-1;
+			int indexSelectedPrev;
 
 
-						//if _variableSelected is NULL 
-						// or NOT INITIALIZED 
-						// => create new UnityVariable and add default type value
-						if (variableSelected == null || (!variableSelected.IsBinded () && variableSelected.ValueType.IsValueType && variableSelected.Value == null)) {
-								indexSelected = 0;
-								variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
-								variableSelected.displayMode = UnityVariable.DisplayMode.Raw;
-						} else 
-								indexSelected = values.IndexOf (variableSelected);
+			//if _variableSelected is NULL 
+			// or NOT INITIALIZED 
+			// => create new UnityVariable and add default type value
+			if (variableSelected == null || (!variableSelected.IsBinded () && variableSelected.ValueType.IsValueType && variableSelected.Value == null)) {
+				indexSelected = 0;
+				variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
+				variableSelected.displayMode = UnityVariable.DisplayMode.Raw;
+				variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+			} else if(values!=null)
+				indexSelected = values.IndexOf (variableSelected);
 
-						//if UnityVariable is not in supplied list of values(most likely blackboard vars)
-						if (indexSelected < 0) {
-								indexSelected = (int)variableSelected.displayMode;
-						} else {
-								indexSelected += 2;//shift cos of "Variable" and "Bind"
+			//if UnityVariable is not in supplied, argument "list of values"(most likely blackboard vars) check
+			if (indexSelected < 0) {
+				indexSelected = (int)variableSelected.displayMode;
+			} else {//if found inside "list of values"
+				indexSelected += 2;//shift index cos of "Variable" and "Bind" which are inx=0 and inx=1
 
+			}
+
+			indexSelectedPrev = indexSelected;
+
+			if (position.HasValue) {
+				Rect popupPos = new Rect (pos.x, pos.y, 80, position.Value.height);
+				pos.xMin = popupPos.xMax + 10;
+				indexSelected = EditorGUI.Popup (popupPos, indexSelected, displayOptions.ToArray ());
+			} else {
+				//GUILayoutUtility.GetRect(100f,16f);
+				//Rect popupPos =EditorGUILayout.GetControlRect(true);
+				indexSelected = EditorGUILayout.Popup (indexSelected, displayOptions.ToArray ());
+				//indexSelected = EditorGUI.Popup (popupPos, indexSelected, displayOptions.ToArray ());
+			}
+
+			//Debug.Log (indexSelected);
+						
+
+			//----- RAW --------//
+			if (indexSelected == 0) {
+				//FROM LOCAL|GLOBALS TO RAW 
+				if (indexSelectedPrev >= 1) {
+					variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
+					variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+				} 
+							
+
+
+				variableSelected.displayMode = UnityVariable.DisplayMode.Raw;	
+
+												
+				//////// CHOOSE DRAWER ///////
+
+				if (variableSelected.ValueType == typeof(UnityEvent)) {
+									
+					//list.elementHeight = 43f;//MAGIC NUMBER
+
+
+										
+					if (variableSelected.serializedProperty == null) {
+						variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+					} 
+				
+			
+					SerializedProperty elements = (variableSelected.serializedProperty as SerializedProperty).FindPropertyRelative ("m_PersistentCalls.m_Calls");
+
+
+
+					//!!! UNITY DEVS DECIDED ONE DRAWER PER UNITYEVENT (WICKED STUFF)
+					if (variableSelected.drawer == null)	
+						variableSelected.drawer = new UnityEditorInternal.UnityEventDrawer ();
+						
+					Rect eventRect = position.Value;
+					eventRect.y=eventRect.y+16f; //label height
+					eventRect.height = Math.Max (1, elements.arraySize) * 43 + 36f + 2;
+				
+					EditorGUI.BeginProperty (eventRect, GUIContent.none, variableSelected.serializedProperty as SerializedProperty);
+
+					(variableSelected.drawer as PropertyDrawer).OnGUI (eventRect, variableSelected.serializedProperty as SerializedProperty, new GUIContent (variableSelected.name));
+					
+					EditorGUI.EndProperty ();
+						
+						
+					EditorGUI.BeginChangeCheck ();
+
+					//EditorUtilityEx.ApplyModifiedProperties (variableSelected);
+					if (EditorGUI.EndChangeCheck ()) {
+						EditorUtilityEx.ApplyModifiedProperties (variableSelected);
+
+						//Debug.Log ("change happen");
+					}
+
+				} else {
+					//EditorGUILayout.PropertyField (position,variableSelected.serializedProperty, new GUIContent (""));
+					EditorGUI.BeginChangeCheck ();
+
+					if (!variableSelected.ValueType.IsSubclassOf (typeof(UnityEngine.Object))) {
+
+						//!!! Bellow code might prevent Kaboom on compiling not saved Node/GameObject with UnityVariables
+						//												if (variableSelected.Value == null)
+						//												if (typeSelected == typeof(string))
+						//														variableSelected.Value = String.Empty;
+						//												else
+						//														variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
+
+						PropertyDrawer drawer;
+												
+												
+						drawer = EditorUtilityEx.GetDrawer (variableSelected.ValueType);
+												
+						if (drawer == null)
+							drawer = EditorUtilityEx.GetDefaultDrawer ();
+
+						if (variableSelected.serializedProperty == null)
+							variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+
+												
+						if (variableSelected.serializedProperty != null) {
+							if (position.HasValue) {
+								Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
+								pos.xMin = propertyPos.xMax + 10;
+								//EditorGUI.PropertyField (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
+								drawer.OnGUI (propertyPos, variableSelected.serializedProperty as SerializedProperty, new GUIContent (""));
+							} else {
+								//EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
+				
+															
+								//drawer.OnGUI (GUILayoutUtility.GetRect(80,32), variableSelected.serializedProperty, new GUIContent (""));
+							
+
+								drawer.OnGUI (EditorGUILayout.GetControlRect (false, 32), variableSelected.serializedProperty as SerializedProperty, new GUIContent (""));
+									
+																	
+							}
 						}
-
-						indexSelectedPrev = indexSelected;
-
+												
+					
+					} else {
 						if (position.HasValue) {
-								Rect popupPos = new Rect (pos.x, pos.y, 80, position.Value.height);
-								pos.xMin = popupPos.xMax + 10;
-								indexSelected = EditorGUI.Popup (popupPos, indexSelected, displayOptions.ToArray ());
+							Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
+							pos.xMin = propertyPos.xMax + 10;
+							variableSelected.Value = EditorGUI.ObjectField (propertyPos, variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
 						} else
-
-								indexSelected = EditorGUILayout.Popup (indexSelected, displayOptions.ToArray ());
-
-						//Debug.Log (indexSelected);
-						
-
-						//----- RAW --------//
-						if (indexSelected == 0) {
-								//FROM LOCAL|GLOBALS TO RAW 
-								if (indexSelectedPrev >= 1) {
-										variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
-					
-								} 
-							
+							variableSelected.Value = EditorGUI.ObjectField (GUILayoutUtility.GetRect (80, 16), variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+						//if(Event.current.type==EventType.Layout)
+						//	variableSelected.Value = EditorGUILayout.ObjectField (variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
+					}
 
 
-								variableSelected.displayMode = UnityVariable.DisplayMode.Raw;	
-
-												
-								//////// CHOOSE DRAWER ///////
-
-								if (variableSelected.ValueType == typeof(UnityEvent)) {
-									
-										//list.elementHeight = 43f;//MAGIC NUMBER
-
-										if (position.HasValue) {
-												Debug.LogError ("GUIContent not compatible with UnityEvent Display");
-												return null;
-										}
-										
-
-										SerializedProperty elements = variableSelected.serializedProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
-						
-										Rect rect = EditorGUILayout.GetControlRect (true, Math.Max (1, elements.arraySize) * 43 + 36f);
-
-										//!!! UNITY DEVS DECIDED ONE DRAWER PER UNITYEVENT (WICKED STUFF)
-										if (variableSelected.drawer == null)	
-												variableSelected.drawer = new UnityEditorInternal.UnityEventDrawer ();
-						
-						
-						
-										variableSelected.drawer.OnGUI (rect, variableSelected.serializedProperty, new GUIContent (variableSelected.name));
-						
-						
-
-										variableSelected.ApplyModifiedProperties ();
-
-
-								} else {
-										//EditorGUILayout.PropertyField (position,variableSelected.serializedProperty, new GUIContent (""));
-										EditorGUI.BeginChangeCheck ();
-
-										if (!variableSelected.ValueType.IsSubclassOf (typeof(UnityEngine.Object))) {
-
-												//!!! Bellow code might prevent Kaboom on compiling not saved Node/GameObject with UnityVariables
-												//												if (variableSelected.Value == null)
-												//												if (typeSelected == typeof(string))
-												//														variableSelected.Value = String.Empty;
-												//												else
-												//														variableSelected.Value = FormatterServices.GetUninitializedObject (typeSelected);
-
-												PropertyDrawer drawer;
-												
-												
-												drawer = EditorUtilityEx.GetDrawer (variableSelected.ValueType);
-												
-												if (drawer == null)
-														drawer = EditorUtilityEx.GetDefaultDrawer ();
-
-												
-												if (variableSelected.serializedProperty != null)
-												if (position.HasValue) {
-														Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
-														pos.xMin = propertyPos.xMax + 10;
-														//EditorGUI.PropertyField (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
-														drawer.OnGUI (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
-												} else {
-														//EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
-			
-														
-														//drawer.OnGUI (GUILayoutUtility.GetRect(80,32), variableSelected.serializedProperty, new GUIContent (""));
-						
-
-														drawer.OnGUI (EditorGUILayout.GetControlRect (false, 32), variableSelected.serializedProperty, new GUIContent (""));
-								
-																
-												}
-												
-					
-										} else {
-												if (position.HasValue) {
-														Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
-														pos.xMin = propertyPos.xMax + 10;
-														variableSelected.Value = EditorGUI.ObjectField (propertyPos, variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
-												} else
-														variableSelected.Value = EditorGUI.ObjectField (GUILayoutUtility.GetRect (80, 16), variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
-												//if(Event.current.type==EventType.Layout)
-												//	variableSelected.Value = EditorGUILayout.ObjectField (variableSelected.Value as UnityEngine.Object, variableSelected.ValueType, true);
-										}
-
-
-										if (EditorGUI.EndChangeCheck ()) {
-												variableSelected.ApplyModifiedProperties ();
-												EditorUtility.SetDirty (variableSelected);
-												//Debug.Log ("change happen");
-										}
+					if (EditorGUI.EndChangeCheck ()) {
+						EditorUtilityEx.ApplyModifiedProperties (variableSelected);
+						EditorUtility.SetDirty (variableSelected);
+						//Debug.Log ("change happen");
+					}
 					
 										
-								}
+				}
 
 
-						} else if (indexSelected == 1) {
+			} else if (indexSelected == 1) {
 
 								
 
-								//FROM LOCALS/GLOBALS TO BIND => create new fresh Variable
-								if (indexSelectedPrev == 0 || indexSelectedPrev > 1) {
-										variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
+				//FROM LOCALS/GLOBALS TO BIND => create new fresh Variable
+				if (indexSelectedPrev == 0 || indexSelectedPrev > 1) {
+					variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
+					variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
 									
-									
-								}
+				}
 
-								variableSelected.displayMode = UnityVariable.DisplayMode.Bind;
+				variableSelected.displayMode = UnityVariable.DisplayMode.Bind;
 				
-								UnityEngine.Object _objectSelected = null;
+				UnityEngine.Object _objectSelected = null;
 				
-								//find owner GameObject as reflectedInstance might be that owner or some owner's Component
-								if (variableSelected.IsBinded ()) {
+				//find owner GameObject as reflectedInstance might be that owner or some owner's Component
+				if (variableSelected.IsBinded ()) {
 
-										if (variableSelected.instanceBinded is Component)
-												_objectSelected = ((Component)variableSelected.instanceBinded).gameObject;
-										else
-												_objectSelected = variableSelected.instanceBinded;
-								} 
+					if (variableSelected.instanceBinded is Component)
+						_objectSelected = ((Component)variableSelected.instanceBinded).gameObject;
+					else
+						_objectSelected = variableSelected.instanceBinded;
+				} 
 						
-								//select object which properties would be extracted
-								if (position.HasValue) {
-										Rect objPos = new Rect (pos.x, pos.y, 80, 16);
-										pos.xMin = objPos.xMax + 10;
-										_objectSelected = EditorGUI.ObjectField (objPos, _objectSelected, typeof(UnityEngine.Object), true);
-								} else
-										_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
+				//select object which properties would be extracted
+				if (position.HasValue) {
+					Rect objPos = new Rect (pos.x, pos.y, 80, 16);
+					pos.xMin = objPos.xMax + 10;
+					_objectSelected = EditorGUI.ObjectField (objPos, _objectSelected, typeof(UnityEngine.Object), true);
+				} else
+					_objectSelected = EditorGUILayout.ObjectField (_objectSelected, typeof(UnityEngine.Object), true);
 						
 						
-								if (_objectSelected != null) {
+				if (_objectSelected != null) {
 										
 									
 							
-										GUIContent[] displayOptionsProperties;
+					GUIContent[] displayOptionsProperties;
 										
-										String[] membersUniquePath;//ex. position.x@314124144
+					String[] membersUniquePath;//ex. position.x@314124144
 										
 
 							
-										//get properties from object by object type
-										EditorUtilityEx.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out membersUniquePath);
+					//get properties from object by object type
+					EditorUtilityEx.ObjectToDisplayOptionsValues (_objectSelected, typeSelected, out displayOptionsProperties, out membersUniquePath);
 
 										
 										
-										Rect? popPos = null;
-										if (position.HasValue) {
-												popPos = new Rect (pos.x, pos.y, pos.width, 16);
-												//pos.xMin=popPos.xMax+10;
-										}
+					Rect? popPos = null;
+					if (position.HasValue) {
+						popPos = new Rect (pos.x, pos.y, pos.width, 16);
+						//pos.xMin=popPos.xMax+10;
+					}
 
-										string currentSelectedPath = variableSelected.memberPath;
+					string currentSelectedPath = variableSelected.memberPath;
 
-										if (variableSelected.instanceBinded != null)
-												currentSelectedPath += "@" + variableSelected.instanceBinded.GetInstanceID ();
+					if (variableSelected.instanceBinded != null)
+						currentSelectedPath += "@" + variableSelected.instanceBinded.GetInstanceID ();
 
-										//Debug.Log("currentSelectedPath:"+currentSelectedPath+" "+Time.frameCount);
+					//Debug.Log("currentSelectedPath:"+currentSelectedPath+" "+Time.frameCount);
 
-										EditorGUI.BeginChangeCheck ();
-										string memberPath = EditorGUILayoutEx.CustomObjectPopup<string> (new GUIContent ("Properties"), 
+					EditorGUI.BeginChangeCheck ();
+					string memberPath = EditorGUILayoutEx.CustomObjectPopup<string> (new GUIContent ("Properties"), 
 					                                                                 currentSelectedPath, displayOptionsProperties, membersUniquePath, null, null, null, null, popPos);
 					
 
 
 
 										
-										if (!String.IsNullOrEmpty (memberPath) && memberPath != currentSelectedPath) {
-												//	Debug.Log("CHANGE memberPath:"+memberPath+" "+Time.frameCount);
+					if (!String.IsNullOrEmpty (memberPath) && memberPath != currentSelectedPath) {
+						//	Debug.Log("CHANGE memberPath:"+memberPath+" "+Time.frameCount);
 												
 
-												String[] memberPathAndID = memberPath.Split ('@');
+						String[] memberPathAndID = memberPath.Split ('@');
 										
-												variableSelected.Bind (EditorUtility.InstanceIDToObject (int.Parse (memberPathAndID [1])), memberPathAndID [0]);
+						variableSelected.Bind (EditorUtility.InstanceIDToObject (int.Parse (memberPathAndID [1])), memberPathAndID [0]);
 												
-										} 
+					} 
 							
 									
 							
-								} 
+				} 
 
 										
 					
@@ -1379,10 +1401,10 @@ namespace ws.winx.editor.extensions
 								
 				
 
-						}//end if (selected inx==1)//BIND
+			}//end if (selected inx==1)//BIND
 						else if (values != null && values.Count > 0) {
-								variableSelected = values [indexSelected - 2];
-						}
+				variableSelected = values [indexSelected - 2];
+			}
 			
 
 
@@ -1390,254 +1412,256 @@ namespace ws.winx.editor.extensions
 
 						
 					
-						return variableSelected;
-				}
+			return variableSelected;
+		}
 		#endregion
 
 
 
 
 		#region Draw Variables
-				public static Rect DrawVector3Var (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawVector3Var (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
 
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.xMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						DrawName (new Rect (rect.x, rect.y, 80f, 16f), variable);
-						rect.xMin = rect.xMin + 84f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.xMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			DrawName (new Rect (rect.x, rect.y, 80f, 16f), variable);
+			rect.xMin = rect.xMin + 84f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
 						
 
-						Vector3 vector = EditorGUI.Vector3Field (rect, string.Empty, (Vector3)variable.Value);
-						if (EditorGUI.EndChangeCheck () && vector != (Vector3)variable.Value) {
+			Vector3 vector = EditorGUI.Vector3Field (rect, string.Empty, (Vector3)variable.Value);
+			if (EditorGUI.EndChangeCheck () && vector != (Vector3)variable.Value) {
 			
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 
-								variable.Value = vector;
+				variable.Value = vector;
 
-								EditorUtility.SetDirty (variable);
+				EditorUtility.SetDirty (variable);
 
-						}
+			}
 
-						return rectOrg;
-				}
+			return rectOrg;
+		}
 
-				public static Rect DrawBoolVar (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawBoolVar (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 			
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
 
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
-						rect.xMin = rect.xMin + 144f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						bool flag = EditorGUI.Toggle (rect, GUIContent.none, (bool)variable.Value);
-						if (EditorGUI.EndChangeCheck () && flag != (bool)variable.Value) {
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
+			rect.xMin = rect.xMin + 144f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			bool flag = EditorGUI.Toggle (rect, GUIContent.none, (bool)variable.Value);
+			if (EditorGUI.EndChangeCheck () && flag != (bool)variable.Value) {
 
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 			
-								variable.Value = flag;
+				variable.Value = flag;
 
-								EditorUtility.SetDirty (variable);
+				EditorUtility.SetDirty (variable);
 
-						}
+			}
 						
 
-						return rectOrg;
+			return rectOrg;
 
-				}
+		}
 		
-				public static Rect DrawColorVar (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawColorVar (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 			
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
 
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
-						rect.xMin = rect.xMin + 124f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						Color color = EditorGUI.ColorField (rect, GUIContent.none, (Color)variable.Value);
-						if (EditorGUI.EndChangeCheck () && color != (Color)variable.Value) {
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
+			rect.xMin = rect.xMin + 124f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			Color color = EditorGUI.ColorField (rect, GUIContent.none, (Color)variable.Value);
+			if (EditorGUI.EndChangeCheck () && color != (Color)variable.Value) {
 
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 
-								variable.Value = color;
+				variable.Value = color;
 
-								EditorUtility.SetDirty (variable);
-						}
+				EditorUtility.SetDirty (variable);
+			}
 						
 
-						return rectOrg;
+			return rectOrg;
 		
-				}
+		}
 
-				public static Rect DrawCurveVar (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawCurveVar (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 			
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
 			
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
-						rect.xMin = rect.xMin + 124f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						AnimationCurve curve = EditorGUI.CurveField (rect, GUIContent.none, (AnimationCurve)variable.Value);
-						if (EditorGUI.EndChangeCheck () && curve != (AnimationCurve)variable.Value) {
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
+			rect.xMin = rect.xMin + 124f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			AnimationCurve curve = EditorGUI.CurveField (rect, GUIContent.none, (AnimationCurve)variable.Value);
+			if (EditorGUI.EndChangeCheck () && curve != (AnimationCurve)variable.Value) {
 				
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 				
-								variable.Value = curve;
+				variable.Value = curve;
 				
-								EditorUtility.SetDirty (variable);
-						}
+				EditorUtility.SetDirty (variable);
+			}
 			
 			
-						return rectOrg;
+			return rectOrg;
 			
-				}
+		}
 		
-				public static Rect DrawFloatVar (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawFloatVar (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						//rect.height = 21;
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			//rect.height = 21;
 
 
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
-						rect.xMin = rect.xMin + 144f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						float num = EditorGUI.FloatField (rect, GUIContent.none, (float)variable.Value);
-						if (EditorGUI.EndChangeCheck () && num != (float)variable.Value) {
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
+			rect.xMin = rect.xMin + 144f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			float num = EditorGUI.FloatField (rect, GUIContent.none, (float)variable.Value);
+			if (EditorGUI.EndChangeCheck () && num != (float)variable.Value) {
 
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 
-								variable.Value = num;
+				variable.Value = num;
 
-								EditorUtility.SetDirty (variable);
+				EditorUtility.SetDirty (variable);
 
-						}
+			}
 
 						
 		
-						return rectOrg;
+			return rectOrg;
 
-				}
+		}
 		
-				public static Rect DrawIntVar (Rect rect, UnityVariable variable)
-				{
+		public static Rect DrawIntVar (Rect rect, UnityVariable variable)
+		{
 
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 			
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
 
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
-						rect.xMin = rect.xMin + 144f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						int num = EditorGUI.IntField (rect, GUIContent.none, (int)variable.Value);
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
+			rect.xMin = rect.xMin + 144f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			int num = EditorGUI.IntField (rect, GUIContent.none, (int)variable.Value);
 
-						if (EditorGUI.EndChangeCheck () && num != (int)variable.Value) {
+			if (EditorGUI.EndChangeCheck () && num != (int)variable.Value) {
 
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 
-								variable.Value = num;
+				variable.Value = num;
 
-								EditorUtility.SetDirty (variable);
+				EditorUtility.SetDirty (variable);
 				
-						}
+			}
 
 		
-						return rectOrg;
-				}
+			return rectOrg;
+		}
 
-				public static Rect DrawUnityObject (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawUnityObject (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
-
-
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-						rect.xMin = rect.xMin + 84f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						UnityEngine.Object objectUnity = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, variable.ValueType, true);
-						if (EditorGUI.EndChangeCheck () && objectUnity != variable.Value) {
-
-								Undo.RecordObject (variable, "Variable Value");
-
-								variable.Value = objectUnity;
-
-								EditorUtility.SetDirty (variable);
-
-						}
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
 
 
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
+			rect.xMin = rect.xMin + 84f;
+			rect.xMax = rect.xMax - 19f;
 
-						return rectOrg;
+			UnityEngine.Object value = variable.Value as UnityEngine.Object;
+			EditorGUI.BeginChangeCheck ();
+			UnityEngine.Object objectUnity = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, variable.ValueType, true);
+			if (EditorGUI.EndChangeCheck () && objectUnity != value) {
 
-				}
+				Undo.RecordObject (variable, "Variable Value");
 
-				public static void DrawName (Rect rect, UnityVariable variable, bool editable=true)
-				{
+				variable.Value = objectUnity;
 
-						if (!editable) {
-								EditorGUI.LabelField (rect, variable.name);
-						}
+				EditorUtility.SetDirty (variable);
 
-						EditorGUI.BeginChangeCheck ();
+			}
 
-						string text = EditorGUI.TextField (rect, variable.name);
+
+
+			return rectOrg;
+
+		}
+
+		public static void DrawName (Rect rect, UnityVariable variable, bool editable=true)
+		{
+
+			if (!editable) {
+				EditorGUI.LabelField (rect, variable.name);
+			}
+
+			EditorGUI.BeginChangeCheck ();
+
+			string text = EditorGUI.TextField (rect, variable.name);
 						
 							
-						if (EditorGUI.EndChangeCheck () && text != variable.name) {
+			if (EditorGUI.EndChangeCheck () && text != variable.name) {
 
-								Undo.RecordObject (variable, "Variable Name");
+				Undo.RecordObject (variable, "Variable Name");
 
-								variable.name = text;
+				variable.name = text;
 
-						}
-				}
+			}
+		}
 //
 //				private static Type __selectedType;
 //
@@ -1725,150 +1749,152 @@ namespace ws.winx.editor.extensions
 //
 //				}
 		
-				public Rect DrawObjectVar (Rect rect, UnityVariable variable)
-				{
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
-						//????/
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						rect.height = rect.height - 18f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-						rect.xMin = rect.xMin + 84f;
-						rect.xMax = rect.xMax - 19f;
-						Type objectType = variable.ValueType;
-						EditorGUI.BeginChangeCheck ();
-						UnityEngine.Object @object = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, objectType, true);
-						if (EditorGUI.EndChangeCheck () && @object != variable.Value) {
+		public Rect DrawObjectVar (Rect rect, UnityVariable variable)
+		{
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
+			//????/
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			rect.height = rect.height - 18f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
+			rect.xMin = rect.xMin + 84f;
+			rect.xMax = rect.xMax - 19f;
+			Type objectType = variable.ValueType;
+			EditorGUI.BeginChangeCheck ();
+			UnityEngine.Object @object = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, objectType, true);
+						
+			UnityEngine.Object value = variable.Value as UnityEngine.Object;
+			if (EditorGUI.EndChangeCheck () && @object != value) {
 								
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 								
-								variable.Value = @object;
+				variable.Value = @object;
 
 								
-								EditorUtility.SetDirty (variable);
+				EditorUtility.SetDirty (variable);
 								
-						}
-						rect.y = rect.y + (rect.height + 3f);
-						string text = objectType.ToString ();
-						if (GUI.Button (rect, text, EditorStyles.popup)) {
-								GenericMenu genericMenu = new GenericMenu ();
-								genericMenu.AddItem (new GUIContent ("None"), string.IsNullOrEmpty (text), null, typeof(UnityEngine.Object));
-								// new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), 
-								// new EditorGUILayoutEx.SetObjectVarType (objectVar, typeof(Object)));
-								Type[] derivedTypes = TypeUtility.GetDerivedTypes (typeof(UnityEngine.Object));
-								for (int i = 0; i < derivedTypes.Length; i++) {
-										string text2 = derivedTypes [i].ToString ();
-										genericMenu.AddItem (new GUIContent (text2.Replace ('.', '/')), text == text2, null, derivedTypes [i]);
-										// new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), 
-										// new EditorGUILayoutEx.SetObjectVarType (objectVar, derivedTypes [i]));
-								}
-								genericMenu.ShowAsContext ();
-						}
+			}
+			rect.y = rect.y + (rect.height + 3f);
+			string text = objectType.ToString ();
+			if (GUI.Button (rect, text, EditorStyles.popup)) {
+				GenericMenu genericMenu = new GenericMenu ();
+				genericMenu.AddItem (new GUIContent ("None"), string.IsNullOrEmpty (text), null, typeof(UnityEngine.Object));
+				// new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), 
+				// new EditorGUILayoutEx.SetObjectVarType (objectVar, typeof(Object)));
+				Type[] derivedTypes = EditorUtilityEx.GetDerivedTypes (typeof(UnityEngine.Object));
+				for (int i = 0; i < derivedTypes.Length; i++) {
+					string text2 = derivedTypes [i].ToString ();
+					genericMenu.AddItem (new GUIContent (text2.Replace ('.', '/')), text == text2, null, derivedTypes [i]);
+					// new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), 
+					// new EditorGUILayoutEx.SetObjectVarType (objectVar, derivedTypes [i]));
+				}
+				genericMenu.ShowAsContext ();
+			}
 							
-						return rect;
-				}
+			return rect;
+		}
 		
-				public static Rect DrawQuaternionVar (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawQuaternionVar (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 			
 			
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-						rect.xMin = rect.xMin + 84f;
-						rect.xMax = rect.xMax - 19f;
-						rect.y = rect.y - 16f;
-						Quaternion value = (Quaternion)variable.Value;
-						Vector4 vector = new Vector4 (value.x, value.y, value.z, value.w);
-						EditorGUI.BeginChangeCheck ();
-						Vector4 vector2 = EditorGUI.Vector4Field (rect, string.Empty, vector);
-						if (EditorGUI.EndChangeCheck () && vector != vector2) {
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
+			rect.xMin = rect.xMin + 84f;
+			rect.xMax = rect.xMax - 19f;
+			rect.y = rect.y - 16f;
+			Quaternion value = (Quaternion)variable.Value;
+			Vector4 vector = new Vector4 (value.x, value.y, value.z, value.w);
+			EditorGUI.BeginChangeCheck ();
+			Vector4 vector2 = EditorGUI.Vector4Field (rect, string.Empty, vector);
+			if (EditorGUI.EndChangeCheck () && vector != vector2) {
 
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 
 
-								variable.Value = new Quaternion (vector2.x, vector2.y, vector2.z, vector2.w);
+				variable.Value = new Quaternion (vector2.x, vector2.y, vector2.z, vector2.w);
 
-								EditorUtility.SetDirty (variable);
+				EditorUtility.SetDirty (variable);
 			
-						}
+			}
 
 
-						return rectOrg;
+			return rectOrg;
 		
 		
-				}
+		}
 		
-				public static Rect DrawRectVar (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+		public static Rect DrawRectVar (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 			
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height - 18f), variable);
-						rect.xMin = rect.xMin + 84f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						Rect rect2 = EditorGUI.RectField (rect, GUIContent.none, (Rect)variable.Value);
-						if (EditorGUI.EndChangeCheck () && rect2 != (Rect)variable.Value) {
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height - 18f), variable);
+			rect.xMin = rect.xMin + 84f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			Rect rect2 = EditorGUI.RectField (rect, GUIContent.none, (Rect)variable.Value);
+			if (EditorGUI.EndChangeCheck () && rect2 != (Rect)variable.Value) {
 
-								Undo.RecordObject (variable, "Variable Value");
+				Undo.RecordObject (variable, "Variable Value");
 				
-								variable.Value = rect2;
+				variable.Value = rect2;
 
-								EditorUtility.SetDirty (variable);
+				EditorUtility.SetDirty (variable);
 
-						}
+			}
 
-						return rectOrg;
-
-				}
-		
-				public static Rect DrawStringVar (Rect rect, UnityVariable variable)
-				{
-						Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-						rect.height = 21;
-						rect.yMin = rect.yMin + 3f;
-						rect.yMax = rect.yMax - 2f;
-						rect.xMin = rect.xMin + 6f;
-						rect.xMax = rect.xMax - 6f;
-						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-						rect.xMin = rect.xMin + 124f;
-						rect.xMax = rect.xMax - 19f;
-						EditorGUI.BeginChangeCheck ();
-						string text = EditorGUI.TextField (rect, GUIContent.none, (string)variable.Value);
-						if (EditorGUI.EndChangeCheck () && text != (string)variable.Value) {
-
-								Undo.RecordObject (variable, "Variable Value");
-				
-								variable.Value = text;
-
-								EditorUtility.SetDirty (variable);
-
-						}
-
-
-						return rectOrg;
-
-				}
-
-		#endregion
-		
-
+			return rectOrg;
 
 		}
+		
+		public static Rect DrawStringVar (Rect rect, UnityVariable variable)
+		{
+			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
+			
+			rect.width = Mathf.Max (Screen.width - 50, rect.width);
+			rect.height = 21;
+			rect.yMin = rect.yMin + 3f;
+			rect.yMax = rect.yMax - 2f;
+			rect.xMin = rect.xMin + 6f;
+			rect.xMax = rect.xMax - 6f;
+			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
+			rect.xMin = rect.xMin + 124f;
+			rect.xMax = rect.xMax - 19f;
+			EditorGUI.BeginChangeCheck ();
+			string text = EditorGUI.TextField (rect, GUIContent.none, (string)variable.Value);
+			if (EditorGUI.EndChangeCheck () && text != (string)variable.Value) {
+
+				Undo.RecordObject (variable, "Variable Value");
+				
+				variable.Value = text;
+
+				EditorUtility.SetDirty (variable);
+
+			}
+
+
+			return rectOrg;
+
+		}
+
+		#endregion
+//#endif
+
+
+	}
 }

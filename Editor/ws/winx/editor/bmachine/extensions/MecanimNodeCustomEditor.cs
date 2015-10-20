@@ -78,8 +78,8 @@ namespace ws.winx.editor.bmachine.extensions
 								//float time = (float)animationEvent.timeNormalized.Value;
 								//float time2 = (float)animationEvent2.timeNormalized.Value;
 
-								float time = (float)animationEvent.timeNormalized.serializedProperty.floatValue;
-								float time2 = (float)animationEvent2.timeNormalized.serializedProperty.floatValue;
+								float time = (animationEvent.timeNormalized.serializedProperty as SerializedProperty).floatValue;
+								float time2 = (animationEvent2.timeNormalized.serializedProperty as SerializedProperty).floatValue;
 								if (time != time2) {
 										return (int)Mathf.Sign (time - time2);
 								}
@@ -168,7 +168,7 @@ namespace ws.winx.editor.bmachine.extensions
 					
 		
 						//child.timeNormalized.Value = args.selectedValue;
-						child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
+						(child.timeNormalized.serializedProperty as SerializedProperty).floatValue = args.selectedValue;
 						//child.timeNormalized.ApplyModifiedProperties ();
 						SendEventNormalizedNodeEditorWindow.Show (child, eventTimeLineValuePopUpRect);
 
@@ -205,7 +205,7 @@ namespace ws.winx.editor.bmachine.extensions
 						//add node to its parent list
 						mecanimNode.Insert (args.selectedIndex, child);
 						//child.timeNormalized.Value = args.selectedValue;
-						child.timeNormalized.serializedProperty.floatValue = args.selectedValue;
+						(child.timeNormalized.serializedProperty as SerializedProperty).floatValue = args.selectedValue;
 
 						mecanimNode.tree.SaveNodes ();
 
@@ -253,7 +253,7 @@ namespace ws.winx.editor.bmachine.extensions
 								ev = ((SendEventNormalizedNode)mecanimNode.children [m]);	
 								this.eventTimeValuesSelected [m] = cloneOfSelected [inx];
 								//this.eventTimeValues [m] = (float)ev.timeNormalized.Value; 
-								this.eventTimeValues [m] = (float)ev.timeNormalized.serializedProperty.floatValue; 
+								this.eventTimeValues [m] = (float)(ev.timeNormalized.serializedProperty as SerializedProperty).floatValue; 
 								this.eventDisplayNames [m] = ev.name;
 				
 						}
@@ -284,7 +284,7 @@ namespace ws.winx.editor.bmachine.extensions
 								if (i < timeValuesNumber) {
 
 										//child.timeNormalized.Value = timeValues [i];
-										child.timeNormalized.serializedProperty.floatValue = timeValues [i];
+										(child.timeNormalized.serializedProperty as SerializedProperty).floatValue = timeValues [i];
 										i++;
 								} else {
 										//remove localy from node parent
@@ -653,7 +653,7 @@ namespace ws.winx.editor.bmachine.extensions
 												//eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalized)val).timeNormalized.Value).ToArray ();
 
 							
-												eventTimeValues = mecanimNode.children.Select ((val) => (float)((SendEventNormalizedNode)val).timeNormalized.serializedProperty.floatValue).ToArray ();
+												eventTimeValues = mecanimNode.children.Select ((val) => (float)(((SendEventNormalizedNode)val).timeNormalized.serializedProperty as SerializedProperty).floatValue).ToArray ();
 
 
 												eventDisplayNames = mecanimNode.children.Select ((val) => ((SendEventNormalizedNode)val).name).ToArray ();
@@ -699,8 +699,8 @@ namespace ws.winx.editor.bmachine.extensions
 												if (ev.name != eventDisplayNames [i])
 														eventDisplayNames [i] = ((SendEventNormalizedNode)mecanimNode.children [i]).name;
 					
-					
-												ev.timeNormalized.ApplyModifiedProperties ();
+												EditorUtilityEx.ApplyModifiedProperties(ev.timeNormalized);
+												//ev.timeNormalized.ApplyModifiedProperties ();
 							
 										}
 

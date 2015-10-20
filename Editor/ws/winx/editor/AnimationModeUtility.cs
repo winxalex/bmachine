@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using ws.winx.unity;
-using ws.winx.editor.utilities;
 
-namespace ws.winx.editor
+
+namespace ws.winx.editor.utilities
 {
 		/// <summary>
 		/// Animation mode utility extracted from UnityEditorInternal.AnimationRecording

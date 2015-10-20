@@ -26,10 +26,7 @@ using ws.winx.editor.utilities;
 namespace ws.winx.editor.bmachine
 {
 
-		/// <summary>
-		/// Wrapper class for BehaviourTreeEditor.
-		/// <seealso cref="BehaviourMachine.BehaviourTree" />
-		/// </summary>
+		
 		[CustomEditor(typeof(BlackboardCustom))]
 		public class BlackboardCustomEditor :Editor
 		{
@@ -175,7 +172,7 @@ namespace ws.winx.editor.bmachine
 								&& (Array.IndexOf (EditorGUILayoutEx.unityTypes, variable.ValueType) < 0
 								|| variable.ValueType == typeof(UnityEvent)) 
 			    ) {
-								UnityObjectEditorWindow.Show (variable);
+								UnityVariableEditorWindow.Show (variable);
 
 
 						}
@@ -251,7 +248,7 @@ namespace ws.winx.editor.bmachine
 						if (currentVariable != null) {
 								Type type = currentVariable.ValueType;
 
-								if (currentVariable.serializedProperty == null)
+									if (currentVariable.serializedProperty == null)
 										currentVariable.Value =UnityVariable.Default(type);
 
 								
@@ -284,7 +281,8 @@ namespace ws.winx.editor.bmachine
 										
 												position.xMin = variableNameTextFieldPos.xMax + 10;
 							
-												currentVariable.drawer.OnGUI (position, property, null);
+												
+												(currentVariable.drawer as PropertyDrawer).OnGUI (position, property, null);
 										} else
 												currentVariable.name = EditorGUI.TextField (position, currentVariable.name);
 										
@@ -308,13 +306,13 @@ namespace ws.winx.editor.bmachine
 
 										EditorGUI.BeginChangeCheck ();
 				
+										if(currentVariable.serializedProperty==null) currentVariable.serializedProperty= EditorUtilityEx.Serialize(currentVariable);
 
-
-										drawer.OnGUI (position, currentVariable.serializedProperty, new GUIContent (""));
+										drawer.OnGUI (position, currentVariable.serializedProperty as SerializedProperty, new GUIContent (""));
 			
 										if (EditorGUI.EndChangeCheck ()) {
 						
-												currentVariable.ApplyModifiedProperties ();
+												EditorUtilityEx.ApplyModifiedProperties (currentVariable);
 
 						
 												EditorUtility.SetDirty (currentVariable);

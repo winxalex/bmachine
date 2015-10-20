@@ -5,6 +5,7 @@ using ws.winx.unity;
 using ws.winx.editor.extensions;
 using ws.winx.editor;
 using ws.winx.unity.attributes;
+using ws.winx.unity.extensions;
 
 [CustomEditor(typeof(TestFunctionContainer))]
 public class TestFunctionContainerEditor : Editor {

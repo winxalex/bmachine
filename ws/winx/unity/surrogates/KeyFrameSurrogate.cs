@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Runtime.Serialization;
-using BehaviourMachine;
+
 
 namespace ws.winx.unity.surrogates{
 
@@ -9,13 +9,13 @@ namespace ws.winx.unity.surrogates{
 	{
 		public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
 		{
-			var vector = (Keyframe)obj;
+			var keyframes = (Keyframe)obj;
 		
-			info.AddValue("t", vector.time);
-			info.AddValue ("v", vector.value);
-			info.AddValue ("it", vector.inTangent);
-			info.AddValue ("ot", vector.outTangent);
-			info.AddValue ("mod", vector.tangentMode);
+			info.AddValue("t", keyframes.time);
+			info.AddValue ("v", keyframes.value);
+			info.AddValue ("it", keyframes.inTangent);
+			info.AddValue ("ot", keyframes.outTangent);
+			info.AddValue ("mod", keyframes.tangentMode);
 
 			//Debug.Log ("Keyframe t:" + vector.time + " v:" + vector.value);
 
