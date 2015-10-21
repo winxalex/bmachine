@@ -198,94 +198,97 @@ namespace ws.winx.editor.utilities
 		
 		
 		
-		public static SerializedProperty SerializeVariable (UnityVariable variable)
-		{
-			
-			using (Microsoft.CSharp.CSharpCodeProvider foo = 
-			       new Microsoft.CSharp.CSharpCodeProvider()) {
-				
-				CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
-				
-				
-				
-				compilerParams.GenerateInMemory = true; 
-				
-				var assembyExcuting = Assembly.GetExecutingAssembly ();
-				
-				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
-				
-				string usingString = "using UnityEngine;";
-				
-				if (!(variable.ValueType.IsPrimitive || variable.ValueType == typeof(string))) {
-					string assemblyLocationVarable = Assembly.GetAssembly (variable.ValueType).Location;
-					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
-					
-					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
-						
-						usingString += "using " + variable.ValueType.Namespace + ";";
-					}
-				}
-				
-				
-				
-				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
-				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
-				
-				
-				
-				// Create class with one property value of type same as type of the object we want to serialize
-				var res = foo.CompileAssemblyFromSource (
-					compilerParams, String.Format (
-					
-					" {0}" +
-					
-					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-					, usingString, variable.ValueType.ToString ())
-					);
-				
-				
-				
-				
-				if (res.Errors.Count > 0) {
-					
-					foreach (CompilerError CompErr in res.Errors) {
-						Debug.LogError (
-							"Line number " + CompErr.Line +
-							", Error Number: " + CompErr.ErrorNumber +
-							", '" + CompErr.ErrorText + ";" 
-							);
-					}
-					
-					return null;
-					
-				} else {
-					
-					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
-					
-					ScriptableObject st = ScriptableObject.CreateInstance (type);
-					
-					type.GetField ("value").SetValue (st, variable.Value);
-
-					SerializedObject seralizedObject=new SerializedObject(st);
-
-
-
-					return seralizedObject.FindProperty ("value");
-					
-				
-					
-					
-					
-				}
-				
-			}
-			
-			
-		}
+//		public static SerializedProperty SerializeVariable (UnityVariable variable)
+//		{
+//			
+//			using (Microsoft.CSharp.CSharpCodeProvider foo = 
+//			       new Microsoft.CSharp.CSharpCodeProvider()) {
+//				
+//				CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
+//				
+//				
+//				
+//				compilerParams.GenerateInMemory = true; 
+//				
+//				var assembyExcuting = Assembly.GetExecutingAssembly ();
+//				
+//				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
+//				
+//				string usingString = "using UnityEngine;";
+//				
+//				if (!(variable.ValueType.IsPrimitive || variable.ValueType == typeof(string))) {
+//					string assemblyLocationVarable = Assembly.GetAssembly (variable.ValueType).Location;
+//					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
+//					
+//					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
+//						
+//						usingString += "using " + variable.ValueType.Namespace + ";";
+//					}
+//				}
+//				
+//				
+//				
+//				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
+//				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
+//				
+//				
+//				
+//				// Create class with one property value of type same as type of the object we want to serialize
+//				var res = foo.CompileAssemblyFromSource (
+//					compilerParams, String.Format (
+//					
+//					" {0}" +
+//					
+//					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
+//					, usingString, variable.ValueType.ToString ())
+//					);
+//				
+//				
+//				
+//				
+//				if (res.Errors.Count > 0) {
+//					
+//					foreach (CompilerError CompErr in res.Errors) {
+//						Debug.LogError (
+//							"Line number " + CompErr.Line +
+//							", Error Number: " + CompErr.ErrorNumber +
+//							", '" + CompErr.ErrorText + ";" 
+//							);
+//					}
+//					
+//					return null;
+//					
+//				} else {
+//					
+//					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
+//					
+//					ScriptableObject st = ScriptableObject.CreateInstance (type);
+//					
+//					type.GetField ("value").SetValue (st, variable.Value);
+//
+//					SerializedObject seralizedObject=new SerializedObject(st);
+//
+//
+//
+//					return seralizedObject.FindProperty ("value");
+//					
+//				
+//					
+//					
+//					
+//				}
+//				
+//			}
+//			
+//			
+//		}
 		
 		
 		
-		
+		/// <summary>
+		/// Applies the variable value to serialized property.
+		/// </summary>
+		/// <param name="variable">Variable.</param>
 		public static void UpdateSerializedProperty(UnityVariable variable){
 			SerializedProperty serializedProperty = variable.serializedProperty as SerializedProperty;
 
@@ -330,9 +333,9 @@ namespace ws.winx.editor.utilities
 		
 		
 		/// <summary>
-		/// Applies the modified properties. !!!! For reusing of Unity Drawers
+		/// Applies the modified properties serializedProperty so can be used in PropertyDrawers
 		/// </summary>
-		public static void ApplyModifiedProperties (UnityVariable variable)
+		public static void ApplySerializedPropertyTo (UnityVariable variable)
 		{
 			//SerializedObject __seralizedObject = variable.seralizedObject as SerializedObject;
 			SerializedProperty seralizedProperty=variable.serializedProperty as SerializedProperty;

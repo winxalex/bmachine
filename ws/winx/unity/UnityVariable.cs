@@ -33,11 +33,11 @@ namespace ws.winx.unity
 				private int
 						__unityVariableReferencedInstanceID = 0;
 
-		public int unityVariableReferencedInstanceID {
-			get {
-				return __unityVariableReferencedInstanceID;
-			}
-		}
+				public int unityVariableReferencedInstanceID {
+					get {
+						return __unityVariableReferencedInstanceID;
+					}
+				}
 
 				[HideInInspector]
 				public byte[]
@@ -223,9 +223,8 @@ namespace ws.winx.unity
 				// Properties
 				//
 
-				//TODO
+				
 
-				// User-defined conversion from UnityVariable to Vector3 
 				public static implicit operator Vector3 (UnityVariable variable)
 				{
 						
@@ -237,6 +236,20 @@ namespace ws.winx.unity
 				{
 					
 						return	(Quaternion)variable.Value;
+					
+				}
+
+				public static implicit operator Rect (UnityVariable variable)
+				{
+					
+					return	(Rect)variable.Value;
+					
+				}
+
+				public static implicit operator Bounds(UnityVariable variable)
+				{
+					
+					return	(Bounds)variable.Value;
 					
 				}
 
@@ -252,14 +265,13 @@ namespace ws.winx.unity
 						return (int)variable.Value;
 				}
 
-
+				
 				
 				///////////////  VALUE ////////////////
 
 				/// <summary>
 				/// Gets or sets the value.
 				/// Property or Field 
-				/// Method in form of GetValueOfProperty("property name");
 				/// should return primitive
 				/// </summary>
 				/// <value>The value.</value>
@@ -368,7 +380,39 @@ namespace ws.winx.unity
 				}
 
 
-				
+					public Vector3 ToVector3(){
+						return (Vector3)valueObject;
+
+					}
+
+					public int ToInt32(){
+						return (int)valueObject;
+						
+					}
+
+
+					public Rect ToRect(){
+						return (Rect)valueObject;
+						
+					}
+
+
+					public float ToFloat(){
+						return (float)valueObject;
+						
+					}
+
+
+					public Bounds ToBounds(){
+						return (Bounds)valueObject;
+						
+					}
+
+					public Quaternion ToQuaternion(){
+						return (Quaternion)valueObject;
+						
+					}
+
 
 		#region ISerializationCallbackReceiver implementation
 
@@ -403,6 +447,8 @@ namespace ws.winx.unity
 
 				public void OnAfterDeserialize ()
 				{
+
+				
 						if (serializable) {
 //								if (memberInfoSerialized != null && memberInfoSerialized.Length > 0)
 //										__memberInfo = (MemberInfo)Utility.Deserialize (memberInfoSerialized);
@@ -427,7 +473,7 @@ namespace ws.winx.unity
 								if (valueObjectSerialized != null && valueObjectSerialized.Length > 0) { 
 
 						
-			
+										
 										__valueObject = SerializationUtility.Deserialize (valueObjectSerialized);
 
 

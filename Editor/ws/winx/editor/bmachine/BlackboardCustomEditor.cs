@@ -312,7 +312,7 @@ namespace ws.winx.editor.bmachine
 			
 										if (EditorGUI.EndChangeCheck ()) {
 						
-												EditorUtilityEx.ApplyModifiedProperties (currentVariable);
+												EditorUtilityEx.ApplySerializedPropertyTo (currentVariable);
 
 						
 												EditorUtility.SetDirty (currentVariable);

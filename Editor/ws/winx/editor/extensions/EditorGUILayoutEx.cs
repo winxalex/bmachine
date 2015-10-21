@@ -1151,7 +1151,7 @@ namespace ws.winx.editor.extensions
 
 
 							
-			int indexSelected=-1;
+			int indexSelected = -1;
 			int indexSelectedPrev;
 
 
@@ -1163,7 +1163,7 @@ namespace ws.winx.editor.extensions
 				variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
 				variableSelected.displayMode = UnityVariable.DisplayMode.Raw;
 				variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
-			} else if(values!=null)
+			} else if (values != null)
 				indexSelected = values.IndexOf (variableSelected);
 
 			//if UnityVariable is not in supplied, argument "list of values"(most likely blackboard vars) check
@@ -1225,7 +1225,7 @@ namespace ws.winx.editor.extensions
 						variableSelected.drawer = new UnityEditorInternal.UnityEventDrawer ();
 						
 					Rect eventRect = position.Value;
-					eventRect.y=eventRect.y+16f; //label height
+					eventRect.y = eventRect.y + 16f; //label height
 					eventRect.height = Math.Max (1, elements.arraySize) * 43 + 36f + 2;
 				
 					EditorGUI.BeginProperty (eventRect, GUIContent.none, variableSelected.serializedProperty as SerializedProperty);
@@ -1239,7 +1239,7 @@ namespace ws.winx.editor.extensions
 
 					//EditorUtilityEx.ApplyModifiedProperties (variableSelected);
 					if (EditorGUI.EndChangeCheck ()) {
-						EditorUtilityEx.ApplyModifiedProperties (variableSelected);
+						EditorUtilityEx.ApplySerializedPropertyTo (variableSelected);
 
 						//Debug.Log ("change happen");
 					}
@@ -1302,7 +1302,12 @@ namespace ws.winx.editor.extensions
 
 
 					if (EditorGUI.EndChangeCheck ()) {
-						EditorUtilityEx.ApplyModifiedProperties (variableSelected);
+
+						if(variableSelected.serializedProperty==null)
+							variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+
+						EditorUtilityEx.ApplySerializedPropertyTo (variableSelected);
+
 						EditorUtility.SetDirty (variableSelected);
 						//Debug.Log ("change happen");
 					}

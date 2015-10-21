@@ -7,6 +7,7 @@ using ws.winx.editor.extensions;
 using System.Collections.Generic;
 using System;
 using System.Runtime.Serialization;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor.drawers
 {
@@ -27,7 +28,7 @@ namespace ws.winx.editor.drawers
 			Rect varPos = new Rect (position.x, position.y, position.width, position.height);
 
 
-			Type type;
+			Type type=Type.GetType(property.type);
 
 						//create types selection popup
 						//if ( selectedType == typeof(System.Object)) {
@@ -36,27 +37,30 @@ namespace ws.winx.editor.drawers
 			else
 				type = ((UnityVariable)property.objectReferenceValue).ValueType;
 
-			
-			String name = ((UnityVariable)property.objectReferenceValue).name;
 
-			typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, typeSelected,EditorGUILayoutEx.unityTypesDisplayOptions , EditorGUILayoutEx.unityTypes,null,null,null,null,typePos);
+			String name = ((UnityVariable)property.objectReferenceValue).name;
+			bool typeChanged = false;
+			EditorGUI.BeginChangeCheck ();
+			typeSelected = EditorGUILayoutEx.CustomObjectPopup<Type> (null, type,EditorGUILayoutEx.unityTypesDisplayOptions , EditorGUILayoutEx.unityTypes,null,null,null,null,typePos);
 			
 								//if change of type create new variable
 								if (typeSelected != type && !typeSelected.IsSubclassOf (type) /*&& type!=typeof(UnityEngine.Object)*/) {
 										
 										property.objectReferenceValue = UnityVariable.CreateInstanceOf(typeSelected);
-
-//										if(typeSelected== typeof(string))
-//											((UnityVariable)property.objectReferenceValue).Value=String.Empty;
-//										else
-//											((UnityVariable)property.objectReferenceValue).Value=UnityVariable.Default(type);
+										typeChanged=true;
 								}
 					//	} 
 
 			property.objectReferenceValue=EditorGUILayoutEx.UnityVariablePopup(null,property.objectReferenceValue as UnityVariable,typeSelected,new List<GUIContent>(),new List<UnityVariable>(),varPos);
-			((UnityVariable)property.objectReferenceValue).drawer = this;
-			((UnityVariable)property.objectReferenceValue).name = name;
-			property.serializedObject.ApplyModifiedProperties();
+
+			UnityVariable variable = ((UnityVariable)property.objectReferenceValue);
+			variable.drawer = this;
+			variable.name = name;
+
+			if (EditorGUI.EndChangeCheck () || typeChanged) {
+				property.serializedObject.ApplyModifiedProperties ();
+				//EditorUtilityEx.ApplySerializedPropertyTo(variable);
+			}
 
 		}	
 	}
