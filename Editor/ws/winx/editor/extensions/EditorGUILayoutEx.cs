@@ -1161,8 +1161,9 @@ namespace ws.winx.editor.extensions
 			if (variableSelected == null || (!variableSelected.IsBinded () && variableSelected.ValueType.IsValueType && variableSelected.Value == null)) {
 				indexSelected = 0;
 				variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
+				variableSelected.name=label.text;
 				variableSelected.displayMode = UnityVariable.DisplayMode.Raw;
-				variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+				variableSelected.serializedProperty = EditorUtilityEx.SerializeObject (variableSelected);
 			} else if (values != null)
 				indexSelected = values.IndexOf (variableSelected);
 
@@ -1195,7 +1196,8 @@ namespace ws.winx.editor.extensions
 				//FROM LOCAL|GLOBALS TO RAW 
 				if (indexSelectedPrev >= 1) {
 					variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
-					variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+					variableSelected.name=label.text;
+					variableSelected.serializedProperty = EditorUtilityEx.SerializeObject (variableSelected);
 				} 
 							
 
@@ -1212,7 +1214,7 @@ namespace ws.winx.editor.extensions
 
 										
 					if (variableSelected.serializedProperty == null) {
-						variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+						variableSelected.serializedProperty = EditorUtilityEx.SerializeObject (variableSelected);
 					} 
 				
 			
@@ -1239,7 +1241,7 @@ namespace ws.winx.editor.extensions
 
 					//EditorUtilityEx.ApplyModifiedProperties (variableSelected);
 					if (EditorGUI.EndChangeCheck ()) {
-						EditorUtilityEx.ApplySerializedPropertyTo (variableSelected);
+						EditorUtilityEx.ApplySerializedPropertyChangeTo (variableSelected);
 
 						//Debug.Log ("change happen");
 					}
@@ -1266,15 +1268,18 @@ namespace ws.winx.editor.extensions
 							drawer = EditorUtilityEx.GetDefaultDrawer ();
 
 						if (variableSelected.serializedProperty == null)
-							variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+							variableSelected.serializedProperty = EditorUtilityEx.SerializeObject (variableSelected);
 
 												
 						if (variableSelected.serializedProperty != null) {
 							if (position.HasValue) {
 								Rect propertyPos = new Rect (pos.x, position.Value.y, pos.width, position.Value.height);
 								pos.xMin = propertyPos.xMax + 10;
+
+								if(variableSelected.ValueType==typeof(Quaternion))
+									propertyPos.y-=16f;
 								//EditorGUI.PropertyField (propertyPos, variableSelected.serializedProperty, new GUIContent (""));
-								drawer.OnGUI (propertyPos, variableSelected.serializedProperty as SerializedProperty, new GUIContent (""));
+								drawer.OnGUI (propertyPos, variableSelected.serializedProperty as SerializedProperty, GUIContent.none);
 							} else {
 								//EditorGUILayout.PropertyField (variableSelected.serializedProperty, new GUIContent (""));
 				
@@ -1282,7 +1287,7 @@ namespace ws.winx.editor.extensions
 								//drawer.OnGUI (GUILayoutUtility.GetRect(80,32), variableSelected.serializedProperty, new GUIContent (""));
 							
 
-								drawer.OnGUI (EditorGUILayout.GetControlRect (false, 32), variableSelected.serializedProperty as SerializedProperty, new GUIContent (""));
+								drawer.OnGUI (EditorGUILayout.GetControlRect (false, 32), variableSelected.serializedProperty as SerializedProperty, GUIContent.none);
 									
 																	
 							}
@@ -1304,9 +1309,9 @@ namespace ws.winx.editor.extensions
 					if (EditorGUI.EndChangeCheck ()) {
 
 						if(variableSelected.serializedProperty==null)
-							variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+							variableSelected.serializedProperty = EditorUtilityEx.SerializeObject (variableSelected);
 
-						EditorUtilityEx.ApplySerializedPropertyTo (variableSelected);
+						EditorUtilityEx.ApplySerializedPropertyChangeTo (variableSelected);
 
 						EditorUtility.SetDirty (variableSelected);
 						//Debug.Log ("change happen");
@@ -1323,7 +1328,8 @@ namespace ws.winx.editor.extensions
 				//FROM LOCALS/GLOBALS TO BIND => create new fresh Variable
 				if (indexSelectedPrev == 0 || indexSelectedPrev > 1) {
 					variableSelected = UnityVariable.CreateInstanceOf (typeSelected);
-					variableSelected.serializedProperty = EditorUtilityEx.Serialize (variableSelected);
+					variableSelected.name=label.text;
+					variableSelected.serializedProperty = EditorUtilityEx.SerializeObject (variableSelected);
 									
 				}
 
@@ -1424,481 +1430,7 @@ namespace ws.winx.editor.extensions
 
 
 
-		#region Draw Variables
-		public static Rect DrawVector3Var (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
 
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.xMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			DrawName (new Rect (rect.x, rect.y, 80f, 16f), variable);
-			rect.xMin = rect.xMin + 84f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-						
-
-			Vector3 vector = EditorGUI.Vector3Field (rect, string.Empty, (Vector3)variable.Value);
-			if (EditorGUI.EndChangeCheck () && vector != (Vector3)variable.Value) {
-			
-				Undo.RecordObject (variable, "Variable Value");
-
-				variable.Value = vector;
-
-				EditorUtility.SetDirty (variable);
-
-			}
-
-			return rectOrg;
-		}
-
-		public static Rect DrawBoolVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
-			rect.xMin = rect.xMin + 144f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			bool flag = EditorGUI.Toggle (rect, GUIContent.none, (bool)variable.Value);
-			if (EditorGUI.EndChangeCheck () && flag != (bool)variable.Value) {
-
-				Undo.RecordObject (variable, "Variable Value");
-			
-				variable.Value = flag;
-
-				EditorUtility.SetDirty (variable);
-
-			}
-						
-
-			return rectOrg;
-
-		}
-		
-		public static Rect DrawColorVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
-			rect.xMin = rect.xMin + 124f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			Color color = EditorGUI.ColorField (rect, GUIContent.none, (Color)variable.Value);
-			if (EditorGUI.EndChangeCheck () && color != (Color)variable.Value) {
-
-				Undo.RecordObject (variable, "Variable Value");
-
-				variable.Value = color;
-
-				EditorUtility.SetDirty (variable);
-			}
-						
-
-			return rectOrg;
-		
-		}
-
-		public static Rect DrawCurveVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-			
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 120f, rect.height), variable);
-			rect.xMin = rect.xMin + 124f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			AnimationCurve curve = EditorGUI.CurveField (rect, GUIContent.none, (AnimationCurve)variable.Value);
-			if (EditorGUI.EndChangeCheck () && curve != (AnimationCurve)variable.Value) {
-				
-				Undo.RecordObject (variable, "Variable Value");
-				
-				variable.Value = curve;
-				
-				EditorUtility.SetDirty (variable);
-			}
-			
-			
-			return rectOrg;
-			
-		}
-		
-		public static Rect DrawFloatVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			//rect.height = 21;
-
-
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
-			rect.xMin = rect.xMin + 144f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			float num = EditorGUI.FloatField (rect, GUIContent.none, (float)variable.Value);
-			if (EditorGUI.EndChangeCheck () && num != (float)variable.Value) {
-
-				Undo.RecordObject (variable, "Variable Value");
-
-				variable.Value = num;
-
-				EditorUtility.SetDirty (variable);
-
-			}
-
-						
-		
-			return rectOrg;
-
-		}
-		
-		public static Rect DrawIntVar (Rect rect, UnityVariable variable)
-		{
-
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 140f, rect.height), variable);
-			rect.xMin = rect.xMin + 144f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			int num = EditorGUI.IntField (rect, GUIContent.none, (int)variable.Value);
-
-			if (EditorGUI.EndChangeCheck () && num != (int)variable.Value) {
-
-				Undo.RecordObject (variable, "Variable Value");
-
-				variable.Value = num;
-
-				EditorUtility.SetDirty (variable);
-				
-			}
-
-		
-			return rectOrg;
-		}
-
-		public static Rect DrawUnityObject (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-
-
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-			rect.xMin = rect.xMin + 84f;
-			rect.xMax = rect.xMax - 19f;
-
-			UnityEngine.Object value = variable.Value as UnityEngine.Object;
-			EditorGUI.BeginChangeCheck ();
-			UnityEngine.Object objectUnity = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, variable.ValueType, true);
-			if (EditorGUI.EndChangeCheck () && objectUnity != value) {
-
-				Undo.RecordObject (variable, "Variable Value");
-
-				variable.Value = objectUnity;
-
-				EditorUtility.SetDirty (variable);
-
-			}
-
-
-
-			return rectOrg;
-
-		}
-
-		public static void DrawName (Rect rect, UnityVariable variable, bool editable=true)
-		{
-
-			if (!editable) {
-				EditorGUI.LabelField (rect, variable.name);
-			}
-
-			EditorGUI.BeginChangeCheck ();
-
-			string text = EditorGUI.TextField (rect, variable.name);
-						
-							
-			if (EditorGUI.EndChangeCheck () && text != variable.name) {
-
-				Undo.RecordObject (variable, "Variable Name");
-
-				variable.name = text;
-
-			}
-		}
-//
-//				private static Type __selectedType;
-//
-//				public static void DrawObjectPropVar (Rect rect, UnityVariable variable)
-//				{
-//						rect.width = Mathf.Max (Screen.width - 50, rect.width);
-//						rect.yMin = rect.yMin + 3f;
-//						rect.yMax = rect.yMax - 2f;
-//						rect.xMin = rect.xMin + 6f;
-//						rect.xMax = rect.xMax - 6f;
-//						rect.height = rect.height - 18f;
-//						EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-//						rect.xMin = rect.xMin + 84f;
-//						rect.xMax = rect.xMax - 19f;
-//				    
-//						//Type 
-//						EditorGUI.BeginChangeCheck ();
-//
-//						variable.reflectedInstance = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.reflectedInstance, typeof(UnityEngine.Object), true);
-//					
-//					
-//
-//						if (EditorGUI.EndChangeCheck () && variable.reflectedInstance != null) {
-//						
-//								Undo.RecordObject (variable, "Variable Value");
-//						
-//							
-//						
-//								EditorUtility.SetDirty (variable);
-//
-//
-//
-//								
-//										rect.width = 100;
-//										rect.xMin += 88f;
-//								
-//										//retruns 
-//										__selectedType = EditorGUILayoutEx.CustomObjectPopup<Type> (null, variable.ValueType, EditorGUILayoutEx.unityTypesDisplayOptions, EditorGUILayoutEx.unityTypes);
-//								
-//										GUIContent[] objectPropDisplayOptions;
-//										UnityVariable[] variables;
-//								
-//										if (__selectedType != null)
-//												Utility.ObjectToDisplayOptionsValues<UnityVariable> (variable.reflectedInstance, __selectedType, out objectPropDisplayOptions, out variables);
-//								
-//										if (variables != null && variables.Length > 0) {
-//									
-//												rect.width = 100;
-//												rect.xMin += 196f;
-//									
-//												EditorGUI.BeginChangeCheck ();
-//									
-//									
-//												variable = EditorGUILayoutEx.CustomObjectPopup<UnityVariable> (null,
-//									                                                            variable,
-//									                                                            objectPropDisplayOptions,
-//									                                                            variables.Select (item => item.MemberInfo),
-//									                                                            null,
-//									                                                            null,
-//									                                                            null,
-//									                                                            rect
-//												);
-//									
-//									
-//									
-//									
-//												if (EditorGUI.EndChangeCheck ()) {
-//										
-//											
-//												
-//												EditorUtility.SetDirty (variable);
-//										
-//												}
-//										}
-//						
-//								
-//
-//
-//					
-//
-//						}
-//
-//
-//					
-//
-//				}
-		
-		public Rect DrawObjectVar (Rect rect, UnityVariable variable)
-		{
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-			//????/
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			rect.height = rect.height - 18f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-			rect.xMin = rect.xMin + 84f;
-			rect.xMax = rect.xMax - 19f;
-			Type objectType = variable.ValueType;
-			EditorGUI.BeginChangeCheck ();
-			UnityEngine.Object @object = EditorGUI.ObjectField (rect, GUIContent.none, (UnityEngine.Object)variable.Value, objectType, true);
-						
-			UnityEngine.Object value = variable.Value as UnityEngine.Object;
-			if (EditorGUI.EndChangeCheck () && @object != value) {
-								
-				Undo.RecordObject (variable, "Variable Value");
-								
-				variable.Value = @object;
-
-								
-				EditorUtility.SetDirty (variable);
-								
-			}
-			rect.y = rect.y + (rect.height + 3f);
-			string text = objectType.ToString ();
-			if (GUI.Button (rect, text, EditorStyles.popup)) {
-				GenericMenu genericMenu = new GenericMenu ();
-				genericMenu.AddItem (new GUIContent ("None"), string.IsNullOrEmpty (text), null, typeof(UnityEngine.Object));
-				// new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), 
-				// new EditorGUILayoutEx.SetObjectVarType (objectVar, typeof(Object)));
-				Type[] derivedTypes = EditorUtilityEx.GetDerivedTypes (typeof(UnityEngine.Object));
-				for (int i = 0; i < derivedTypes.Length; i++) {
-					string text2 = derivedTypes [i].ToString ();
-					genericMenu.AddItem (new GUIContent (text2.Replace ('.', '/')), text == text2, null, derivedTypes [i]);
-					// new GenericMenu.MenuFunction2 (EditorGUILayoutEx.SetObjectType), 
-					// new EditorGUILayoutEx.SetObjectVarType (objectVar, derivedTypes [i]));
-				}
-				genericMenu.ShowAsContext ();
-			}
-							
-			return rect;
-		}
-		
-		public static Rect DrawQuaternionVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-			rect.xMin = rect.xMin + 84f;
-			rect.xMax = rect.xMax - 19f;
-			rect.y = rect.y - 16f;
-			Quaternion value = (Quaternion)variable.Value;
-			Vector4 vector = new Vector4 (value.x, value.y, value.z, value.w);
-			EditorGUI.BeginChangeCheck ();
-			Vector4 vector2 = EditorGUI.Vector4Field (rect, string.Empty, vector);
-			if (EditorGUI.EndChangeCheck () && vector != vector2) {
-
-				Undo.RecordObject (variable, "Variable Value");
-
-
-				variable.Value = new Quaternion (vector2.x, vector2.y, vector2.z, vector2.w);
-
-				EditorUtility.SetDirty (variable);
-			
-			}
-
-
-			return rectOrg;
-		
-		
-		}
-		
-		public static Rect DrawRectVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height - 18f), variable);
-			rect.xMin = rect.xMin + 84f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			Rect rect2 = EditorGUI.RectField (rect, GUIContent.none, (Rect)variable.Value);
-			if (EditorGUI.EndChangeCheck () && rect2 != (Rect)variable.Value) {
-
-				Undo.RecordObject (variable, "Variable Value");
-				
-				variable.Value = rect2;
-
-				EditorUtility.SetDirty (variable);
-
-			}
-
-			return rectOrg;
-
-		}
-		
-		public static Rect DrawStringVar (Rect rect, UnityVariable variable)
-		{
-			Rect rectOrg = new Rect (rect.x, rect.y, rect.width, rect.height);
-			
-			rect.width = Mathf.Max (Screen.width - 50, rect.width);
-			rect.height = 21;
-			rect.yMin = rect.yMin + 3f;
-			rect.yMax = rect.yMax - 2f;
-			rect.xMin = rect.xMin + 6f;
-			rect.xMax = rect.xMax - 6f;
-			EditorGUILayoutEx.DrawName (new Rect (rect.x, rect.y, 80f, rect.height), variable);
-			rect.xMin = rect.xMin + 124f;
-			rect.xMax = rect.xMax - 19f;
-			EditorGUI.BeginChangeCheck ();
-			string text = EditorGUI.TextField (rect, GUIContent.none, (string)variable.Value);
-			if (EditorGUI.EndChangeCheck () && text != (string)variable.Value) {
-
-				Undo.RecordObject (variable, "Variable Value");
-				
-				variable.Value = text;
-
-				EditorUtility.SetDirty (variable);
-
-			}
-
-
-			return rectOrg;
-
-		}
-
-		#endregion
-//#endif
 
 
 	}

@@ -12,6 +12,7 @@ using System.IO;
 using UnityEditor.Animations;
 using ws.winx.csharp.extensions;
 using System.CodeDom.Compiler;
+using System.Linq;
 
 
 namespace ws.winx.editor.utilities
@@ -20,14 +21,7 @@ namespace ws.winx.editor.utilities
 	public class EditorUtilityEx
 		{
 
-//#if UNITY_VARIABLE
-				public delegate Rect SwitchDrawerDelegate (Rect rect,UnityVariable variable);
 
-
-				//into static editor Utilityor somthing
-				static List<Func<Type,SwitchDrawerDelegate>> _drawers;
-				static Func<Type,SwitchDrawerDelegate> _defaultSwitchDrawer;
-//#endif
 				const string showLockIconPrefKey = "Lock_ShowIcon";
 				const string addLockUndoRedoPrefKey = "Lock_UndoRedo";
 				const string lockMultiSelectionPrefKey = "Lock_MultiSelection";
@@ -72,56 +66,42 @@ namespace ws.winx.editor.utilities
 					{
 						EditorPrefs.SetBool(lockMultiSelectionPrefKey, false);
 					}
-				}
 
 
-		//#if UNITY_VARIABLE		
-				public static void AddCustomDrawer<T> (SwitchDrawerDelegate drawer)
-				{
-						if (_drawers == null)
-								_drawers = new List<Func<Type, SwitchDrawerDelegate>> ();
+//					var stek = ScriptAttributeUtilityW.s_DrawerStack;
+//
+//
+//			IDictionary d= ScriptAttributeUtilityW.s_DrawerTypeForType;
+//
+//			if(d==null)
+//			ScriptAttributeUtilityW.BuildDrawerTypeForTypeDictionary();
+//
+//			d = ScriptAttributeUtilityW.s_DrawerTypeForType;
+//
+//			if(!d.Contains(typeof(Dictionary<,>)))
+//				d.Add (typeof(Dictionary<,>), ScriptAttributeUtilityW.GetDrawerKeySetInstance(typeof(Dictionary<,>),typeof(DictionaryPropertyDrawer)));
+//		
+//			var res = d [typeof(Dictionary<,>)];
+		}
 
-						_drawers.Add (SwitchUtility.CaseIsClassOf<T,SwitchDrawerDelegate> (drawer));
-				}
+
+
+			
 		
-				public static Func<Type, SwitchDrawerDelegate> GetDefaultSwitchDrawer ()
-				{
-						if (_defaultSwitchDrawer == null) {
 
-								if (_drawers == null)
-										_drawers = new List<Func<Type, SwitchDrawerDelegate>> ();
 
-								_drawers.AddRange (
-					
-					new Func<Type, SwitchDrawerDelegate>[]{
-					
-					SwitchUtility.CaseIsClassOf<float,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawFloatVar),
-					SwitchUtility.CaseIsClassOf<int,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawIntVar),
-					SwitchUtility.CaseIsClassOf<bool,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawBoolVar),
-					SwitchUtility.CaseIsClassOf<string,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawStringVar),
-					SwitchUtility.CaseIsClassOf<Quaternion,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawQuaternionVar),
-					SwitchUtility.CaseIsClassOf<Vector3,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawVector3Var),
-					SwitchUtility.CaseIsClassOf<Rect,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawRectVar),
-					SwitchUtility.CaseIsClassOf<Color,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawColorVar),
-					SwitchUtility.CaseIsClassOf<Material,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
-					SwitchUtility.CaseIsClassOf<UnityEngine.Texture,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
-					SwitchUtility.CaseIsClassOf<GameObject,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
-					SwitchUtility.CaseIsClassOf<AnimationCurve,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawCurveVar),
-					SwitchUtility.CaseIsClassOf<AnimationClip,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
-					SwitchUtility.CaseIsClassOf<UnityEngine.Object,SwitchDrawerDelegate> (EditorGUILayoutEx.DrawUnityObject),
-				}
-								);
-				
-				
-								_defaultSwitchDrawer = SwitchUtility.Switch (_drawers);
-				
-				
-						}
-			
-			
-						return _defaultSwitchDrawer;
-				}
 
+		static Assembly _EditorAssembly;
+
+		public static Assembly EditorAssembly{
+			get{
+				if(_EditorAssembly==null)
+					_EditorAssembly=Assembly.GetAssembly (typeof(Editor));
+
+				return _EditorAssembly;
+			}
+		}
+	
 
 
 
@@ -193,95 +173,7 @@ namespace ws.winx.editor.utilities
 		
 		
 
-		
-		
-		
-		
-		
-//		public static SerializedProperty SerializeVariable (UnityVariable variable)
-//		{
-//			
-//			using (Microsoft.CSharp.CSharpCodeProvider foo = 
-//			       new Microsoft.CSharp.CSharpCodeProvider()) {
-//				
-//				CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
-//				
-//				
-//				
-//				compilerParams.GenerateInMemory = true; 
-//				
-//				var assembyExcuting = Assembly.GetExecutingAssembly ();
-//				
-//				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
-//				
-//				string usingString = "using UnityEngine;";
-//				
-//				if (!(variable.ValueType.IsPrimitive || variable.ValueType == typeof(string))) {
-//					string assemblyLocationVarable = Assembly.GetAssembly (variable.ValueType).Location;
-//					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
-//					
-//					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
-//						
-//						usingString += "using " + variable.ValueType.Namespace + ";";
-//					}
-//				}
-//				
-//				
-//				
-//				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
-//				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
-//				
-//				
-//				
-//				// Create class with one property value of type same as type of the object we want to serialize
-//				var res = foo.CompileAssemblyFromSource (
-//					compilerParams, String.Format (
-//					
-//					" {0}" +
-//					
-//					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-//					, usingString, variable.ValueType.ToString ())
-//					);
-//				
-//				
-//				
-//				
-//				if (res.Errors.Count > 0) {
-//					
-//					foreach (CompilerError CompErr in res.Errors) {
-//						Debug.LogError (
-//							"Line number " + CompErr.Line +
-//							", Error Number: " + CompErr.ErrorNumber +
-//							", '" + CompErr.ErrorText + ";" 
-//							);
-//					}
-//					
-//					return null;
-//					
-//				} else {
-//					
-//					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
-//					
-//					ScriptableObject st = ScriptableObject.CreateInstance (type);
-//					
-//					type.GetField ("value").SetValue (st, variable.Value);
-//
-//					SerializedObject seralizedObject=new SerializedObject(st);
-//
-//
-//
-//					return seralizedObject.FindProperty ("value");
-//					
-//				
-//					
-//					
-//					
-//				}
-//				
-//			}
-//			
-//			
-//		}
+
 		
 		
 		
@@ -328,14 +220,14 @@ namespace ws.winx.editor.utilities
 			} else if(value is UnityEngine.Object)
 				serializedProperty.objectReferenceValue = value as UnityEngine.Object;
 			
-			
+			//TODO apply changes of array,list,dict happen in code, to serialized prop so can be shown in editor
 		}
 		
 		
 		/// <summary>
 		/// Applies the modified properties serializedProperty so can be used in PropertyDrawers
 		/// </summary>
-		public static void ApplySerializedPropertyTo (UnityVariable variable)
+		public static void ApplySerializedPropertyChangeTo (UnityVariable variable)
 		{
 			//SerializedObject __seralizedObject = variable.seralizedObject as SerializedObject;
 			SerializedProperty seralizedProperty=variable.serializedProperty as SerializedProperty;
@@ -349,76 +241,93 @@ namespace ws.winx.editor.utilities
 					//__seralizedObject=null;
 					seralizedProperty=null;
 					
-					variable.serializedProperty=seralizedProperty=Serialize(variable);
+					variable.serializedProperty=seralizedProperty=SerializeObject(variable);
 
 				}
 				
 				//__seralizedObject.ApplyModifiedProperties ();
 				seralizedProperty.serializedObject.ApplyModifiedProperties();
+
+				object targetObject=seralizedProperty.serializedObject.targetObject;
+
+				if(variable.ValueType.IsGenericType && variable.ValueType.GetGenericTypeDefinition()==typeof(Dictionary<,>))
+				{
+					IDictionary dict=variable.Value as IDictionary;
+					dict.Clear();
+
+					IList valuesList=targetObject.GetType().GetField("values").GetValue(targetObject) as IList;
+					IList keysList=	targetObject.GetType().GetField("keys").GetValue(targetObject)  as IList;
+					int cnt=valuesList.Count;
+
+					for(int i=0;i<cnt;i++)
+						if(!dict.Contains(keysList[i]))
+						dict.Add(keysList[i],valuesList[i]);
+				}
+				else
+					variable.Value=targetObject.GetType().GetField("value").GetValue(targetObject);
 				
-				
-				
-				if (variable.ValueType == typeof(float) && (float)variable.Value != seralizedProperty.floatValue) {
-					
-					variable.Value = seralizedProperty.floatValue;
-					variable.OnBeforeSerialize ();//serialize primitive and objects that aren't subclass of UnityObject or are UnityEvents
-				} else
-				if (variable.ValueType == typeof(bool) && (bool)variable.Value != seralizedProperty.boolValue) {
-					
-					variable.Value = seralizedProperty.boolValue;
-					variable.OnBeforeSerialize ();
-				} else
-				if (variable.ValueType == typeof(Bounds)) {
-					if (((Bounds)variable.Value).center != seralizedProperty.boundsValue.center || ((Bounds)variable.Value).max != seralizedProperty.boundsValue.max || ((Bounds)variable.Value).min != seralizedProperty.boundsValue.min || ((Bounds)variable.Value).size != seralizedProperty.boundsValue.size) {
-						variable.Value = seralizedProperty.boundsValue;
-						variable.OnBeforeSerialize ();
-					}
-					
-				} else
-				if (variable.ValueType == typeof(Color)) {
-					if (((Color)variable.Value).r != seralizedProperty.colorValue.r || ((Color)variable.Value).g != seralizedProperty.colorValue.g || ((Color)variable.Value).b != seralizedProperty.colorValue.b || ((Color)variable.Value).a != seralizedProperty.colorValue.a) {
-						variable.Value = seralizedProperty.colorValue;
-						variable.OnBeforeSerialize ();
-					}
-					
-				} else
-				if (variable.ValueType == typeof(Rect)) {
-					if (((Rect)variable.Value).x != seralizedProperty.rectValue.x || ((Rect)variable.Value).y != seralizedProperty.rectValue.y || ((Rect)variable.Value).width != seralizedProperty.rectValue.width || ((Rect)variable.Value).height != seralizedProperty.rectValue.height) {
-						variable.Value = seralizedProperty.rectValue;
-						variable.OnBeforeSerialize ();
-					}
-					
-				} else
-				if (variable.ValueType == typeof(int) && (int)variable.Value != seralizedProperty.intValue) {
-					
-					variable.Value = seralizedProperty.intValue;
-					variable.OnBeforeSerialize ();
-				} else
-				if (variable.ValueType == typeof(Vector3)) {
-					if (((Vector3)variable.Value).x != seralizedProperty.vector3Value.x || ((Vector3)variable.Value).y != seralizedProperty.vector3Value.y || ((Vector3)variable.Value).z != seralizedProperty.vector3Value.z) {
-						variable.Value = seralizedProperty.vector3Value;
-						variable.OnBeforeSerialize ();
-					}
-				} else
-				if (variable.ValueType == typeof(string) && (string)variable.Value != seralizedProperty.stringValue) {
-					
-					variable.Value = seralizedProperty.stringValue;
-					variable.OnBeforeSerialize ();
-				} else
-				if (variable.ValueType == typeof(Quaternion)) {
-					if (((Quaternion)variable.Value).x != seralizedProperty.quaternionValue.x || ((Quaternion)variable.Value).y != seralizedProperty.quaternionValue.y || ((Quaternion)variable.Value).z != seralizedProperty.quaternionValue.z || ((Quaternion)variable.Value).w != seralizedProperty.quaternionValue.w) {
-						variable.Value = seralizedProperty.quaternionValue;
-						variable.OnBeforeSerialize ();
-					}
-				} else
-				if (variable.ValueType == typeof(AnimationCurve)) {
-					
-					
-					variable.OnBeforeSerialize ();
-					
-				} else
-					if (variable.valueObject is UnityEngine.Object)
-						variable.Value = seralizedProperty.objectReferenceValue;
+//				
+//				if (variable.ValueType == typeof(float) && (float)variable.Value != seralizedProperty.floatValue) {
+//					
+//					variable.Value = seralizedProperty.floatValue;
+//					variable.OnBeforeSerialize ();//serialize primitive and objects that aren't subclass of UnityObject or are UnityEvents
+//				} else
+//				if (variable.ValueType == typeof(bool) && (bool)variable.Value != seralizedProperty.boolValue) {
+//					
+//					variable.Value = seralizedProperty.boolValue;
+//					variable.OnBeforeSerialize ();
+//				} else
+//				if (variable.ValueType == typeof(Bounds)) {
+//					if (((Bounds)variable.Value).center != seralizedProperty.boundsValue.center || ((Bounds)variable.Value).max != seralizedProperty.boundsValue.max || ((Bounds)variable.Value).min != seralizedProperty.boundsValue.min || ((Bounds)variable.Value).size != seralizedProperty.boundsValue.size) {
+//						variable.Value = seralizedProperty.boundsValue;
+//						variable.OnBeforeSerialize ();
+//					}
+//					
+//				} else
+//				if (variable.ValueType == typeof(Color)) {
+//					if (((Color)variable.Value).r != seralizedProperty.colorValue.r || ((Color)variable.Value).g != seralizedProperty.colorValue.g || ((Color)variable.Value).b != seralizedProperty.colorValue.b || ((Color)variable.Value).a != seralizedProperty.colorValue.a) {
+//						variable.Value = seralizedProperty.colorValue;
+//						variable.OnBeforeSerialize ();
+//					}
+//					
+//				} else
+//				if (variable.ValueType == typeof(Rect)) {
+//					if (((Rect)variable.Value).x != seralizedProperty.rectValue.x || ((Rect)variable.Value).y != seralizedProperty.rectValue.y || ((Rect)variable.Value).width != seralizedProperty.rectValue.width || ((Rect)variable.Value).height != seralizedProperty.rectValue.height) {
+//						variable.Value = seralizedProperty.rectValue;
+//						variable.OnBeforeSerialize ();
+//					}
+//					
+//				} else
+//				if (variable.ValueType == typeof(int) && (int)variable.Value != seralizedProperty.intValue) {
+//					
+//					variable.Value = seralizedProperty.intValue;
+//					variable.OnBeforeSerialize ();
+//				} else
+//				if (variable.ValueType == typeof(Vector3)) {
+//					if (((Vector3)variable.Value).x != seralizedProperty.vector3Value.x || ((Vector3)variable.Value).y != seralizedProperty.vector3Value.y || ((Vector3)variable.Value).z != seralizedProperty.vector3Value.z) {
+//						variable.Value = seralizedProperty.vector3Value;
+//						variable.OnBeforeSerialize ();
+//					}
+//				} else
+//				if (variable.ValueType == typeof(string) && (string)variable.Value != seralizedProperty.stringValue) {
+//					
+//					variable.Value = seralizedProperty.stringValue;
+//					variable.OnBeforeSerialize ();
+//				} else
+//				if (variable.ValueType == typeof(Quaternion)) {
+//					if (((Quaternion)variable.Value).x != seralizedProperty.quaternionValue.x || ((Quaternion)variable.Value).y != seralizedProperty.quaternionValue.y || ((Quaternion)variable.Value).z != seralizedProperty.quaternionValue.z || ((Quaternion)variable.Value).w != seralizedProperty.quaternionValue.w) {
+//						variable.Value = seralizedProperty.quaternionValue;
+//						variable.OnBeforeSerialize ();
+//					}
+//				} else
+//				if (variable.ValueType == typeof(AnimationCurve)) {
+//					
+//					
+//					variable.OnBeforeSerialize ();
+//					
+//				} else
+//					if (variable.valueObject is UnityEngine.Object)
+//						variable.Value = seralizedProperty.objectReferenceValue;
 				
 				
 			}
@@ -450,6 +359,12 @@ namespace ws.winx.editor.utilities
 				
 
 		#region GetDrawer of type
+				//TODO maybe use ScriptUtilityAttributeW for some
+				/// <summary>
+				/// Gets the drawer.
+				/// </summary>
+				/// <returns>The drawer.</returns>
+				/// <param name="type">Type.</param>
 				public static PropertyDrawer GetDrawer (Type type)
 				{
 						Type typeDrawer;
@@ -482,16 +397,26 @@ namespace ws.winx.editor.utilities
 
 												
 
-																		if (typeProperty != null && typeProperty.BaseType != typeof(PropertyAttribute) && !EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
-																				EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
-												
-//																Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name+" "+typeProperty.BaseType);
+																		if (typeProperty != null && typeProperty.BaseType != typeof(PropertyAttribute))
+																		{
+																			if(typeProperty.IsGenericType)
+																					typeProperty=typeProperty.GetGenericTypeDefinition();
+
+																			if(!EditorUtilityEx.__drawers.ContainsKey (typeProperty)) {
+																															EditorUtilityEx.__drawers.Add (typeProperty, Activator.CreateInstance (typeDrawer) as PropertyDrawer);
+																				
+//																				Debug.Log("  "+typeProperty.Name+" "+typeDrawer.Name+" "+typeProperty.BaseType);
+																			}
 																		}
 																}
 														}
 												}//attributes
 								}//types in dll
 						}
+
+						if (type.IsGenericType)
+						type = type.GetGenericTypeDefinition ();
+						
 
 						EditorUtilityEx.__drawers.TryGetValue (type, out drawer);
 						if (drawer != null) {
@@ -517,7 +442,7 @@ namespace ws.winx.editor.utilities
 		#endregion
 
 		#region SerializedObject
-		public static SerializedProperty Serialize (object obj)
+		public static SerializedProperty SerializeObject (object obj)
 		{
 
 			//ws.winx.csharp.CSharpCodeCompilerOriginal compOrig = new ws.winx.csharp.CSharpCodeCompilerOriginal ();
@@ -528,13 +453,7 @@ namespace ws.winx.editor.utilities
 
 			if(obj is UnityVariable){
 				UnityVariable var=obj as UnityVariable;
-			//respaw reference to other unity variable
-//			if(var.unityVariableReferencedInstanceID!=0)
-//				{
-//					//TODO Test this hard
-//
-//					EditorUtility.InstanceIDToObject(var.unityVariableReferencedInstanceID);
-//				}else
+
 					value=var.Value;
 					                                 
 			}
@@ -574,14 +493,43 @@ namespace ws.winx.editor.utilities
 
 			// Create class with one property value of type same as type of the object we want to serialize
 
-			var res = compOrig.CompileAssemblyFromSource (
-				compilerParams, String.Format (
+			String sourceCodeString = String.Format (
 				
 				" {0}" +
 				
 				"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-				, usingString, ValueType.ToString ())
-				);
+				, usingString, ValueType.ToCSharpString ());
+
+			Type[] genericTypes = null;
+			if (ValueType.IsGenericType && ValueType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
+				genericTypes=ValueType.GetGenericArguments();
+
+				IDictionary dictionary=value as IDictionary;
+
+				genericTypes[0]=typeof(List<>).MakeGenericType(new Type[]{genericTypes[0]});
+				genericTypes[1]=typeof(List<>).MakeGenericType(new Type[]{genericTypes[1]});
+					
+
+				sourceCodeString = String.Format (
+					
+					" {0}" +
+					
+					"public class ScriptableObjectTemplate:ScriptableObject {{ " +
+
+					"public {1} keys;"+
+					"public {2} values;"+
+
+					"}}"
+					, usingString,genericTypes[0].ToCSharpString(),genericTypes[1].ToCSharpString() 
+					);
+			}
+
+		
+
+
+			var res = compOrig.CompileAssemblyFromSource (
+				compilerParams,sourceCodeString )
+				;
 			
 			
 			
@@ -603,14 +551,45 @@ namespace ws.winx.editor.utilities
 				var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
 				
 				ScriptableObject st = ScriptableObject.CreateInstance (type);
-				
-				type.GetField ("value").SetValue (st, value);
+
+				if (ValueType.IsGenericType && ValueType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
+
+					IDictionary valueDict=value as IDictionary;
+
+
+					int count=valueDict.Keys.Count;
+
+					IList keysList=Activator.CreateInstance(genericTypes[0]) as IList;
+					IList valuesList=Activator.CreateInstance(genericTypes[1]) as IList;
+					IEnumerator eKeys=valueDict.Keys.GetEnumerator();
+					IEnumerator eValues=valueDict.Values.GetEnumerator();
+
+					while (eKeys.MoveNext())
+											{
+						keysList.Add (eKeys.Current);
+						eValues.MoveNext();
+							valuesList.Add(eValues.Current);
+					}
+
+
+					st.GetType().GetField("keys").SetValue(st,keysList);
+					st.GetType().GetField("values").SetValue(st,valuesList);
+
+
+				}else
+					type.GetField ("value").SetValue (st, value);
 				
 				SerializedObject seralizedObject=new SerializedObject(st);
 				
+				SerializedProperty serializedProp=seralizedObject.FindProperty ("value");
+
+				if(serializedProp==null) 
+					serializedProp=seralizedObject.FindProperty ("values");
+
+				if(serializedProp==null) 
+					Debug.LogError("Can't serialize "+obj);
 				
-				
-				return seralizedObject.FindProperty ("value");
+				return serializedProp;
 				
 				
 				
@@ -1032,9 +1011,9 @@ namespace ws.winx.editor.utilities
 						                                "The prefab already exists. Do you want to overwrite it?", 
 						                                "Yes", 
 						                                "No"))
-														CreateNew (go, localPath);
+														CreateNewPrefab (go, localPath);
 										} else
-												CreateNew (go, localPath);
+												CreateNewPrefab (go, localPath);
 								}
 						}
 				}
@@ -1045,10 +1024,10 @@ namespace ws.winx.editor.utilities
 						return Selection.activeGameObject != null;
 				}
 		
-				public static void CreateNew (GameObject obj, string localPath)
+				public static void CreateNewPrefab (GameObject go, string localPath)
 				{
 						var prefab = PrefabUtility.CreateEmptyPrefab (localPath);
-						PrefabUtility.ReplacePrefab (obj, prefab, ReplacePrefabOptions.ConnectToPrefab);
+						PrefabUtility.ReplacePrefab (go, prefab, ReplacePrefabOptions.ConnectToPrefab);
 				}
 
 

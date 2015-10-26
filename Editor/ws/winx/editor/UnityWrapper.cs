@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Linq;
 using ws.winx.editor.extensions;
+using ws.winx.editor.utilities;
 
 namespace ws.winx.editor
 {
@@ -24,6 +25,8 @@ namespace ws.winx.editor
 				Delete,
 				SelectionChanged
 		}
+
+
 
 	#region EditorGUIUtilityW
 		public class EditorGUIUtilityW
@@ -3070,8 +3073,8 @@ namespace ws.winx.editor
 
 
 						if (__RealType == null) {
-								Assembly assembly = Assembly.GetAssembly (typeof(Editor));
-								__RealType = assembly.GetType ("UnityEditor.AudioClipInspector");
+								
+							__RealType = EditorUtilityEx.EditorAssembly.GetType ("UnityEditor.AudioClipInspector");
 						}
 			
 						return __RealType;
@@ -3084,6 +3087,121 @@ namespace ws.winx.editor
 				}
 
 		}
+	#endregion
+
+	#region ScriptAttributeUtilityW
+	public class ScriptAttributeUtilityW{
+		private static Type __RealType;
+
+		private static Type __DrawerKeySetType;
+
+		static Type DrawerKeySetType {
+			get {
+				if (__DrawerKeySetType == null)
+					__DrawerKeySetType = GetWrappedType ().GetNestedType ("DrawerKeySet", BindingFlags.NonPublic);
+
+				return __DrawerKeySetType;
+			}
+		}
+
+
+	
+
+
+		private static FieldInfo __s_DrawerStack_FieldInfo;
+		
+		static FieldInfo s_DrawerStack_FieldInfo {
+			get {
+
+				if (__s_DrawerStack_FieldInfo == null)
+					__s_DrawerStack_FieldInfo = GetWrappedType().GetField ("s_DrawerStack",BindingFlags.Static |  BindingFlags.NonPublic);
+				
+				
+				return __s_DrawerStack_FieldInfo;
+			}
+		}
+
+		private static FieldInfo __s_DrawerTypeForType_FieldInfo;
+		
+		static FieldInfo s_DrawerTypeForType_FieldInfo {
+			get {
+				if (__s_DrawerTypeForType_FieldInfo == null)
+					__s_DrawerTypeForType_FieldInfo = GetWrappedType().GetField ("s_DrawerTypeForType",BindingFlags.Static | BindingFlags.NonPublic);
+				
+				
+				return __s_DrawerTypeForType_FieldInfo;
+			}
+		}
+
+		private static MethodInfo __BuildDrawerTypeForTypeDictionary_MethodInfo;
+		
+		public static MethodInfo BuildDrawerTypeForTypeDictionary_MethodInfo {
+			get {
+				if (__BuildDrawerTypeForTypeDictionary_MethodInfo == null)
+					__BuildDrawerTypeForTypeDictionary_MethodInfo = GetWrappedType ().GetMethod ("BuildDrawerTypeForTypeDictionary", BindingFlags.Static | BindingFlags.NonPublic);
+				return __BuildDrawerTypeForTypeDictionary_MethodInfo;
+			}
+		}
+		
+		/// <summary>
+		/// Gets the type of the wrapped.
+		/// </summary>
+		/// <returns>The wrapped type.</returns>
+		public static Type GetWrappedType ()
+		{
+			
+			
+			
+			if (__RealType == null) {
+				
+				__RealType = EditorUtilityEx.EditorAssembly.GetType ("UnityEditor.ScriptAttributeUtility");
+			}
+			
+			return __RealType;
+			
+		}
+
+		public static Stack<PropertyDrawer> s_DrawerStack {
+			get {
+					return (Stack<PropertyDrawer>)s_DrawerStack_FieldInfo.GetValue(null);
+			}
+		}
+
+		//public static Dictionary<Type, ScriptAttributeUtility.DrawerKeySet> s_DrawerTypeForType {
+		public static IDictionary s_DrawerTypeForType {
+			get {
+				//typeof(Dictionary<,>).MakeGenericType(
+				//return (Dictionary<Type, ScriptAttributeUtility.DrawerKeySet>)s_DrawerTypeForType_FieldInfo.GetValue(null);
+
+
+				return (IDictionary) s_DrawerTypeForType_FieldInfo.GetValue(null);
+			}
+		}
+
+		public static void BuildDrawerTypeForTypeDictionary(){
+			 BuildDrawerTypeForTypeDictionary_MethodInfo.Invoke(null,null);
+		}
+
+		public static Type GetDrawerKeySetType(){
+
+			return GetWrappedType ().GetNestedType ("DrawerKeySet", BindingFlags.NonPublic);
+
+		}
+
+		public static object GetDrawerKeySetInstance(Type type,Type drawer){
+
+			object drawerkeySet = Activator.CreateInstance (DrawerKeySetType);
+
+			DrawerKeySetType.GetField ("drawer").SetValue (drawerkeySet, drawer);
+			DrawerKeySetType.GetField ("type").SetValue (drawerkeySet,type);
+
+			return drawerkeySet;
+		}
+
+
+
+ 
+	}
 	#endregion
 
 

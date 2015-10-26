@@ -9,6 +9,8 @@ using System.Runtime.Serialization;
 using ws.winx.unity.surrogates;
 using ws.winx.csharp.utilities;
 using ws.winx.csharp.extensions;
+using System.Linq;
+using System.Threading;
 
 
 
@@ -16,6 +18,7 @@ namespace ws.winx.unity.utilities{
 
 	public class SerializationUtility
 	{
+
 	
 		static SerializationUtility(){
 
@@ -23,25 +26,31 @@ namespace ws.winx.unity.utilities{
 			AddSurrogate(typeof(UnityEngine.Color),new ColorSurrogate());
 			AddSurrogate(typeof(UnityEngine.Rect),new RectSurrogate());
 			AddSurrogate(typeof(UnityEngine.Quaternion),new QuaternionSurrogate());
-			AddSurrogate (typeof(BehaviourMachine.InternalBlackboard), new InternalBlackboardTempSurrogate ());
+
 			AddSurrogate (typeof(UnityEngine.Keyframe), new KeyFrameSurrogate ());
 			AddSurrogate (typeof(UnityEngine.AnimationCurve), new AnimationCurveSurrogate ());
 			AddSurrogate (typeof(UnityEngine.Bounds), new BoundsSurrogate ());
-			AddSurrogate (typeof(UnityEngine.GameObject), new GameObjectSurrogate ());
+			//AddSurrogate (typeof(UnityEngine.GameObject), new GameObjectSurrogate ());
 
 
 
-
-		
-
+			UnityObjectSurrogate unityObjectSurrogate = new UnityObjectSurrogate ();
+			typeof(UnityEngine.Object).Assembly.GetTypes ()
+				.Where (t => typeof(UnityEngine.Object).IsAssignableFrom (t)).ToList<Type> ().ForEach (itm =>
+			{
+				AddSurrogate (itm, unityObjectSurrogate);});
+					
+					
+					
+					
 		}
-
-
-
-	
-
-
-
+		
+		
+		
+		
+		
+		
+		
 		private static BinaryFormatter __binaryFormater;
 		private static SurrogateSelector __surrogateSelector;
 		private static StreamingContext __streamingContext;
@@ -65,7 +74,8 @@ namespace ws.winx.unity.utilities{
 			
 			if(__surrogateSelector==null){
 				
-				__surrogateSelector=new SurrogateSelector();
+				//__surrogateSelector=new SurrogateSelector();
+				__surrogateSelector=new UnitySurrogateSelectorEx();
 				
 				__streamingContext=new StreamingContext();
 				
@@ -117,7 +127,8 @@ namespace ws.winx.unity.utilities{
 				stream.Seek(0, SeekOrigin.Begin);
 				
 				if(__surrogateSelector==null)
-					__surrogateSelector=new SurrogateSelector();
+					//__surrogateSelector=new SurrogateSelector();
+					__surrogateSelector=new UnitySurrogateSelectorEx();
 				
 				__binaryFormater.SurrogateSelector=__surrogateSelector;
 				

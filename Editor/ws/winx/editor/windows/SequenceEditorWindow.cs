@@ -176,6 +176,100 @@ namespace ws.winx.editor.windows
 				}
 
 
+		#region CreatePrefab
+		// Creates a prefab from the selected GameObjects.
+		// if the prefab already exists it asks if you want to replace it
+		
+		[MenuItem("GameObject/Create/Sequence Prefab From Selected")]
+		static void CreatePrefab ()
+		{
+			var objs = Selection.gameObjects;
+			
+			string pathBase = EditorUtility.SaveFolderPanel ("Choose save folder", "Assets", "");
+			
+			if (!String.IsNullOrEmpty (pathBase)) {
+				
+				pathBase = pathBase.Remove (0, pathBase.IndexOf ("Assets")) + Path.DirectorySeparatorChar;
+				
+				foreach (var go in objs) {
+					String localPath = pathBase + go.name + ".prefab";
+					
+					if (AssetDatabase.LoadAssetAtPath (localPath, typeof(GameObject))) {
+						if (EditorUtility.DisplayDialog ("Are you sure?", 
+						                                 "The prefab already exists. Do you want to overwrite it?", 
+						                                 "Yes", 
+						                                 "No"))
+							CreateNewPrefab (go, localPath);
+					} else
+						CreateNewPrefab (go, localPath);
+				}
+			}
+		}
+		
+		[MenuItem("GameObject/Create/Sequence Prefab From Selected", true)]
+		static bool ValidateCreatePrefab ()
+		{
+			return Selection.activeGameObject != null && Selection.activeGameObject is GameObject && (Selection.activeGameObject as GameObject).GetComponent<Sequence>() !=null;
+		}
+		
+		public static void CreateNewPrefab (GameObject go, string localPath)
+		{
+
+//			public static void OnOverridenPrefabsInspector(GameObject gameObject)
+//			{
+//				GUI.enabled = true;
+//				UnityEngine.Object prefabObject = PrefabUtility.GetPrefabObject(gameObject);
+//				if (prefabObject == null)
+//				{
+//					return;
+//				}
+
+			GameObject duplicate=GameObject.Instantiate<GameObject> (go);
+
+			var prefab = PrefabUtility.CreateEmptyPrefab (localPath);
+			PrefabUtility.ReplacePrefab (go, prefab, ReplacePrefabOptions.ConnectToPrefab);
+
+			GameObject prefabGo = PrefabUtility.GetPrefabParent (go) as GameObject;
+			UnityEngine.Object obj1=	AssetDatabase.LoadAssetAtPath (localPath, typeof (GameObject));
+				UnityEngine.Object obj3=PrefabUtility.GetPrefabObject (prefab);
+//
+		//	UnityEngine.Object obj2=PrefabUtility.GetPrefabParent (prefab);
+
+
+			 //  AssetDatabase.LoadAssetAtPath(localPath)
+
+			Sequence sequence = go.GetComponent<Sequence> ();
+
+			int i = 0;
+			foreach (SequenceChannel channel in sequence.channels) {
+				//link channel ScriptableObject to prefabed GameObject targets
+				channel.target=PrefabUtility.GetPrefabParent (channel.target) as GameObject;
+				channel.sequence=prefabGo.GetComponent<Sequence>();
+				AssetDatabase.CreateAsset (channel, "Assets/Resources/" + channel.name + "_" + channel.GetInstanceID () + ".asset");
+				//AssetDatabase.AddObjectToAsset(prefabGo,channel);
+
+				//link sequence MonoBehaviour channels from assets
+				channel.sequence.channels[0]=channel;
+
+				foreach(SequenceNode node in channel.nodes){
+					AssetDatabase.AddObjectToAsset(node,channel);
+					AssetDatabase.AddObjectToAsset(node.clipBinding,node);
+				}
+
+				//AssetDatabase.AddObjectToAsset(sequence,channel);
+				//AssetDatabase.AddObjectToAsset(go,channel);
+
+		}
+
+
+
+
+		}
+		
+		
+		#endregion
+
+
 
 				/// <summary>
 				/// Hanlde the enable event raized by Mono.

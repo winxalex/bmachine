@@ -3,10 +3,12 @@ using System;
 using System.Collections;
 using System.Reflection;
 using ws.winx.csharp.utilities;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+
 
 namespace ws.winx.csharp.extensions
 {
@@ -1075,6 +1077,55 @@ namespace ws.winx.csharp.extensions
 			throw new ArgumentException("{" + MethodInfo.GetCurrentMethod() + "} Error:\n\nThe supplied value type <" + type + 
 			                            "> is not a publicly-visible type, so the default value cannot be retrieved");
 		}
+
+
+
+		public static string ToCSharpString(this Type t, bool trimArgCount=true) {
+			if( t.IsGenericType ) {
+				var genericArgs = t.GetGenericArguments().ToList();
+				
+				return ToCSharpString( t, trimArgCount, genericArgs );
+			}
+			
+			return t.ToString();
+		}
+		
+		static string ToCSharpString(Type t, bool trimArgCount, List<Type> availableArguments ) {
+			if( t.IsGenericType ) {
+				string value = t.Name;
+				if( trimArgCount && value.IndexOf("`") > -1 ) {
+					value = value.Substring( 0, value.IndexOf( "`" ) );
+				}
+				
+				if( t.DeclaringType != null ) {
+					// This is a nested type, build the nesting type first
+					value = ToCSharpString( t.DeclaringType, trimArgCount, availableArguments ) + "+" + value;
+				}
+				
+				// Build the type arguments (if any)
+				string argString = "";
+				var thisTypeArgs = t.GetGenericArguments();
+				for( int i = 0; i < thisTypeArgs.Length && availableArguments.Count > 0; i++ ) {
+					if( i != 0 ) argString += ", ";
+					
+					argString += ToCSharpString( availableArguments[0], trimArgCount );
+					availableArguments.RemoveAt( 0 );
+				}
+				
+				// If there are type arguments, add them with < >
+				if( argString.Length > 0 ) {
+					value += "<" + argString + ">";
+				}
+				
+				return value;
+			}
+			
+			return t.ToString();
+		}
+
+
+
+
 		
 		public static void SetValue (this MemberInfo member, object instance, object value)
 		{

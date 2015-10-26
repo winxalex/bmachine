@@ -360,4 +360,21 @@ namespace ws.winx.editor
 	}
 	#endregion
 
+
+	#region SerializedProperty
+	public static class SerializedPropertyExtension
+	{
+		public static void LogStructure(this SerializedObject so, bool includeChildren = true) {
+			// Shows all the properties in the serialized object with name and type
+			// You can use this to learn the structure
+			so.Update();
+			SerializedProperty propertyLogger = so.GetIterator();
+			while(true) {
+				Debug.Log("name = " + propertyLogger.name + " type = " + propertyLogger.type);
+				if(!propertyLogger.Next(includeChildren)) break;
+			}
+		}
+	}
+	#endregion
+
 }
