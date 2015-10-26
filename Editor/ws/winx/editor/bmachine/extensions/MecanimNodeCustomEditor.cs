@@ -699,7 +699,7 @@ namespace ws.winx.editor.bmachine.extensions
 												if (ev.name != eventDisplayNames [i])
 														eventDisplayNames [i] = ((SendEventNormalizedNode)mecanimNode.children [i]).name;
 					
-												EditorUtilityEx.ApplySerializedPropertyTo(ev.timeNormalized);
+												EditorUtilityEx.ApplySerializedPropertyChangeTo(ev.timeNormalized);
 												//ev.timeNormalized.ApplyModifiedProperties ();
 							
 										}

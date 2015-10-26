@@ -10,6 +10,12 @@ namespace ws.winx.editor.drawers
 	public class QuaternionPropertyDrawer:PropertyDrawer
 	{
 
+		public override float GetPropertyHeight (SerializedProperty property, GUIContent label)
+		{
+
+				return 32f;// base.GetPropertyHeight (property, label);
+		}
+
 		public override void OnGUI (Rect position, SerializedProperty property, GUIContent label)
 		{
 
@@ -18,7 +24,7 @@ namespace ws.winx.editor.drawers
 			Vector4 vector = new Vector4 (value.x, value.y, value.z, value.w);
 
 			//if(Event.current.type==EventType.Layout)
-			GUILayoutUtility.GetRect (position.width, 16f);
+			//GUILayoutUtility.GetRect (position.width, 16f);
 
 
 			EditorGUI.BeginProperty (position, label, property);

@@ -306,13 +306,13 @@ namespace ws.winx.editor.bmachine
 
 										EditorGUI.BeginChangeCheck ();
 				
-										if(currentVariable.serializedProperty==null) currentVariable.serializedProperty= EditorUtilityEx.Serialize(currentVariable);
+										if(currentVariable.serializedProperty==null) currentVariable.serializedProperty= EditorUtilityEx.SerializeObject(currentVariable);
 
 										drawer.OnGUI (position, currentVariable.serializedProperty as SerializedProperty, new GUIContent (""));
 			
 										if (EditorGUI.EndChangeCheck ()) {
 						
-												EditorUtilityEx.ApplySerializedPropertyTo (currentVariable);
+												EditorUtilityEx.ApplySerializedPropertyChangeTo (currentVariable);
 
 						
 												EditorUtility.SetDirty (currentVariable);

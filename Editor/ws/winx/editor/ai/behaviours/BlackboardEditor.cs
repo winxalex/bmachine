@@ -46,7 +46,7 @@ namespace ws.winx.editor.ai.behaviours
 			
 			((Blackboard)target).variablesList.ForEach (var => {
 				if (var != null && var.serializedProperty == null) {
-					var.serializedProperty = EditorUtilityEx.Serialize (var);
+					var.serializedProperty = EditorUtilityEx.SerializeObject (var);
 					EditorUtilityEx.UpdateSerializedProperty (var);
 					
 					
@@ -258,7 +258,7 @@ namespace ws.winx.editor.ai.behaviours
 
 				if (currentVariable.serializedProperty == null) {
 					currentVariable.Value = UnityVariable.Default (type);
-					currentVariable.serializedProperty = EditorUtilityEx.Serialize (currentVariable);
+					currentVariable.serializedProperty = EditorUtilityEx.SerializeObject (currentVariable);
 				}
 
 								
@@ -331,7 +331,7 @@ namespace ws.winx.editor.ai.behaviours
 			
 					if (EditorGUI.EndChangeCheck ()) {
 						
-						EditorUtilityEx.ApplySerializedPropertyTo (currentVariable);
+						EditorUtilityEx.ApplySerializedPropertyChangeTo (currentVariable);
 
 						
 						EditorUtility.SetDirty (currentVariable);
@@ -396,6 +396,7 @@ namespace ws.winx.editor.ai.behaviours
 					_typesCustom.Add (type);
 					menu.AddItem (new GUIContent (type.Name), true, onTypeCustomSelected, type);
 					typeFullPath = "";
+					this.Repaint();
 				}
 			}
 
@@ -410,6 +411,7 @@ namespace ws.winx.editor.ai.behaviours
 
 					CreateGenericMenu();
 					typeFullPath = "";
+					this.Repaint();
 				}
 			}
 			EditorGUILayout.EndHorizontal ();
