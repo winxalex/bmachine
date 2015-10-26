@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using UnityEngine.Events;
 using System.Linq;
 using ws.winx.unity.ai.behaviours;
+using System.Collections.Generic;
 
 namespace ws.winx.editor.drawers
 {
@@ -21,15 +22,33 @@ namespace ws.winx.editor.drawers
 		public override float GetPropertyHeight (SerializedProperty property, GUIContent label)
 		{
 			UnityVariable variable = property.objectReferenceValue as UnityVariable;
-			if (variable!=null && variable.serializedProperty!=null && variable.ValueType == typeof(UnityEvent)) {
-				SerializedProperty elements = (variable.serializedProperty as SerializedProperty).FindPropertyRelative ("m_PersistentCalls.m_Calls");
-				
 
-				return Math.Max (1, elements.arraySize) * 43 + 36f+2f+16f;//16f label height , 2f separator
+			if (variable != null && variable.serializedProperty != null)
+			{
+
+				SerializedProperty variableSerializadProperty = variable.serializedProperty as SerializedProperty;
+
+				if (variable.ValueType == typeof(UnityEvent)) {
+					SerializedProperty elements = variableSerializadProperty.FindPropertyRelative ("m_PersistentCalls.m_Calls");
+					
+
+					return Math.Max (1, elements.arraySize) * 43 + 36f + 2f + EditorGUIUtility.singleLineHeight;//16f label height , 2f separator
+				}
+				else if((variable.ValueType.IsGenericType && variable.ValueType.GetGenericTypeDefinition()==typeof(List<>)
+				        ) || variable.ValueType.IsArray){
+
+					if(variableSerializadProperty.isExpanded)
+						return EditorGUIUtility.singleLineHeight + (variableSerializadProperty.arraySize+1) * EditorGUIUtility.singleLineHeight+2f;//label + (size label) + list elements
+				}else if (variable.ValueType.IsGenericType && variable.ValueType.GetGenericTypeDefinition()==typeof(Dictionary<,>)) {
+
+					
+					return Math.Max (1, variableSerializadProperty.arraySize) * 43 + 36f + 2f + EditorGUIUtility.singleLineHeight;//16f label height , 2f separator
+				}
+
+			
+
 			
 			}
-
-
 
 			return base.GetPropertyHeight (property, label);
 		}
