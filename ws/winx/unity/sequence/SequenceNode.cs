@@ -13,9 +13,9 @@ namespace ws.winx.unity.sequence
 
 
 
-				[HideInInspector]
+				//[HideInInspector]
 				public SequenceNodeEvent
-						onStart = new SequenceNodeEvent ();
+			onStart;// = new SequenceNodeEvent ();
 				[HideInInspector]
 				public SequenceNodeEvent
 						onStop = new SequenceNodeEvent ();

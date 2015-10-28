@@ -16,23 +16,23 @@ namespace ws.winx.editor.windows{
 		bool showHideSequenceEvents;
 
 		void OnEnable(){
-			onStartSerializedProperty = serializedObject.FindProperty ("onStart");
-			onStopSerializedProperty = serializedObject.FindProperty ("onStop");
-			onUpdateSerializedProperty = serializedObject.FindProperty ("onUpdate");
-			onPauseSerializedProperty = serializedObject.FindProperty ("onPause");
+//			onStartSerializedProperty = serializedObject.FindProperty ("onStart");
+//			onStopSerializedProperty = serializedObject.FindProperty ("onStop");
+//			onUpdateSerializedProperty = serializedObject.FindProperty ("onUpdate");
+//			onPauseSerializedProperty = serializedObject.FindProperty ("onPause");
 
 				}
 
 		public override void OnInspectorGUI ()
 		{
-			showHideSequenceEvents = EditorGUILayout.Foldout (showHideSequenceEvents, "Node Events:");
-			
-			if (showHideSequenceEvents) {
-				EditorGUILayout.PropertyField (onStartSerializedProperty, new GUIContent ("OnStart"));
-				EditorGUILayout.PropertyField (onStopSerializedProperty, new GUIContent ("OnStop"));
-				EditorGUILayout.PropertyField (onUpdateSerializedProperty, new GUIContent ("OnUpdate"));
-				EditorGUILayout.PropertyField (onPauseSerializedProperty, new GUIContent ("OnPause"));
-			}
+//			showHideSequenceEvents = EditorGUILayout.Foldout (showHideSequenceEvents, "Node Events:");
+//			
+//			if (showHideSequenceEvents) {
+//				EditorGUILayout.PropertyField (onStartSerializedProperty, new GUIContent ("OnStart"));
+//				EditorGUILayout.PropertyField (onStopSerializedProperty, new GUIContent ("OnStop"));
+//				EditorGUILayout.PropertyField (onUpdateSerializedProperty, new GUIContent ("OnUpdate"));
+//				EditorGUILayout.PropertyField (onPauseSerializedProperty, new GUIContent ("OnPause"));
+//			}
 
 			this.DrawDefaultInspector ();
 		}

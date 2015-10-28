@@ -7,7 +7,7 @@ using System;
 
 namespace ws.winx.unity.sequence
 {
-		public class Sequence : MonoBehaviour
+		public class Sequence : ScriptableObject
 		{
 
 				//
@@ -15,25 +15,25 @@ namespace ws.winx.unity.sequence
 				//
 				public class EventComparer : IComparer<SequenceEvent>
 				{
-			#region IComparer implementation
+						#region IComparer implementation
 
-						public int Compare (SequenceEvent animationEvent, SequenceEvent animationEvent2)
-						{
+									public int Compare (SequenceEvent animationEvent, SequenceEvent animationEvent2)
+									{
 
-								//float time = (float)animationEvent.timeNormalized.Value;
-								//float time2 = (float)animationEvent2.timeNormalized.Value;
-				
-								float time = (float)animationEvent.time;
-								float time2 = (float)animationEvent2.time;
-								if (time != time2) {
-										return (int)Mathf.Sign (time - time2);
-								}
-								int hashCode = animationEvent.GetHashCode ();
-								int hashCode2 = animationEvent2.GetHashCode ();
-								return hashCode - hashCode2;
-						}
+											//float time = (float)animationEvent.timeNormalized.Value;
+											//float time2 = (float)animationEvent2.timeNormalized.Value;
+							
+											float time = (float)animationEvent.time;
+											float time2 = (float)animationEvent2.time;
+											if (time != time2) {
+													return (int)Mathf.Sign (time - time2);
+											}
+											int hashCode = animationEvent.GetHashCode ();
+											int hashCode2 = animationEvent2.GetHashCode ();
+											return hashCode - hashCode2;
+									}
 
-			#endregion
+						#endregion
 
 
 				}
@@ -43,39 +43,39 @@ namespace ws.winx.unity.sequence
 				//events 
 				public ws.winx.unity.sequence.SequenceEvent OnStart = new ws.winx.unity.sequence.SequenceEvent ();
 				public ws.winx.unity.sequence.SequenceEvent OnEnd = new ws.winx.unity.sequence.SequenceEvent ();
-				[NonSerialized]
-				public ws.winx.unity.sequence.SequenceEvent
-						eventSelected;
+//				[NonSerialized]
+//				public ws.winx.unity.sequence.SequenceEvent
+//						eventSelected;
 
-				public event UnityAction<SequenceNode> SequenceNodeStart {
-						add {
-								//this.channels.ForEach (chn => chn.nodes.ForEach (nd => nd.onStart.AddListener(value)));
-					
-								foreach (SequenceChannel channel in this.channels)
-										foreach (SequenceNode node in channel.nodes)
-												node.onStart.AddListener (value);
-						}
-						remove {
-								foreach (SequenceChannel channel in this.channels)
-										foreach (SequenceNode node in channel.nodes)
-												node.onStart.RemoveListener (value);
-						}
-				}
-				//
-				public event UnityAction<SequenceNode> SequenceNodeStop {
-						add {
-								foreach (SequenceChannel channel in this.channels)
-										foreach (SequenceNode node in channel.nodes)
-												node.onStop.AddListener (value);
-				
-				
-						}
-						remove {
-								foreach (SequenceChannel channel in this.channels)
-										foreach (SequenceNode node in channel.nodes)
-												node.onStop.RemoveListener (value);
-						}
-				}
+//				public event UnityAction<SequenceNode> SequenceNodeStart {
+//						add {
+//								//this.channels.ForEach (chn => chn.nodes.ForEach (nd => nd.onStart.AddListener(value)));
+//					
+//								foreach (SequenceChannel channel in this.channels)
+//										foreach (SequenceNode node in channel.nodes)
+//												node.onStart.AddListener (value);
+//						}
+//						remove {
+//								foreach (SequenceChannel channel in this.channels)
+//										foreach (SequenceNode node in channel.nodes)
+//												node.onStart.RemoveListener (value);
+//						}
+//				}
+//				//
+//				public event UnityAction<SequenceNode> SequenceNodeStop {
+//						add {
+//								foreach (SequenceChannel channel in this.channels)
+//										foreach (SequenceNode node in channel.nodes)
+//												node.onStop.AddListener (value);
+//				
+//				
+//						}
+//						remove {
+//								foreach (SequenceChannel channel in this.channels)
+//										foreach (SequenceNode node in channel.nodes)
+//												node.onStop.RemoveListener (value);
+//						}
+//				}
 
 				[SerializeField]
 				List<SequenceChannel>

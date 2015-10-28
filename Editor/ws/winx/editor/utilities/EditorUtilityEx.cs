@@ -951,38 +951,59 @@ namespace ws.winx.editor.utilities
 				[MenuItem("Assets/Delete/Remove SubAsset")]
 				public static void RemoveSelectedSubAsset ()
 				{
-						if (Selection.activeObject is ScriptableObject && AssetDatabase.IsSubAsset (Selection.activeObject.GetInstanceID ())) {
-								String path = AssetDatabase.GetAssetPath (Selection.activeObject);			
-								UnityEngine.Object.DestroyImmediate (Selection.activeObject, true);
+						var objectsSelected = Selection.objects;
 
-								AssetDatabase.ImportAsset (path);
+					foreach (var obj in objectsSelected) {
+						if (obj is ScriptableObject && AssetDatabase.IsSubAsset (Selection.activeObject.GetInstanceID ())) {
+									
+							UnityEngine.Object.DestroyImmediate (Selection.activeObject, true);
+
+							
 						}
+					}
 
 				}
 		#endregion
 
 
 		#region CreateAssetFromSelected
-				[MenuItem("Assets/Create/Asset From Selected")]
+
+
+
+
+
+				[MenuItem("Assets/Create/Asset From Scriptable Object")]
 				public static void CreateAssetFromSelected ()
 				{
 						if (Selection.activeObject != null && Selection.activeObject is MonoScript && ((MonoScript)Selection.activeObject).GetClass ().IsSubclassOf (typeof(ScriptableObject))) 
-								CreateAssetFromName (Selection.activeObject.name);
+						CreateAssetFromName (((MonoScript)Selection.activeObject).GetClass ().Name,Selection.activeObject.name);
 				}
 
-				public static void CreateAssetFromName (String name)
+				public static void CreateAssetFromName (String className,String name="")
 				{
 
-						if (File.Exists (Path.Combine (Path.Combine (Application.dataPath, "Resources"), name + ".asset"))) {
+							string pathBase = EditorUtility.SaveFilePanel ("Choose save folder", "Assets", name,"asset");
 							
-								if (EditorUtility.DisplayDialog ("UnityClipboard Asset Exists!",
-							                                 "Are you sure you overwrite?", "Yes", "Cancel")) {
-										AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (Selection.activeObject.name), "Assets/Resources/" + name + ".asset");
-								}
-						} else {
-				
-								AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (Selection.activeObject.name), "Assets/Resources/" + name + ".asset");
-						}
+							if (!String.IsNullOrEmpty (pathBase)) {
+								
+								pathBase = pathBase.Remove (0, pathBase.IndexOf ("Assets"));
+								
+								
+								
+								
+								if (AssetDatabase.LoadAssetAtPath (pathBase, typeof(GameObject))) {
+									if (EditorUtility.DisplayDialog ("Are you sure?", 
+									                                 "The Assets already exists. Do you want to overwrite it?", 
+									                                 "Yes", 
+									                                 "No"))
+
+										AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (className), pathBase);
+										
+								} else
+									AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (className), pathBase);
+								
+							}
+
 			
 				}
 		#endregion
@@ -991,11 +1012,13 @@ namespace ws.winx.editor.utilities
 		#region CreatePrefab
 				// Creates a prefab from the selected GameObjects.
 				// if the prefab already exists it asks if you want to replace it
-		
+
 				[MenuItem("GameObject/Create/Prefab From Selected")]
 				static void CreatePrefab ()
 				{
 						var objs = Selection.gameObjects;
+
+
 
 						string pathBase = EditorUtility.SaveFolderPanel ("Choose save folder", "Assets", "");
 
