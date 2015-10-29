@@ -172,10 +172,11 @@ namespace ws.winx.editor.windows
 							__timeAreaW.hTicks.SetTickModulosForFrameRate (__sequence.frameRate);
 					}
 							
-				} else {
-					selectionChangeEventHandler ();
-
 				}
+//				else {
+//					selectionChangeEventHandler ();
+//
+//				}
 
 			}
 
@@ -340,7 +341,9 @@ namespace ws.winx.editor.windows
 					
 					
 			}
-				
+
+			EditorUtilityEx.SceneContentChanged-= OnSceneContentChanged;
+			EditorUtilityEx.SceneContentChanged += OnSceneContentChanged;
 			EditorApplication.hierarchyWindowChanged -= OnHierarchyChanged;		
 			EditorApplication.hierarchyWindowChanged += OnHierarchyChanged;
 			EditorApplication.playmodeStateChanged -= OnPlayModeStateChange;
@@ -350,14 +353,20 @@ namespace ws.winx.editor.windows
 			SceneView.onSceneGUIDelegate += OnSceneGUI;
 		}
 
+
+		private static void OnSceneContentChanged(object o, EventArgs args){
+			__sequence = null;
+			__sequencer = null;
+			__sequencerGameObject = null;
+			Debug.Log ("Scene content changed");
+		}
+
 		private static void OnHierarchyChanged ()
 		{
 
-			Event evt = Event.current;
 			
-			
-			if(Selection.activeGameObject!=null && PrefabUtility.GetPrefabType(Selection.activeGameObject)==PrefabType.PrefabInstance)
-			Debug.Log (Selection.activeGameObject);
+//			if(Selection.activeGameObject!=null && PrefabUtility.GetPrefabType(Selection.activeGameObject)==PrefabType.PrefabInstance)
+//			Debug.Log (Selection.activeGameObject);
 
 		}
 			
@@ -1701,9 +1710,7 @@ namespace ws.winx.editor.windows
 							SequenceChannel channel = null;
 							channel = __sequence.channels [channelInx];
 							channel.target = target;
-							channel.targetPositionOriginal = target.transform.position;
-							channel.targetRotationOriginal = target.transform.rotation;
-							channel.targetBoneRoot = target.GetRootBone ();
+
 
 							//AnimationMode
 							__sequence.timeCurrent = 0;
@@ -3551,6 +3558,8 @@ namespace ws.winx.editor.windows
 
 				//create and add AnimatorState in controller from node.source
 				UnityEditor.Animations.AnimatorState stateCurrent = animatorController.AddMotion ((source as Motion), layerIndex);
+				stateCurrent.speedParameter="speedMultiplier";
+				stateCurrent.speedParameterActive=true;
 
 				//save AnimatorState ID hase
 				node.stateNameHash = stateCurrent.nameHash;
@@ -3603,8 +3612,8 @@ namespace ws.winx.editor.windows
 				
 				
 				//create Controller
-				UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
-				
+				UnityEditor.Animations.AnimatorController controller= UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+				controller.AddParameter("speedMultiplier",UnityEngine.AnimatorControllerParameterType.Float);
 				
 			}
 			
@@ -3782,8 +3791,23 @@ namespace ws.winx.editor.windows
 		/// <param name="sequence">Sequence.</param>
 		public static void onSequenceEnd (object data)
 		{
-						
-			Stop ();
+			switch (__sequence.wrap) {
+			case Sequence.SequenceWrap.ClampForever:
+
+
+
+				break;
+
+			case Sequence.SequenceWrap.Once:
+
+				SampleClipNodesAt (__sequence.timeCurrent);
+
+			break;
+
+			case Sequence.SequenceWrap.Loop:
+
+				break;
+			}
 
 						
 		}

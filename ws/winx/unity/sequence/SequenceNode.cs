@@ -246,15 +246,18 @@ namespace ws.winx.unity.sequence
 									   			
 
 												//Debug.Log("time normalized"+_timeNormalized);
+												//Animator.speed can only be negative when Animator recorder is enabled. Animator.recorderMode != AnimatorRecorderMode.Offline
 
 												//change direction (from _timeNormalized to 0f or from _timeNormalized to 1f)
 												if (!channel.sequence.playForward) 
+												{
+							animator.SetFloat("speedMultiplier",-1);
+														//animator.speed = -1f;//from U5.1 this not possible
+												}else{
 
-														animator.speed = -1f;
-												else
-
-														animator.speed = 1f;
-
+														//animator.speed = 1f;
+							animator.SetFloat("speedMultiplier",1);
+												}
 
 												if (transition > 0) {
 														//	Debug.Log ("Crossfade " + this.name);
@@ -349,9 +352,9 @@ namespace ws.winx.unity.sequence
 												//hard stop
 												Animator animator = target.GetComponent<Animator> ();
 															
-												//TODO can 2 nodes in different channel to share same target animator
-//												if (animator != null && this.index + 1 == this.channel.nodes.Count)
-//														animator.enabled = false;
+												//!!!! Warnning that 2 or more Animation channels can't share same target 
+											//if (animator != null && this.index + 1 == this.channel.nodes.Count)
+														animator.enabled = false;
 
 																	
 								
@@ -407,8 +410,27 @@ namespace ws.winx.unity.sequence
 					
 				}
 
-				public void UpdateNode (double time)
+				public void GoTO (double time)
 				{
+					if (channel.type == SequenceChannel.SequenceChannelType.Animation
+					    && channel.target!=null) {
+						Animator ani = channel.target.GetComponent<Animator> ();
+							AnimatorStateInfo stateInfo=ani.GetCurrentAnimatorStateInfo(this.layerIndex);
+							if(stateInfo.shortNameHash==this.stateNameHash)
+							{
+									_timeLocal = ((float)time - timeStart);
+									_timeNormalized = Mathf.Clamp(_timeLocal / duration,-1f,1f);
+							
+									float speedDirection=channel.sequence.playForward ? 1f : -1f;
+									float delta=speedDirection *(_timeNormalized-stateInfo.normalizedTime);
+									ani.Update (delta);
+							}
+					}
+
+				}
+
+				public void UpdateNode (double time)
+						{
 						_timeLocal = ((float)time - timeStart);
 						_timeNormalized = (_timeLocal / duration);
 
@@ -418,12 +440,12 @@ namespace ws.winx.unity.sequence
 			              
 						// 
 						if (_isRunning) {
-								if (_timeNormalized <= 0.0f || _timeNormalized > 1.0f) 
+								if (_timeNormalized < 0.0f || _timeNormalized > 1.0f) 
 										Stop ();
 								else
 										DoUpdate ();
 						} else {
-								if (_timeNormalized > 0.0f && _timeNormalized <= 1.0f) {
+								if (_timeNormalized >= 0.0f && _timeNormalized <= 1.0f) {
 										StartNode ();
 								} else if (source is AnimationClip) {
 

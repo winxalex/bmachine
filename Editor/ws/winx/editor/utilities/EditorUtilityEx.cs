@@ -20,43 +20,41 @@ namespace ws.winx.editor.utilities
 	[InitializeOnLoad]
 	public class EditorUtilityEx
 		{
+				
+				public static event EventHandler SceneContentChanged;
 
+				static bool __showLockIcon;
 
 				const string showLockIconPrefKey = "Lock_ShowIcon";
 				const string addLockUndoRedoPrefKey = "Lock_UndoRedo";
 				const string lockMultiSelectionPrefKey = "Lock_MultiSelection";
 
-
+				static string _sceneCurrentPath;
 
 				static EditorUtilityEx()
 				{
 
-					bool drawLockIcon = false;
+					EditorApplication.hierarchyWindowChanged -= OnHierarchyChanged;
+					EditorApplication.hierarchyWindowChanged += OnHierarchyChanged;
+					
 
 
-
-					if (!EditorPrefs.HasKey (showLockIconPrefKey)) {
+						//check if EditorPrefs have LockIcon
+						if (!EditorPrefs.HasKey (showLockIconPrefKey)) {
 								EditorPrefs.SetBool (showLockIconPrefKey, true);
-								drawLockIcon=true;
+								__showLockIcon=true;
 						} else {
 
-								drawLockIcon=EditorPrefs.GetBool(showLockIconPrefKey);
+							__showLockIcon=EditorPrefs.GetBool(showLockIconPrefKey);
 
 						}
 
+						if (__showLockIcon) {
 							EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyWindowItemOnGUI;
+							EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
+						}
 
-						if (drawLockIcon) {
-								
-								EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
-							
-								
-								EditorApplication.RepaintHierarchyWindow ();
-								
-								
-							}
-			
-			
+
 			
 					if (!EditorPrefs.HasKey(addLockUndoRedoPrefKey))
 					{
@@ -266,68 +264,7 @@ namespace ws.winx.editor.utilities
 				else
 					variable.Value=targetObject.GetType().GetField("value").GetValue(targetObject);
 				
-//				
-//				if (variable.ValueType == typeof(float) && (float)variable.Value != seralizedProperty.floatValue) {
-//					
-//					variable.Value = seralizedProperty.floatValue;
-//					variable.OnBeforeSerialize ();//serialize primitive and objects that aren't subclass of UnityObject or are UnityEvents
-//				} else
-//				if (variable.ValueType == typeof(bool) && (bool)variable.Value != seralizedProperty.boolValue) {
-//					
-//					variable.Value = seralizedProperty.boolValue;
-//					variable.OnBeforeSerialize ();
-//				} else
-//				if (variable.ValueType == typeof(Bounds)) {
-//					if (((Bounds)variable.Value).center != seralizedProperty.boundsValue.center || ((Bounds)variable.Value).max != seralizedProperty.boundsValue.max || ((Bounds)variable.Value).min != seralizedProperty.boundsValue.min || ((Bounds)variable.Value).size != seralizedProperty.boundsValue.size) {
-//						variable.Value = seralizedProperty.boundsValue;
-//						variable.OnBeforeSerialize ();
-//					}
-//					
-//				} else
-//				if (variable.ValueType == typeof(Color)) {
-//					if (((Color)variable.Value).r != seralizedProperty.colorValue.r || ((Color)variable.Value).g != seralizedProperty.colorValue.g || ((Color)variable.Value).b != seralizedProperty.colorValue.b || ((Color)variable.Value).a != seralizedProperty.colorValue.a) {
-//						variable.Value = seralizedProperty.colorValue;
-//						variable.OnBeforeSerialize ();
-//					}
-//					
-//				} else
-//				if (variable.ValueType == typeof(Rect)) {
-//					if (((Rect)variable.Value).x != seralizedProperty.rectValue.x || ((Rect)variable.Value).y != seralizedProperty.rectValue.y || ((Rect)variable.Value).width != seralizedProperty.rectValue.width || ((Rect)variable.Value).height != seralizedProperty.rectValue.height) {
-//						variable.Value = seralizedProperty.rectValue;
-//						variable.OnBeforeSerialize ();
-//					}
-//					
-//				} else
-//				if (variable.ValueType == typeof(int) && (int)variable.Value != seralizedProperty.intValue) {
-//					
-//					variable.Value = seralizedProperty.intValue;
-//					variable.OnBeforeSerialize ();
-//				} else
-//				if (variable.ValueType == typeof(Vector3)) {
-//					if (((Vector3)variable.Value).x != seralizedProperty.vector3Value.x || ((Vector3)variable.Value).y != seralizedProperty.vector3Value.y || ((Vector3)variable.Value).z != seralizedProperty.vector3Value.z) {
-//						variable.Value = seralizedProperty.vector3Value;
-//						variable.OnBeforeSerialize ();
-//					}
-//				} else
-//				if (variable.ValueType == typeof(string) && (string)variable.Value != seralizedProperty.stringValue) {
-//					
-//					variable.Value = seralizedProperty.stringValue;
-//					variable.OnBeforeSerialize ();
-//				} else
-//				if (variable.ValueType == typeof(Quaternion)) {
-//					if (((Quaternion)variable.Value).x != seralizedProperty.quaternionValue.x || ((Quaternion)variable.Value).y != seralizedProperty.quaternionValue.y || ((Quaternion)variable.Value).z != seralizedProperty.quaternionValue.z || ((Quaternion)variable.Value).w != seralizedProperty.quaternionValue.w) {
-//						variable.Value = seralizedProperty.quaternionValue;
-//						variable.OnBeforeSerialize ();
-//					}
-//				} else
-//				if (variable.ValueType == typeof(AnimationCurve)) {
-//					
-//					
-//					variable.OnBeforeSerialize ();
-//					
-//				} else
-//					if (variable.valueObject is UnityEngine.Object)
-//						variable.Value = seralizedProperty.objectReferenceValue;
+
 				
 				
 			}
@@ -597,192 +534,10 @@ namespace ws.winx.editor.utilities
 				
 			}
 
-			//System.CodeDom.Compiler.CodeDomProvider provider = new CodeDomProvider ();
-			//provider.CompileAssemblyFromSource ();
 
-			//Mono.CSharp.CSharpCodeCompiler compiler=new Mono.CSharp.CSharpCodeCompiler();
-
-
-			//return SerializeVariable (value as UnityVariable);
-//			
-//			using (Microsoft.CSharp.CSharpCodeProvider provider = 
-//			       new Microsoft.CSharp.CSharpCodeProvider()) {
-//
-//				System.CodeDom.Compiler.CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
-//
-//
-//				
-//
-//				Type ValueType = typeof(float);//   value is UnityVariable? (value as UnityVariable).ValueType : value.GetType ();
-//				
-//				
-//				compilerParams.GenerateInMemory = true; 
-//				
-//				var assembyExcuting = Assembly.GetExecutingAssembly ();
-//				
-//				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
-//				
-//				string usingString = "using UnityEngine;";
-//				
-//				if (!(ValueType.IsPrimitive || ValueType == typeof(string))) {
-//					string assemblyLocationVarable = Assembly.GetAssembly (ValueType).Location;
-//					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
-//					
-//					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
-//						
-//						usingString += "using " + ValueType.Namespace + ";";
-//					}
-//				}
-//
-//			//	MemberInfo windowsMcsPath=typeof(Mono.CSharp.CSharpCodeCompiler).GetField("windowsMcsPath",BindingFlags.Static && BindingFlags.NonPublic);
-//			//	MemberInfo windowsMonoPath=typeof(Mono.CSharp.CSharpCodeCompiler).GetField("windowsMonoPath",BindingFlags.Static && BindingFlags.NonPublic);
-//
-//
-//
-//
-//				if(Application.platform==RuntimePlatform.OSXPlayer && Application.platform==RuntimePlatform.OSXEditor){
-//
-//				}
-//
-//				
-//				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
-//				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
-//				
-//
-//
-////				var res = compiler.CompileAssemblyFromSource (
-////					compilerParams, String.Format (
-////					
-////					" {0}" +
-////					
-////					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-////					, usingString, ValueType.ToString ())
-////					);
-//				var res = provider.CompileAssemblyFromSource (
-//					compilerParams, String.Format (
-//					
-//					" {0}" +
-//					
-//					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-//					, usingString, ValueType.ToString ())
-//					);
-//				
-//				
-//				
-//				
-//				if (res.Errors.Count > 0) {
-//					
-//					foreach (System.CodeDom.Compiler.CompilerError CompErr in res.Errors) {
-//						Debug.LogError (
-//							"Line number " + CompErr.Line +
-//							", Error Number: " + CompErr.ErrorNumber +
-//							", '" + CompErr.ErrorText + ";" 
-//							);
-//					}
-//					
-//					
-//					return null;
-//					
-//					
-//				} else {
-//					
-//					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
-//					
-//					ScriptableObject st = ScriptableObject.CreateInstance (type);
-//					
-//					type.GetField ("value").SetValue (st, value);
-//					
-//					
-//					
-//					
-//					
-//					return new SerializedObject (st).FindProperty ("value");
-//					
-//				}
-//				
-//			}
 			
 			
-			
-//			using (Microsoft.CSharp.CSharpCodeProvider foo = 
-//			       new Microsoft.CSharp.CSharpCodeProvider()) {
-//				
-//				System.CodeDom.Compiler.CompilerParameters compilerParams = new System.CodeDom.Compiler.CompilerParameters ();
-//				
-//				
-//				
-//				Type ValueType = typeof(float);//   value is UnityVariable? (value as UnityVariable).ValueType : value.GetType ();
-//				
-//				
-//				compilerParams.GenerateInMemory = true; 
-//				
-//				var assembyExcuting = Assembly.GetExecutingAssembly ();
-//				
-//				string assemblyLocationUnity = Assembly.GetAssembly (typeof(ScriptableObject)).Location;
-//				
-//				string usingString = "using UnityEngine;";
-//				
-//				if (!(ValueType.IsPrimitive || ValueType == typeof(string))) {
-//					string assemblyLocationVarable = Assembly.GetAssembly (ValueType).Location;
-//					compilerParams.ReferencedAssemblies.Add (assemblyLocationVarable);
-//					
-//					if (String.Compare (assemblyLocationUnity, assemblyLocationVarable) != 0) {
-//						
-//						usingString += "using " + ValueType.Namespace + ";";
-//					}
-//				}
-//				
-//				
-//				
-//				compilerParams.ReferencedAssemblies.Add (assemblyLocationUnity);
-//				compilerParams.ReferencedAssemblies.Add (assembyExcuting.Location);
-//				
-//				
-//				
-//				
-//				var res = foo.CompileAssemblyFromSource (
-//					compilerParams, String.Format (
-//					
-//					" {0}" +
-//					
-//					"public class ScriptableObjectTemplate:ScriptableObject {{ public {1} value;}}"
-//					, usingString, ValueType.ToString ())
-//					);
-//				
-//				
-//				
-//				
-//				if (res.Errors.Count > 0) {
-//					
-//					foreach (System.CodeDom.Compiler.CompilerError CompErr in res.Errors) {
-//						Debug.LogError (
-//							"Line number " + CompErr.Line +
-//							", Error Number: " + CompErr.ErrorNumber +
-//							", '" + CompErr.ErrorText + ";" 
-//							);
-//					}
-//					
-//					
-//					return null;
-//					
-//					
-//				} else {
-//					
-//					var type = res.CompiledAssembly.GetType ("ScriptableObjectTemplate");
-//					
-//					ScriptableObject st = ScriptableObject.CreateInstance (type);
-//					
-//					type.GetField ("value").SetValue (st, value);
-//					
-//					
-//					
-//					
-//					
-//					return new SerializedObject (st).FindProperty ("value");
-//					
-//				}
-//				
-//			}
+	
 			
 			
 			
@@ -1102,18 +857,9 @@ namespace ws.winx.editor.utilities
 
 			EditorGUILayout.BeginVertical();
 
-			EditorGUI.BeginChangeCheck ();
-			bool drawIcon = ShowLockIconPrefsBoolOption(showLockIconPrefKey, "Show lock icon in hierarchy");
+			__showLockIcon = ShowLockIconPrefsBoolOption(showLockIconPrefKey, "Show lock icon in hierarchy");
 
-			if (EditorGUI.EndChangeCheck ()) {
-								if (drawIcon) {
-										EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
-								} else {
-										EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyWindowItemOnGUI;
-								}
-			
-								EditorApplication.RepaintHierarchyWindow ();
-						}
+
 
 			EditorGUILayout.HelpBox(
 				"When enabled a small lock icon will appear in the hierarchy view for all locked objects.",
@@ -1144,11 +890,20 @@ namespace ws.winx.editor.utilities
 
 		}
 
+		private static void OnHierarchyChanged(){
+			if (EditorUtilityEx.SceneContentChanged != null && (String.IsNullOrEmpty (EditorUtilityEx._sceneCurrentPath) || EditorApplication.currentScene != EditorUtilityEx._sceneCurrentPath)) {
+				EditorUtilityEx._sceneCurrentPath=EditorApplication.currentScene;
+				EditorUtilityEx.SceneContentChanged.Invoke (null, null);
+			}
+
+		}
 
 		private static void OnHierarchyWindowItemOnGUI(int instanceID, Rect selectionRect)
 		{
+
+
 			var obj = EditorUtility.InstanceIDToObject(instanceID);
-			if (obj && (obj.hideFlags & HideFlags.NotEditable) == HideFlags.NotEditable)
+			if (__showLockIcon && obj!=null && (obj.hideFlags & HideFlags.NotEditable) == HideFlags.NotEditable)
 			{
 				if (!_lockIcon)
 				{
@@ -1157,6 +912,11 @@ namespace ws.winx.editor.utilities
 				
 				GUI.Box(new Rect(selectionRect.xMax - 16f, selectionRect.center.y - (16f / 2f), 16f, 16f), _lockIcon, GUIStyle.none);
 			}
+
+
+
+
+
 		}
 
 		static bool ShowLockIconPrefsBoolOption(string key, string name)

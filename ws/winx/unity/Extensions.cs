@@ -484,6 +484,12 @@ namespace ws.winx.unity.extensions
 		public static class GameObjectExtensions
 		{
 
+				public static string GetPath(this Transform current) {
+					if (current.parent == null)
+						return "/" + current.name;
+					return current.parent.GetPath() + "/" + current.name;
+				}
+
 				public static bool isRoot (this GameObject go)
 				{
 						return go.transform == go.transform.root;
