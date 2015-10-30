@@ -4,6 +4,7 @@ using System.Collections;
 using ws.winx.unity.sequence;
 using ws.winx.editor.utilities;
 using ws.winx.editor.extensions;
+using ws.winx.unity;
 
 namespace ws.winx.editor.windows
 {
@@ -25,11 +26,18 @@ namespace ws.winx.editor.windows
 		Sequencer sequencer;
 		bool showHideSequenceEvents;
 
+		GUIContent cloneSequenceGUIContent;
+		GUIContent playOnStartGUIContent;
+		GUIContent eventSelectedGUIContent;
+		GUIContent wrapCurrentGUIContent;
+		GUIContent sequenceGUIContent;
+
 		void OnEnable ()
 		{
 
 			OnStartSerializedProperty = serializedObject.FindProperty ("OnStart");
 			OnEndSerializedProperty = serializedObject.FindProperty ("OnEnd");
+
 			wrapSerializedProperty = serializedObject.FindProperty ("wrap");
 			playOnStartSerializedProperty = serializedObject.FindProperty ("playOnStart");
 			sequencer = target as Sequencer;
@@ -37,12 +45,16 @@ namespace ws.winx.editor.windows
 			eventSelectedSerializedProperty = serializedObject.FindProperty ("eventSelected");
 			timeCurrentSerializedProperty = serializedObject.FindProperty ("timeCurrent");
 
+			playOnStartGUIContent = new GUIContent ("PlayOnStart");
+			wrapCurrentGUIContent = new GUIContent ("EventSelected");
+			cloneSequenceGUIContent=new GUIContent("Clone");
+			sequenceGUIContent = new GUIContent ("Sequence");
 
 		}
 
 		public override void OnInspectorGUI ()
 		{
-			serializedObject.Update ();
+			//serializedObject.Update ();
 
 			sequence = sequenceSerialziedProperty.objectReferenceValue as Sequence;
 
@@ -50,12 +62,56 @@ namespace ws.winx.editor.windows
 
 			if (sequence != null) {	
 				wrapSerializedProperty.enumValueIndex = (int)sequence.wrap;
-				EditorGUILayout.PropertyField (wrapSerializedProperty, new GUIContent ("Wrap Mode"));
+				EditorGUILayout.PropertyField (wrapSerializedProperty, wrapCurrentGUIContent);
 				sequence.wrap = (Sequence.SequenceWrap)wrapSerializedProperty.enumValueIndex;
 			}
-			EditorGUILayout.PropertyField (playOnStartSerializedProperty, new GUIContent ("Play On Start"));
-			EditorGUILayout.PropertyField (sequenceSerialziedProperty, new GUIContent ("Sequence"));
+			EditorGUILayout.PropertyField (playOnStartSerializedProperty,playOnStartGUIContent);
 
+
+		
+
+			EditorGUILayout.BeginHorizontal ();
+
+			EditorGUILayout.PropertyField (sequenceSerialziedProperty,sequenceGUIContent );
+
+			if (GUILayout.Button (cloneSequenceGUIContent)) {
+				if(sequence!=null) {
+					Sequence sequenceNew=ScriptableObject.CreateInstance<Sequence>();
+
+
+
+
+					EditorUtilityEx.CreateAssetFromInstance(sequenceNew);
+
+					foreach(SequenceChannel channel in sequence.channels){
+						SequenceChannel channelClone=UnityEngine.Object.Instantiate<SequenceChannel>(channel);
+						channelClone.nodes.Clear();
+						sequenceNew.channels.Add(channelClone);
+						channelClone.sequence=sequenceNew;
+						AssetDatabase.AddObjectToAsset(channelClone,sequenceNew);
+
+						foreach(SequenceNode node in channel.nodes)
+						{
+							SequenceNode nodeClone=UnityEngine.Object.Instantiate<SequenceNode>(node);
+							nodeClone.channel=channelClone;
+							channelClone.nodes.Add(nodeClone);
+							AssetDatabase.AddObjectToAsset(nodeClone,channelClone);
+
+							EditorClipBinding clipBindingClone=UnityEngine.Object.Instantiate<EditorClipBinding>(node.clipBinding);
+							nodeClone.clipBinding=clipBindingClone;
+							AssetDatabase.AddObjectToAsset(clipBindingClone,nodeClone);
+
+						}
+
+						
+					}
+
+
+
+				}
+					
+			}
+			EditorGUILayout.EndHorizontal ();
 
 
 

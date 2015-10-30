@@ -342,7 +342,7 @@ namespace ws.winx.editor.windows
 					
 			}
 
-			EditorUtilityEx.SceneContentChanged-= OnSceneContentChanged;
+			EditorUtilityEx.SceneContentChanged -= OnSceneContentChanged;
 			EditorUtilityEx.SceneContentChanged += OnSceneContentChanged;
 			EditorApplication.hierarchyWindowChanged -= OnHierarchyChanged;		
 			EditorApplication.hierarchyWindowChanged += OnHierarchyChanged;
@@ -353,8 +353,8 @@ namespace ws.winx.editor.windows
 			SceneView.onSceneGUIDelegate += OnSceneGUI;
 		}
 
-
-		private static void OnSceneContentChanged(object o, EventArgs args){
+		private static void OnSceneContentChanged (object o, EventArgs args)
+		{
 			__sequence = null;
 			__sequencer = null;
 			__sequencerGameObject = null;
@@ -1167,7 +1167,7 @@ namespace ws.winx.editor.windows
 		private static void OnRecord ()
 		{
 
-			Debug.Log (" OnRecord:" + __sequence.isRecording);
+
 			          
 			if (__sequence.isRecording) {//STOP RECORD
 				Stop ();
@@ -1186,6 +1186,8 @@ namespace ws.winx.editor.windows
 				
 								
 			}
+
+			Debug.Log (" OnRecord:" + __sequence.isRecording);
 		}
 
 		private static void StartRecording ()
@@ -1234,7 +1236,7 @@ namespace ws.winx.editor.windows
 		public static void Play (bool forward=true)
 		{
 
-			//__sequence.timeCurrent
+
 			SequenceEditorWindow.OnPlay (forward);
 		}
 
@@ -1268,6 +1270,8 @@ namespace ws.winx.editor.windows
 			if (__sequence != null && __sequence.duration > 0)
 			if (!__sequence.isPlaying) {//PLAY
 								
+				if( (float)__sequence.timeCurrent >= __sequence.timeEnd && __sequence.wrap==Sequence.SequenceWrap.ClampForever && forward) 
+					return;
 								
 				Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
 
@@ -1320,6 +1324,8 @@ namespace ws.winx.editor.windows
 				
 			} else {//PAUSE 
 
+
+
 				Stop (true);//soft stop preserve gameobject transforms after stop animation mode (something like "pause", not reseting GameObjets as stop record do)
 
 								
@@ -1354,9 +1360,12 @@ namespace ws.winx.editor.windows
 
 				
 			if (__sequence != null) {
-				__sequence.Stop ();
-				
-				__sequence.StopRecording ();
+
+				if (__sequence.isPlaying)
+					__sequence.Stop ();
+
+				if (__sequence.isRecording)
+					__sequence.StopRecording ();
 
 				StopAllVideo ();
 						
@@ -1378,12 +1387,14 @@ namespace ws.winx.editor.windows
 					}
 
 				//RESET 
-				IAnimatedValues fbbikAnimatedValues;
-				foreach (SequenceChannel channel in __sequence.channels)
+				if (!pause) {
+					IAnimatedValues fbbikAnimatedValues;
+					foreach (SequenceChannel channel in __sequence.channels)
 
-					if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && (fbbikAnimatedValues = channel.target.GetComponent<IAnimatedValues> ()) != null)
-						fbbikAnimatedValues.ResetValues ();//as this component is binded to FFBIK component need to reset IK values
+						if (channel.target != null && channel.type == SequenceChannel.SequenceChannelType.Animation && (fbbikAnimatedValues = channel.target.GetComponent<IAnimatedValues> ()) != null)
+							fbbikAnimatedValues.ResetValues ();//as this component is binded to FFBIK component need to reset IK values
 			
+				}
 			}
 
 
@@ -2501,6 +2512,14 @@ namespace ws.winx.editor.windows
 
 				if (channel.target != null) {
 
+					animator = channel.target.GetComponent<Animator> ();
+					
+					if (animator == null) {
+						animator = channel.target.AddComponent<Animator> ();
+					}
+					
+					animator.runtimeAnimatorController = channel.runtimeAnimatorController;
+
 
 					//node = channel.nodes.FirstOrDefault (itm => time - itm.startTime >= 0 && time <= itm.startTime + itm.duration);
 
@@ -2534,6 +2553,20 @@ namespace ws.winx.editor.windows
 								}
 
 							}
+						} else {//timeCurrent is left from the node => reset
+
+							if (channel.type == SequenceChannel.SequenceChannelType.Animation){
+								if((animatedValues = channel.target.GetComponent<IAnimatedValues> ()) != null)
+																				
+									//reset need cos you might have click in one node with ikAnimatedValues then in another => first node should be reseted
+									animatedValues.ResetValues ();
+								else 
+									AnimationMode.SampleAnimationClip (channel.target, n.source as AnimationClip, 0f);//reset
+																				
+									
+								break;
+							}
+
 						}
 
 					}
@@ -2545,13 +2578,7 @@ namespace ws.winx.editor.windows
 											
 													
 
-							animator = channel.target.GetComponent<Animator> ();
 
-							if (animator == null) {
-								animator = channel.target.AddComponent<Animator> ();
-							}
-
-							animator.runtimeAnimatorController = channel.runtimeAnimatorController;
 									
 														
 
@@ -3558,8 +3585,8 @@ namespace ws.winx.editor.windows
 
 				//create and add AnimatorState in controller from node.source
 				UnityEditor.Animations.AnimatorState stateCurrent = animatorController.AddMotion ((source as Motion), layerIndex);
-				stateCurrent.speedParameter="speedMultiplier";
-				stateCurrent.speedParameterActive=true;
+				stateCurrent.speedParameter = "speedMultiplier";
+				stateCurrent.speedParameterActive = true;
 
 				//save AnimatorState ID hase
 				node.stateNameHash = stateCurrent.nameHash;
@@ -3612,8 +3639,8 @@ namespace ws.winx.editor.windows
 				
 				
 				//create Controller
-				UnityEditor.Animations.AnimatorController controller= UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
-				controller.AddParameter("speedMultiplier",UnityEngine.AnimatorControllerParameterType.Float);
+				UnityEditor.Animations.AnimatorController controller = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath (AssetDatabaseUtility.AbsoluteUrlToAssets (path));
+				controller.AddParameter ("speedMultiplier", UnityEngine.AnimatorControllerParameterType.Float);
 				
 			}
 			
@@ -3791,23 +3818,51 @@ namespace ws.winx.editor.windows
 		/// <param name="sequence">Sequence.</param>
 		public static void onSequenceEnd (object data)
 		{
+
+//			AudioUtilW.StopAllClips ();
+//			StopAllVideo ();
+//
+//			__sequence.StopRecording ();
+//
+//			Undo.postprocessModifications -= PostprocessAnimationRecordingModifications;
+
+			
+		
+
 			switch (__sequence.wrap) {
 			case Sequence.SequenceWrap.ClampForever:
 
-
+				Stop (true);
 
 				break;
 
 			case Sequence.SequenceWrap.Once:
 
+
+				Stop (true);
+
+
 				SampleClipNodesAt (__sequence.timeCurrent);
 
-			break;
+				//TODO find why this throw error on backward m_AnimationMode
+
+
+
+//				foreach (SequenceChannel ch in __sequence.channels)
+//					ResetChannelTarget (ch);
+
+	
+
+				break;
 
 			case Sequence.SequenceWrap.Loop:
 
 				break;
 			}
+
+
+
+			//AnimationMode.StopAnimationMode ();
 
 						
 		}
@@ -3887,9 +3942,11 @@ namespace ws.winx.editor.windows
 					__sequence = __sequencer.sequence;
 
 					__sequencer.eventSelected = __eventDummy;
-					__sequence.nodeSelected = null;
+				
 
 					if (__sequence != null) {
+						__sequence.nodeSelected = null;
+
 						if (__sequence.isPlaying || __sequence.isRecording)
 							Stop ();
 						

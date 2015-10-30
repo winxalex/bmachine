@@ -33,6 +33,9 @@ namespace ws.winx.unity.sequence
 						this.targetPositionOriginal = target.transform.position;
 						this.targetRotationOriginal = target.transform.rotation;
 						this.targetBoneRoot = target.GetRootBone ();
+					}else{
+
+						Debug.LogWarning("Target of channel \""+name+"\" is missing from the scene ");
 					}
 				}
 				
@@ -52,7 +55,7 @@ namespace ws.winx.unity.sequence
 			}
 		}
 
-		[HideInInspector]
+		//[HideInInspector]
 		public string
 			_targetPath;
 		[NonSerialized]
@@ -115,6 +118,51 @@ namespace ws.winx.unity.sequence
 		{
 					
 		}
+
+
+		public SequenceNode getActiveNodeAt(ref double timeCurrent){
+
+
+			SequenceNode node = null;
+			
+			
+			
+			//find node in time (node in which time is in range between nodeStartTime and nodeEndTime)
+			foreach (SequenceNode n in this.nodes) {
+				
+				//find first node which has n.startTime >= then current time (lower boundary)
+				if (timeCurrent - n.timeStart >= 0) {
+					//check if time comply to upper boundary
+					if (timeCurrent <= n.timeStart + n.duration) {
+						node = n;
+						break;
+					} else { 
+						//if channel is of animation type 
+						//and this is only node
+						//or there is next node, so time is between prev and next node => snap time to prev node endTime
+						if (this.type == SequenceChannel.SequenceChannelType.Animation 
+							&& (this.nodes.Count == 1
+							|| (n.index + 1 < this.nodes.Count && timeCurrent < this.nodes [n.index + 1].timeStart))
+						    
+						    ) {
+							
+							node = n;
+							timeCurrent = n.timeStart + n.duration;
+							break;
+							
+						}
+						
+					}
+				}
+
+
+			}
+
+			return node;
+
+
+		}
+
 
 				#endregion
 

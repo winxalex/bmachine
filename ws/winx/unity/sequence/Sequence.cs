@@ -248,24 +248,24 @@ namespace ws.winx.unity.sequence
 
 					///////////////////////////// Update Nodes ////////////////////////
 
-					if(_playForward)
-						timeCurrent=timeStart;
+					if (_playForward)
+						timeCurrent = timeStart;
 					else
-						timeCurrent=timeEnd;
+						timeCurrent = timeEnd;
 
 
 
 					foreach (SequenceChannel channel in this.channels)
 						foreach (SequenceNode node in channel.nodes) {
 								
-								node.GoTO(timeCurrent);
+							node.GoTO (timeCurrent);
 								
 						}
 
 					Stop ();
 
-					if(OnEnd!=null)
-					OnEnd.Invoke (this);
+					if (OnEnd != null)
+						OnEnd.Invoke (this);
 										
 										
 					break;
@@ -277,13 +277,13 @@ namespace ws.winx.unity.sequence
 					else
 						timeCurrent = timeStart;
 
-					if(OnEnd!=null)
-					OnEnd.Invoke (this);
+					if (OnEnd != null)
+						OnEnd.Invoke (this);
 										
 					break;
 				case SequenceWrap.Loop:
 
-					if(OnEnd!=null)
+					if (OnEnd != null)
 						OnEnd.Invoke (this);
 
 					if (_playForward)
@@ -328,13 +328,20 @@ namespace ws.winx.unity.sequence
 				
 				_timeLast = t;
 					
+				SequenceNode node;
 
 				////////////////////////// Update Nodes ////////////////////////
-				foreach (SequenceChannel channel in this.channels)
-					foreach (SequenceNode node in channel.nodes) {
-
-						node.UpdateNode (timeCurrent);		
-					}
+				foreach (SequenceChannel channel in this.channels) {
+					timeCurrentBeforeUpdate=timeCurrent;
+					node = channel.getActiveNodeAt (ref timeCurrentBeforeUpdate);//
+					if (node != null)
+						node.UpdateNode (timeCurrentBeforeUpdate);
+				
+//				foreach (SequenceNode node in channel.nodes) {
+//						
+//				node.UpdateNode (timeCurrent);		
+//				}
+			}
 			}
 			///////////////////////////////////////////////////////////////////
 
@@ -532,6 +539,8 @@ namespace ws.winx.unity.sequence
 
 		}
 
+
+
 		/// <summary>
 		/// Value of Final Node's EndTime in local sequence time space
 		/// </summary>
@@ -556,6 +565,7 @@ namespace ws.winx.unity.sequence
 			return (float)(timeEnd - timeStart);
 			
 		}
+
 
 
 

@@ -440,12 +440,12 @@ namespace ws.winx.unity.sequence
 			              
 						// 
 						if (_isRunning) {
-								if (_timeNormalized < 0.0f || _timeNormalized > 1.0f) 
+								if (_timeNormalized <= 0.0f || _timeNormalized > 1.0f) 
 										Stop ();
 								else
 										DoUpdate ();
 						} else {
-								if (_timeNormalized >= 0.0f && _timeNormalized <= 1.0f) {
+								if (_timeNormalized > 0.0f && _timeNormalized <= 1.0f) {
 										StartNode ();
 								} else if (source is AnimationClip) {
 

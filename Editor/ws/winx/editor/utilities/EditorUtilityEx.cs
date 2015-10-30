@@ -727,15 +727,28 @@ namespace ws.winx.editor.utilities
 
 
 
-				[MenuItem("Assets/Create/Asset From Scriptable Object")]
-				public static void CreateAssetFromSelected ()
-				{
-						if (Selection.activeObject != null && Selection.activeObject is MonoScript && ((MonoScript)Selection.activeObject).GetClass ().IsSubclassOf (typeof(ScriptableObject))) 
-						CreateAssetFromName (((MonoScript)Selection.activeObject).GetClass ().Name,Selection.activeObject.name);
-				}
+						[MenuItem("Assets/Create/Asset From Scriptable MonoScript")]
+						public static void CreateAssetFromSelected ()
+						{
+							if (Selection.activeObject != null && Selection.activeObject is MonoScript && ((MonoScript)Selection.activeObject).GetClass ().IsSubclassOf (typeof(ScriptableObject))) 
+								CreateAssetFromType (((MonoScript)Selection.activeObject).GetClass (),Selection.activeObject.name);
+						}
 
-				public static void CreateAssetFromName (String className,String name="")
-				{
+
+						
+
+						public static void CreateAssetFromName (String className,String name=""){
+								//need class name,Assembly name
+								CreateAssetFromType (Type.GetType (className), name );
+						}
+
+						public static void CreateAssetFromType (Type type,String name=""){
+							
+							CreateAssetFromInstance (ScriptableObject.CreateInstance(type), name );
+						}
+
+						public static void CreateAssetFromInstance(UnityEngine.Object instance, String name="")
+						{
 
 							string pathBase = EditorUtility.SaveFilePanel ("Choose save folder", "Assets", name,"asset");
 							
@@ -752,15 +765,52 @@ namespace ws.winx.editor.utilities
 									                                 "Yes", 
 									                                 "No"))
 
-										AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (className), pathBase);
+										AssetDatabase.CreateAsset (instance, pathBase);
 										
 								} else
-									AssetDatabase.CreateAsset (ScriptableObject.CreateInstance (className), pathBase);
+									AssetDatabase.CreateAsset (instance, pathBase);
 								
 							}
 
 			
-				}
+						}
+
+
+						public static void DuplicateAssetFromName (UnityEngine.Object asset)
+						{
+							
+							UnityEngine.Object assetNew = UnityEngine.Object.Instantiate (asset);
+
+							string name = asset.name + Guid.NewGuid ().ToString ();
+
+							string pathBase = EditorUtility.SaveFilePanel ("Choose save folder", "Assets", name,"asset");
+							
+							if (!String.IsNullOrEmpty (pathBase)) {
+								
+								pathBase = pathBase.Remove (0, pathBase.IndexOf ("Assets"));
+								
+								
+								
+								
+								if (AssetDatabase.LoadAssetAtPath (pathBase, typeof(GameObject))) {
+									if (EditorUtility.DisplayDialog ("Are you sure?", 
+									                                 "The Assets already exists. Do you want to overwrite it?", 
+									                                 "Yes", 
+									                                 "No"))
+										
+										AssetDatabase.CreateAsset (assetNew, pathBase);
+									
+								} else
+									AssetDatabase.CreateAsset (assetNew, pathBase);
+								
+							}
+							
+							
+						}
+
+
+
+
 		#endregion
 
 
