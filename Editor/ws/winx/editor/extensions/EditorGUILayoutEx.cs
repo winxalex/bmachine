@@ -465,6 +465,23 @@ namespace ws.winx.editor.extensions
 		#endregion
 
 		#region CustomObjectPopup
+
+
+		/// <summary>
+		/// Customs the object popup.
+		/// !!! Don't use BeginChangeCheck/EndChangeChange (cos change happen in menu and not get cought)
+		/// </summary>
+		/// <returns>The object popup.</returns>
+		/// <param name="label">Label.</param>
+		/// <param name="selectedObject">Selected object.</param>
+		/// <param name="displayOptions">Display options.</param>
+		/// <param name="values">Values.</param>
+		/// <param name="comparer">Comparer.</param>
+		/// <param name="onSelection">On selection.</param>
+		/// <param name="onEvent">On event.</param>
+		/// <param name="labelStyle">Label style.</param>
+		/// <param name="position">Position.</param>
+		/// <typeparam name="T">The 1st type parameter.</typeparam>
 		public static T CustomObjectPopup<T> (GUIContent label, T selectedObject, GUIContent[] displayOptions, IList<T> values, Func<T,T,bool> comparer=null,
 		                                      MenuCallback<T> onSelection=null,
 		                                      EventCallback<T> onEvent=null,

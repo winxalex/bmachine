@@ -135,7 +135,11 @@ namespace ws.winx.editor.windows
 		
 				EditorGUILayout.BeginHorizontal ();
 
-				
+				if (GUILayout.Button ( "Goto")) {
+					sequence.GoTo(timeCurrentSerializedProperty.floatValue);
+					
+				}
+
 
 				if (GUILayout.Button (!Application.isPlaying ? (sequence.isPlaying ? "Pause" : "Play Forward") : "Play Forward")) {
 					if (Application.isPlaying)

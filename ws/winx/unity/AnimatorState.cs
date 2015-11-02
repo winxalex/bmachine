@@ -12,8 +12,8 @@ namespace ws.winx.unity
 				//
 				// Properties
 				//
-	
-	
+				public string name;
+				
 				public  bool iKOnFeet ;
 	
 				public  bool mirror ;

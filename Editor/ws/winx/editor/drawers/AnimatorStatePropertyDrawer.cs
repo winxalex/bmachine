@@ -49,7 +49,7 @@ namespace ws.winx.editor.drawers
 
 				public override void OnGUI (Rect position, SerializedProperty property, GUIContent label)
 				{
-	
+					
 						
 			//TODO change to obtain controller thru property.serializedObject.Find(attribute.animator)....
 						UnityEditor.Animations.AnimatorController animatorController = ((MonoBehaviour)property.serializedObject.targetObject).GetComponent<Animator> ().runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
@@ -57,7 +57,7 @@ namespace ws.winx.editor.drawers
 						if (animatorController != null) {
 
 
-								
+				//property.serializedObject.Update();	
 
 										animatorStateValues = MecanimUtility.GetAnimatorStates (animatorController);
 										displayOptions = MecanimUtility.GetDisplayOptions (animatorController);
@@ -78,19 +78,24 @@ namespace ws.winx.editor.drawers
 								//animaStateInfoSelected = property.objectReferenceValue as UnityEditor.Animations.AnimatorState;
 
 
-								//EditorGUI.BeginProperty (position, label, property);
+								
 								// Check if it was modified this frame, to avoid overwriting the property constantly
-								EditorGUI.BeginChangeCheck ();
+								
+								UnityEditor.Animations.AnimatorState prevAnimatorStateSelected=animatorStateSelected;
 								animatorStateSelected = EditorGUILayoutEx.CustomObjectPopup (label, animatorStateSelected, displayOptions, animatorStateValues,null, null, null, null, position) as UnityEditor.Animations.AnimatorState;
 
+								
 
-								if(EditorGUI.EndChangeCheck() && animatorStateSelected!=null){
+									if(animatorStateSelected!=null && animatorStateSelected.nameHash!=prevAnimatorStateSelected.nameHash){
 			
 								 	ws.winx.unity.AnimatorState state=property.objectReferenceValue as ws.winx.unity.AnimatorState;
-									if(state==null) state=ScriptableObject.CreateInstance<ws.winx.unity.AnimatorState>();
+
+									if(state==null) 
+											state=ScriptableObject.CreateInstance<ws.winx.unity.AnimatorState>();
 
 									state.motion=animatorStateSelected.motion;
 									state.nameHash=animatorStateSelected.nameHash;
+									state.name=animatorStateSelected.name;
 
 									if(state.motion is UnityEditor.Animations.BlendTree){
 										BlendTree tree =(BlendTree)state.motion;
@@ -107,11 +112,20 @@ namespace ws.winx.editor.drawers
 									}
 
 
+									
+
+									property.objectReferenceValue=state;
+									property.serializedObject.ApplyModifiedProperties ();
+
+
+									
+
+
 								}
 
 
 
-								property.serializedObject.ApplyModifiedProperties ();
+								
 
 								
 					

@@ -76,6 +76,13 @@ namespace ws.winx.unity.sequence
 
 				}
 
+
+				void LateUpdate(){
+					if (sequence != null && Application.isPlaying)
+						sequence.LateUpdate ();
+
+				}
+
 				
 	}
 				

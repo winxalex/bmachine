@@ -3242,6 +3242,9 @@ namespace ws.winx.editor.windows
 				//remove channel
 				__sequence.channels.Remove (sequenceChannel);
 
+				if(__nodeSelected !=null &&  sequenceChannel==__nodeSelected.channel)//removing of channel of node selectd
+					__nodeSelected=null;
+
 				//AssetDatabase.DeleteAsset(AssetDatabase.F
 				
 				if (sequenceChannel == __sequence.channelSelected)
@@ -3926,6 +3929,9 @@ namespace ws.winx.editor.windows
 
 		private static void selectionChangeEventHandler ()
 		{
+
+			if (Application.isPlaying)
+				return;
 
 			GameObject activeGameObject = Selection.activeGameObject;
 

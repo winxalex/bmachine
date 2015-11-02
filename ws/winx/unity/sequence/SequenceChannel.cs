@@ -120,20 +120,20 @@ namespace ws.winx.unity.sequence
 		}
 
 
-		public SequenceNode getActiveNodeAt(ref double timeCurrent){
+		public SequenceNode getActiveNodeAt(ref double time){
 
 
 			SequenceNode node = null;
 			
-			
+			IAnimatedValues animatedValues = null;
 			
 			//find node in time (node in which time is in range between nodeStartTime and nodeEndTime)
 			foreach (SequenceNode n in this.nodes) {
 				
 				//find first node which has n.startTime >= then current time (lower boundary)
-				if (timeCurrent - n.timeStart >= 0) {
+				if (time - n.timeStart >= 0) {
 					//check if time comply to upper boundary
-					if (timeCurrent <= n.timeStart + n.duration) {
+					if (time <= n.timeStart + n.duration) {
 						node = n;
 						break;
 					} else { 
@@ -142,36 +142,55 @@ namespace ws.winx.unity.sequence
 						//or there is next node, so time is between prev and next node => snap time to prev node endTime
 						if (this.type == SequenceChannel.SequenceChannelType.Animation 
 							&& (this.nodes.Count == 1
-							|| (n.index + 1 < this.nodes.Count && timeCurrent < this.nodes [n.index + 1].timeStart))
+							|| (n.index + 1 < this.nodes.Count && time < this.nodes [n.index + 1].timeStart))
 						    
 						    ) {
 							
 							node = n;
-							timeCurrent = n.timeStart + n.duration;
+							time = n.timeStart + n.duration;//snap to node time end
 							break;
 							
 						}
 						
 					}
+				}else {//time is left from the first most left node => return node and snap time to that node start time
+					
+					if (this.type == SequenceChannel.SequenceChannelType.Animation){
+//						if((animatedValues = this.target.GetComponent<IAnimatedValues> ()) != null)
+//							
+//							//reset need cos you might have click in one node with ikAnimatedValues then in another => first node should be reseted
+//							animatedValues.ResetValues ();
+//						else 
+							time=n.timeStart;//snap to node time start
+							
+						node=n;
+						
+						break;
+					}
+					
 				}
-
-
+				
+				
 			}
-
+			
 			return node;
-
-
+			
+			
 		}
-
-
-				#endregion
+		
+		
+		#endregion
 
 		public void Reset ()
 		{
 			if (this.target != null) {
 				this.target.transform.position = this.targetPositionOriginal;
 				this.target.transform.rotation = this.targetRotationOriginal;
+
+				Debug.Log("Channel reset. Target position and rotation returned to target starting pos and rot");
 			}
+
+		
 		}
 
 

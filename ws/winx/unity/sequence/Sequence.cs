@@ -235,7 +235,9 @@ namespace ws.winx.unity.sequence
 			//Debug.Log ("Time current:" + timeCurrent+"Time.time"+Time.time+" _timeAtEnd:"+_timeAtEnd);
 
 			//Debug.Log ("Time current:" + timeCurrent+"ticki:"+t+" _timeAtEnd:"+_timeAtEnd+" _timeStart:"+timeStart+" duration:"+duration);
-			
+			SequenceNode node = null;
+			double timeCurrentBeforeUpdate = 0f;
+
 			if (t > _timeAtEnd) {
 				switch (wrap) {
 				case SequenceWrap.PingPong:
@@ -255,14 +257,12 @@ namespace ws.winx.unity.sequence
 
 
 
-					foreach (SequenceChannel channel in this.channels)
-						foreach (SequenceNode node in channel.nodes) {
-								
-							node.GoTO (timeCurrent);
-								
-						}
+					GoTo(timeCurrent);
 
-					Stop ();
+
+
+
+				
 
 					if (OnEnd != null)
 						OnEnd.Invoke (this);
@@ -300,8 +300,7 @@ namespace ws.winx.unity.sequence
 
 								
 			} else {
-
-				double timeCurrentBeforeUpdate = timeCurrent;
+				timeCurrentBeforeUpdate = timeCurrent;
 			
 				//update time
 				if (_playForward)
@@ -328,20 +327,16 @@ namespace ws.winx.unity.sequence
 				
 				_timeLast = t;
 					
-				SequenceNode node;
+
 
 				////////////////////////// Update Nodes ////////////////////////
 				foreach (SequenceChannel channel in this.channels) {
-					timeCurrentBeforeUpdate=timeCurrent;
-					node = channel.getActiveNodeAt (ref timeCurrentBeforeUpdate);//
+					node = channel.nodes.FirstOrDefault (itm => (timeCurrent - itm.timeStart >= 0) && (timeCurrent <= itm.timeStart + itm.duration));
 					if (node != null)
-						node.UpdateNode (timeCurrentBeforeUpdate);
-				
-//				foreach (SequenceNode node in channel.nodes) {
-//						
-//				node.UpdateNode (timeCurrent);		
-//				}
-			}
+						
+						node.UpdateNode (timeCurrent);		
+
+				}
 			}
 			///////////////////////////////////////////////////////////////////
 
@@ -386,8 +381,15 @@ namespace ws.winx.unity.sequence
 
 			Stop ();
 						
-			foreach (SequenceChannel channel in channels)
+			foreach (SequenceChannel channel in channels) {
+
+				if (channel.type == SequenceChannel.SequenceChannelType.Animation && !forward) {
+					if (channel.target != null)
+						channel.target.GetComponent<Animator> ().enabled = true;//this prevents reset on nodes that aren't currently playing
+				}
+
 				channel.Reset ();
+			}
 
 			events.Sort (EVENT_COMPARER);
 				
@@ -517,6 +519,22 @@ namespace ws.winx.unity.sequence
 			//Debug.Log ("Sequence>Stop " + _isPlaying);
 
 						
+		}
+
+		public void GoTo (double time)
+		{
+			SequenceNode node;
+			double timeSnapped = 0;
+			foreach (SequenceChannel channel in this.channels) {
+				timeSnapped=time;
+				node = channel.getActiveNodeAt(ref timeSnapped);
+
+				if(node!=null)
+				node.GoTO(timeSnapped);
+				
+				
+				
+			}
 		}
 
 		public void Record ()
