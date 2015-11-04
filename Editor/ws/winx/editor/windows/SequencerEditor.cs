@@ -17,8 +17,7 @@ namespace ws.winx.editor.windows
 		SequenceEvent selectedEventPrev;
 		SerializedProperty wrapSerializedProperty;
 		SerializedProperty playOnStartSerializedProperty;
-		SerializedProperty OnStartSerializedProperty;
-		SerializedProperty OnEndSerializedProperty;
+	
 		SerializedProperty eventSelectedSerializedProperty = null;
 		SerializedProperty sequenceSerialziedProperty;
 		SerializedProperty timeCurrentSerializedProperty;
@@ -28,25 +27,24 @@ namespace ws.winx.editor.windows
 
 		GUIContent cloneSequenceGUIContent;
 		GUIContent playOnStartGUIContent;
-		GUIContent eventSelectedGUIContent;
+	
 		GUIContent wrapCurrentGUIContent;
 		GUIContent sequenceGUIContent;
 
 		void OnEnable ()
 		{
 
-			OnStartSerializedProperty = serializedObject.FindProperty ("OnStart");
-			OnEndSerializedProperty = serializedObject.FindProperty ("OnEnd");
+		
 
 			wrapSerializedProperty = serializedObject.FindProperty ("wrap");
 			playOnStartSerializedProperty = serializedObject.FindProperty ("playOnStart");
 			sequencer = target as Sequencer;
 			sequenceSerialziedProperty = serializedObject.FindProperty ("sequence");
-			eventSelectedSerializedProperty = serializedObject.FindProperty ("eventSelected");
+
 			timeCurrentSerializedProperty = serializedObject.FindProperty ("timeCurrent");
 
 			playOnStartGUIContent = new GUIContent ("PlayOnStart");
-			wrapCurrentGUIContent = new GUIContent ("EventSelected");
+			wrapCurrentGUIContent = new GUIContent ("Wrap mode");
 			cloneSequenceGUIContent=new GUIContent("Clone");
 			sequenceGUIContent = new GUIContent ("Sequence");
 
@@ -218,8 +216,7 @@ namespace ws.winx.editor.windows
 					nodeEditor.OnInspectorGUI ();
 				} else {
 
-					if(eventSelectedSerializedProperty!=null && sequencer.eventSelected!=null && sequencer.eventSelected.GetPersistentEventCount()>0)
-						EditorGUILayout.PropertyField (eventSelectedSerializedProperty, new GUIContent ("Event Selected"));
+
 
 					EditorGUILayout.LabelField ("No Node selected");
 

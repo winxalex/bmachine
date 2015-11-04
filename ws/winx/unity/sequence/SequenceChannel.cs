@@ -21,7 +21,7 @@ namespace ws.winx.unity.sequence
 
 		public string name;
 		public SequenceChannelType type;
-		[SerializeField]
+		//[SerializeField]
 		GameObject
 			_target;
 
@@ -125,7 +125,7 @@ namespace ws.winx.unity.sequence
 
 			SequenceNode node = null;
 			
-			IAnimatedValues animatedValues = null;
+
 			
 			//find node in time (node in which time is in range between nodeStartTime and nodeEndTime)
 			foreach (SequenceNode n in this.nodes) {
@@ -156,11 +156,7 @@ namespace ws.winx.unity.sequence
 				}else {//time is left from the first most left node => return node and snap time to that node start time
 					
 					if (this.type == SequenceChannel.SequenceChannelType.Animation){
-//						if((animatedValues = this.target.GetComponent<IAnimatedValues> ()) != null)
-//							
-//							//reset need cos you might have click in one node with ikAnimatedValues then in another => first node should be reseted
-//							animatedValues.ResetValues ();
-//						else 
+
 							time=n.timeStart;//snap to node time start
 							
 						node=n;
@@ -184,10 +180,10 @@ namespace ws.winx.unity.sequence
 		public void Reset ()
 		{
 			if (this.target != null) {
-				this.target.transform.position = this.targetPositionOriginal;
-				this.target.transform.rotation = this.targetRotationOriginal;
+//				this.target.transform.position = this.targetPositionOriginal;
+//				this.target.transform.rotation = this.targetRotationOriginal;
 
-				Debug.Log("Channel reset. Target position and rotation returned to target starting pos and rot");
+//				Debug.Log("Channel reset. Target position and rotation returned to target starting pos and rot");
 			}
 
 		

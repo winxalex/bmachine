@@ -16,8 +16,7 @@ namespace ws.winx.unity.sequence
 					}
 				
 				public float timeCurrent;
-				public ws.winx.unity.sequence.SequenceEvent
-						eventSelected;
+			
 
 				public event UnityAction<SequenceNode> SequenceNodeStart {
 						add {
@@ -65,7 +64,7 @@ namespace ws.winx.unity.sequence
 				public int frameRate = 30;
 				public Vector2 scale;
 				public Sequence sequence;
-				int _eventCurrentIndex;
+				
 
 				
 				void Update(){

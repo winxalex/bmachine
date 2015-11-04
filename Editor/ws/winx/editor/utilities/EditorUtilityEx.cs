@@ -441,7 +441,7 @@ namespace ws.winx.editor.utilities
 			if (ValueType.IsGenericType && ValueType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
 				genericTypes=ValueType.GetGenericArguments();
 
-				IDictionary dictionary=value as IDictionary;
+			
 
 				genericTypes[0]=typeof(List<>).MakeGenericType(new Type[]{genericTypes[0]});
 				genericTypes[1]=typeof(List<>).MakeGenericType(new Type[]{genericTypes[1]});
@@ -494,7 +494,7 @@ namespace ws.winx.editor.utilities
 					IDictionary valueDict=value as IDictionary;
 
 
-					int count=valueDict.Keys.Count;
+
 
 					IList keysList=Activator.CreateInstance(genericTypes[0]) as IList;
 					IList valuesList=Activator.CreateInstance(genericTypes[1]) as IList;

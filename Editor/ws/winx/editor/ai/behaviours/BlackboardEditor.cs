@@ -23,7 +23,7 @@ namespace ws.winx.editor.ai.behaviours
 	{
 				
 		ReorderableList  __variablesReordableList;
-		string _typeNameSelected = "None";
+		//string _typeNameSelected = "None";
 		List<Type> _typesCustom;
 		Rect variableNameTextFieldPos = new Rect (32, 0, 80, 16);
 		GenericMenu menu;

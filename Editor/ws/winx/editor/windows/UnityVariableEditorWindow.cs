@@ -21,9 +21,7 @@ namespace ws.winx.editor.windows
 		[NonSerialized]
 		private static UnityVariable
 			__variable;
-		[NonSerialized]
-		private static UnityVariable[]
-			__properties;
+	
 
 		public static void Show (UnityVariable variable)
 		{

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEditor;
-using BehaviourMachineEditor;
+
 using ws.winx.unity;
 using System.Collections.Generic;
 using System.Reflection;

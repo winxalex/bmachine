@@ -195,98 +195,7 @@ namespace ws.winx.editor.windows
 		}
 
 
-		#region CreatePrefab
-		// Creates a prefab from the selected GameObjects.
-		// if the prefab already exists it asks if you want to replace it
-		
-		[MenuItem("GameObject/Create/Sequence Prefab From Selected")]
-		static void CreatePrefab ()
-		{
-			var objs = Selection.gameObjects;
-			
-			string pathBase = EditorUtility.SaveFolderPanel ("Choose save folder", "Assets", "");
-			
-			if (!String.IsNullOrEmpty (pathBase)) {
-				
-				pathBase = pathBase.Remove (0, pathBase.IndexOf ("Assets")) + Path.DirectorySeparatorChar;
-				
-				foreach (var go in objs) {
-					String localPath = pathBase + go.name + ".prefab";
-					
-					if (AssetDatabase.LoadAssetAtPath (localPath, typeof(GameObject))) {
-						if (EditorUtility.DisplayDialog ("Are you sure?", 
-						                                 "The prefab already exists. Do you want to overwrite it?", 
-						                                 "Yes", 
-						                                 "No"))
-							CreateNewPrefab (go, localPath);
-					} else
-						CreateNewPrefab (go, localPath);
-				}
-			}
-		}
-		
-		[MenuItem("GameObject/Create/Sequence Prefab From Selected", true)]
-		static bool ValidateCreatePrefab ()
-		{
-			return Selection.activeGameObject != null && Selection.activeGameObject is GameObject && (Selection.activeGameObject as GameObject).GetComponent<Sequencer> () != null;
-		}
-		
-		public static void CreateNewPrefab (GameObject go, string localPath)
-		{
-
-//			public static void OnOverridenPrefabsInspector(GameObject gameObject)
-//			{
-//				GUI.enabled = true;
-//				UnityEngine.Object prefabObject = PrefabUtility.GetPrefabObject(gameObject);
-//				if (prefabObject == null)
-//				{
-//					return;
-//				}
-
-			GameObject duplicate = GameObject.Instantiate<GameObject> (go);
-
-			var prefab = PrefabUtility.CreateEmptyPrefab (localPath);
-			PrefabUtility.ReplacePrefab (go, prefab, ReplacePrefabOptions.ConnectToPrefab);
-
-			GameObject prefabGo = PrefabUtility.GetPrefabParent (go) as GameObject;
-			UnityEngine.Object obj1 = AssetDatabase.LoadAssetAtPath (localPath, typeof(GameObject));
-			UnityEngine.Object obj3 = PrefabUtility.GetPrefabObject (prefab);
-//
-			//	UnityEngine.Object obj2=PrefabUtility.GetPrefabParent (prefab);
-
-
-			//  AssetDatabase.LoadAssetAtPath(localPath)
-
-			Sequence sequence = go.GetComponent<Sequencer> ().sequence;
-
-			int i = 0;
-			foreach (SequenceChannel channel in sequence.channels) {
-				//link channel ScriptableObject to prefabed GameObject targets
-				channel.target = PrefabUtility.GetPrefabParent (channel.target) as GameObject;
-				channel.sequence = prefabGo.GetComponent<Sequencer> ().sequence;
-				AssetDatabase.CreateAsset (channel, "Assets/Resources/" + channel.name + "_" + channel.GetInstanceID () + ".asset");
-				//AssetDatabase.AddObjectToAsset(prefabGo,channel);
-
-				//link sequence MonoBehaviour channels from assets
-				channel.sequence.channels [0] = channel;
-
-				foreach (SequenceNode node in channel.nodes) {
-					AssetDatabase.AddObjectToAsset (node, channel);
-					AssetDatabase.AddObjectToAsset (node.clipBinding, node);
-				}
-
-				//AssetDatabase.AddObjectToAsset(sequence,channel);
-				//AssetDatabase.AddObjectToAsset(go,channel);
-
-			}
-
-
-
-
-		}
-		
-		
-		#endregion
+	
 
 
 
@@ -917,7 +826,7 @@ namespace ws.winx.editor.windows
 
 				//if(!String.IsNullOrEmpty(__nodeSelectedSourceEditorCurveBinding.propertyName)) EditorWindow.GetWindow<SequenceEditorWindow>().Repaint();
 
-				IAnimatedValues animatedValues = modifications [0].previousValue.target as IAnimatedValues;
+				IAnimatedValues animatedValues = propertyModification.target as IAnimatedValues;
 				if (animatedValues != null) {
 					SampleClipNodesAt (__sequence.timeCurrent, false);
 				}
@@ -1170,10 +1079,12 @@ namespace ws.winx.editor.windows
 
 			          
 			if (__sequence.isRecording) {//STOP RECORD
-				Stop ();
+
+				SampleClipNodesAt (__sequence.timeStart);
+
+				Stop (true);
 									
-				foreach (SequenceChannel channel in __sequence.channels)
-					ResetChannelTarget (channel);
+
 
 			} else {//START RECORD
 
@@ -2155,7 +2066,7 @@ namespace ws.winx.editor.windows
 			switch (ev.rawType) {
 						
 			case EventType.MouseDrag:
-				if (__isEventDragged && __sequencer.eventSelected == evt) {
+				if (__isEventDragged ) {/*&& __sequencer.eventSelected == evt*/
 
 					float time = __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect) + __clickDelta;
 					
@@ -2188,7 +2099,10 @@ namespace ws.winx.editor.windows
 					} else if (ev.button == 0) {
 						__clickDelta = (float)evt.time - __timeAreaW.PixelToTime (Event.current.mousePosition.x, rect);
 						__isEventDragged = true;
-						__sequencer.eventSelected = evt;
+
+//						if(__sequencer!=null)
+//						__sequencer.eventSelected = evt;
+
 						__sequence.nodeSelected = null;
 						__sequence.timeCurrent = evt.time;
 
@@ -2556,15 +2470,14 @@ namespace ws.winx.editor.windows
 						} else {//timeCurrent is left from the node => reset
 
 							if (channel.type == SequenceChannel.SequenceChannelType.Animation){
-								if((animatedValues = channel.target.GetComponent<IAnimatedValues> ()) != null)
-																				
-									//reset need cos you might have click in one node with ikAnimatedValues then in another => first node should be reseted
-									animatedValues.ResetValues ();
-								else 
-									AnimationMode.SampleAnimationClip (channel.target, n.source as AnimationClip, 0f);//reset
+
+
+								timeCurrent=n.timeStart;
+								node=n;
+								break;
 																				
 									
-								break;
+
 							}
 
 						}
@@ -3756,7 +3669,7 @@ namespace ws.winx.editor.windows
 				AudioUtilW.SetClipSamplePosition (audioClip, sampleStart);//sample function should follow to play from startSample positionAudioUtilW.SetClipSamplePosition (audioClip, sampleStart);
 			} else if (node.source is MovieTexture) {
 				MovieTexture movieTexture = node.source as MovieTexture;
-				if (node.channel.target.tag == Tags.MAIN_CAMERA) {//==Camera.main
+				if (node.channel.target.tag =="MainCamera" ) {//==Camera.main //Tags.MAIN_CAMERA
 
 					Debug.Log (node.name + " RenderSettings.skybox isn't supported in EditMode");
 					//RenderSettings.skybox.mainTexture = movieTexture;
@@ -3842,19 +3755,16 @@ namespace ws.winx.editor.windows
 			case Sequence.SequenceWrap.Once:
 
 
+			
+
+
+
+				if(__sequence.playForward)
+					SampleClipNodesAt (__sequence.timeStart);
+				else
+					SampleClipNodesAt (__sequence.timeEnd);
+
 				Stop (true);
-
-
-				SampleClipNodesAt (__sequence.timeCurrent);
-
-				//TODO find why this throw error on backward m_AnimationMode
-
-
-
-//				foreach (SequenceChannel ch in __sequence.channels)
-//					ResetChannelTarget (ch);
-
-	
 
 				break;
 
@@ -3947,7 +3857,7 @@ namespace ws.winx.editor.windows
 					__sequencerGameObject = __sequencer.gameObject;
 					__sequence = __sequencer.sequence;
 
-					__sequencer.eventSelected = __eventDummy;
+					//__sequencer.eventSelected = __eventDummy;
 				
 
 					if (__sequence != null) {

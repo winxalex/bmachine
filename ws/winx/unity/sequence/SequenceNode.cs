@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine.Events;
-using ws.winx.ik;
+
 
 namespace ws.winx.unity.sequence
 {
@@ -317,7 +317,7 @@ namespace ws.winx.unity.sequence
 			_isRunning = false;
 
 						
-			Debug.Log ("StopNode " + source.name + " at time:" + this.channel.sequence.timeCurrent + " timeNormalized:" + (this.channel.target.GetComponent<Animator> ().GetCurrentAnimatorStateInfo (layerIndex).normalizedTime));
+		//	Debug.Log ("StopNode " + source.name + " at time:" + this.channel.sequence.timeCurrent + " timeNormalized:" + (this.channel.target.GetComponent<Animator> ().GetCurrentAnimatorStateInfo (layerIndex).normalizedTime));
 			
 						
 
@@ -392,7 +392,7 @@ namespace ws.winx.unity.sequence
 
 
 
-			Debug.Log ("DoUpdate " + source.name + " at time:" + this.channel.sequence.timeCurrent + " timeNormalized:" + (this.channel.target.GetComponent<Animator> ().GetCurrentAnimatorStateInfo (layerIndex).normalizedTime));
+		//	Debug.Log ("DoUpdate " + source.name + " at time:" + this.channel.sequence.timeCurrent + " timeNormalized:" + (this.channel.target.GetComponent<Animator> ().GetCurrentAnimatorStateInfo (layerIndex).normalizedTime));
 
 
 
