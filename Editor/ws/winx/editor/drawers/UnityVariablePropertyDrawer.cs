@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 using UnityEngine.Events;
 using System.Linq;
 using ws.winx.unity.ai.behaviours;
-using System.Collections.Generic;
+
 
 namespace ws.winx.editor.drawers
 {

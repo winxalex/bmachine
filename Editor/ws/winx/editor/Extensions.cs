@@ -3,16 +3,17 @@ using System;
 using System.Reflection;
 using UnityEditor;
 using System.Linq;
+using UnityEditor.Animations;
 
 
-namespace ws.winx.editor
+namespace ws.winx.editor.extensions
 {
-
+	
 	#region GameObject Extensions
-
+	
 	public static class GameObjectExtensions{
-
-
+		
+		
 		/// <summary>
 		/// Resets the only typeof(T) property modifications.
 		/// </summary>
@@ -22,36 +23,36 @@ namespace ws.winx.editor
 			
 			
 			
-
+			
 			PropertyModification[] modifications = PrefabUtility.GetPropertyModifications (gameObjectRootAnimated);
-
+			
 			//Get all modification except of type Transform
 			if (modifications != null) {
-								modifications = modifications.Where ((itm) => itm.target.GetType () != typeof(T)).ToArray ();
+				modifications = modifications.Where ((itm) => itm.target.GetType () != typeof(T)).ToArray ();
 				
 				
 				
-								PrefabUtility.SetPropertyModifications (gameObjectRootAnimated, modifications);
+				PrefabUtility.SetPropertyModifications (gameObjectRootAnimated, modifications);
 			}
 			
 			
 			
 			
 		}
-
-
-
+		
+		
+		
 	}
-
-
-
+	
+	
+	
 	#endregion
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	#region KeyframeExtension
 	public enum TangentMode
 	{
@@ -66,8 +67,8 @@ namespace ws.winx.editor
 		Left,
 		Right
 	}
-
-
+	
+	
 	public static class KeyframeExtension
 	{
 		
@@ -359,22 +360,46 @@ namespace ws.winx.editor
 		
 	}
 	#endregion
-
-
-	#region SerializedProperty
-	public static class SerializedPropertyExtension
+	
+	
+	#region AnimatorControllerExtension
+	public static class AnimatorControllerExtension
 	{
-		public static void LogStructure(this SerializedObject so, bool includeChildren = true) {
-			// Shows all the properties in the serialized object with name and type
-			// You can use this to learn the structure
-			so.Update();
-			SerializedProperty propertyLogger = so.GetIterator();
-			while(true) {
-				Debug.Log("name = " + propertyLogger.name + " type = " + propertyLogger.type);
-				if(!propertyLogger.Next(includeChildren)) break;
+		public static  UnityEditor.Animations.AnimatorState GetStateBy (this UnityEditor.Animations.AnimatorController controller, int nameHash, int layerIndex=0)
+		{
+			
+			ChildAnimatorState child = controller.layers [layerIndex].stateMachine.states.FirstOrDefault (itm => itm.state.nameHash == nameHash);
+			
+			if (child.state != null)
+				return child.state;
+			
+			
+			
+			return null;
+		}
+		
+		public static  UnityEditor.Animations.AnimatorState RemoveStateWith (this UnityEditor.Animations.AnimatorController controller, int nameHash, int layerIndex=0)
+		{
+			
+			UnityEditor.Animations.AnimatorState state = controller.GetStateBy (nameHash,layerIndex);
+			
+			if (state != null) {
+				controller.layers [layerIndex].stateMachine.RemoveState (state);
+				
+				return state;
 			}
+			
+			
+			
+			return null;
 		}
 	}
+	
+	
+	
+	
+	
+	
 	#endregion
-
+	
 }

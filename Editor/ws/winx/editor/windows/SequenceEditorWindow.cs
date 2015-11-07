@@ -191,7 +191,7 @@ namespace ws.winx.editor.windows
 		public static void CreateSequenceAsset ()
 		{
 			
-			EditorUtilityEx.CreateAssetFromName ("Sequence", "Sequence_" + Guid.NewGuid ().ToString ());
+			EditorUtilityEx.CreateAssetFromName ("ws.winx.unity.sequence.Sequence, Assembly-CSharp", "Sequence_" + Guid.NewGuid ().ToString ());
 		}
 
 
@@ -1726,8 +1726,8 @@ namespace ws.winx.editor.windows
 				if (GUILayout.Button (__prevKeyContent, EditorStyles.toolbarButton)) {
 					
 					__sequence.timeCurrent = 0f;
-					foreach (SequenceChannel ch in __sequence.channels)
-						ResetChannelTarget (ch);
+//					foreach (SequenceChannel ch in __sequence.channels)
+//						ResetChannelTarget (ch);
 					
 					
 					
@@ -1875,7 +1875,7 @@ namespace ws.winx.editor.windows
 				foreach (Sequencer sequencer in sequencers) {
 					toolsMenu.AddItem (new GUIContent (sequencer.name), false, OnGameObjectMenuSelectionChanged, sequencer);
 				}
-				toolsMenu.AddItem (new GUIContent ("[New Sequence]"), false, CreateNewSequence);
+				toolsMenu.AddItem (new GUIContent ("[New Sequencer]"), false, CreateNewSequencer);
 				toolsMenu.AddItem (new GUIContent ("[New Animation Clip]"), false, CreateNewAnimationClip);
 				toolsMenu.AddItem (new GUIContent ("[New Animation Controller]"), false, CreateRuntimeAnimatorController);
 								
@@ -3617,11 +3617,11 @@ namespace ws.winx.editor.windows
 				
 				
 				
-		////   CREATE NEW SEQUENCE GAME OBJECT WITH SEQUENCE BEHAVIOUR ////
+		////   CREATE NEW GAME OBJECT WITH SEQUENCER BEHAVIOUR ////
 		/// <summary>
 		/// Creates the new sequence.
 		/// </summary>
-		private void CreateNewSequence ()
+		private void CreateNewSequencer ()
 		{
 					
 						
